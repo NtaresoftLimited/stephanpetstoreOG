@@ -20,6 +20,8 @@ $sky-text: #222222;
 .o_sky_refresh:hover { border-color: $sky-amber; background: $sky-cream; }
 .o_sky_stock_button { border: 1px solid $sky-brown; border-radius: 9px; color: #fff; background: $sky-brown; }
 .o_sky_stock_button:hover { background: $sky-amber; border-color: $sky-amber; color: #fff; }
+.o_sky_replenish_button { border: 1px solid #198754; border-radius: 9px; color: #fff; background: #198754; font-weight: 500; }
+.o_sky_replenish_button:hover { background: #157347; border-color: #146c43; color: #fff; }
 
 .o_sky_metric {
     align-items: center; background: #fff; border: 1px solid $sky-border; border-radius: 12px; display: flex;

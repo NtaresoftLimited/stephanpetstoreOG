@@ -5,11 +5,24 @@
         <field name="tag">sky.dashboard</field>
     </record>
 
-    <!-- One menu only: selecting the app opens the dashboard directly. Restricted to Administrator only. -->
+    <!-- Root menu: Restricted to Administrator only. -->
     <menuitem id="menu_sky_root"
               name="SKY"
-              action="action_sky_dashboard"
               web_icon="sky_dashboard,static/description/icon.png"
               groups="base.group_system"
               sequence="12"/>
+
+    <!-- Submenus under SKY -->
+    <menuitem id="menu_sky_dashboard"
+              name="Dashboard"
+              parent="menu_sky_root"
+              action="action_sky_dashboard"
+              sequence="1"/>
+
+    <menuitem id="menu_sky_replenishments"
+              name="Replenishment Approvals"
+              parent="menu_sky_root"
+              action="grooming.action_grooming_stock_request"
+              groups="base.group_system"
+              sequence="5"/>
 </odoo>

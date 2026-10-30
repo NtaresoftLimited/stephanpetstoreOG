@@ -12,17 +12,24 @@ export class SkyDashboard extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.user = user;
-        this.state = useState({ loading: true, data: null, canAccessDailyStock: false });
+        this.state = useState({ loading: true, data: null, canAccessDailyStock: false, isAdmin: false });
 
         onWillStart(async () => {
             let canAccessDailyStock = false;
+            let isAdmin = false;
             try {
                 canAccessDailyStock = await user.hasGroup("sky_dashboard.group_sky_stock_cashier");
             } catch (e) {
                 console.warn("Could not check group sky_dashboard.group_sky_stock_cashier:", e);
             }
+            try {
+                isAdmin = await user.hasGroup("base.group_system");
+            } catch (e) {
+                console.warn("Could not check group base.group_system:", e);
+            }
             await this.loadDashboard();
             this.state.canAccessDailyStock = canAccessDailyStock;
+            this.state.isAdmin = isAdmin;
         });
     }
 
@@ -87,6 +94,10 @@ export class SkyDashboard extends Component {
 
     openDailyStock() {
         this.action.doAction("sky_dashboard.action_sky_daily_stock");
+    }
+
+    openReplenishments() {
+        this.action.doAction("grooming.action_grooming_stock_request");
     }
 }
 

@@ -53,6 +53,13 @@ class SaleOrder(models.Model):
             low_stock_domain.append(("is_storable", "=", True))
         low_stock_count = self.env["product.product"].search_count(low_stock_domain)
 
+        pending_replenishments = 0
+        if "grooming.stock.request" in self.env:
+            try:
+                pending_replenishments = self.env["grooming.stock.request"].search_count([("state", "=", "submitted")])
+            except Exception:
+                pending_replenishments = 0
+
         company = self.env.company
         return {
             "currency": company.currency_id.symbol or company.currency_id.name,
@@ -62,6 +69,7 @@ class SaleOrder(models.Model):
             "customers": customer_count,
             "products": product_count,
             "low_stock": low_stock_count,
+            "pending_replenishments": pending_replenishments,
             "states": {
                 "quotation": state_counts.get("draft", 0) + state_counts.get("sent", 0),
                 "confirmed": state_counts.get("sale", 0),
