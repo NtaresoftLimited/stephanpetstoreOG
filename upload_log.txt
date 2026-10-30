@@ -1,0 +1,35 @@
+Uploading and Installing bi_stock_block_quantity on 166.1.227.63...
+
+[1/5] Uploading module zip...
+
+[2/5] Cleaning old version and extracting...
+Executing: rm -rf /opt/odoo/custom-addons/bi_stock_block_quantity
+Executing: unzip -o /tmp/bi_stock_block_quantity.zip -d /opt/odoo/custom-addons
+
+[3/5] Fixing permissions...
+Executing: chown -R odoo:odoo /opt/odoo/custom-addons/bi_stock_block_quantity && chmod -R 755 /opt/odoo/custom-addons/bi_stock_block_quantity
+
+[4/5] Updating module list in DB...
+Executing: su - postgres -c "psql Stephans -c \"UPDATE ir_module_module SET state='to install' WHERE name='bi_stock_block_quantity';\""
+UPDATE 1
+
+
+[5/5] Re-starting Odoo or calling Odoo bin...
+Stopping odoo service...
+Executing: systemctl stop odoo
+Executing: su -s /bin/bash odoo -c '/opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf -d Stephans -i bi_stock_block_quantity --stop-after-init'
+Install Output (last 2000 chars):
+
+
+Starting odoo service again...
+Executing: systemctl start odoo
+
+Checking if installed...
+Executing: su - postgres -c "psql Stephans -c \"SELECT name, state FROM ir_module_module WHERE name='bi_stock_block_quantity';\""
+          name           |   state    
+-------------------------+------------
+ bi_stock_block_quantity | to install
+(1 row)
+
+
+Done!

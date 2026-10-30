@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_form_inherit_grooming" model="ir.ui.view">
+        <field name="name">account.payment.register.form.inherit.grooming</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <!-- Insert POS Payment Method right before the Journal field -->
+            <xpath expr="//field[@name='journal_id']" position="before">
+                <field name="pos_payment_method_id" widget="selection" options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+            
+            <!-- Hide the original journal_id, but keep it in the DOM because it's required by base Odoo logic -->
+            <xpath expr="//field[@name='journal_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

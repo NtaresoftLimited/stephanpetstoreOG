@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_pos_store_expense" model="ir.sequence">
+        <field name="name">Store Expense Reference</field>
+        <field name="code">pos.store.expense</field>
+        <field name="prefix">EXP/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Seed Essential Store Expense Categories -->
+    <record id="cat_store_supplies" model="pos.store.expense.category">
+        <field name="name">Store Supplies &amp; Packaging</field>
+    </record>
+
+    <record id="cat_cleaning_sanitization" model="pos.store.expense.category">
+        <field name="name">Cleaning &amp; Sanitization</field>
+    </record>
+
+    <record id="cat_grooming_supplies" model="pos.store.expense.category">
+        <field name="name">Pet Care &amp; Grooming Supplies</field>
+    </record>
+
+    <record id="cat_transport_boda" model="pos.store.expense.category">
+        <field name="name">Local Transport &amp; Delivery</field>
+    </record>
+
+    <record id="cat_utilities_maintenance" model="pos.store.expense.category">
+        <field name="name">Utilities &amp; Store Maintenance</field>
+    </record>
+
+    <record id="cat_staff_amenities" model="pos.store.expense.category">
+        <field name="name">Staff Amenities &amp; Refreshments</field>
+    </record>
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Override the Orderline template to show fixed discount amount instead of percentage -->
+    <t t-name="pos_dynamic_discount.OrderlineDiscount" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        
+        <!-- Target the discount li by its exact t-if attribute -->
+        <xpath expr="//li[@t-if=&quot;line.price !== 0 and line.discount and line.discount !== '0' and !props.basic_receipt&quot;]" position="replace">
+            <!-- Show fixed amount if available, otherwise show percentage -->
+            <li t-if="line.price !== 0 and line.discount and line.discount !== '0' and !props.basic_receipt">
+                <t t-if="props.line.getFixedDiscountAmount and props.line.getFixedDiscountAmount() > 0">
+                    With a <em><t t-esc="props.line.getFixedDiscountAmount().toLocaleString()"/> TSh</em> discount
+                </t>
+                <t t-else="">
+                    With a <em><t t-esc="line.discount"/>%</em> discount
+                </t>
+            </li>
+        </xpath>
+        
+    </t>
+
+</templates>

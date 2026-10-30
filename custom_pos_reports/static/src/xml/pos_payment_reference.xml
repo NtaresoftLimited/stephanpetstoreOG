@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!--
+        custom_pos_reports: PaymentScreenPaymentLines ref badge.
+        Uses this.requiresRef(line) (defined in techovers_business_suite)
+        instead of the hardcoded type === 'bank' check.
+    -->
+    <t t-name="custom_pos_reports.PaymentScreenPaymentLines"
+       t-inherit="point_of_sale.PaymentScreenPaymentLines"
+       t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('payment-name')]" position="inside">
+            <t t-if="this.requiresRef(line)">
+                <div class="mt-1">
+                    <span t-if="line.payment_ref_no"
+                          class="badge text-bg-success cursor-pointer py-1 px-2"
+                          style="font-size: 0.78rem; cursor: pointer;"
+                          t-on-click.stop="() => this.editPaymentRef(line)">
+                        <i class="fa fa-hashtag me-1"/>Ref: <t t-out="line.payment_ref_no"/> <i class="fa fa-pencil ms-1"/>
+                    </span>
+                    <span t-else=""
+                          class="badge text-bg-danger cursor-pointer py-1 px-2"
+                          style="font-size: 0.78rem; cursor: pointer;"
+                          t-on-click.stop="() => this.editPaymentRef(line)">
+                        <i class="fa fa-exclamation-triangle me-1"/>Ref Required (Click)
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

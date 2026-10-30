@@ -1,0 +1,600 @@
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:16:10,727 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:16:10] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.001 0.011
+2026-02-10 14:16:15,119 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:16:15] "POST /web/dataset/call_kw/pos.config/get_pos_kanban_view_state HTTP/1.1" 200 - 5 0.015 0.024
+2026-02-10 14:16:15,150 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:16:15] "POST /web/dataset/call_kw/pos.config/web_search_read HTTP/1.1" 200 - 12 0.018 0.056
+2026-02-10 14:16:15,509 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:16:15] "GET /web/image/res.users/11/avatar_128 HTTP/1.1" 304 - 9 0.005 0.021
+2026-02-10 14:16:16,956 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:16:16,976 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:16:43,444 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:16:43,447 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:16:43] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.002 0.031
+2026-02-10 14:16:45,478 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:16:45,498 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:16:49,533 414352 INFO Stephans odoo.addons.base.models.res_device: User 2 inserts device log (ck61O-Bhb1bcY4SwagH7sX4_BfrhJue8I-ZH5372-w) 
+2026-02-10 14:16:49,538 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:16:49,540 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:16:49] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 2 0.003 0.026
+2026-02-10 14:17:12,197 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:17:12,198 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:17:12] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.001 0.009
+2026-02-10 14:17:22,080 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:17:22,099 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:17:48,510 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:17:48,512 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:17:48] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.002 0.017
+2026-02-10 14:17:51,098 414353 INFO Stephans odoo.addons.base.models.res_device: User 2 inserts device log (ck61O-Bhb1bcY4SwagH7sX4_BfrhJue8I-ZH5372-w) 
+2026-02-10 14:17:51,102 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:17:51,104 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:17:51] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 2 0.003 0.020
+2026-02-10 14:17:53,663 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:17:53,692 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:18:13,910 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:18:13,912 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:18:13] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.001 0.010
+2026-02-10 14:18:27,229 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:18:27,259 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:18:52,282 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:18:52,283 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:18:52] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.002 0.017
+2026-02-10 14:18:53,151 414353 INFO Stephans odoo.addons.base.models.res_device: User 2 inserts device log (ck61O-Bhb1bcY4SwagH7sX4_BfrhJue8I-ZH5372-w) 
+2026-02-10 14:18:53,155 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:18:53,156 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:18:53] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 2 0.006 0.017
+2026-02-10 14:19:01,885 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:19:01,910 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:19:18,710 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:19:18,711 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:19:18] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.001 0.012
+2026-02-10 14:19:32,349 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:19:32,370 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:19:54,014 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:19:54,016 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:19:54] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.002 0.014
+2026-02-10 14:19:55,227 414353 INFO Stephans odoo.addons.base.models.res_device: User 2 inserts device log (ck61O-Bhb1bcY4SwagH7sX4_BfrhJue8I-ZH5372-w) 
+2026-02-10 14:19:55,235 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:19:55,236 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:19:55] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 2 0.007 0.035
+2026-02-10 14:20:10,148 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) starting 
+2026-02-10 14:20:10,158 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) done in 0.009s 
+2026-02-10 14:20:10,161 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) processed 0 records, 0 records remaining 
+2026-02-10 14:20:10,171 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) completed 
+2026-02-10 14:20:10,179 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) starting 
+2026-02-10 14:20:10,185 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) done in 0.006s 
+2026-02-10 14:20:10,188 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) processed 0 records, 0 records remaining 
+2026-02-10 14:20:10,191 414358 INFO Stephans_Temp_Restore odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) completed 
+2026-02-10 14:20:10,205 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 3 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:20:10,242 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) starting 
+2026-02-10 14:20:10,250 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) done in 0.009s 
+2026-02-10 14:20:10,254 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) processed 0 records, 0 records remaining 
+2026-02-10 14:20:10,263 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Payment: Post-process transactions' (17) completed 
+2026-02-10 14:20:10,270 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) starting 
+2026-02-10 14:20:10,277 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) done in 0.007s 
+2026-02-10 14:20:10,280 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) processed 0 records, 0 records remaining 
+2026-02-10 14:20:10,284 414358 INFO Stephans odoo.addons.base.models.ir_cron: Job 'Account: Journal online Waiting Synchronization' (24) completed 
+2026-02-10 14:20:10,295 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 3 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:20:20,882 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:20:20,883 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:20:20] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.001 0.015
+2026-02-10 14:20:37,557 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:20:37,579 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:20:44,215 414353 INFO Stephans werkzeug: 103.173.211.38 - - [10/Feb/2026 14:20:44] "GET /boaform/admin/formLogin?username=adminisp&psd=adminisp HTTP/1.0" 404 - 28 0.020 0.080
+2026-02-10 14:20:56,027 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:20:56,033 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:20:56] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.002 0.041
+2026-02-10 14:20:56,566 414353 INFO Stephans odoo.addons.base.models.res_device: User 2 inserts device log (ck61O-Bhb1bcY4SwagH7sX4_BfrhJue8I-ZH5372-w) 
+2026-02-10 14:20:56,570 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:20:56,571 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:20:56] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 2 0.003 0.020
+2026-02-10 14:21:03,491 414352 INFO Stephans odoo.addons.base.models.res_users: Login successful for db:Stephans login:info@stephanspetstore.co.tz from n/a 
+2026-02-10 14:21:03,498 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:03] "POST /xmlrpc/2/common HTTP/1.1" 200 - 8 0.010 0.677
+2026-02-10 14:21:03,967 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:03] "POST /xmlrpc/2/object HTTP/1.1" 200 - 3 0.005 0.038
+2026-02-10 14:21:16,182 414352 INFO Stephans odoo.addons.base.models.res_users: Login successful for db:Stephans login:info@stephanspetstore.co.tz from n/a 
+2026-02-10 14:21:16,184 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:16] "POST /xmlrpc/2/common HTTP/1.1" 200 - 8 0.007 0.614
+2026-02-10 14:21:16,631 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:16] "POST /xmlrpc/2/object HTTP/1.1" 200 - 3 0.003 0.020
+2026-02-10 14:21:18,504 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:21:18,530 414358 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414358 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:21:24,701 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:21:24,705 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:24] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.001 0.014
+2026-02-10 14:21:33,604 414352 INFO Stephans odoo.addons.base.models.res_users: Login successful for db:Stephans login:info@stephanspetstore.co.tz from n/a 
+2026-02-10 14:21:33,607 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:33] "POST /xmlrpc/2/common HTTP/1.1" 200 - 8 0.017 1.117
+2026-02-10 14:21:34,064 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:34] "POST /xmlrpc/2/object HTTP/1.1" 200 - 3 0.003 0.027
+2026-02-10 14:21:42,763 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans_Temp_Restore' 
+2026-02-10 14:21:42,789 414355 INFO ? odoo.sql_db: ConnectionPool(read/write;used=1/count=1/max=64): Closed 1 connections to 'application_name=odoo-414355 user=odoo sslmode=prefer dbname=Stephans' 
+2026-02-10 14:21:57,442 414353 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:21:57,444 414353 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:57] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 1 0.002 0.017
+2026-02-10 14:21:58,002 414352 INFO Stephans odoo.addons.base.models.res_device: User 2 inserts device log (ck61O-Bhb1bcY4SwagH7sX4_BfrhJue8I-ZH5372-w) 
+2026-02-10 14:21:58,006 414352 ERROR Stephans odoo.http: Exception during request handling. 
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 913, in open_connection
+    socket = request.httprequest._HTTPRequest__environ['socket']
+KeyError: 'socket'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2364, in __call__
+    response = request._serve_db()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1891, in _serve_db
+    return self._transactioning(
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1954, in _transactioning
+    return service_model.retrying(func, env=self.env)
+  File "/opt/odoo/odoo-server/odoo/service/model.py", line 137, in retrying
+    result = func()
+  File "/opt/odoo/odoo-server/odoo/http.py", line 1921, in _serve_ir_http
+    response = self.dispatcher.dispatch(rule.endpoint, args)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 2081, in dispatch
+    return self.request.registry['ir.http']._dispatch(endpoint)
+  File "/opt/odoo/odoo-server/odoo/addons/base/models/ir_http.py", line 330, in _dispatch
+    result = endpoint(**request.params)
+  File "/opt/odoo/odoo-server/odoo/http.py", line 728, in route_wrapper
+    result = endpoint(self, *args, **params_ok)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/controllers/websocket.py", line 20, in websocket
+    return WebsocketConnectionHandler.open_connection(request, version)
+  File "/opt/odoo/odoo-server/odoo/addons/bus/websocket.py", line 926, in open_connection
+    raise RuntimeError(
+RuntimeError: Couldn't bind the websocket. Is the connection opened on the evented port (8072)?
+2026-02-10 14:21:58,007 414352 INFO Stephans werkzeug: 127.0.0.1 - - [10/Feb/2026 14:21:58] "GET /websocket?version=18.0-1 HTTP/1.1" 500 - 2 0.003 0.017

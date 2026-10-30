@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    <!-- Portal Home: Add Grooming Appointments Card (Odoo 18 structure) -->
+    <template id="portal_my_home_appointment" name="Grooming Appointments"
+              inherit_id="portal.portal_my_home" priority="20">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/grooming/static/description/icon.png'"/>
+                <t t-set="title">Pet Grooming Appointments</t>
+                <t t-set="url" t-value="'/my/grooming'"/>
+                <t t-set="text">View your pet grooming appointments &amp; status</t>
+                <t t-set="placeholder_count" t-value="'grooming_appointment_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- My Grooming Appointments List -->
+    <template id="portal_my_appointments" name="My Grooming Appointments">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Pet Grooming Appointments</t>
+            </t>
+
+            <t t-if="not appointments">
+                <div class="alert alert-info mt-3" role="alert">
+                    <p class="mb-0">You don't have any grooming appointments yet.</p>
+                    <a href="/grooming" class="btn btn-primary mt-2">Book Now</a>
+                </div>
+            </t>
+
+            <t t-if="appointments">
+                <div class="table-responsive">
+                    <table class="table table-hover o_portal_my_doc_table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Pet Name</th>
+                                <th>Date</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="appointments" t-as="apt">
+                                <tr>
+                                    <td>
+                                        <a t-attf-href="/my/grooming/#{apt.id}">
+                                            <t t-out="apt.name"/>
+                                        </a>
+                                    </td>
+                                    <td><t t-out="apt.pet_name"/></td>
+                                    <td>
+                                        <span t-field="apt.appointment_date" t-options='{"format": "dd MMM yyyy HH:mm"}'/>
+                                    </td>
+                                    <td><t t-out="apt.service_id.name or 'Treatments Only'"/></td>
+                                    <td>
+                                        <span t-attf-class="badge rounded-pill #{
+                                            'text-bg-warning' if apt.state == 'pending' else
+                                            'text-bg-info' if apt.state in ('confirmed', 'checked_in') else
+                                            'text-bg-primary' if apt.state in ('in_progress', 'halfway') else
+                                            'text-bg-success' if apt.state == 'completed' else
+                                            'text-bg-danger'
+                                        }">
+                                            <t t-out="(apt.state or '').replace('_', ' ').title()"/>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="apt.total_price" t-options='{"widget": "monetary", "display_currency": apt.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Appointment Detail -->
+    <template id="portal_appointment_detail" name="Appointment Details">
+        <t t-call="portal.portal_layout">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-lg-6">
+                            <h4 class="mb-0">
+                                <i class="fa fa-paw me-2"/>
+                                <t t-out="appointment.name"/>
+                            </h4>
+                        </div>
+                        <div class="col-12 col-lg-6 text-lg-end">
+                            <span t-attf-class="badge rounded-pill fs-6 #{
+                                'text-bg-warning' if appointment.state == 'pending' else
+                                'text-bg-info' if appointment.state in ('confirmed', 'checked_in') else
+                                'text-bg-primary' if appointment.state in ('in_progress', 'halfway') else
+                                'text-bg-success' if appointment.state == 'completed' else
+                                'text-bg-danger'
+                            }">
+                                <t t-out="(appointment.state or '').replace('_', ' ').title()"/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Pet Info -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">Pet Information</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Pet Name</dt>
+                                <dd class="col-sm-8"><t t-out="appointment.pet_name"/></dd>
+
+                                <dt class="col-sm-4">Species</dt>
+                                <dd class="col-sm-8"><t t-out="(appointment.pet_type or '').title()"/></dd>
+
+                                <dt class="col-sm-4">Size/Age</dt>
+                                <dd class="col-sm-8"><t t-out="(appointment.pet_category or '').replace('_', ' ').title()"/></dd>
+                            </dl>
+                        </div>
+
+                        <!-- Appointment Info -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">Appointment Details</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Date &amp; Time</dt>
+                                <dd class="col-sm-8">
+                                    <span t-field="appointment.appointment_date" t-options='{"format": "EEEE, dd MMM yyyy HH:mm"}'/>
+                                </dd>
+
+                                <dt class="col-sm-4">Service</dt>
+                                <dd class="col-sm-8"><t t-out="appointment.service_id.name or 'Treatments Only'"/></dd>
+
+                                <dt t-if="appointment.addon_ids" class="col-sm-4">Add-ons</dt>
+                                <dd t-if="appointment.addon_ids" class="col-sm-8">
+                                    <t t-foreach="appointment.addon_ids" t-as="addon">
+                                        <span class="badge text-bg-secondary me-1"><t t-out="addon.name"/></span>
+                                    </t>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2">Pricing</h5>
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold">Total Amount:</span>
+                                <span class="fs-4 text-primary">
+                                    <span t-field="appointment.total_price" t-options='{"widget": "monetary", "display_currency": appointment.currency_id}'/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sales Order / Invoice Link -->
+                    <t t-if="appointment.sale_order_id">
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Billing</h5>
+                                <p>
+                                    <strong>Sales Order:</strong>
+                                    <a t-attf-href="/my/orders/#{appointment.sale_order_id.id}">
+                                        <t t-out="appointment.sale_order_id.name"/>
+                                    </a>
+                                </p>
+                                <t t-if="appointment.sale_order_id.invoice_ids">
+                                    <p>
+                                        <strong>Invoices:</strong>
+                                        <t t-foreach="appointment.sale_order_id.invoice_ids" t-as="inv">
+                                            <a t-attf-href="/my/invoices/#{inv.id}" class="me-2">
+                                                <t t-out="inv.name"/>
+                                            </a>
+                                        </t>
+                                    </p>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Notes -->
+                    <t t-if="appointment.notes">
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Special Requests</h5>
+                                <p t-out="appointment.notes"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="card-footer">
+                    <a href="/my/grooming" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left me-2"/>Back to Appointments
+                    </a>
+                    <a href="/grooming" class="btn btn-primary ms-2">
+                        <i class="fa fa-plus me-2"/>Book Another Appointment
+                    </a>
+                </div>
+            </div>
+        </t>
+    </template>
+    </data>
+</odoo>

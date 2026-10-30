@@ -1,0 +1,190 @@
+/* Main Dashboard Container */
+.o_grooming_dashboard {
+    background-color: #f6f8fa;
+    /* Light grey background like standard SaaS */
+    font-family: 'Roboto', 'Inter', sans-serif;
+}
+
+/* Header */
+.dashboard-header-title {
+    color: #374151;
+    font-weight: 700;
+}
+
+/* Common Card Styles */
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.card-header-clean {
+    background: transparent;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+}
+
+/* Top Summary Cards */
+.stat-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.icon-blue-light {
+    background-color: #eef2ff;
+    color: #4f46e5;
+}
+
+.icon-cyan-light {
+    background-color: #ecfeff;
+    color: #06b6d4;
+}
+
+.icon-purple-light {
+    background-color: #f3e8ff;
+    color: #9333ea;
+}
+
+.icon-orange-light {
+    background-color: #fff7ed;
+    color: #ea580c;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stat-desc {
+    color: #9ca3af;
+    font-size: 0.8rem;
+}
+
+/* Donut Chart Simulation (CSS Conic Gradient) */
+.donut-chart-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.donut-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    /* Default gray, will be overridden inline */
+    background: conic-gradient(#e5e7eb 0% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.donut-hole {
+    width: 80%;
+    height: 80%;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.donut-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.donut-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1;
+}
+
+/* Legend */
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #4b5563;
+    margin-bottom: 4px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* Tables */
+.table-clean th {
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 2px solid #f3f4f6;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table-clean td {
+    vertical-align: middle;
+    color: #374151;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f9fafb;
+    padding: 12px 16px;
+}
+
+.badge-clean {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.badge-success-soft {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-warning-soft {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-info-soft {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-gray-soft {
+    background-color: #f3f4f6;
+    color: #374151;
+}

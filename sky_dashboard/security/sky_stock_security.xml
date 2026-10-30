@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_sky_stock_cashier" model="res.groups">
+        <field name="name">Cashiers Stock Report User</field>
+        <field name="implied_ids" eval="[(4, ref('point_of_sale.group_pos_user'))]"/>
+    </record>
+
+    <record id="group_sky_stock_manager" model="res.groups">
+        <field name="name">Cashiers Stock Report Manager</field>
+        <field name="implied_ids" eval="[(4, ref('group_sky_stock_cashier')), (4, ref('point_of_sale.group_pos_manager'))]"/>
+    </record>
+
+</odoo>

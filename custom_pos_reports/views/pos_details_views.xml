@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_details_wizard_custom" model="ir.ui.view">
+        <field name="name">pos.details.wizard.form.custom</field>
+        <field name="model">pos.details.wizard</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_details_wizard"/>
+        <field name="arch" type="xml">
+            <!-- Replace Datetime fields with Date fields -->
+            <xpath expr="//field[@name='start_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='end_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='start_date']" position="after">
+                 <field name="is_weekly_report" invisible="1"/>
+                 <field name="date_start_only"/>
+            </xpath>
+            <xpath expr="//field[@name='end_date']" position="after">
+                 <field name="date_end_only"/>
+            </xpath>
+
+            <!-- Hide Default Print and Rename Custom Buttons -->
+            <xpath expr="//footer/button[@name='generate_report']" position="attributes">
+                 <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//footer" position="inside">
+                 <button name="action_export_excel" string="Export Excel" type="object" class="btn-success" invisible="not is_weekly_report"/>
+                 <button name="action_print_a4" string="Export PDF (A4)" type="object" class="btn-primary" />
+                 <button name="action_print_thermal" string="Thermal PDF" type="object" class="btn-secondary" invisible="not is_weekly_report"/>
+                 <button name="action_send_whatsapp" string="Send to WhatsApp" type="object" class="btn-info text-white" icon="fa-whatsapp"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Weekly Report Action -->
+    <record id="action_report_pos_weekly" model="ir.actions.act_window">
+        <field name="name">Weekly Sales Report</field>
+        <field name="res_model">pos.details.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'weekly_report': True}</field>
+    </record>
+
+    <!-- Ensure Point of Sale > Reports top menu is visible to Cashiers (POS Users) and POS Managers -->
+    <record id="point_of_sale.menu_point_rep" model="ir.ui.menu">
+        <field name="name">Reports</field>
+        <field name="sequence">20</field>
+        <field name="active" eval="True"/>
+        <field name="groups_id" eval="[(6, 0, [ref('point_of_sale.group_pos_user'), ref('point_of_sale.group_pos_manager')])]"/>
+    </record>
+
+    <!-- Weekly Report Menu (Under Point of Sale > Reporting) -->
+    <menuitem id="menu_report_pos_weekly"
+              name="Weekly Report"
+              parent="point_of_sale.menu_point_rep"
+              action="action_report_pos_weekly"
+              sequence="20"/>
+    <record id="menu_report_pos_weekly" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('point_of_sale.group_pos_user'), ref('point_of_sale.group_pos_manager')])]"/>
+    </record>
+
+    <!-- Ensure Session Report is only visible to POS Managers -->
+    <record id="point_of_sale.menu_report_daily_details" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('point_of_sale.group_pos_manager')])]"/>
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- Ensure Daily Sales Report is visible to POS Users at sequence 10 -->
+    <record id="point_of_sale.menu_report_order_details" model="ir.ui.menu">
+        <field name="name">Daily Sales Report</field>
+        <field name="sequence">10</field>
+        <field name="groups_id" eval="[(6, 0, [ref('point_of_sale.group_pos_user'), ref('point_of_sale.group_pos_manager')])]"/>
+    </record>
+
+    <!-- Sales Details Action for Users -->
+    <record id="action_report_pos_details_user" model="ir.actions.act_window">
+        <field name="name">Sales Details</field>
+        <field name="res_model">pos.details.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu for POS Users -->
+    <menuitem id="menu_report_pos_details_user"
+              name="Sales Details"
+              parent="point_of_sale.menu_point_rep"
+              action="action_report_pos_details_user"
+              groups="point_of_sale.group_pos_user"
+              sequence="99"
+              active="False"/>
+</odoo>

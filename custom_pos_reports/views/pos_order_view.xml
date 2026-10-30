@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Quick Date Filters and Grouping to Search View -->
+    <record id="view_pos_order_search_inherit_week" model="ir.ui.view">
+        <field name="name">pos.order.search.inherit.week</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <separator/>
+                <filter string="Today" name="filter_today" domain="[('date_order', '&gt;=', (context_today()).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="This Week" name="filter_this_week" domain="[('date_order', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="Last Week" name="filter_last_week" domain="[('date_order', '&gt;=', (context_today() - relativedelta(days=context_today().weekday() + 7)).strftime('%Y-%m-%d 00:00:00')), ('date_order', '&lt;', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="Last 2 Weeks" name="filter_last_2_weeks" domain="[('date_order', '&gt;=', (context_today() - relativedelta(days=14)).strftime('%Y-%m-%d 00:00:00'))]"/>
+            </xpath>
+            <xpath expr="//filter[@name='order_month']" position="after">
+                <filter string="Day" name="group_by_day" domain="[]" context="{'group_by': 'date_order:day'}"/>
+                <filter string="Week" name="group_by_week" domain="[]" context="{'group_by': 'date_order:week'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Set "Week" Grouping as Default in Action -->
+    <record id="point_of_sale.action_pos_pos_form" model="ir.actions.act_window">
+        <field name="context">{'search_default_group_by_week': 1}</field>
+    </record>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_sky_daily_stock" model="ir.cron">
+        <field name="name">SKY: Generate Daily Stock Reports</field>
+        <field name="model_id" ref="model_sky_daily_stock_report"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_generate_daily_reports()</field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
+        <!-- First attempt: 21:30 UTC = 00:30 Africa/Nairobi. Open POS sessions are skipped and retried every 30 minutes. -->
+        <field name="nextcall" eval="(DateTime.now() + relativedelta(days=1)).replace(hour=21, minute=30, second=0).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="active">True</field>
+    </record>
+</odoo>

@@ -1,0 +1,320 @@
+/* Hide default Odoo headers and footers on preview */
+#wrapwrap > header#top,
+#wrapwrap > header.o_header_standard,
+#wrapwrap > footer:not(.stephans-footer),
+#wrapwrap > .o_footer {
+    display: none !important;
+}
+
+#wrapwrap {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Master Header Component */
+.stephans-master-header {
+    width: 100%;
+    background: #ffffff;
+    font-family: $stephans-sans;
+    position: relative;
+    z-index: 100;
+}
+
+/* 1. Top Bar */
+.stephans-topbar {
+    background-color: #3e220f;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 7px 0;
+}
+
+.stephans-topbar__inner {
+    width: min(1280px, calc(100% - 48px));
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stephans-topbar__announcement {
+    opacity: 0.95;
+    letter-spacing: 0.02em;
+}
+
+.stephans-topbar__links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: auto;
+}
+
+.stephans-topbar__link {
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+
+    &:hover {
+        color: #fde68a;
+    }
+}
+
+.stephans-topbar__link--wa:hover {
+    color: #4ade80;
+}
+
+/* 2. Main Bar */
+.stephans-mainbar {
+    background: #ffffff;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0ece6;
+}
+
+.stephans-mainbar__inner {
+    width: min(1280px, calc(100% - 48px));
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+}
+
+.stephans-logo img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    display: block;
+}
+
+/* Search Bar */
+.stephans-searchbar {
+    flex: 1;
+    max-width: 640px;
+}
+
+.stephans-searchbar__box {
+    display: flex;
+    align-items: center;
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 999px;
+    overflow: hidden;
+    height: 42px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus-within {
+        border-color: #3e220f;
+        box-shadow: 0 0 0 3px rgba(62, 34, 15, 0.12);
+    }
+}
+
+.stephans-searchbar__icon {
+    margin-left: 16px;
+    flex-shrink: 0;
+}
+
+.stephans-searchbar__input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 0 14px;
+    font-size: 13px;
+    color: #222222;
+    outline: none;
+
+    &::placeholder {
+        color: #888888;
+    }
+}
+
+.stephans-searchbar__btn {
+    background: #3e220f;
+    color: #ffffff;
+    border: 0;
+    padding: 0 24px;
+    height: 100%;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+        background: #5a3419;
+    }
+}
+
+/* Right Actions */
+.stephans-actions {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.stephans-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #444444;
+    transition: color 0.2s;
+
+    &:hover {
+        color: $stephans-gold;
+
+        .stephans-action-item__icon-wrap {
+            background: #faf5ee;
+            border-color: #e5ded5;
+        }
+    }
+}
+
+.stephans-action-item__icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafaf9;
+    border: 1px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.stephans-action-item__label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #666666;
+}
+
+/* 3. Category Navigation Strip */
+.stephans-nav-strip {
+    background: #ffffff;
+    border-bottom: 1px solid $stephans-line;
+}
+
+.stephans-nav-strip__inner {
+    width: min(1280px, calc(100% - 48px));
+    margin: 0 auto;
+}
+
+.stephans-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 34px;
+    height: 44px;
+
+    li a {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #2b2622;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: color 0.2s;
+
+        &:hover {
+            color: $stephans-gold;
+        }
+    }
+}
+
+.stephans-chevron {
+    font-size: 10px;
+    color: #888888;
+}
+
+.stephans-nav-icon {
+    font-size: 13px;
+}
+
+.stephans-nav-highlight {
+    color: #8b4f22 !important;
+}
+
+.stephans-nav-locator {
+    color: #444444 !important;
+}
+
+/* Mobile trigger */
+.stephans-mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: 0;
+    padding: 6px;
+    cursor: pointer;
+
+    span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        margin: 5px 0;
+        background: #3e220f;
+    }
+}
+
+@media (max-width: 991px) {
+    .stephans-topbar__announcement {
+        display: none;
+    }
+
+    .stephans-nav-list {
+        gap: 18px;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 0 10px;
+
+        li a {
+            white-space: nowrap;
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    .stephans-mobile-menu-btn {
+        display: block;
+    }
+
+    .stephans-mainbar__inner {
+        width: calc(100% - 24px);
+    }
+
+    .stephans-searchbar {
+        display: none;
+    }
+
+    .stephans-action-item:not(:last-child) {
+        display: none;
+    }
+
+    .stephans-nav-strip {
+        display: none;
+
+        &.is-open {
+            display: block;
+
+            .stephans-nav-list {
+                flex-direction: column;
+                height: auto;
+                padding: 16px 20px;
+                gap: 14px;
+                align-items: flex-start;
+            }
+        }
+    }
+}

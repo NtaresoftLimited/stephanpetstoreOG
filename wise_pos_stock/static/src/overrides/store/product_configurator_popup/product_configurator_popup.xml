@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ProductConfiguratorPopup" t-inherit-mode="extension">
+        <xpath expr="//ProductInfoBanner" position="after">
+            <div t-if="this.pos.config.is_display_stock and state.product.type !== 'service'" class="stock-info mt-2 mb-2">
+                <t t-set="stock_qty" t-value="this.getProductLatestQty(state.product)"/>
+                <span class="btn btn-sm" t-attf-class="{{stock_qty.colorClass}}">
+                    Stock: <t t-esc="stock_qty.value"/>
+                </span>
+            </div>
+        </xpath>
+    </t>
+</templates>

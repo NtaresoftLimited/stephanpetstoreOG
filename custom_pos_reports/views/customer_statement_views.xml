@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+ <record id="view_customer_statement_form" model="ir.ui.view">
+  <field name="name">techovers.customer.statement.form</field><field name="model">techovers.customer.statement</field>
+  <field name="arch" type="xml"><form string="Customer Statement"><group><field name="partner_id" domain="['|', ('is_company', '=', True), ('name', 'ilike', 'SACCO')]"/><field name="date_start"/><field name="date_end"/></group><footer><button name="action_print_statement" string="Print Customer Statement" type="object" class="btn-primary"/><button string="Cancel" special="cancel" class="btn-secondary"/></footer></form></field>
+ </record>
+ <record id="action_customer_statement_wizard" model="ir.actions.act_window"><field name="name">Customer Statement</field><field name="res_model">techovers.customer.statement</field><field name="view_mode">form</field><field name="target">new</field></record>
+</odoo>

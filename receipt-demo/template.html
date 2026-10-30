@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 80mm; /* Standard POS receipt width */
+            margin: 0;
+            padding: 10px;
+            color: black;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .pos-receipt {
+            font-weight: bold;
+            color: black;
+        }
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .receipt-orderlines {
+            width: 100%;
+            border-top: 1px dashed black;
+            border-bottom: 1px dashed black;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .receipt-orderlines th {
+            font-size: 16px;
+            border-bottom: 1px dashed black;
+            padding: 5px 0;
+        }
+        .receipt-orderlines td {
+            padding: 5px 0;
+        }
+        .w-60 { width: 60%; }
+        .w-40 { width: 40%; }
+        .dashed-top { border-top: 1px dashed black; padding-top: 5px; margin-top: 5px;}
+        .bold-16 { font-size: 16px; font-weight: bold; }
+        .flex-between { display: flex; justify-content: space-between; }
+        .policy {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+    <div class="pos-receipt">
+        <div class="text-center">
+            <!-- We would normally use the logo img tag here, replacing with text for demo -->
+            <h2>STEPHAN'S PET STORE</h2>
+        </div>
+        <div class="text-left" style="font-size: 14px;">
+            <span>Phone:</span> +255 123 456 789<br />
+            <span>Email:</span> info@stephanspetstore.co.tz<br />
+        </div>
+        <br/>
+        <div class="text-left">
+            <div style="font-size:20px;">RECEIPT</div>
+        </div>
+        <div class="text-left">
+            27/06/2026 14:30:00<br />
+            POS/001/0045<br />
+            Served by: Administrator<br />
+        </div>
+        <br/>
+        <div class="text-center" style="font-size:15px">
+            TIN: 137-033-089
+        </div>
+        <br/>
+        
+        <table class="receipt-orderlines">
+            <colgroup>
+                <col class="w-60" />
+                <col class="w-40" />
+            </colgroup>
+            <tr>
+                <th class="text-left">Product</th>
+                <th class="text-right">Amount</th>
+            </tr>
+            <tr>
+                <td class="text-left">
+                    Royal Canin Maxi Adult 15kg<br/>
+                    1 Units X 185,000
+                </td>
+                <td class="text-right">185,000.00</td>
+            </tr>
+            <tr>
+                <td class="text-left">
+                    Bioline Catnip Spray 50ml<br/>
+                    2 Units X 12,000
+                </td>
+                <td class="text-right">24,000.00</td>
+            </tr>
+            <tr>
+                <td class="text-left">
+                    Reflective Dog Collar Large<br/>
+                    1 Units X 25,000
+                </td>
+                <td class="text-right">25,000.00</td>
+            </tr>
+            <tr>
+                <td class="text-left">
+                    Whiskas Ocean Fish 1.2kg<br/>
+                    3 Units X 22,000
+                </td>
+                <td class="text-right">66,000.00</td>
+            </tr>
+            <tr>
+                <td class="text-left">
+                    Bird Toy with Bell<br/>
+                    1 Units X 8,500
+                </td>
+                <td class="text-right">8,500.00</td>
+            </tr>
+            <tr>
+                <td class="text-left">
+                    Summit 10 Cat Food 2kg<br/>
+                    1 Units X 45,000
+                </td>
+                <td class="text-right">45,000.00</td>
+            </tr>
+        </table>
+        
+        <div class="dashed-top flex-between bold-16">
+            <span>Subtotal :</span>
+            <span>353,500.00</span>
+        </div>
+        
+        <div class="flex-between bold-16">
+            <span>TOTAL :</span>
+            <span>353,500.00</span>
+        </div>
+
+        <div class="flex-between bold-16" style="margin-top: 10px;">
+            <span>Cash</span>
+            <span>360,000.00</span>
+        </div>
+        <div class="flex-between bold-16">
+            <span>CHANGE :</span>
+            <span>6,500.00</span>
+        </div>
+        
+        <div class="policy">
+            ALL SALES ARE FINAL.<br/>
+            NO REFUNDS.<br/>
+            EXCHANGES WITH RECEIPT WITHIN 24 HRS
+        </div>
+
+        <div class="text-center" style="margin-top: 20px;">
+            Thank You... Please Visit Again ...
+        </div>
+    </div>
+</body>
+</html>

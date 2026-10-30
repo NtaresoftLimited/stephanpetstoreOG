@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="grooming.RequestStockPopup">
+        <Dialog title="props.title">
+            <div class="form-group p-3">
+                
+                <!-- Add Products Section -->
+                <div class="mb-3 text-start position-relative">
+                    <label class="form-label text-start w-100 fw-bold">Add Products <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" placeholder="Search by product name, SKU, or barcode..." 
+                           t-model="state.searchQuery" t-on-input="onSearchProduct" />
+                    
+                    <!-- Search Results Dropdown -->
+                    <div t-if="state.searchResults.length > 0" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <t t-foreach="state.searchResults" t-as="product" t-key="product.id">
+                            <button type="button" class="list-group-item list-group-item-action" t-on-click="() => this.addProduct(product)">
+                                <t t-esc="product.display_name" />
+                            </button>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Product Table -->
+                <div class="mb-3 text-start">
+                    <table class="table table-sm table-striped mt-2 border-bottom">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-end">Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="state.cartLines.length === 0">
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-3 border-bottom">No products added yet.</td>
+                                </tr>
+                            </t>
+                            <t t-foreach="state.cartLines" t-as="line" t-key="line.product_id">
+                                <tr>
+                                    <td class="align-middle"><t t-esc="line.product_name" /></td>
+                                    <td class="text-end align-middle">
+                                        <div class="input-group input-group-sm justify-content-end" style="width: 120px; float: right;">
+                                            <button class="btn btn-outline-secondary" type="button" t-on-click="() => this.updateQty(line, -1)">-</button>
+                                            <input type="text" class="form-control text-center px-1" t-model="line.qty" t-on-change="(e) => this.onQtyChange(line, e)" />
+                                            <button class="btn btn-outline-secondary" type="button" t-on-click="() => this.updateQty(line, 1)">+</button>
+                                            <button class="btn btn-outline-danger ms-1" type="button" t-on-click="() => this.removeProduct(line)"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Destination Warehouse (Current POS Store) -->
+                <div class="mb-3 text-start">
+                    <label class="form-label text-start w-100 fw-bold">Destination (To Store)</label>
+                    <div class="form-control bg-light text-dark fw-bold">
+                        <i class="fa fa-map-marker text-danger me-1"></i>
+                        <t t-esc="state.destinationWarehouseName" />
+                    </div>
+                </div>
+
+                <!-- Request From (Source) -->
+                <div class="mb-3 text-start">
+                    <label class="form-label text-start w-100 fw-bold">Request From (Source Warehouse)</label>
+                    <select class="form-select" t-model="state.sourceWarehouseId">
+                        <option value="" disabled="1" selected="1">Select Source Warehouse...</option>
+                        <t t-foreach="state.warehouses" t-as="wh" t-key="wh.id">
+                            <option t-att-value="wh.id"><t t-esc="wh.name" /></option>
+                        </t>
+                    </select>
+                </div>
+
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn text-white" style="background-color: #6a4a5b;" t-on-click="confirm">
+                    Send Request
+                </button>
+                <button class="btn btn-light border" t-on-click="cancel">
+                    Cancel
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

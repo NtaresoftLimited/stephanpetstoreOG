@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sky_stock_generate_wizard_form" model="ir.ui.view">
+        <field name="name">sky.stock.generate.wizard.form</field>
+        <field name="model">sky.stock.generate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Stock Card Report">
+                <sheet>
+                    <div class="mb-4">
+                        <div class="text-uppercase fw-bold text-muted small mb-3 pb-1 border-bottom" style="letter-spacing: 0.6px; font-size: 0.75rem;">
+                            Dates
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="start_date" class="fw-semibold small text-muted mb-1 d-block"/>
+                                <field name="start_date" class="w-100" required="1"/>
+                            </div>
+                            <div class="col-6">
+                                <label for="end_date" class="fw-semibold small text-muted mb-1 d-block"/>
+                                <field name="end_date" class="w-100" required="1"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-uppercase fw-bold text-muted small mb-3 pb-1 border-bottom" style="letter-spacing: 0.6px; font-size: 0.75rem;">
+                            Location / Company
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="warehouse_option" string="Stock Location" class="fw-semibold small text-muted mb-1 d-block"/>
+                                <field name="warehouse_option" class="w-100" required="1"/>
+                            </div>
+                            <div class="col-6">
+                                <label for="company_id" class="fw-semibold small text-muted mb-1 d-block"/>
+                                <field name="company_id" readonly="1" options="{'no_open': True}" class="w-100"/>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+                <footer class="d-flex align-items-center gap-2 pt-3 border-top">
+                    <button name="action_generate_pdf" type="object" string="PDF" class="btn btn-primary px-3 fw-semibold"/>
+                    <span class="text-muted small">or</span>
+                    <button name="action_generate_excel" type="object" string="Excel" class="btn btn-secondary px-3 fw-semibold"/>
+                    <span class="text-muted small">or</span>
+                    <button string="Cancel" special="cancel" class="btn btn-link text-muted text-decoration-none px-2"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sky_stock_generate_wizard" model="ir.actions.act_window">
+        <field name="name">Stock Report</field>
+        <field name="res_model">sky.stock.generate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

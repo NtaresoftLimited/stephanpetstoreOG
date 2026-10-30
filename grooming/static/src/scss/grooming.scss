@@ -1,0 +1,82 @@
+// Grooming page specific styles
+// Extends theme_pet_store styles for grooming-specific UI
+
+// Price row hover effect
+.price-row {
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: rgba(93, 64, 55, 0.05);
+    }
+}
+
+// Size option cards
+.size-option {
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: rgba(93, 64, 55, 0.5) !important;
+    }
+
+    &.active {
+        border-color: #5D4037 !important;
+        background-color: rgba(93, 64, 55, 0.05) !important;
+    }
+}
+
+// Service type options
+.service-option {
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: rgba(93, 64, 55, 0.5) !important;
+    }
+
+    &.active {
+        border-color: #5D4037 !important;
+        background-color: rgba(93, 64, 55, 0.05) !important;
+    }
+}
+
+// Addon checkbox labels
+.addon-checkbox-label {
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: rgba(93, 64, 55, 0.4) !important;
+        background-color: rgba(93, 64, 55, 0.02);
+    }
+
+    input:checked+div {
+        color: #5D4037;
+        font-weight: 500;
+    }
+}
+
+// Form focus states
+.grooming-page {
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #5D4037 !important;
+        box-shadow: 0 0 0 0.2rem rgba(93, 64, 55, 0.15);
+    }
+}
+
+// Estimated total animation
+#estimated-total {
+    transition: all 0.3s;
+
+    &.updating {
+        opacity: 0.5;
+    }
+}
+
+// Card hover effects
+.grooming-page .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        box-shadow: 0 10px 30px -10px rgba(93, 64, 55, 0.15) !important;
+    }
+}

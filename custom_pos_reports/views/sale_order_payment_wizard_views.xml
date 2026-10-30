@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_payment_wizard_form" model="ir.ui.view">
+        <field name="name">sale.order.payment.wizard.form</field>
+        <field name="model">sale.order.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Register Payment">
+                <group>
+                    <group>
+                        <field name="order_id" readonly="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="payment_method_type" invisible="1"/>
+                        <field name="pos_payment_method_id" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    </group>
+                    <group>
+                        <field name="payment_date"/>
+                        <field name="reference"
+                               placeholder="e.g. M-Pesa / Tigo Pesa ID, CRDB or NMB Ref"
+                               required="payment_method_type == 'bank'"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" role="alert" invisible="payment_method_type != 'bank'">
+                    <i class="fa fa-info-circle me-1" title="Info"/> A <strong>Payment Reference / Ref</strong> is required for Bank &amp; Mobile Money payments (CRDB Bank, NMB Bank, M-Pesa, Tigo Pesa).
+                </div>
+                <footer>
+                    <button name="action_confirm_payment" string="Confirm &amp; Pay" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sale_order_payment_wizard" model="ir.actions.act_window">
+        <field name="name">Register Payment</field>
+        <field name="res_model">sale.order.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_sale_order_form_register_payment_techovers" model="ir.ui.view">
+        <field name="name">sale.order.form.register.payment.techovers</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_register_payment"
+                        type="object"
+                        string="Register Payment"
+                        class="btn-primary"
+                        icon="fa-money"
+                        invisible="state not in ['draft', 'sent', 'sale']"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

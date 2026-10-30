@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Public Website Categories (Isolated for Stephan's Theme) -->
+    <record id="category_pet_toys" model="product.public.category">
+        <field name="name">Pet Toys</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="category_cat_accessories" model="product.public.category">
+        <field name="name">Cat Accessories</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="category_pets" model="product.public.category">
+        <field name="name">Pets</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <!-- 4 Featured Homepage Showcase Products (Consumable type: strictly zero inventory impact) -->
+    <record id="product_plush_parrot_dog_toy" model="product.template">
+        <field name="name">Plush Parrot Dog Toy</field>
+        <field name="type">consu</field>
+        <field name="list_price">28000.0</field>
+        <field name="public_categ_ids" eval="[(4, ref('category_pet_toys'))]"/>
+        <field name="website_published">True</field>
+        <field name="description_sale">Thoughtfully chosen plush parrot dog toy for play and comfort.</field>
+    </record>
+
+    <record id="product_cat_water_fountain" model="product.template">
+        <field name="name">Cat Water Fountain Bubble Boy</field>
+        <field name="type">consu</field>
+        <field name="list_price">140000.0</field>
+        <field name="public_categ_ids" eval="[(4, ref('category_cat_accessories'))]"/>
+        <field name="website_published">True</field>
+        <field name="description_sale">Modern circulating pet water fountain for fresh, clean hydration.</field>
+    </record>
+
+    <record id="product_rabbit_house_c" model="product.template">
+        <field name="name">Rabbit House C</field>
+        <field name="type">consu</field>
+        <field name="list_price">55000.0</field>
+        <field name="public_categ_ids" eval="[(4, ref('category_pets'))]"/>
+        <field name="website_published">True</field>
+        <field name="description_sale">Cozy and sheltered house designed for rabbits and small pets.</field>
+    </record>
+
+    <record id="product_flying_bird_cage" model="product.template">
+        <field name="name">Flying Bird Cage Medium</field>
+        <field name="type">consu</field>
+        <field name="list_price">85000.0</field>
+        <field name="public_categ_ids" eval="[(4, ref('category_pets'))]"/>
+        <field name="website_published">True</field>
+        <field name="description_sale">Spacious medium flying bird cage with perches and feeders.</field>
+    </record>
+</odoo>

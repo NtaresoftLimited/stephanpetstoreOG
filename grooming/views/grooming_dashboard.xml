@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    <!-- ========================================= -->
+    <!-- GRAPH VIEW: Appointment Trends            -->
+    <!-- ========================================= -->
+    <record id="grooming_appointment_view_graph" model="ir.ui.view">
+        <field name="name">grooming.appointment.graph</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <graph string="Appointment Analysis" type="bar" stacked="True" sample="1">
+                <field name="appointment_date" interval="week"/>
+                <field name="state" type="col"/>
+                <field name="total_price" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- ========================================= -->
+    <!-- PIVOT VIEW: Revenue Analysis              -->
+    <!-- ========================================= -->
+    <record id="grooming_appointment_view_pivot" model="ir.ui.view">
+        <field name="name">grooming.appointment.pivot</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <pivot string="Revenue Analysis" sample="1">
+                <field name="service_id" type="row"/>
+                <field name="appointment_date" interval="month" type="col"/>
+                <field name="total_price" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- ========================================= -->
+    <!-- ENHANCED SEARCH VIEW                      -->
+    <!-- ========================================= -->
+    <record id="grooming_appointment_view_search_dashboard" model="ir.ui.view">
+        <field name="name">grooming.appointment.search.dashboard</field>
+        <field name="model">grooming.appointment</field>
+        <field name="inherit_id" ref="grooming_appointment_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='in_progress']" position="after">
+                <filter name="completed" string="Completed" domain="[('state', '=', 'completed')]"/>
+                <separator/>
+                <filter name="this_week" string="This Week" 
+                        domain="[('appointment_date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('appointment_date', '&lt;', (context_today() + relativedelta(days=7-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter name="this_month" string="This Month" 
+                        domain="[('appointment_date', '&gt;=', context_today().strftime('%Y-%m-01')),
+                                 ('appointment_date', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
+                <separator/>
+                <filter name="group_by_service" string="Service" context="{'group_by': 'service_id'}"/>
+                <filter name="group_by_pet_type" string="Pet Type" context="{'group_by': 'pet_type'}"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- ========================================= -->
+    <!-- DASHBOARD ACTION                          -->
+    <!-- ========================================= -->
+    <record id="action_grooming_appointment_analysis" model="ir.actions.act_window">
+        <field name="name">Appointment Analysis</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">graph,pivot,list,calendar</field>
+        <field name="search_view_id" ref="grooming_appointment_view_search"/>
+        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No appointments to analyze yet
+            </p>
+            <p>
+                Start creating grooming appointments to see analytics and trends here.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Revenue Report Action -->
+    <record id="action_grooming_revenue_report" model="ir.actions.act_window">
+        <field name="name">Revenue Report</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="grooming_appointment_view_search"/>
+        <field name="context">{'search_default_completed': 1}</field>
+    </record>
+    </data>
+</odoo>

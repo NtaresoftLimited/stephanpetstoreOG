@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<record id="group_sale_advance_payment" model="res.groups">
+		<field name="name">Sale Advance Payment</field>
+	</record>
+
+	<record id="group_purchase_advance_payment" model="res.groups">
+		<field name="name">Purchase Advance Payment</field>
+	</record>
+
+</odoo>

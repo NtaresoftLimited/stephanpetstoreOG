@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!-- Hide Action Buttons in the POS ControlButtons -->
+    <t t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        
+        <!-- General Note -->
+        <xpath expr="//OrderlineNoteButton[@label]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+        
+        <!-- Customer Note -->
+        <xpath expr="//OrderlineNoteButton[@icon]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <!-- Quotation/Order (from pos_sale) -->
+        <xpath expr="//button[@t-on-click='() => this.onClickQuotation()']" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <!-- Discount (from pos_discount) -->
+        <xpath expr="//button[hasclass('js_discount')]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <!-- Enter Code (from pos_loyalty) -->
+        <xpath expr="//button[@t-on-click='() => this.clickPromoCode()']" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <!-- Reward (from pos_loyalty) -->
+        <xpath expr="//button[@t-on-click='() => this.clickRewards()']" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <!-- Add Request Stock Button -->
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div" position="inside">
+            <button class="btn btn-secondary btn-lg py-5" t-on-click="() => this.clickRequestStock()">
+                <i class="fa fa-truck me-1" role="img" aria-label="Request Stock" title="Request Stock" />
+                Request Stock
+            </button>
+            <button class="btn btn-secondary btn-lg py-5" t-on-click="() => this.clickReplenishmentRequest()">
+                <i class="fa fa-shopping-cart me-1" role="img" aria-label="Replenishment Request" title="Replenishment Request" />
+                Replenishment Request
+            </button>
+        </xpath>
+
+    </t>
+</templates>

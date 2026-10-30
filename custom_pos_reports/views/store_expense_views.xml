@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Store Expense Search View -->
+    <record id="view_pos_store_expense_search" model="ir.ui.view">
+        <field name="name">pos.store.expense.search</field>
+        <field name="model">pos.store.expense</field>
+        <field name="arch" type="xml">
+            <search string="Store Expenses">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="category_id"/>
+                <field name="pos_config_id"/>
+                <field name="vendor_id"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="submitted" string="To Approve" domain="[('state', '=', 'submitted')]"/>
+                <filter name="paid" string="Paid" domain="[('state', '=', 'paid')]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today())]"/>
+                <filter name="current_month" string="This Month" domain="[('date', '&gt;=', (context_today().strftime('%Y-%m-01')))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_branch" string="Branch" context="{'group_by': 'pos_config_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Store Expense List View -->
+    <record id="view_pos_store_expense_list" model="ir.ui.view">
+        <field name="name">pos.store.expense.list</field>
+        <field name="model">pos.store.expense</field>
+        <field name="arch" type="xml">
+            <list string="Store Expenses" decoration-info="state == 'draft'" decoration-warning="state == 'submitted'" decoration-success="state == 'paid'" decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="pos_config_id" string="Branch"/>
+                <field name="category_id"/>
+                <field name="description"/>
+                <field name="payment_mode"/>
+                <field name="amount" sum="Total Expenses"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="user_id" string="Recorded By"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'submitted'" decoration-success="state == 'paid'" decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Store Expense Form View -->
+    <record id="view_pos_store_expense_form" model="ir.ui.view">
+        <field name="name">pos.store.expense.form</field>
+        <field name="model">pos.store.expense</field>
+        <field name="arch" type="xml">
+            <form string="Store Expense">
+                <header>
+                    <button name="action_submit" type="object" string="Submit for Approval" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_approve" type="object" string="Approve &amp; Pay" class="btn-success" invisible="state != 'submitted'" groups="point_of_sale.group_pos_manager"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('cancelled', 'draft')" groups="point_of_sale.group_pos_manager" confirm="Are you sure you want to cancel this expense?"/>
+                    <button name="action_draft" type="object" string="Reset to Draft" invisible="state not in ('cancelled', 'submitted')" groups="point_of_sale.group_pos_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_journal_entry" type="object" class="oe_stat_button" icon="fa-book" invisible="not move_id" groups="point_of_sale.group_pos_manager">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Journal Entry</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <span class="o_form_label text-muted">Store Expense</span>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group name="left_details">
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="pos_config_id" readonly="state != 'draft'"/>
+                            <field name="category_id" options="{'no_create': True}" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="description" placeholder="e.g. Disinfectant &amp; mop for puppy area" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="amount" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group name="right_details">
+                            <field name="payment_mode" widget="radio" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="payment_journal_id" options="{'no_create': True}" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="vendor_id" placeholder="Optional supplier / vendor" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="reference" placeholder="e.g. Receipt #1234" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="receipt_file" filename="receipt_filename" widget="binary" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="receipt_filename" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Audit &amp; Accounting" groups="point_of_sale.group_pos_manager">
+                            <group>
+                                <group string="Tracking">
+                                    <field name="user_id"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="approved_by" invisible="not approved_by"/>
+                                    <field name="approved_at" invisible="not approved_at"/>
+                                    <field name="paid_by" invisible="not paid_by"/>
+                                    <field name="paid_at" invisible="not paid_at"/>
+                                </group>
+                                <group string="Accounting">
+                                    <field name="move_id" readonly="1"/>
+                                    <field name="reversal_move_id" invisible="not reversal_move_id" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Expense Category Views -->
+    <record id="view_pos_store_expense_category_list" model="ir.ui.view">
+        <field name="name">pos.store.expense.category.list</field>
+        <field name="model">pos.store.expense.category</field>
+        <field name="arch" type="xml">
+            <list string="Expense Categories" editable="bottom">
+                <field name="name"/>
+                <field name="account_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_pos_store_expense" model="ir.actions.act_window">
+        <field name="name">Store Expenses</field>
+        <field name="res_model">pos.store.expense</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_pos_store_expense_search"/>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record your first store expense.</p>
+            <p>Cashiers can record daily branch disbursements, attach receipts, and submit them for manager approval.</p>
+        </field>
+    </record>
+
+    <record id="action_pos_store_expense_category" model="ir.actions.act_window">
+        <field name="name">Expense Categories</field>
+        <field name="res_model">pos.store.expense.category</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Configure categories and link them to General Ledger accounts.</p>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- CLEAN MENUS IN POINT OF SALE               -->
+    <!-- ========================================== -->
+    <menuitem id="menu_pos_store_expense_root"
+              name="Expenses"
+              parent="point_of_sale.menu_point_root"
+              sequence="20"
+              groups="point_of_sale.group_pos_user"/>
+
+    <menuitem id="menu_pos_store_expense"
+              name="Store Expenses"
+              parent="menu_pos_store_expense_root"
+              action="action_pos_store_expense"
+              sequence="10"
+              groups="point_of_sale.group_pos_user"/>
+
+    <menuitem id="menu_pos_store_expense_category"
+              name="Expense Categories"
+              parent="menu_pos_store_expense_root"
+              action="action_pos_store_expense_category"
+              sequence="20"
+              groups="point_of_sale.group_pos_manager"/>
+</odoo>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Paper Format: 80mm -->
+        <record id="paperformat_pos_thermal" model="report.paperformat">
+            <field name="name">Thermal 80mm</field>
+            <field name="default" eval="True"/>
+            <field name="format">custom</field>
+            <field name="page_height">0</field> <!-- Continuous roll -->
+            <field name="page_width">80</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">2</field>
+            <field name="margin_bottom">2</field>
+            <field name="margin_left">2</field>
+            <field name="margin_right">2</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">0</field>
+            <field name="dpi">90</field>
+        </record>
+
+        <!-- Report Action - WIZARD -->
+        <record id="action_report_pos_thermal" model="ir.actions.report">
+            <field name="name">Z-Report (Thermal)</field>
+            <field name="model">pos.details.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">custom_pos_reports.report_pos_thermal</field>
+            <field name="print_report_name">'Z-Report - %s' % (object.date_start_only or 'Date')</field>
+            <field name="paperformat_id" ref="custom_pos_reports.paperformat_pos_thermal"/>
+            <field name="binding_model_id" ref="point_of_sale.model_pos_details_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- Report Action - SESSION -->
+        <record id="action_report_session_thermal" model="ir.actions.report">
+            <field name="name">Z-Report (Thermal)</field>
+            <field name="model">pos.session</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">custom_pos_reports.report_pos_thermal</field>
+            <field name="print_report_name">'Z-Report - %s' % (object.name)</field>
+            <field name="paperformat_id" ref="custom_pos_reports.paperformat_pos_thermal"/>
+            <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- NEW: A4 Report Action -->
+        <record id="action_report_pos_a4" model="ir.actions.report">
+            <field name="name">Daily Sales (A4 PDF)</field>
+            <field name="model">pos.details.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">custom_pos_reports.report_pos_a4</field>
+            <field name="print_report_name">'Daily Sales - %s' % (object.date_start_only or 'Date')</field>
+            <field name="binding_type">report</field>
+            <!-- No custom paperformat means default A4 -->
+        </record>
+    </data>
+</odoo>

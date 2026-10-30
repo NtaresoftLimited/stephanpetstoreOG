@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <!-- 1. Embed Dashboard Component Below Native POS Kanban Cards -->
+  <t t-inherit="point_of_sale.PosKanbanRenderer" t-inherit-mode="extension">
+    <xpath expr="//t[@t-call='web.KanbanRenderer']" position="after">
+      <div class="o_pos_dashboard_container px-3 pb-4 pt-2 border-top mt-2">
+        <PosDashboard />
+      </div>
+    </xpath>
+  </t>
+
+  <!-- 2. POS Dashboard Component -->
+  <t t-name="custom_pos_reports.PosDashboard">
+   <div class="o_pos_dashboard">
+    <style>
+      .tech-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+      }
+      .tech-header {
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 10px 16px !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+        letter-spacing: 0.3px !important;
+        text-transform: uppercase !important;
+      }
+      .tech-kpi-card {
+        border-radius: 8px !important;
+        padding: 12px 14px !important;
+        border: 1px solid transparent !important;
+        box-shadow: none !important;
+      }
+      .tech-donut-circle {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 50% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+      
+      /* Card 1: Total Sales (TechOvers Berry/Maroon) */
+      .tech-kpi-sales {
+        background-color: #fdf2f8 !important;
+        border-color: #fbcfe8 !important;
+      }
+      .tech-kpi-sales .tech-donut-circle {
+        background-color: #9D2065 !important;
+        color: #ffffff !important;
+      }
+      .tech-kpi-sales .tech-kpi-label {
+        color: #9D2065 !important;
+      }
+      
+      /* Card 2: Total Orders (Blue) */
+      .tech-kpi-orders {
+        background-color: #eff6ff !important;
+        border-color: #bfdbfe !important;
+      }
+      .tech-kpi-orders .tech-donut-circle {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+      }
+      .tech-kpi-orders .tech-kpi-label {
+        color: #1d4ed8 !important;
+      }
+      
+      /* Card 3: Items Sold (Green/Emerald) */
+      .tech-kpi-items {
+        background-color: #ecfdf5 !important;
+        border-color: #a7f3d0 !important;
+      }
+      .tech-kpi-items .tech-donut-circle {
+        background-color: #059669 !important;
+        color: #ffffff !important;
+      }
+      .tech-kpi-items .tech-kpi-label {
+        color: #047857 !important;
+      }
+      
+      /* Card 4: Total Expenses (Red) */
+      .tech-kpi-expenses {
+        background-color: #fef2f2 !important;
+        border-color: #fecaca !important;
+      }
+      .tech-kpi-expenses .tech-donut-circle {
+        background-color: #dc2626 !important;
+        color: #ffffff !important;
+      }
+      .tech-kpi-expenses .tech-kpi-label {
+        color: #b91c1c !important;
+      }
+
+      /* Card 5: Total Unpaid (Amber/Gold) */
+      .tech-kpi-unpaid {
+        background-color: #fffbeb !important;
+        border-color: #fde68a !important;
+      }
+      .tech-kpi-unpaid .tech-donut-circle {
+        background-color: #d97706 !important;
+        color: #ffffff !important;
+      }
+      .tech-kpi-unpaid .tech-kpi-label {
+        color: #b45309 !important;
+      }
+
+      .tech-kpi-label {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 2px !important;
+      }
+      .tech-kpi-value {
+        color: #0f172a !important;
+        font-size: 17px !important;
+        font-weight: 800 !important;
+        line-height: 1.2 !important;
+        white-space: nowrap;
+      }
+      .tech-btn-primary {
+        background-color: #9D2065 !important;
+        border-color: #9D2065 !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+      }
+      .tech-btn-primary:hover {
+        background-color: #801851 !important;
+        border-color: #801851 !important;
+        color: #ffffff !important;
+      }
+      .tech-table th {
+        background: #f8fafc !important;
+        color: #475569 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+        padding: 8px 12px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+      .tech-table td {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+        color: #1e293b !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+      }
+      .tech-payment-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px;
+        height: 100%;
+        border-left: 3px solid #9D2065;
+      }
+      .tech-scroll-container {
+        max-height: 420px;
+        overflow-y: auto;
+      }
+      .tech-scroll-container thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8fafc !important;
+      }
+      .tech-scroll-container tfoot td {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        background: #f8fafc !important;
+      }
+    </style>
+
+    <!-- Filter Bar: [Start Date] [End Date] [Apply Filters] & Refresh -->
+    <div class="card tech-card mb-3">
+      <div class="card-body py-2 px-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-4 col-sm-5">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0 text-muted small fw-bold">Start Date</label>
+              <t t-if="!state.is_manager and state.min_date">
+                <span class="badge bg-warning text-dark" style="font-size: 0.72rem; padding: 2px 6px;" title="Cashiers can only view sales of the last 1 week">
+                  <i class="fa fa-lock me-1"/>1-Week Limit
+                </span>
+              </t>
+            </div>
+            <input type="date" class="form-control form-control-sm" t-model="state.date_start" t-att-min="state.min_date or undefined"/>
+          </div>
+          <div class="col-md-4 col-sm-5">
+            <label class="form-label mb-1 text-muted small fw-bold">End Date</label>
+            <input type="date" class="form-control form-control-sm" t-model="state.date_end" t-att-min="state.min_date or undefined"/>
+          </div>
+          <div class="col-md-3 col-sm-10">
+            <button class="btn btn-sm tech-btn-primary w-100" t-on-click="applyFilters">
+              <i class="fa fa-filter me-1"/> Apply Filters
+            </button>
+          </div>
+          <div class="col-md-1 col-sm-2 text-end">
+            <button class="btn btn-sm btn-outline-secondary w-100" t-on-click="applyFilters" title="Refresh">
+              <i class="fa fa-refresh"/>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <t t-if="state.loading">
+      <div class="text-center p-4 text-muted"><i class="fa fa-circle-o-notch fa-spin me-2"/> Loading dashboard...</div>
+    </t>
+    <t t-else="">
+      <!-- 1. KPI Summary Cards (5-in-a-Row, Full Soft Backgrounds with Circle Donut Icons) -->
+      <div class="row g-2 mb-3">
+        <!-- 1. Total Sales -->
+        <div class="col-xl col-md-4 col-sm-6 mb-2">
+          <div class="tech-kpi-card tech-kpi-sales h-100 d-flex align-items-center">
+            <div class="tech-donut-circle me-3">
+              <i class="fa fa-line-chart"/>
+            </div>
+            <div class="overflow-hidden">
+              <div class="tech-kpi-label">Total Sales</div>
+              <div class="tech-kpi-value"><t t-esc="state.currency"/> <t t-esc="format(state.data.total_sales)"/></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Total Orders -->
+        <div class="col-xl col-md-4 col-sm-6 mb-2">
+          <div class="tech-kpi-card tech-kpi-orders h-100 d-flex align-items-center">
+            <div class="tech-donut-circle me-3">
+              <i class="fa fa-shopping-bag"/>
+            </div>
+            <div class="overflow-hidden">
+              <div class="tech-kpi-label">Total Orders</div>
+              <div class="tech-kpi-value"><t t-esc="state.data.total_orders"/></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Items Sold -->
+        <div class="col-xl col-md-4 col-sm-6 mb-2">
+          <div class="tech-kpi-card tech-kpi-items h-100 d-flex align-items-center">
+            <div class="tech-donut-circle me-3">
+              <i class="fa fa-cubes"/>
+            </div>
+            <div class="overflow-hidden">
+              <div class="tech-kpi-label">Items Sold</div>
+              <div class="tech-kpi-value"><t t-esc="state.data.items_sold"/></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Total Expenses -->
+        <div class="col-xl col-md-4 col-sm-6 mb-2">
+          <div class="tech-kpi-card tech-kpi-expenses h-100 d-flex align-items-center">
+            <div class="tech-donut-circle me-3">
+              <i class="fa fa-minus-circle"/>
+            </div>
+            <div class="overflow-hidden">
+              <div class="tech-kpi-label">Total Expenses</div>
+              <div class="tech-kpi-value"><t t-esc="state.currency"/> <t t-esc="format(state.data.expenses_total)"/></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Total Unpaid -->
+        <div class="col-xl col-md-4 col-sm-6 mb-2">
+          <div class="tech-kpi-card tech-kpi-unpaid h-100 d-flex align-items-center">
+            <div class="tech-donut-circle me-3">
+              <i class="fa fa-clock-o"/>
+            </div>
+            <div class="overflow-hidden">
+              <div class="tech-kpi-label">Total Unpaid</div>
+              <div class="tech-kpi-value"><t t-esc="state.currency"/> <t t-esc="format(state.data.total_unpaid)"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Payments Received (Grouped by Channel) -->
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <div class="card tech-card h-100">
+            <div class="card-header tech-header d-flex justify-content-between align-items-center">
+              <span>Payments Received (TSh)</span>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <t t-foreach="state.data.payments" t-as="box" t-key="box_index">
+                  <div class="col-sm-6 col-md-3">
+                    <div class="tech-payment-box">
+                      <div class="fw-bold text-dark small mb-2" t-esc="box.name"/>
+                      <t t-if="box.rows.length">
+                        <table class="w-100 mb-2" style="font-size: 11px;">
+                          <tbody>
+                            <tr t-foreach="box.rows" t-as="r" t-key="r_index">
+                              <td class="text-muted py-1"><t t-esc="r.location"/>:</td>
+                              <td class="text-end fw-semibold py-1"><t t-esc="format(r.amount)"/></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </t>
+                      <t t-else=""><div class="text-muted small mb-2">No payments</div></t>
+                      <div class="border-top pt-1 text-end fw-bold small text-dark">
+                        Total: <t t-esc="state.currency"/> <t t-esc="format(box.total)"/>
+                      </div>
+                    </div>
+                  </div>
+                </t>
+                <div t-if="!state.data.payments.length" class="col-12 text-center text-muted py-3">
+                  No payments recorded for this period.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Sales Breakdown (Products Sold) - Matching Daily Sales Report -->
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <div class="card tech-card">
+            <div class="card-header tech-header d-flex justify-content-between align-items-center">
+              <span>Sales Breakdown</span>
+              <span class="badge bg-light text-dark border"><t t-esc="state.data.sales_breakdown ? state.data.sales_breakdown.length : 0"/> Products</span>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive tech-scroll-container">
+                <table class="table tech-table table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-start">Product</th>
+                      <th class="text-start" style="width: 180px;">Branch</th>
+                      <th class="text-center" style="width: 100px;">Qty</th>
+                      <th class="text-end" style="width: 160px;">Total (TSh)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="state.data.sales_breakdown" t-as="prod" t-key="prod_index">
+                      <td class="text-start fw-semibold" t-esc="prod.name"/>
+                      <td class="text-start text-muted" t-esc="prod.branch"/>
+                      <td class="text-center fw-bold" t-esc="format(prod.qty)"/>
+                      <td class="text-end fw-bold" style="color: #9D2065;"><t t-esc="format(prod.total)"/></td>
+                    </tr>
+                    <tr t-if="!state.data.sales_breakdown || !state.data.sales_breakdown.length">
+                      <td colspan="4" class="text-center text-muted py-3">No product sales found for this period.</td>
+                    </tr>
+                  </tbody>
+                  <t t-if="state.data.sales_breakdown and state.data.sales_breakdown.length">
+                    <tfoot>
+                      <tr class="fw-bold bg-light">
+                        <td colspan="2" class="text-start py-2">Total Sales (TSh):</td>
+                        <td class="text-center py-2"><t t-esc="format(state.data.items_sold)"/></td>
+                        <td class="text-end py-2" style="color: #9D2065;"><t t-esc="state.currency"/> <t t-esc="format(state.data.total_sales)"/></td>
+                      </tr>
+                    </tfoot>
+                  </t>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Daily Expenses (TSh) - Matching Daily Sales Report -->
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <div class="card tech-card">
+            <div class="card-header tech-header d-flex justify-content-between align-items-center">
+              <span>Expenses (TSh)</span>
+              <span class="badge bg-light text-danger border"><t t-esc="state.currency"/> <t t-esc="format(state.data.expenses_total)"/></span>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive tech-scroll-container">
+                <table class="table tech-table table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-start">Category / Reason</th>
+                      <th class="text-start" style="width: 180px;">Date &amp; Time</th>
+                      <th class="text-end" style="width: 160px;">Amount (TSh)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="state.data.expenses" t-as="exp" t-key="exp_index">
+                      <td class="text-start" t-esc="exp.reason"/>
+                      <td class="text-start text-muted" t-esc="exp.datetime"/>
+                      <td class="text-end fw-bold text-danger"><t t-esc="format(exp.amount)"/></td>
+                    </tr>
+                    <tr t-if="!state.data.expenses || !state.data.expenses.length">
+                      <td colspan="3" class="text-center text-muted py-3">No expenses recorded for this period.</td>
+                    </tr>
+                  </tbody>
+                  <t t-if="state.data.expenses and state.data.expenses.length">
+                    <tfoot>
+                      <tr class="fw-bold bg-light">
+                        <td colspan="2" class="text-start py-2">Total Expenses (TSh):</td>
+                        <td class="text-end text-danger py-2"><t t-esc="state.currency"/> <t t-esc="format(state.data.expenses_total)"/></td>
+                      </tr>
+                    </tfoot>
+                  </t>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Proforma Invoices & Accounting Invoices - Matching Daily Sales Report -->
+      <div class="row g-3 mb-3">
+        <!-- Proforma Invoices -->
+        <div class="col-xl-6">
+          <div class="card tech-card h-100">
+            <div class="card-header tech-header">Proforma Invoices</div>
+            <div class="card-body p-0">
+              <div class="table-responsive tech-scroll-container">
+                <table class="table tech-table table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Number</th>
+                      <th>Customer</th>
+                      <th class="text-end">Amount (TSh)</th>
+                      <th class="text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="state.data.proforma_invoices" t-as="pro" t-key="pro_index">
+                      <td class="fw-bold" t-esc="pro.number"/>
+                      <td class="text-truncate" style="max-width: 150px;" t-esc="pro.customer"/>
+                      <td class="text-end fw-bold"><t t-esc="format(pro.amount)"/></td>
+                      <td class="text-center">
+                        <span class="badge bg-secondary" t-esc="pro.state_label"/>
+                      </td>
+                    </tr>
+                    <tr t-if="!state.data.proforma_invoices || !state.data.proforma_invoices.length">
+                      <td colspan="4" class="text-center text-muted py-3">No proforma invoices found for this period.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoices -->
+        <div class="col-xl-6">
+          <div class="card tech-card h-100">
+            <div class="card-header tech-header">Invoices</div>
+            <div class="card-body p-0">
+              <div class="table-responsive tech-scroll-container">
+                <table class="table tech-table table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Number</th>
+                      <th>Customer</th>
+                      <th class="text-end">Total (TSh)</th>
+                      <th class="text-end">Due (TSh)</th>
+                      <th class="text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="state.data.invoices" t-as="inv" t-key="inv_index">
+                      <td class="fw-bold" t-esc="inv.number"/>
+                      <td class="text-truncate" style="max-width: 130px;" t-esc="inv.customer"/>
+                      <td class="text-end fw-bold"><t t-esc="format(inv.total)"/></td>
+                      <td class="text-end text-muted"><t t-esc="format(inv.amount_due)"/></td>
+                      <td class="text-center">
+                        <span t-attf-class="badge bg-{{ inv.status_badge }}" t-esc="inv.status"/>
+                      </td>
+                    </tr>
+                    <tr t-if="!state.data.invoices || !state.data.invoices.length">
+                      <td colspan="5" class="text-center text-muted py-3">No invoices found for this period.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Manager-Only Extended Analytics (Hidden for Cashiers) -->
+      <t t-if="state.data.is_manager">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="alert alert-secondary py-2 px-3 mb-0 small fw-bold text-uppercase">
+              <i class="fa fa-lock me-1"/> Manager Analytics (Restricted)
+            </div>
+          </div>
+          <!-- Sales Trend -->
+          <div class="col-xl-6">
+            <div class="card tech-card h-100">
+              <div class="card-header tech-header">Sales Trend</div>
+              <div class="card-body p-0">
+                <table class="table tech-table table-hover mb-0">
+                  <thead>
+                    <tr><th>Date</th><th>Orders</th><th class="text-end">Sales (TSh)</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="state.data.trend" t-as="row" t-key="row_index">
+                      <td t-esc="row.name"/>
+                      <td>
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'date'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
+                          <t t-esc="row.orders"/>
+                        </a>
+                      </td>
+                      <td class="text-end fw-bold"><t t-esc="format(row.sales)"/></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Top Customers -->
+          <div class="col-xl-6">
+            <div class="card tech-card h-100">
+              <div class="card-header tech-header">Top Customers</div>
+              <div class="card-body p-0">
+                <table class="table tech-table table-hover mb-0">
+                  <thead><tr><th>Customer</th><th>Orders</th><th class="text-end">Revenue (TSh)</th></tr></thead>
+                  <tbody>
+                    <tr t-foreach="state.data.customers" t-as="row" t-key="row_index" t-att-class="row.unpaid > 0 ? 'table-warning' : ''">
+                      <td>
+                        <t t-esc="row.name"/>
+                        <t t-if="row.unpaid > 0">
+                          <div class="badge bg-danger ms-1">Owes <t t-esc="format(row.unpaid)"/></div>
+                        </t>
+                      </td>
+                      <td>
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'customer'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
+                          <t t-esc="row.orders"/>
+                        </a>
+                      </td>
+                      <td class="text-end fw-bold"><t t-esc="format(row.revenue)"/></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Staff Performance -->
+          <div class="col-xl-6">
+            <div class="card tech-card h-100">
+              <div class="card-header tech-header">Staff Performance</div>
+              <div class="card-body p-0">
+                <table class="table tech-table table-hover mb-0">
+                  <thead><tr><th>Cashier</th><th>Orders</th><th class="text-end">Revenue (TSh)</th></tr></thead>
+                  <tbody>
+                    <tr t-foreach="state.data.staff" t-as="row" t-key="row_index">
+                      <td t-esc="row.name"/>
+                      <td>
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'staff'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
+                          <t t-esc="row.orders"/>
+                        </a>
+                      </td>
+                      <td class="text-end fw-bold"><t t-esc="format(row.revenue)"/></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Category Distribution -->
+          <div class="col-xl-6">
+            <div class="card tech-card h-100">
+              <div class="card-header tech-header">Category Distribution</div>
+              <div class="card-body p-2">
+                <t t-foreach="state.data.categories" t-as="row" t-key="row_index">
+                  <div class="d-flex justify-content-between border-bottom py-2 small">
+                    <span t-esc="row.name"/>
+                    <b><t t-esc="state.currency"/> <t t-esc="format(row.revenue)"/></b>
+                  </div>
+                </t>
+              </div>
+            </div>
+          </div>
+        </div>
+      </t>
+    </t>
+   </div>
+  </t>
+</templates>

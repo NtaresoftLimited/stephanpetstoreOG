@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ProductConfiguratorPopup" t-inherit-mode="extension">
+        <xpath expr="//ProductInfoBanner" position="after">
+            <div t-if="variantStock !== null" class="variant-stock-info d-flex align-items-center justify-content-between p-2 mb-3 rounded border border-2" t-att-class="stockColorClass">
+                <span class="fw-bold">Available Stock:</span>
+                <span class="fs-4 fw-bolder" t-esc="variantStock"/>
+            </div>
+        </xpath>
+    </t>
+</templates>

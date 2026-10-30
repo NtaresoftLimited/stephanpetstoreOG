@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="grooming_page" name="Pet Grooming Services">
+    <t t-call="website.layout">
+      <t t-set="additional_title">Pet Grooming Services | Stephan's Pet Store</t>
+      <t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
+      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css"/>
+      <link rel="stylesheet" href="/grooming/static/src/css/grooming_website.css"/>
+      <main id="wrap" class="oe_structure stephans-theme grooming-site">
+        <style>#wrapwrap &gt; header#top,#wrapwrap &gt; header.o_header_standard,#wrapwrap &gt; footer:not(.stephans-footer),#wrapwrap &gt; .o_footer{display:none!important}#wrapwrap{padding-top:0!important;margin-top:0!important}</style>
+        <t t-call="stephans_website_theme.stephans_preview_header"/>
+
+        <section class="grooming-hero">
+          <div class="grooming-hero__shade"></div>
+          <div class="grooming-hero__content">
+            <p class="grooming-kicker">Professional care, gentle hands</p>
+            <h1>Pet Grooming Services</h1>
+            <p>Professional grooming for your furry friends. Our experienced groomers provide top-quality care with love and attention to detail.</p>
+            <div><a href="#booking" class="grooming-btn grooming-btn--light">Book Appointment</a><a href="#packages" class="grooming-btn grooming-btn--outline">View Packages</a></div>
+          </div>
+        </section>
+
+        <section id="packages" class="grooming-section grooming-packages">
+          <div class="grooming-container">
+            <p class="grooming-kicker">Grooming packages</p><h2>Choose the perfect care.</h2>
+            <div class="grooming-package-grid">
+              <t t-foreach="packages" t-as="pkg">
+                <article class="grooming-package">
+                  <div class="grooming-package__icon">✂</div><h3><t t-out="pkg.name"/></h3>
+                  <p><t t-out="pkg.description"/></p>
+                  <div class="grooming-price-list">
+                    <t t-foreach="pkg.price_line_ids.filtered(lambda p: p.species == 'dog')" t-as="price"><span><b><t t-out="dict(price._fields['size_category'].selection).get(price.size_category)"/></b><strong>Tsh <t t-out="'{:,.0f}'.format(price.price)"/></strong></span></t>
+                  </div>
+                  <a href="#booking" class="grooming-package-select" t-att-data-service-id="pkg.id">Choose package →</a>
+                </article>
+              </t>
+            </div>
+          </div>
+        </section>
+
+        <section id="booking" class="grooming-section grooming-booking">
+          <div class="grooming-container grooming-booking__grid">
+            <div class="grooming-booking__intro"><p class="grooming-kicker">Book appointment</p><h2>Let's pamper your pet.</h2><p>Fill in the details and our grooming team will receive your appointment immediately.</p><img src="/stephans_website_theme/static/src/images/banners/grooming-dog.jpeg" alt="Dog receiving professional grooming"/></div>
+            <form action="/grooming/book" method="post" id="grooming-booking-form" class="grooming-form">
+              <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+              <fieldset><legend>Pet type</legend><div class="pet-toggle"><label><input type="radio" name="pet_type" value="dog" checked="checked"/><span>Dog</span></label><label><input type="radio" name="pet_type" value="cat"/><span>Cat</span></label></div></fieldset>
+              <div class="grooming-fields">
+                <label>Pet Name *<input name="pet_name" required="required" placeholder="Your pet's name"/></label>
+                <label>Breed Size *<select name="pet_category" required="required"><option value="">Select size</option><option value="mini">Mini</option><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></label>
+                <label>Package *<select name="service_id" id="grooming-service" required="required"><option value="">Select package</option><t t-foreach="packages" t-as="pkg"><option t-att-value="pkg.id"><t t-out="pkg.name"/></option></t></select></label>
+                <label>Preferred Date *<input type="date" name="preferred_date" t-att-min="min_date" required="required"/></label>
+                <label>Preferred Time *<select name="preferred_time" required="required"><option value="">Select time</option><t t-foreach="time_slots" t-as="slot"><option t-att-value="slot[0]"><t t-out="slot[1]"/><t t-if="slot[0] &gt;= '18:30'"> — Emergency hours</t></option></t></select></label>
+                <label>Your Name *<input name="customer_name" required="required"/></label>
+                <label>Phone Number *<input type="tel" name="customer_phone" required="required" placeholder="+255 ..."/></label>
+                <label>Email<input type="email" name="customer_email"/></label>
+              </div>
+              <label class="grooming-check"><input type="checkbox" name="has_detangling"/> Add Detangling Service <strong>+30,000 TZS</strong></label>
+              <label>Special Notes<textarea name="notes" rows="4" placeholder="Tell us anything we should know about your pet"></textarea></label>
+              <label class="grooming-policy-check"><input type="checkbox" required="required"/> I have read and agree to Stephan's grooming policies.</label>
+              <button type="submit" class="grooming-submit">Confirm Booking →</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="grooming-section grooming-extras"><div class="grooming-container"><p class="grooming-kicker">Extra services</p><h2>Special care, when needed.</h2><div class="grooming-extras__grid"><div><b>Express Service</b><span>30,000 TZS</span></div><div><b>Detangling</b><span>30,000 TZS</span></div><div><b>Behavioral Handling</b><span>10,000 TZS</span></div><div><b>Sedation</b><span>5,000 TZS</span></div><div><b>Late Pickup</b><span>10,000 TZS / hour</span></div><div><b>Emergency after 6:30 PM</b><span>30,000 TZS</span></div></div></div></section>
+        <section class="grooming-section grooming-policies"><div class="grooming-container"><p class="grooming-kicker">Before your visit</p><h2>Grooming policies.</h2><div class="grooming-policy-grid"><article><h3>Gentle, safe handling</h3><p>Please tell us about medical or behavioral concerns. Pets requiring additional handling may attract a handling fee, and sedation is only used when necessary for safety.</p></article><article><h3>Timely pickup</h3><p>We will contact you when grooming is complete. Please collect your pet within one hour; late pickup is charged at 10,000 TZS per hour.</p></article></div></div></section>
+        <t t-call="stephans_website_theme.stephans_preview_footer"/>
+      </main>
+    </t>
+  </template>
+
+  <template id="booking_success" name="Booking Success"><t t-call="website.layout"><div id="wrap" class="grooming-result"><div><span>✓</span><h1>Booking received.</h1><p>Thank you. Your appointment reference is <strong><t t-out="appointment.name"/></strong>. Our team will contact you to confirm.</p><a href="/grooming">Back to Grooming</a></div></div></t></template>
+  <template id="booking_error" name="Booking Error"><t t-call="website.layout"><div id="wrap" class="grooming-result"><div><h1>We couldn't complete the booking.</h1><p><t t-out="error"/></p><a href="/grooming#booking">Try Again</a></div></div></t></template>
+  <template id="track_page" name="Track Appointment"><t t-call="website.layout"><div id="wrap" class="container py-5"><h1>Track Appointment</h1><form action="/grooming/track"><input name="phone" t-att-value="phone" placeholder="Phone Number"/><button>Search</button></form><t t-foreach="appointments" t-as="apt"><p><t t-out="apt.name"/> — <t t-out="apt.state"/></p></t></div></t></template>
+</odoo>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Dog Breeds -->
+        <record id="breed_dog_labrador" model="grooming.breed">
+            <field name="name">Labrador Retriever</field>
+            <field name="species">dog</field>
+        </record>
+        <record id="breed_dog_german_shepherd" model="grooming.breed">
+            <field name="name">German Shepherd</field>
+            <field name="species">dog</field>
+        </record>
+        <record id="breed_dog_bulldog" model="grooming.breed">
+            <field name="name">Bulldog</field>
+            <field name="species">dog</field>
+        </record>
+        <record id="breed_dog_golden" model="grooming.breed">
+            <field name="name">Golden Retriever</field>
+            <field name="species">dog</field>
+        </record>
+        <record id="breed_dog_poodle" model="grooming.breed">
+            <field name="name">Poodle</field>
+            <field name="species">dog</field>
+        </record>
+        <record id="breed_dog_chihuahua" model="grooming.breed">
+            <field name="name">Chihuahua</field>
+            <field name="species">dog</field>
+        </record>
+        <record id="breed_dog_mixed" model="grooming.breed">
+            <field name="name">Mixed Breed (Dog)</field>
+            <field name="species">dog</field>
+        </record>
+
+        <!-- Cat Breeds -->
+        <record id="breed_cat_persian" model="grooming.breed">
+            <field name="name">Persian</field>
+            <field name="species">cat</field>
+        </record>
+        <record id="breed_cat_siamese" model="grooming.breed">
+            <field name="name">Siamese</field>
+            <field name="species">cat</field>
+        </record>
+        <record id="breed_cat_maine_coon" model="grooming.breed">
+            <field name="name">Maine Coon</field>
+            <field name="species">cat</field>
+        </record>
+         <record id="breed_cat_ragdoll" model="grooming.breed">
+            <field name="name">Ragdoll</field>
+            <field name="species">cat</field>
+        </record>
+        <record id="breed_cat_mixed" model="grooming.breed">
+            <field name="name">Mixed Breed (Cat)</field>
+            <field name="species">cat</field>
+        </record>
+        
+        <!-- Other -->
+        <record id="breed_other" model="grooming.breed">
+            <field name="name">Other</field>
+            <field name="species">other</field>
+        </record>
+    </data>
+</odoo>

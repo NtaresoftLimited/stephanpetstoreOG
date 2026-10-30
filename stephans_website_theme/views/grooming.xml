@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="grooming_page" name="Pet Grooming Studio | Stephan's Pet Store">
+    <t t-call="website.layout">
+      <t t-set="additional_title">Pet Grooming Studio | Stephan's Pet Store</t>
+      <t t-set="no_header" t-value="True"/>
+      <t t-set="no_footer" t-value="True"/>
+      
+      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css"/>
+      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/grooming.css"/>
+      
+      <main id="wrap" class="oe_structure stephans-theme grooming-site">
+        <style>
+          #wrapwrap &gt; header#top,
+          #wrapwrap &gt; header.o_header_standard,
+          #wrapwrap &gt; footer:not(.stephans-footer),
+          #wrapwrap &gt; .o_footer {
+            display: none !important;
+          }
+          #wrapwrap {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+          }
+        </style>
+
+        <!-- 3-Tier Header -->
+        <t t-call="stephans_website_theme.stephans_preview_header"/>
+
+        <!-- Hero Section with Pet Tabs -->
+        <section class="grooming-header">
+          <div class="grooming-container">
+            <p class="grooming-kicker">Pet Grooming Studio</p>
+            <h1 class="grooming-title">Gentle care.<br/>Professional grooming.</h1>
+
+            <!-- Animal Selection Tabs -->
+            <div class="grooming-tabs">
+              <button type="button" class="grooming-tab active" data-tab="dog" id="tab-dog">
+                <span class="grooming-tab-icon" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-dog.png'); mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-dog.png');"></span>
+                <span>Dogs</span>
+              </button>
+              <div class="grooming-tab-divider"></div>
+              <button type="button" class="grooming-tab" data-tab="cat" id="tab-cat">
+                <span class="grooming-tab-icon" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-cat.png'); mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-cat.png');"></span>
+                <span>Cats</span>
+              </button>
+              <div class="grooming-tab-divider"></div>
+              <button type="button" class="grooming-tab" data-tab="small_animal" id="tab-small_animal">
+                <span class="grooming-tab-icon" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-rabbit.png'); mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-rabbit.png');"></span>
+                <span>Small Animals</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Packages Section -->
+        <section class="grooming-packages-section">
+          <div class="grooming-container">
+            <p class="grooming-kicker">Choose your grooming experience</p>
+
+            <div class="grooming-packages-grid" id="packages-grid">
+              <!-- Essential Package Card -->
+              <div class="grooming-pkg-card" id="card-essential" data-package="standard">
+                <div class="grooming-pkg-icon">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="rotate(-45 24 24)">
+                      <rect x="10" y="22" width="26" height="4" rx="2" stroke="#c77e35" stroke-width="1.8"/>
+                      <line x1="16" y1="26" x2="16" y2="34" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round"/>
+                      <line x1="20" y1="26" x2="20" y2="34" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round"/>
+                      <line x1="24" y1="26" x2="24" y2="34" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round"/>
+                      <line x1="28" y1="26" x2="28" y2="34" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round"/>
+                      <line x1="32" y1="26" x2="32" y2="34" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round"/>
+                    </g>
+                    <circle cx="14" cy="16" r="2" stroke="#c77e35" stroke-width="1.5"/>
+                    <circle cx="20" cy="12" r="1.5" stroke="#c77e35" stroke-width="1.5"/>
+                    <path d="M34 32 C36 30, 38 34, 36 36 C34 38, 38 40, 38 40" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                  </svg>
+                </div>
+                <h3 class="grooming-pkg-title">Essential</h3>
+                <p class="grooming-pkg-desc">Fresh care for regular maintenance.</p>
+                <div class="grooming-pkg-line"></div>
+                <div>
+                  <div class="grooming-pkg-price-label">Starting from</div>
+                  <div class="grooming-pkg-price" id="price-essential">TZS 60,000</div>
+                </div>
+                <div class="grooming-pkg-action">
+                  VIEW DETAILS <span>→</span>
+                </div>
+              </div>
+
+              <!-- Signature Package Card -->
+              <div class="grooming-pkg-card" id="card-signature" data-package="super_premium">
+                <div class="grooming-pkg-badge">MOST POPULAR</div>
+                <div class="grooming-pkg-icon">
+                  <div class="grooming-pkg-icon-mask" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/grooming/grooming-scissors-bubbles.png'); mask-image: url('/stephans_website_theme/static/src/images/grooming/grooming-scissors-bubbles.png');"></div>
+                </div>
+                <h3 class="grooming-pkg-title">Signature</h3>
+                <p class="grooming-pkg-desc">The ultimate grooming experience at Stephan's.</p>
+                <div class="grooming-pkg-line"></div>
+                <div>
+                  <div class="grooming-pkg-price-label">Starting from</div>
+                  <div class="grooming-pkg-price" id="price-signature">TZS 80,000</div>
+                </div>
+                <div class="grooming-pkg-action">
+                  VIEW DETAILS <span>→</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Booking Form Section -->
+        <section class="grooming-booking-section" id="booking-form">
+          <div class="grooming-container">
+            <p class="grooming-kicker">Book Appointment</p>
+            <h2 class="grooming-booking-title">Let's pamper your pet.</h2>
+
+            <form action="/grooming/book" method="post" id="grooming-form" class="grooming-form">
+              <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+              <div class="grooming-form-grid">
+                <!-- Pet Name -->
+                <div>
+                  <input type="text" name="pet_name" id="field-pet-name" required="required" placeholder="Pet Name" class="grooming-input"/>
+                </div>
+
+                <!-- Pet Type -->
+                <div>
+                  <select name="pet_type" id="field-pet-type" class="grooming-select" required="required">
+                    <option value="dog">🐕 Dog</option>
+                    <option value="cat">🐈 Cat</option>
+                    <option value="small_animal">🐰 Small Animal</option>
+                  </select>
+                </div>
+
+                <!-- Breed Size -->
+                <div>
+                  <select name="pet_category" id="field-breed-size" class="grooming-select" required="required">
+                    <option value="" disabled="disabled" selected="selected">Breed Size</option>
+                    <option value="small">Small Breeds</option>
+                    <option value="medium">Medium Breeds</option>
+                    <option value="large">Large Breeds</option>
+                  </select>
+                </div>
+
+                <!-- Service Package -->
+                <div>
+                  <select name="service_key" id="field-package" class="grooming-select" required="required">
+                    <option value="" disabled="disabled" selected="selected">Service Package</option>
+                    <option value="standard">Essential</option>
+                    <option value="super_premium">Signature</option>
+                  </select>
+                </div>
+
+                <!-- Preferred Date -->
+                <div class="grooming-date-wrapper">
+                  <input type="date" name="preferred_date" id="field-date" required="required" t-att-min="min_date" class="grooming-input"/>
+                  <img src="/stephans_website_theme/static/src/images/icons/calendar-stephans.svg" alt="" class="grooming-calendar-icon"/>
+                </div>
+
+                <!-- Time -->
+                <div>
+                  <select name="preferred_time" id="field-time" class="grooming-select" required="required">
+                    <option value="" disabled="disabled" selected="selected">Time</option>
+                    <t t-foreach="valid_times" t-as="vt">
+                      <option t-att-value="vt['value']"><t t-out="vt['label']"/></option>
+                    </t>
+                  </select>
+                </div>
+
+                <!-- Your Name -->
+                <div>
+                  <input type="text" name="customer_name" id="field-customer-name" required="required" placeholder="Your Name" class="grooming-input"/>
+                </div>
+
+                <!-- Phone Number -->
+                <div>
+                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number" class="grooming-input"/>
+                </div>
+              </div>
+
+              <!-- What's Included Box (Visible when package is chosen) -->
+              <div class="grooming-included-box" id="included-box" style="display: none;">
+                <h3 class="grooming-included-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                  </svg>
+                  <span id="included-title">What's included in your Package</span>
+                </h3>
+                <div class="grooming-included-grid" id="included-services">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+
+              <!-- Before Your Visit Policy Box -->
+              <div class="grooming-policy-box">
+                <div class="grooming-policy-intro">
+                  <div class="grooming-policy-badge">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c77e35" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                  </div>
+                  <h3>Before your visit</h3>
+                  <p>To keep every pet safe and comfortable, please review the important guidelines before booking.</p>
+                </div>
+                <div class="grooming-policy-list">
+                  <div class="grooming-policy-item">
+                    <svg class="grooming-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Arrive 10 minutes early for check-in.</span>
+                  </div>
+                  <div class="grooming-policy-item">
+                    <svg class="grooming-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Please notify us of any medical conditions.</span>
+                  </div>
+                  <div class="grooming-policy-item">
+                    <svg class="grooming-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>We may recommend de-matting or handling services where necessary.</span>
+                  </div>
+                  <div class="grooming-policy-item">
+                    <svg class="grooming-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Pick-up within one hour after notification.</span>
+                  </div>
+                  <div class="grooming-policy-item">
+                    <svg class="grooming-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Aggressive pets may require additional handling.</span>
+                  </div>
+
+                  <div class="grooming-policy-footer">
+                    <label class="grooming-agree-label">
+                      <input type="checkbox" required="required" id="agree-policy"/>
+                      <span>I have read and agree to Stephan's Grooming Policy.</span>
+                    </label>
+                    <a href="/grooming-policy" class="grooming-policy-link">
+                      READ FULL POLICY <span>→</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estimated Total Box -->
+              <div class="grooming-total-box" id="total-box" style="display: none;">
+                <div>
+                  <div class="grooming-total-label">Estimated Total</div>
+                  <div class="grooming-total-sub" id="total-summary">Dog • Small • Essential Package</div>
+                </div>
+                <div class="grooming-total-amount" id="total-amount">TZS 60,000</div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="grooming-submit-btn" id="btn-submit">
+                <span>Book Appointment</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Master 5-Column Footer (Includes Trust Banner) -->
+        <t t-call="stephans_website_theme.stephans_preview_footer"/>
+      </main>
+
+      <!-- Client-side Interaction Script -->
+      <script type="text/javascript"><![CDATA[
+        (function() {
+          const PRICES = {
+            dog: {
+              standard: { small: 60000, medium: 70000, large: 80000 },
+              super_premium: { small: 80000, medium: 90000, large: 100000 }
+            },
+            cat: {
+              standard: { kitten: 60000, adult: 70000, senior: 80000 },
+              super_premium: { kitten: 80000, adult: 90000, senior: 100000 }
+            },
+            small_animal: {
+              super_premium: { hamster: 100000, junior_rabbit: 100000, adult_rabbit: 150000, guinea_pig: 100000 }
+            }
+          };
+
+          const BREED_SIZES = {
+            dog: [
+              { value: 'small', label: 'Small Breeds' },
+              { value: 'medium', label: 'Medium Breeds' },
+              { value: 'large', label: 'Large Breeds' }
+            ],
+            cat: [
+              { value: 'kitten', label: 'Kitten - (2 - 12 Months)' },
+              { value: 'adult', label: 'Adult Cat - (1+ Year)' },
+              { value: 'senior', label: 'Senior Cat - (5+ Years)' }
+            ],
+            small_animal: [
+              { value: 'hamster', label: 'Hamster' },
+              { value: 'junior_rabbit', label: 'Junior Rabbit (0 - 6 months)' },
+              { value: 'adult_rabbit', label: 'Adult Rabbit (6months +)' },
+              { value: 'guinea_pig', label: 'Guinea Pig' }
+            ]
+          };
+
+          const SIZE_LABELS = {
+            small: 'Small Breeds',
+            medium: 'Medium Breeds',
+            large: 'Large Breeds',
+            kitten: 'Kitten - (2 - 12 Months)',
+            adult: 'Adult Cat - (1+ Year)',
+            senior: 'Senior Cat - (5+ Years)',
+            hamster: 'Hamster',
+            junior_rabbit: 'Junior Rabbit (0 - 6 months)',
+            adult_rabbit: 'Adult Rabbit (6months +)',
+            guinea_pig: 'Guinea Pig'
+          };
+
+          const SERVICES = {
+            standard: [
+              'Warm Deep Clean Bath',
+              'Blow Dry',
+              'Ear Care',
+              'Full Coat Brush Out',
+              'Sanitary Trim (Private Area &amp; Belly)'
+            ],
+            super_premium: [
+              'Warm Deep Clean Bath',
+              'Blow Dry',
+              'Ear Care',
+              'Nail Care',
+              'Dental Care',
+              'De-shedding',
+              'Full Hair Cut or Styling',
+              'Flea &amp; Tick Treatment',
+              'Paw Balm Treatment',
+              'Finishing Touches'
+            ]
+          };
+
+          let currentTab = 'dog';
+
+          function formatPrice(amount) {
+            return 'TZS ' + (amount || 0).toLocaleString();
+          }
+
+          function setTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.grooming-tab').forEach(b => {
+              b.classList.toggle('active', b.dataset.tab === tab);
+            });
+
+            // Update packages grid
+            const grid = document.getElementById('packages-grid');
+            const cardEssential = document.getElementById('card-essential');
+            const cardSignature = document.getElementById('card-signature');
+            const priceEssential = document.getElementById('price-essential');
+            const priceSignature = document.getElementById('price-signature');
+
+            if (tab === 'small_animal') {
+              grid.classList.add('single-col');
+              cardEssential.style.display = 'none';
+              cardSignature.style.display = 'flex';
+              priceSignature.textContent = formatPrice(100000);
+            } else {
+              grid.classList.remove('single-col');
+              cardEssential.style.display = 'flex';
+              cardSignature.style.display = 'flex';
+              priceEssential.textContent = formatPrice(60000);
+              priceSignature.textContent = formatPrice(80000);
+            }
+
+            // Sync with form pet_type
+            const selectPetType = document.getElementById('field-pet-type');
+            if (selectPetType) {
+              selectPetType.value = tab;
+              updateBreedSizes();
+            }
+
+            updatePriceAndDetails();
+          }
+
+          function updateBreedSizes() {
+            const selectPetType = document.getElementById('field-pet-type');
+            const selectBreedSize = document.getElementById('field-breed-size');
+            const selectPackage = document.getElementById('field-package');
+            const petType = selectPetType.value;
+
+            // Update breed sizes
+            selectBreedSize.innerHTML = '<option value="" disabled selected>Breed Size</option>';
+            const sizes = BREED_SIZES[petType] || [];
+            sizes.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s.value;
+              opt.textContent = s.label;
+              selectBreedSize.appendChild(opt);
+            });
+
+            // Update packages dropdown for small animals
+            selectPackage.innerHTML = '<option value="" disabled selected>Service Package</option>';
+            if (petType !== 'small_animal') {
+              const opt1 = document.createElement('option');
+              opt1.value = 'standard';
+              opt1.textContent = 'Essential';
+              selectPackage.appendChild(opt1);
+            }
+            const opt2 = document.createElement('option');
+            opt2.value = 'super_premium';
+            opt2.textContent = 'Signature';
+            selectPackage.appendChild(opt2);
+
+            updatePriceAndDetails();
+          }
+
+          function updatePriceAndDetails() {
+            const petType = document.getElementById('field-pet-type').value;
+            const breedSize = document.getElementById('field-breed-size').value;
+            const pkg = document.getElementById('field-package').value;
+
+            // What's included box
+            const includedBox = document.getElementById('included-box');
+            const includedTitle = document.getElementById('included-title');
+            const includedList = document.getElementById('included-services');
+
+            if (pkg && SERVICES[pkg]) {
+              includedBox.style.display = 'block';
+              includedTitle.textContent = "What's included in your " + (pkg === 'standard' ? 'Essential' : 'Signature') + " Package";
+              includedList.innerHTML = SERVICES[pkg].map(s => `
+                <div class="grooming-service-item">
+                  <svg class="grooming-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>${s}</span>
+                </div>
+              `).join('');
+            } else {
+              includedBox.style.display = 'none';
+            }
+
+            // Total Box
+            const totalBox = document.getElementById('total-box');
+            const totalSummary = document.getElementById('total-summary');
+            const totalAmount = document.getElementById('total-amount');
+
+            if (pkg && breedSize && PRICES[petType] && PRICES[petType][pkg] && PRICES[petType][pkg][breedSize]) {
+              const price = PRICES[petType][pkg][breedSize];
+              const petNameLabel = petType === 'dog' ? 'Dog' : (petType === 'cat' ? 'Cat' : 'Small Animal');
+              const sizeLabel = SIZE_LABELS[breedSize] || breedSize;
+              const pkgName = pkg === 'standard' ? 'Essential' : 'Signature';
+
+              totalBox.style.display = 'flex';
+              totalSummary.textContent = `${petNameLabel} • ${sizeLabel} • ${pkgName} Package`;
+              totalAmount.textContent = formatPrice(price);
+            } else {
+              totalBox.style.display = 'none';
+            }
+          }
+
+          // Tab click events
+          document.querySelectorAll('.grooming-tab').forEach(btn => {
+            btn.addEventListener('click', function() {
+              setTab(this.dataset.tab);
+            });
+          });
+
+          // Card click events
+          document.querySelectorAll('.grooming-pkg-card').forEach(card => {
+            card.addEventListener('click', function() {
+              const pkgKey = this.dataset.package;
+              const selectPackage = document.getElementById('field-package');
+              if (selectPackage) {
+                selectPackage.value = pkgKey;
+                updatePriceAndDetails();
+              }
+              const formEl = document.getElementById('booking-form');
+              if (formEl) {
+                formEl.scrollIntoView({ behavior: 'smooth' });
+              }
+            });
+          });
+
+          // Form input changes
+          document.getElementById('field-pet-type').addEventListener('change', function() {
+            setTab(this.value);
+          });
+          document.getElementById('field-breed-size').addEventListener('change', updatePriceAndDetails);
+          document.getElementById('field-package').addEventListener('change', updatePriceAndDetails);
+
+          // Sunday date check
+          document.getElementById('field-date').addEventListener('change', function() {
+            if (!this.value) return;
+            const d = new Date(this.value);
+            if (d.getDay() === 0) {
+              alert("We are closed on Sundays. Please select another day for your pet's grooming.");
+              this.value = '';
+            }
+          });
+
+          // Form submission & WhatsApp redirect
+          document.getElementById('grooming-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const petType = document.getElementById('field-pet-type').value;
+            const petName = document.getElementById('field-pet-name').value;
+            const breedSize = document.getElementById('field-breed-size').value;
+            const pkg = document.getElementById('field-package').value;
+            const dateStr = document.getElementById('field-date').value;
+            const timeStr = document.getElementById('field-time').value;
+            const custName = document.getElementById('field-customer-name').value;
+            const custPhone = document.getElementById('field-customer-phone').value;
+
+            const basePrice = (PRICES[petType] &amp;&amp; PRICES[petType][pkg] &amp;&amp; PRICES[petType][pkg][breedSize]) || 0;
+            const sizeLabel = SIZE_LABELS[breedSize] || breedSize;
+            const pkgName = pkg === 'standard' ? 'Essential Package' : 'Signature Package';
+            const petTypeLabel = petType === 'dog' ? 'Dog' : (petType === 'cat' ? 'Cat' : 'Small Animal');
+
+            let formattedDate = dateStr;
+            try {
+              const d = new Date(dateStr);
+              formattedDate = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            } catch(err) {}
+
+            const bookingRef = 'GRM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+            const message = `Hi Stephan's Pet Store!\n` +
+              `I want to book a grooming appointment:\n\n` +
+              `*GROOMING APPOINTMENT BOOKING*\n` +
+              `----------------------------------\n` +
+              `*Booking Ref:* #${bookingRef}\n` +
+              `*Customer Name:* ${custName}\n` +
+              `*Phone Number:* ${custPhone}\n\n` +
+              `*PET DETAILS*\n` +
+              `*Pet Name:* ${petName} (${petTypeLabel})\n` +
+              `*Breed Size:* ${sizeLabel}\n\n` +
+              `*SERVICE DETAILS*\n` +
+              `*Selected Package:* ${pkgName}\n` +
+              `*Preferred Date:* ${formattedDate}\n` +
+              `*Preferred Time:* ${timeStr}\n\n` +
+              `*PRICE SUMMARY*\n` +
+              `  - Package Price: ${formatPrice(basePrice)}\n` +
+              `----------------------------------\n` +
+              `*Total Amount:* ${formatPrice(basePrice)}\n\n`;
+
+            const whatsappUrl = 'https://wa.me/255769324445?text=' + encodeURIComponent(message);
+
+            // Also post in background to Odoo controller so booking is saved
+            const formData = new FormData(this);
+            fetch('/grooming/book', {
+              method: 'POST',
+              body: formData
+            }).finally(() => {
+              window.location.href = whatsappUrl;
+            });
+          });
+
+          // Initialize breed sizes on load
+          updateBreedSizes();
+        })();
+      ]]></script>
+    </t>
+  </template>
+
+  <template id="booking_success" name="Booking Success">
+    <t t-call="website.layout">
+      <div id="wrap" class="grooming-result" style="text-align: center; padding: 100px 20px; background: #F8F5F0;">
+        <div style="max-width: 500px; margin: 0 auto; background: #fff; padding: 48px; border-radius: 20px; border: 1px solid #E8E0D8;">
+          <span style="display: inline-block; width: 64px; height: 64px; border-radius: 50%; background: #c77e35; color: #fff; line-height: 64px; font-size: 32px; margin-bottom: 24px;">✓</span>
+          <h1 style="font-family: serif; font-size: 32px; color: #222; margin-bottom: 16px;">Booking received.</h1>
+          <p style="color: #666; margin-bottom: 28px;">Thank you. Your appointment reference is <strong><t t-out="appointment.name"/></strong>. Our grooming team will contact you shortly.</p>
+          <a href="/grooming" style="display: inline-block; background: #4E2A15; color: #fff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.1em;">Back to Grooming</a>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <template id="booking_error" name="Booking Error">
+    <t t-call="website.layout">
+      <div id="wrap" class="grooming-result" style="text-align: center; padding: 100px 20px; background: #F8F5F0;">
+        <div style="max-width: 500px; margin: 0 auto; background: #fff; padding: 48px; border-radius: 20px; border: 1px solid #E8E0D8;">
+          <h1 style="font-family: serif; font-size: 28px; color: #222; margin-bottom: 16px;">We couldn't complete the booking.</h1>
+          <p style="color: #666; margin-bottom: 28px;"><t t-out="error"/></p>
+          <a href="/grooming#booking-form" style="display: inline-block; background: #c77e35; color: #fff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.1em;">Try Again</a>
+        </div>
+      </div>
+    </t>
+  </template>
+</odoo>

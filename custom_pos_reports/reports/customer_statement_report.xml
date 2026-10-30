@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_customer_statement" model="report.paperformat">
+        <field name="name">TechOvers Customer Statement A4</field>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">30</field>
+        <field name="margin_left">12</field>
+        <field name="margin_right">12</field>
+        <field name="header_line" eval="False"/>
+    </record>
+
+    <record id="action_customer_statement" model="ir.actions.report">
+        <field name="name">Customer Statement</field>
+        <field name="model">techovers.customer.statement</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_pos_reports.customer_statement</field>
+        <field name="report_file">custom_pos_reports.customer_statement</field>
+        <field name="paperformat_id" ref="custom_pos_reports.paperformat_customer_statement"/>
+    </record>
+
+    <template id="customer_statement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="data" t-value="o._get_statement_data()"/>
+                <t t-set="company" t-value="o.env.company"/>
+                
+                <!-- HEADER (will be repeated on every page) -->
+                <div class="header" style="font-family: 'Inter', 'Hurme Geometric Sans 1', 'HurmeGeometricSans1', sans-serif !important;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border: none !important;">
+                        <tr style="border: none !important;">
+                            <td style="width: 50%; vertical-align: top; border: none !important;">
+                                <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 70px; margin-bottom: 5px;"/>
+                                <div t-else="" style="font-size: 24px; font-weight: 800; color: #17231f;"><t t-esc="company.name"/></div>
+                            </td>
+                            <td style="width: 50%; vertical-align: top; text-align: right; border: none !important;">
+                                <div style="font-size: 24px; font-weight: 800; color: #1e293b; letter-spacing: 0.02em; border: none !important;">
+                                    CUSTOMER STATEMENT
+                                </div>
+                                <div style="font-size: 10px; color: #64748b; margin-top: 4px; line-height: 1.4; border: none !important;">
+                                    TIN: <t t-esc="company.vat or '131-518-544'"/><br/>
+                                    <t t-esc="company.phone or '+255 749 388 080'"/><br/>
+                                    <t t-esc="company.email or 'info@techovers.co.tz'"/><br/>
+                                    <t t-esc="company.website or 'https://www.techovers.co.tz'"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- BODY -->
+                <div class="article o_report_layout_standard" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id" style="border: none !important;">
+                    <style>
+                        body { font-family: 'Inter', 'Hurme Geometric Sans 1', 'HurmeGeometricSans1', sans-serif !important; color: #1e293b !important; }
+                        .article table, .article tr, .article td, .article th, .article div { border: none !important; }
+                        .to-card { border: 1px solid #cbd5e1 !important; border-radius: 8px !important; padding: 12px 14px !important; min-height: 100px; background: transparent; }
+                        .to-items td { border-bottom: 1px solid #e5e7eb !important; }
+                    </style>
+
+                    <!-- METADATA & RECIPIENT INFO -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border: none !important;">
+                        <tr style="border: none !important;">
+                            <td style="width: 48%; vertical-align: top; padding: 0; border: none !important;">
+                                <div class="to-card">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+                                        CUSTOMER DETAILS
+                                    </div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">
+                                        <t t-esc="o.partner_id.name"/>
+                                    </div>
+                                    <div style="font-size: 11px; color: #475569; line-height: 1.4;">
+                                        <t t-if="o.partner_id.street"><t t-esc="o.partner_id.street"/><br/></t>
+                                        <t t-if="o.partner_id.city"><t t-esc="o.partner_id.city"/>, </t>
+                                        <t t-if="o.partner_id.country_id"><t t-esc="o.partner_id.country_id.name"/><br/></t>
+                                        <t t-if="o.partner_id.phone">Phone: <t t-esc="o.partner_id.phone"/><br/></t>
+                                        <t t-if="o.partner_id.email">Email: <t t-esc="o.partner_id.email"/><br/></t>
+                                        <t t-if="o.partner_id.vat">TIN: <t t-esc="o.partner_id.vat"/></t>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="width: 4%; border: none !important;"></td>
+                            <td style="width: 48%; vertical-align: top; padding: 0; border: none !important;">
+                                <div class="to-card">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+                                        STATEMENT SUMMARY
+                                    </div>
+                                    <table style="width: 100%; font-size: 11px; border: none !important;">
+                                        <tr style="border: none !important;">
+                                            <td style="color: #64748b; padding: 3px 0; border: none !important;">Period:</td>
+                                            <td style="text-align: right; font-weight: 600; padding: 3px 0; border: none !important;">
+                                                <span t-field="o.date_start"/> - <span t-field="o.date_end"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border: none !important;">
+                                            <td style="color: #64748b; padding: 3px 0; border: none !important;">Invoices Count:</td>
+                                            <td style="text-align: right; font-weight: 600; padding: 3px 0; border: none !important;">
+                                                <t t-esc="len(data['invoices'])"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border: none !important;">
+                                            <td style="color: #64748b; padding: 3px 0; border: none !important;">Currency:</td>
+                                            <td style="text-align: right; font-weight: 600; padding: 3px 0; border: none !important;">
+                                                TZS (TSh)
+                                            </td>
+                                        </tr>
+                                        <tr style="border-top: 1px solid #cbd5e1 !important;">
+                                            <td style="font-weight: 700; color: #0f172a; padding: 6px 0 0 0; border: none !important;">Total Billed:</td>
+                                            <td style="text-align: right; font-weight: 800; font-size: 13px; color: #17231f; padding: 6px 0 0 0; border: none !important;">
+                                                <t t-esc="'{:,.2f}'.format(data['total'])"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- STATEMENT ITEMIZED TABLE -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border: none !important;" class="to-items">
+                        <thead>
+                            <tr style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1 !important; border-top: 1px solid #cbd5e1 !important;">
+                                <th style="padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #475569; width: 15%; border: none !important;">DATE</th>
+                                <th style="padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #475569; width: 25%; border: none !important;">BUYER / CONTACT</th>
+                                <th style="padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #475569; width: 35%; border: none !important;">ITEM DESCRIPTION</th>
+                                <th style="padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 700; color: #475569; width: 10%; border: none !important;">QTY</th>
+                                <th style="padding: 10px 8px; text-align: right; font-size: 11px; font-weight: 700; color: #475569; width: 15%; border: none !important;">TOTAL (TSH)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="data['lines']" t-as="line">
+                                <tr>
+                                    <td style="padding: 8px; font-size: 11px; color: #334155; border-bottom: 1px solid #f1f5f9 !important;">
+                                        <t t-esc="line['date']"/>
+                                    </td>
+                                    <td style="padding: 8px; font-size: 11px; color: #0f172a; font-weight: 500; border-bottom: 1px solid #f1f5f9 !important;">
+                                        <t t-esc="line['customer']"/>
+                                    </td>
+                                    <td style="padding: 8px; font-size: 11px; color: #334155; border-bottom: 1px solid #f1f5f9 !important;">
+                                        <t t-esc="line['product']"/>
+                                    </td>
+                                    <td style="padding: 8px; font-size: 11px; color: #334155; text-align: center; border-bottom: 1px solid #f1f5f9 !important;">
+                                        <t t-esc="'{:,.0f}'.format(line['qty'])"/>
+                                    </td>
+                                    <td style="padding: 8px; font-size: 11px; color: #0f172a; text-align: right; font-weight: 600; border-bottom: 1px solid #f1f5f9 !important;">
+                                        <t t-esc="'{:,.2f}'.format(line['price'])"/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr t-if="not data['lines']">
+                                <td colspan="5" style="text-align: center; padding: 25px; color: #94a3b8; font-style: italic; border: none !important;">
+                                    No invoice records found for this period.
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot t-if="data['lines']">
+                            <tr style="border-top: 2px solid #0f172a !important; border-bottom: 2px solid #0f172a !important; background-color: #f8fafc;">
+                                <td colspan="4" style="padding: 10px 8px; font-size: 12px; font-weight: 800; color: #0f172a; text-align: right; border: none !important;">
+                                    TOTAL AMOUNT BILLED:
+                                </td>
+                                <td style="padding: 10px 8px; font-size: 13px; font-weight: 800; color: #17231f; text-align: right; border: none !important;">
+                                    <t t-esc="'{:,.2f}'.format(data['total'])"/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Standard Footer -->
+                <div class="footer o_standard_footer" style="font-family: 'Inter', 'Hurme Geometric Sans 1', 'HurmeGeometricSans1', sans-serif !important; border: none !important;">
+                    <div style="background-color: #f0fdf4 !important; border-radius: 8px; padding: 12px 18px; margin-bottom: 8px; border: none !important;">
+                        <table style="width: 100%; border-collapse: collapse; border: none !important;">
+                            <tr style="border: none !important;">
+                                <td style="width: 33%; vertical-align: top; text-align: left; padding: 0; border: none !important;">
+                                    <div style="color: #17231f; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">TECHOVERS</div>
+                                    <div style="font-weight: 700; font-size: 10px; color: #1e293b; margin-bottom: 2px;">LIPA M-PESA</div>
+                                    <div style="font-size: 10px; color: #475569; font-weight: 600;">Contact Store</div>
+                                </td>
+                                <td style="width: 33%; vertical-align: top; text-align: left; padding: 0; border: none !important;">
+                                    <div style="font-weight: 800; font-size: 10px; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">BANK TRANSFER</div>
+                                    <div style="font-size: 10px; color: #475569; font-weight: 600; margin-bottom: 2px;">TechOvers Account</div>
+                                    <div style="font-size: 9px; color: #64748b;">TechOvers Co. Limited</div>
+                                </td>
+                                <td style="width: 34%; vertical-align: top; text-align: left; padding: 0; border: none !important;">
+                                    <div style="font-weight: 700; font-size: 10px; color: #1e293b; margin-bottom: 2px;">Account Name:</div>
+                                    <div style="font-size: 10px; color: #475569; font-weight: 600;">TechOvers Co. Limited</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="border-top: 1px solid #e5e7eb !important; margin-top: 8px; margin-bottom: 6px;"/>
+                    <div style="font-size: 9px; color: #64748b; text-align: center; line-height: 1.4;">
+                        TechOvers Co. Limited  |  MIKOCHENI, GARDEN ROAD, DAR ES SALAAM  |  Phone: +255 749 388 080  |  info@techovers.co.tz  |  www.techovers.co.tz
+                    </div>
+                    <div style="font-size: 9px; color: #17231f; font-style: italic; text-align: center; margin-top: 3px; font-weight: 600;">
+                        Thank you for your business.  Karibu sana TechOvers.
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

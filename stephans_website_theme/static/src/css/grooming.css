@@ -1,0 +1,574 @@
+/* Stephan's Pet Store - Grooming Studio Styles (100% Next.js Parity) */
+
+.grooming-site {
+  background-color: #F8F5F0 !important;
+  color: #2A2A2A;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.grooming-site * {
+  box-sizing: border-box;
+}
+
+.grooming-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header Section */
+.grooming-header {
+  padding-top: 80px;
+  padding-bottom: 40px;
+  text-align: center;
+}
+
+.grooming-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #c77e35;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.grooming-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(38px, 6vw, 68px);
+  font-weight: 400;
+  color: #222222;
+  line-height: 1.1;
+  margin: 0 0 44px;
+}
+
+/* Animal Tabs */
+.grooming-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  border-bottom: 1px solid #E8E0D8;
+  max-width: 760px;
+  margin: 0 auto;
+  padding-bottom: 16px;
+}
+
+.grooming-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 19px;
+  font-weight: 500;
+  color: #888888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 8px 12px;
+  transition: color 0.2s ease;
+}
+
+.grooming-tab.active {
+  color: #222222;
+  font-weight: 600;
+}
+
+.grooming-tab-icon {
+  width: 36px;
+  height: 36px;
+  background-color: #c77e35;
+  display: inline-block;
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.grooming-tab.active .grooming-tab-icon {
+  opacity: 1;
+}
+
+.grooming-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -17px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #c77e35;
+}
+
+.grooming-tab-divider {
+  width: 1px;
+  height: 32px;
+  background-color: #E8E0D8;
+}
+
+/* Packages Section */
+.grooming-packages-section {
+  padding: 48px 0 64px;
+  text-align: center;
+}
+
+.grooming-packages-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.grooming-packages-grid.single-col {
+  grid-template-columns: 1fr;
+  max-width: 420px;
+}
+
+.grooming-pkg-card {
+  position: relative;
+  background: #FDFBF9;
+  border: 1px solid #E8E0D8;
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.grooming-pkg-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+  border-color: #d8c8b6;
+}
+
+.grooming-pkg-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: #c77e35;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.grooming-pkg-icon {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.grooming-pkg-icon-mask {
+  width: 58px;
+  height: 58px;
+  background-color: #c77e35;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.grooming-pkg-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 26px;
+  color: #222222;
+  margin: 0 0 12px;
+}
+
+.grooming-pkg-desc {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.6;
+  max-width: 220px;
+  margin: 0 auto 28px;
+}
+
+.grooming-pkg-line {
+  width: 32px;
+  height: 1px;
+  background-color: #E8E0D8;
+  margin: 0 auto 28px;
+}
+
+.grooming-pkg-price-label {
+  font-size: 12px;
+  color: #777777;
+  margin-bottom: 4px;
+}
+
+.grooming-pkg-price {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #222222;
+  margin: 0 0 28px;
+}
+
+.grooming-pkg-action {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #c77e35;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+.grooming-pkg-card:hover .grooming-pkg-action {
+  color: #4a2a14;
+}
+
+/* Booking Form Section */
+.grooming-booking-section {
+  padding: 64px 0 96px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.grooming-booking-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(32px, 5vw, 48px);
+  color: #222222;
+  text-align: center;
+  margin: 0 0 44px;
+}
+
+.grooming-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.grooming-input,
+.grooming-select {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid #E8E0D8;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #222222;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.grooming-select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23888888%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.grooming-input:focus,
+.grooming-select:focus {
+  border-color: #c77e35;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(199, 126, 53, 0.15);
+}
+
+.grooming-date-wrapper {
+  position: relative;
+}
+
+.grooming-date-wrapper .grooming-input {
+  padding-right: 46px;
+}
+
+.grooming-date-wrapper .grooming-calendar-icon {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Included Services Box */
+.grooming-included-box {
+  margin-top: 28px;
+  background-color: #ffffff;
+  border: 1px solid #E8E0D8;
+  border-radius: 18px;
+  padding: 32px 36px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+}
+
+.grooming-included-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 20px;
+  color: #222222;
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grooming-included-title svg {
+  color: #c77e35;
+}
+
+.grooming-included-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+}
+
+.grooming-service-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: #444444;
+  line-height: 1.5;
+}
+
+.grooming-check-icon {
+  width: 16px;
+  height: 16px;
+  color: #c77e35;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* Policy Card */
+.grooming-policy-box {
+  margin-top: 28px;
+  background-color: #F4F0EB;
+  border-radius: 18px;
+  padding: 36px;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.grooming-policy-intro {
+  flex: 0 0 32%;
+}
+
+.grooming-policy-badge {
+  width: 58px;
+  height: 58px;
+  background-color: #EBE4DC;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.grooming-policy-badge svg {
+  stroke: #c77e35;
+}
+
+.grooming-policy-intro h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  color: #222222;
+  margin: 0 0 10px;
+}
+
+.grooming-policy-intro p {
+  font-size: 13.5px;
+  color: #666666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.grooming-policy-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 6px;
+}
+
+.grooming-policy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13.5px;
+  color: #444444;
+  line-height: 1.5;
+}
+
+.grooming-policy-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #E8E0D8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.grooming-agree-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: #333333;
+  cursor: pointer;
+  user-select: none;
+}
+
+.grooming-agree-label input[type="checkbox"] {
+  accent-color: #c77e35;
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+
+.grooming-policy-link {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #c77e35;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+.grooming-policy-link:hover {
+  color: #4a2a14;
+  text-decoration: underline;
+}
+
+/* Estimated Total Box */
+.grooming-total-box {
+  margin-top: 28px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #E8E0D8;
+  border-radius: 18px;
+  padding: 26px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grooming-total-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #c77e35;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.grooming-total-sub {
+  font-size: 14px;
+  color: #666666;
+}
+
+.grooming-total-amount {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(26px, 3.5vw, 36px);
+  font-weight: 700;
+  color: #222222;
+}
+
+/* Submit Button */
+.grooming-submit-btn {
+  margin-top: 28px;
+  width: 100%;
+  background-color: #4E2A15;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  font-family: inherit;
+}
+
+.grooming-submit-btn:hover {
+  background-color: #3A1F0F;
+  transform: translateY(-1px);
+}
+
+.grooming-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .grooming-policy-box {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .grooming-policy-intro {
+    flex: 0 0 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .grooming-header {
+    padding-top: 50px;
+    padding-bottom: 28px;
+  }
+  .grooming-tabs {
+    gap: 14px;
+  }
+  .grooming-tab {
+    font-size: 16px;
+    padding: 6px 8px;
+  }
+  .grooming-tab-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .grooming-packages-grid {
+    grid-template-columns: 1fr;
+  }
+  .grooming-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .grooming-included-grid {
+    grid-template-columns: 1fr;
+  }
+  .grooming-total-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .grooming-policy-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

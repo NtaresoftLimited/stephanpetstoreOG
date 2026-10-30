@@ -1,0 +1,31 @@
+{
+    "name": "Stephan's Pet Store Website Theme",
+    "version": "20.0.1.0.1",
+    "category": "Theme/eCommerce",
+    "summary": "Isolated Stephan's Pet Store website preview",
+    "author": "Stephan's Pet Store",
+    "website": "https://stephanspetstore.co.tz",
+    "depends": ["website", "website_sale", "grooming"],
+    "data": [
+        "views/header.xml",
+        "views/footer.xml",
+        "views/homepage.xml",
+        "views/grooming.xml",
+        "views/pages.xml",
+        "data/pages.xml",
+        "data/products.xml",
+    ],
+    "assets": {
+        "web.assets_frontend": [
+            "stephans_website_theme/static/src/scss/_variables.scss",
+            "stephans_website_theme/static/src/scss/header.scss",
+            "stephans_website_theme/static/src/scss/homepage.scss",
+            "stephans_website_theme/static/src/scss/footer.scss",
+            "stephans_website_theme/static/src/js/header.js",
+        ],
+    },
+    "installable": True,
+    "application": False,
+    "auto_install": False,
+    "license": "LGPL-3",
+}

@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_brand_user,product.brand user access,model_product_brand,base.group_user,1,1,1,1
+access_pos_whatsapp_config_manager,pos.whatsapp.config manager access,model_pos_whatsapp_config,point_of_sale.group_pos_manager,1,1,1,1
+access_techovers_customer_statement_user,techovers.customer.statement user access,model_techovers_customer_statement,base.group_user,1,1,1,1
+access_pos_dashboard_data,access_pos_dashboard_data,model_pos_dashboard_data,base.group_user,1,0,0,0
+access_sale_order_payment_wizard_user,sale.order.payment.wizard user access,model_sale_order_payment_wizard,base.group_user,1,1,1,1
+access_pos_details_wizard_user,pos.details.wizard user access,point_of_sale.model_pos_details_wizard,point_of_sale.group_pos_user,1,1,1,1
+access_pos_details_wizard_base_user,pos.details.wizard base user access,point_of_sale.model_pos_details_wizard,base.group_user,1,1,1,1
+access_pos_daily_sales_reports_wizard_user,pos.daily.sales.reports.wizard user access,point_of_sale.model_pos_daily_sales_reports_wizard,point_of_sale.group_pos_user,1,1,1,1
+access_pos_store_expense_cat_user,pos.store.expense.category user,model_pos_store_expense_category,point_of_sale.group_pos_user,1,0,0,0
+access_pos_store_expense_cat_manager,pos.store.expense.category manager,model_pos_store_expense_category,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_store_expense_user,pos.store.expense user,model_pos_store_expense,point_of_sale.group_pos_user,1,1,1,0
+access_pos_store_expense_manager,pos.store.expense manager,model_pos_store_expense,point_of_sale.group_pos_manager,1,1,1,1

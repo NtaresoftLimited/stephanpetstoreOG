@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <template id="report_pos_thermal">
+
+        <t t-call="web.html_container">
+
+            <t t-foreach="docs" t-as="o">
+
+                <t t-call="web.basic_layout">
+
+                    <div class="page" style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: black; background-image: url('/custom_pos_reports/static/src/img/paw_watermark.png'); background-repeat: no-repeat; background-position: center; background-size: contain;">
+
+                        
+
+                        <style>
+
+                            .table-excel {
+
+                                width: 100%;
+
+                                border-collapse: collapse;
+
+                                margin-top: 5px;
+
+                                margin-bottom: 10px;
+
+                            }
+
+                            .table-excel th {
+
+                                background-color: #6b4e3d;
+
+                                color: white;
+
+                                border: 1px solid #6b4e3d;
+
+                                padding: 4px;
+
+                                text-align: center;
+
+                                font-weight: bold;
+
+                            }
+
+                            .table-excel td {
+
+                                border: 1px solid #ddd;
+
+                                padding: 4px;
+
+                                vertical-align: middle;
+
+                            }
+
+                            .text-end { text-align: right; }
+
+                            .text-start { text-align: left; }
+
+                            .text-center { text-align: center; }
+
+                            .font-bold { font-weight: bold; }
+
+                            .negative { color: red; }
+
+                            .section-title {
+
+                                font-size: 12px;
+
+                                font-weight: bold;
+
+                                margin-top: 15px;
+
+                                display: block;
+
+                                border-bottom: 1px solid #6b4e3d;
+
+                                margin-bottom: 5px;
+
+                            }
+
+                        </style>
+
+
+
+                        <!-- Header -->
+
+                        <div class="text-center">
+
+                            <img t-if="o.env.company.logo" t-att-src="image_data_uri(o.env.company.logo)" style="max-height: 80px;"/>
+
+                            <br/>
+
+                            <strong><t t-esc="o.env.company.name"/></strong><br/>
+
+                            <span class="font-bold"><t t-esc="o.report_type_label"/> Sales Report</span><br/>
+
+                            
+
+                            <!-- Safe Date Display -->
+
+                            <t t-if="o._name == 'pos.details.wizard'">
+
+                                <t t-if="o.report_type_label == 'Weekly'">
+                                    <span t-field="o.date_start_only"/> - <span t-field="o.date_end_only"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-field="o.date_start_only"/>
+                                </t>
+
+                            </t>
+
+                            <t t-elif="o._name == 'pos.session'">
+
+                                <span t-field="o.start_at" t-options='{"widget": "date"}'/>
+
+                            </t>
+
+                        </div>
+
+                        <br/>
+
+                        
+
+                        <!-- Cashier Info -->
+
+                        <div style="font-size: 10px;">
+
+                            <strong>Printed By:</strong> <span t-esc="user.name"/><br/>
+
+                            <strong>Generated:</strong> <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+
+                            <br/>
+
+                            <t t-if="'config_id' in o">
+
+                                <strong>POS:</strong> <span t-field="o.config_id.name"/>
+
+                            </t>
+
+                        </div>
+
+
+
+                        <!-- Fetch Data -->
+
+                        <t t-set="report_data" t-value="o._get_report_data()"/>
+
+                        
+
+                        <!-- 1. Sales by Product -->
+
+                        <span class="section-title">Sales by Product</span>
+
+                        <table class="table-excel">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th class="text-start">Product Name</th>
+
+                                    <th>Quantity</th>
+
+                                    <th class="text-end">Total (TSh)</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr t-foreach="report_data['products']" t-as="prod">
+
+                                    <td>
+                                        <span t-esc="prod['name']"/>
+                                        <t t-if="prod.get('brand')">
+                                            <br/>
+                                            <span style="font-size: 9px; font-style: italic; color: #555;">
+                                                <t t-esc="prod['brand']"/>
+                                            </span>
+                                        </t>
+                                    </td>
+
+                                    <td class="text-center"><span t-esc="prod['qty']"/></td>
+
+                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(prod['total'])"/></td>
+
+                                </tr>
+
+                            </tbody>
+
+                             <tfoot>
+
+                                <tr>
+
+                                    <td colspan="2" class="text-end font-bold">Total Sales:</td>
+
+                                    <td class="text-end font-bold"><span t-esc="'{:,.2f}'.format(report_data['total_sales'])"/></td>
+
+                                </tr>
+
+                            </tfoot>
+
+                        </table>
+
+
+                        <!-- 1.5. Grooming Services -->
+                        <span class="section-title">Grooming Services</span>
+                        <t t-if="report_data.get('grooming_products')">
+                            <table class="table-excel">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">Service</th>
+                                        <th>Qty</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="report_data['grooming_products']" t-as="prod">
+                                        <td>
+                                            <span t-esc="prod['name']"/>
+                                            <t t-if="prod.get('brand')">
+                                                <br/>
+                                                <span style="font-size: 9px; font-style: italic; color: #555;">
+                                                    <t t-esc="prod['brand']"/>
+                                                </span>
+                                            </t>
+                                        </td>
+                                        <td class="text-center"><span t-esc="prod['qty']"/></td>
+                                        <td class="text-end"><span t-esc="'{:,.2f}'.format(prod['total'])"/></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" class="text-end font-bold">Total Grooming:</td>
+                                        <td class="text-end font-bold"><span t-esc="'{:,.2f}'.format(report_data['total_grooming'])"/></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+                        <t t-else="">
+                             <div style="text-align: center; font-style: italic; color: #666; margin: 5px 0 10px 0;">
+                                 - No grooming services -
+                             </div>
+                        </t>
+
+                        
+
+                        <!-- 2. Payments Breakdown -->
+
+                        <span class="section-title">Payments Breakdown</span>
+
+                        <table class="table-excel">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th class="text-start">Payment Method</th>
+
+                                    <th class="text-end">Amount</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr t-foreach="report_data['payments']" t-as="pay">
+
+                                    <td><span t-esc="pay['method']"/></td>
+
+                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(pay['amount'])"/></td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+
+
+                        <!-- 2.5 Cash In -->
+
+                        <span class="section-title">Cash In</span>
+
+                        <table class="table-excel">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th class="text-start">Reason</th>
+
+                                    <th class="text-end">Amount</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr t-if="not report_data['cash_in']">
+
+                                    <td>No Cash In</td>
+
+                                    <td class="text-end">0.00</td>
+
+                                </tr>
+
+                                <tr t-foreach="report_data['cash_in']" t-as="cin">
+
+                                    <td><span t-esc="cin['reason']"/></td>
+
+                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(cin['amount'])"/></td>
+
+                                </tr>
+
+                            </tbody>
+
+                            <tfoot>
+
+                                <tr>
+
+                                    <td class="text-end font-bold">Total Cash In:</td>
+
+                                    <td class="text-end font-bold"><span t-esc="'{:,.2f}'.format(report_data['total_cash_in'])"/></td>
+
+                                </tr>
+
+                            </tfoot>
+
+                        </table>
+
+
+
+                        <!-- 3. Cash Outs / Expenses -->
+
+                        <span class="section-title">Cash Outs / Expenses</span>
+
+                        <table class="table-excel">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th class="text-start">Reason</th>
+
+                                    <th class="text-end">Amount (Negative)</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr t-if="not report_data['expenses']">
+
+                                    <td>No Expenses</td>
+
+                                    <td class="text-end negative">0.00</td>
+
+                                </tr>
+
+                                <tr t-foreach="report_data['expenses']" t-as="exp">
+
+                                    <td><span t-esc="exp['reason']"/></td>
+
+                                    <td class="text-end negative"><span t-esc="'{:,.2f}'.format(exp['amount'])"/></td>
+
+                                </tr>
+
+                            </tbody>
+
+                            <tfoot>
+
+                                <tr>
+
+                                    <td class="text-end font-bold">Total Expenses:</td>
+
+                                    <td class="text-end font-bold negative"><span t-esc="'{:,.2f}'.format(report_data['total_cash_out'])"/></td>
+
+                                </tr>
+
+                            </tfoot>
+
+                        </table>
+
+
+
+                        <!-- Net Total -->
+
+                        <div class="text-end" style="margin-top: 10px; border-top: 2px solid #6b4e3d; padding-top: 5px;">
+
+                            <span class="font-bold align-right" style="font-size: 13px;">Net Cash (TSh): </span>
+
+                            <span class="font-bold" t-esc="'{:,.2f}'.format(report_data['net_cash'])" style="font-size: 15px;"/>
+
+                        </div>
+
+                        
+
+                        <br/><br/>
+
+                        <div class="text-center" style="font-size: 10px;">
+
+                            ________________________<br/>
+
+                            Signature
+
+                            <br/><br/>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+                </t>
+
+            </t>
+
+        </t>
+
+    </template>
+
+</odoo>
+

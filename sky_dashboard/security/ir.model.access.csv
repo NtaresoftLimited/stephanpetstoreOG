@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sky_stock_report_cashier,sky.daily.stock.report cashier,model_sky_daily_stock_report,sky_dashboard.group_sky_stock_cashier,1,0,0,0
+access_sky_stock_report_pos_user,sky.daily.stock.report pos user,model_sky_daily_stock_report,point_of_sale.group_pos_user,1,0,0,0
+access_sky_stock_report_manager,sky.daily.stock.report manager,model_sky_daily_stock_report,sky_dashboard.group_sky_stock_manager,1,1,1,1
+access_sky_stock_line_cashier,sky.daily.stock.report.line cashier,model_sky_daily_stock_report_line,sky_dashboard.group_sky_stock_cashier,1,0,0,0
+access_sky_stock_line_pos_user,sky.daily.stock.report.line pos user,model_sky_daily_stock_report_line,point_of_sale.group_pos_user,1,0,0,0
+access_sky_stock_line_manager,sky.daily.stock.report.line manager,model_sky_daily_stock_report_line,sky_dashboard.group_sky_stock_manager,1,1,1,1
+access_sky_stock_generate_wizard_manager,sky.stock.generate.wizard manager,model_sky_stock_generate_wizard,sky_dashboard.group_sky_stock_manager,1,1,1,1
+access_sky_stock_generate_wizard_user,sky.stock.generate.wizard user,model_sky_stock_generate_wizard,point_of_sale.group_pos_user,1,1,1,1

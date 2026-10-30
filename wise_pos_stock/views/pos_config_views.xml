@@ -1,0 +1,17 @@
+<odoo>
+  <record id="view_pos_config_form_inherit_visible_field" model="ir.ui.view">
+    <field name="name">pos.config.form.inherit.visible.field</field>
+    <field name="model">pos.config</field>
+    <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Locate the original field -->
+      <xpath expr="//div[@id='title']" position="after">
+          <label for="picking_type_id"></label>
+          <field name="picking_type_id" string="Picking Type" invisible="0"/>
+          <label for="picking_type_location_id"/>
+          <field name="picking_type_location_id" string="Picking Type Location" invisible="0"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>
+

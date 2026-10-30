@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_whatsapp_config_form" model="ir.ui.view">
+        <field name="name">pos.whatsapp.config.form</field>
+        <field name="model">pos.whatsapp.config</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp POS Configuration">
+                <header>
+                    <button name="action_send_now" string="Send Daily Report Now" type="object" class="btn-primary" icon="fa-paper-plane"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="send_time" widget="float_time"/>
+                        </group>
+                        <group>
+                            <field name="phone_numbers" placeholder="255712345678, 255787654321"/>
+                            <field name="last_sent_date" readonly="1"/>
+                            <field name="last_sent_status" readonly="1"/>
+                        </group>
+                    </group>
+                    <p class="text-muted">
+                        When enabled, the Daily POS Sales Report (A4) will be generated automatically at the specified time (e.g. 22:00) and sent via WhatsApp to the listed numbers.
+                    </p>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pos_whatsapp_config_server" model="ir.actions.server">
+        <field name="name">WhatsApp POS Report</field>
+        <field name="model_id" ref="custom_pos_reports.model_pos_whatsapp_config"/>
+        <field name="state">code</field>
+        <field name="code">config = env['pos.whatsapp.config'].search([], limit=1)
+if not config:
+    manager_phone = env['ir.config_parameter'].sudo().get_param('techovers_whatsapp.manager_phone') or '+255719498263'
+    config = env['pos.whatsapp.config'].create({'name': 'WhatsApp POS Report Configuration', 'active': True, 'send_time': 22.0, 'phone_numbers': manager_phone})
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'WhatsApp POS Report',
+    'res_model': 'pos.whatsapp.config',
+    'view_mode': 'form',
+    'res_id': config.id,
+    'target': 'current',
+}</field>
+    </record>
+
+    <!-- Menuitem attached to Point of Sale -> Configuration -> WhatsApp POS Report -->
+    <menuitem id="menu_pos_whatsapp_config" 
+              name="WhatsApp POS Report" 
+              parent="point_of_sale.menu_point_config_product" 
+              action="action_pos_whatsapp_config_server" 
+              sequence="50"/>
+</odoo>

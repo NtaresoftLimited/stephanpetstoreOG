@@ -1,0 +1,46 @@
+Date : 21th June 2023
+Version : '17.0' (in __manifest__.py)
+Odoo Version : 17
+Done by : Gaurav Vipani
+Task : Migrate v16 to v17
+
+Date : 17th May 2023
+Version : '16.5' (in __manifest__.py)
+Odoo Version : 16
+Done by : Devangi Pabari
+Changes : FSN-XYZ company wise report changes.
+
+Date : 9th May 2023
+Version : '16.4' (in __manifest__.py)
+Odoo Version : 16
+Done by : Devangi Pabari
+Changes : Age and Age Breakdown report issue fixed.
+
+Date : 5th April 2023
+Version : '16.3' (in __manifest__.py)
+Odoo Version : 16
+Done by : Udit Ramani
+Changes : Out of stock report sp changes, 0 stock product was not taken in the report.
+
+Date : 31st January 2023
+Version : '16.2' (in __manifest__.py)
+Odoo Version : 16
+Done by : Udit Ramani
+Changes : Changes in the SP of age and age breakdown report related to remaining > 0 and added again different test cases union all.
+
+Date : 28th September 2022
+Version : '16.0' (in __manifest__.py)
+Odoo Version : 16
+Done by : Niyati Palan
+Tested by : Udit Ramani on 31st Oct 2022
+Module : setu_advance_inventory_reports
+ - Took jsonb related change in sql (tmpl.name)
+ - Solved 'Division by zero' error in Out Of Stock Report for the field 'Analyse Inventory for Next X Days'
+
+
+Date : 12th November 2022
+Version : '16.1' (in __manifest__.py)
+Odoo Version : 16
+Done by : Udit Ramani
+Module : setu_inventory_ledger_report
+Changes : Speed optimisation in age and age breakdown report (query optimization).

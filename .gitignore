@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+*/node_modules/
+.next/
+*/.next/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large binary / backups
+*.zip
+*.tar.gz
+*.bak
+Stephans_*.zip
+addons.zip
+bi_stock_block_quantity.zip
+bi_stock_block_quantity_clean.zip
+
+# IDE and Editor files
+.idea/
+.trae/
+.vscode/
+
+# Sub-projects with their own repository
+StephansEcomercewithAI/
+scratch/
+temp_db_check/
+tmp_unzip/
+
+# Media / Documents
+Product Pictures/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.docx

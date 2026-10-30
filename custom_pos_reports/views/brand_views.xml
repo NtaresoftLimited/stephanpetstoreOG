@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Brand Form View -->
+    <record id="product_brand_view_form" model="ir.ui.view">
+        <field name="name">product.brand.view.form</field>
+        <field name="model">product.brand</field>
+        <field name="arch" type="xml">
+            <form string="Brand">
+                <sheet>
+                    <field name="logo" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Brand Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                    <notebook>
+                        <page string="Products" name="products">
+                            <field name="product_ids" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Brand Tree View -->
+    <record id="product_brand_view_tree" model="ir.ui.view">
+        <field name="name">product.brand.view.tree</field>
+        <field name="model">product.brand</field>
+        <field name="arch" type="xml">
+            <list string="Brands">
+                <field name="name"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Brand Action -->
+    <record id="product_brand_action" model="ir.actions.act_window">
+        <field name="name">Brands</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.brand</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new brand!
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item for Brands (In Inventory Configuration) -->
+    <menuitem id="menu_product_brand"
+              name="Brands"
+              parent="stock.menu_stock_config_settings"
+              action="product_brand_action"
+              sequence="10"/>
+</odoo>

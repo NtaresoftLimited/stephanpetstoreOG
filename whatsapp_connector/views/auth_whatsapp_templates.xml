@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Add "Login with WhatsApp" button to native Odoo /web/login -->
+    <template id="web_login_whatsapp_button" name="Login with WhatsApp Button" inherit_id="web.login">
+        <xpath expr="//div[hasclass('o_login_auth')]" position="inside">
+            <a t-attf-href="/web/login/whatsapp{{ '?redirect=' + redirect if redirect else '' }}"
+               class="btn w-100 mt-2 d-flex align-items-center justify-content-center gap-2 fw-semibold"
+               style="background-color: #25D366; color: #ffffff; border: 1px solid #1ebe5d;">
+                <i class="fa fa-whatsapp fs-5" role="img" aria-label="WhatsApp" title="WhatsApp"/>
+                <span>Login with WhatsApp</span>
+            </a>
+        </xpath>
+    </template>
+
+    <!-- 2. Dedicated WhatsApp OTP Login Page (/web/login/whatsapp) -->
+    <template id="whatsapp_login" name="WhatsApp Customer Login">
+        <t t-call="web.login_layout">
+            <div class="oe_login_form">
+                <div class="text-center mb-3">
+                    <span class="badge rounded-pill px-3 py-2 mb-2" style="background-color: #e8f9ee; color: #128C7E; font-size: 0.85rem;">
+                        <i class="fa fa-whatsapp me-1"/> WhatsApp Portal Access
+                    </span>
+                    <h5 class="fw-bold mb-1" t-if="step == 'phone'">Customer Portal Login</h5>
+                    <h5 class="fw-bold mb-1" t-if="step == 'otp'">Enter Verification Code</h5>
+                    <p class="text-muted small mb-0" t-if="step == 'phone'">
+                        Enter your WhatsApp phone number to receive a one-time login code.
+                    </p>
+                    <p class="text-muted small mb-0" t-if="step == 'otp'">
+                        Enter the 6-digit code sent to <strong t-esc="phone"/>
+                    </p>
+                </div>
+
+                <p class="alert alert-danger py-2 small" t-if="error" role="alert">
+                    <i class="fa fa-exclamation-circle me-1"/>
+                    <t t-esc="error"/>
+                </p>
+                <p class="alert alert-success py-2 small" t-if="message" role="status">
+                    <i class="fa fa-check-circle me-1"/>
+                    <t t-esc="message"/>
+                </p>
+
+                <!-- STEP 1: Enter WhatsApp Phone Number -->
+                <t t-if="step == 'phone'">
+                    <form action="/web/login/whatsapp" method="post" class="mt-3">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="action" value="send_otp"/>
+                        <input type="hidden" name="redirect" t-att-value="redirect"/>
+
+                        <div class="mb-3">
+                            <label for="wa_phone" class="form-label fw-semibold">WhatsApp Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fa fa-whatsapp text-success"/>
+                                </span>
+                                <input type="tel"
+                                       name="phone"
+                                       id="wa_phone"
+                                       t-att-value="phone"
+                                       class="form-control"
+                                       placeholder="0769 324 445 or +255..."
+                                       required="required"
+                                       autofocus="autofocus"
+                                       autocomplete="tel"/>
+                            </div>
+                            <div class="form-text small text-muted">
+                                Use the phone number registered with Stephan's Pet Store.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 pt-2">
+                            <button type="submit"
+                                    class="btn fw-semibold py-2"
+                                    style="background-color: #25D366; color: #ffffff; border: 1px solid #1ebe5d;">
+                                <i class="fa fa-paper-plane me-1"/> Send Code via WhatsApp
+                            </button>
+                            <a t-attf-href="/web/login{{ '?redirect=' + redirect if redirect else '' }}"
+                               class="btn btn-link btn-sm text-muted">
+                                <i class="fa fa-envelope-o me-1"/> Sign in with Email &amp; Password instead
+                            </a>
+                        </div>
+                    </form>
+                </t>
+
+                <!-- STEP 2: Verify 6-Digit OTP -->
+                <t t-if="step == 'otp'">
+                    <form action="/web/login/whatsapp" method="post" class="mt-3">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="action" value="verify_otp"/>
+                        <input type="hidden" name="phone" t-att-value="phone"/>
+                        <input type="hidden" name="redirect" t-att-value="redirect"/>
+
+                        <div class="mb-3">
+                            <label for="wa_otp" class="form-label fw-semibold">6-Digit Code</label>
+                            <input type="text"
+                                   name="otp"
+                                   id="wa_otp"
+                                   class="form-control form-control-lg text-center fw-bold"
+                                   style="letter-spacing: 0.35em; font-size: 1.35rem;"
+                                   placeholder="••••••"
+                                   inputmode="numeric"
+                                   pattern="[0-9]{6}"
+                                   maxlength="6"
+                                   required="required"
+                                   autofocus="autofocus"
+                                   autocomplete="one-time-code"/>
+                        </div>
+
+                        <div class="d-grid gap-2 pt-1">
+                            <button type="submit"
+                                    class="btn fw-semibold py-2"
+                                    style="background-color: #25D366; color: #ffffff; border: 1px solid #1ebe5d;">
+                                <i class="fa fa-check me-1"/> Verify &amp; Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Resend & Change Number Controls -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <form action="/web/login/whatsapp" method="post" class="d-inline">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="action" value="resend_otp"/>
+                            <input type="hidden" name="phone" t-att-value="phone"/>
+                            <input type="hidden" name="redirect" t-att-value="redirect"/>
+                            <button type="submit" class="btn btn-link btn-sm p-0 text-decoration-none">
+                                <i class="fa fa-refresh me-1"/> Resend Code
+                            </button>
+                        </form>
+                        <a t-attf-href="/web/login/whatsapp?reset=1{{ '&amp;redirect=' + redirect if redirect else '' }}"
+                           class="btn btn-link btn-sm p-0 text-muted text-decoration-none">
+                            Change Number
+                        </a>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- 3. Portal Home Card: Store Purchases (POS Receipts) -->
+    <template id="portal_my_home_pos_orders" name="Portal My Home : POS Orders" inherit_id="portal.portal_my_home" priority="25">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/point_of_sale/static/description/icon.png'"/>
+                <t t-set="title">Store Purchases (POS)</t>
+                <t t-set="text">View your in-store receipts and purchases</t>
+                <t t-set="url" t-value="'/my/pos_orders'"/>
+                <t t-set="placeholder_count" t-value="'pos_order_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- 4. My POS Orders List -->
+    <template id="portal_my_pos_orders" name="My Store Purchases">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Store Purchases (POS)</t>
+            </t>
+
+            <t t-if="not pos_orders">
+                <div class="alert alert-info mt-3" role="alert">
+                    <p class="mb-0">No in-store POS receipts found for your account yet.</p>
+                </div>
+            </t>
+
+            <t t-if="pos_orders">
+                <div class="table-responsive">
+                    <table class="table table-hover o_portal_my_doc_table">
+                        <thead>
+                            <tr>
+                                <th>Receipt Reference</th>
+                                <th>Date</th>
+                                <th>Store / Session</th>
+                                <th>Status</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="pos_orders" t-as="order">
+                                <tr>
+                                    <td>
+                                        <a t-attf-href="/my/pos_orders/#{order.id}">
+                                            <t t-out="order.pos_reference or order.name"/>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span t-field="order.date_order" t-options='{"format": "dd MMM yyyy HH:mm"}'/>
+                                    </td>
+                                    <td>
+                                        <t t-out="order.config_id.name or ''"/>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill text-bg-success">Paid</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="order.amount_total" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- 5. Single POS Order Detail -->
+    <template id="portal_pos_order_detail" name="Store Purchase Receipt">
+        <t t-call="portal.portal_layout">
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fa fa-shopping-bag me-2"/>
+                        <t t-out="pos_order.pos_reference or pos_order.name"/>
+                    </h4>
+                    <span class="badge rounded-pill text-bg-success fs-6">Paid</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <strong>Date:</strong>
+                            <span t-field="pos_order.date_order" t-options='{"format": "dd MMM yyyy HH:mm"}'/>
+                        </div>
+                        <div class="col-md-6" t-if="pos_order.config_id">
+                            <strong>Branch:</strong>
+                            <t t-out="pos_order.config_id.name"/>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Qty</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="pos_order.lines" t-as="line">
+                                    <tr>
+                                        <td><t t-out="line.full_product_name or line.product_id.display_name"/></td>
+                                        <td class="text-end"><t t-out="line.qty"/></td>
+                                        <td class="text-end">
+                                            <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": pos_order.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.price_subtotal_incl" t-options='{"widget": "monetary", "display_currency": pos_order.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total</th>
+                                    <th class="text-end fs-5">
+                                        <span t-field="pos_order.amount_total" t-options='{"widget": "monetary", "display_currency": pos_order.currency_id}'/>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/my/pos_orders" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left me-1"/> Back to Store Purchases
+                    </a>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

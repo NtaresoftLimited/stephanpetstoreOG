@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    <!-- Grooming Service Form View -->
+    <record id="grooming_service_view_form" model="ir.ui.view">
+        <field name="name">grooming.service.form</field>
+        <field name="model">grooming.service</field>
+        <field name="arch" type="xml">
+            <form string="Grooming Package/Service">
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" 
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Package Name (e.g. Standard Package)"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="is_addon"/>
+                            <field name="sequence"/>
+                            <field name="product_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                             <field name="description"/>
+                        </group>
+                    </group>
+                    
+                    <!-- PRICING MATRIX FOR PACKAGES -->
+                    <notebook invisible="is_addon">
+                        <page string="Pricing Matrix">
+                            <field name="price_line_ids">
+                                <list editable="bottom">
+                                    <field name="species"/>
+                                    <field name="size_category"/>
+                                    <field name="price" widget="monetary"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+
+                    <!-- ADD-ON PRICING -->
+                    <group invisible="not is_addon">
+                        <group string="Add-on Pricing">
+                            <field name="addon_price" widget="monetary"/>
+                            <field name="addon_standalone_price" widget="monetary"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Grooming Service Tree View -->
+    <record id="grooming_service_view_tree" model="ir.ui.view">
+        <field name="name">grooming.service.tree</field>
+        <field name="model">grooming.service</field>
+        <field name="arch" type="xml">
+            <list string="Grooming Services" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="is_addon"/>
+                <field name="addon_price" invisible="not is_addon" optional="show"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Grooming Appointment Form View -->
+    <record id="grooming_appointment_view_form" model="ir.ui.view">
+        <field name="name">grooming.appointment.form</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <form string="Grooming Appointment">
+                <header>
+                    <button name="action_create_payment" string="Pay" type="object"
+                            class="btn-primary" invisible="state not in ['confirmed', 'in_progress', 'completed']"/>
+                    <button name="action_confirm" string="Confirm" type="object"
+                            class="btn-primary" invisible="state != 'pending'"/>
+                    <button name="action_check_in" string="Check-in" type="object"
+                            class="btn-primary" invisible="state != 'confirmed'"/>
+                    <button name="action_start" string="Start Grooming" type="object"
+                            class="btn-primary" invisible="state != 'checked_in'"/>
+                    <button name="action_halfway" string="Halfway" type="object"
+                            class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button name="action_complete" string="Complete" type="object"
+                            class="btn-success" invisible="state != 'halfway'"/>
+                    <button name="action_create_sale_order" string="Create Order" type="object"
+                            class="btn-warning" invisible="sale_order_id or state not in ['confirmed', 'in_progress', 'completed']"/>
+                    <button name="action_create_pos_order" string="Create POS Order" type="object"
+                            class="btn-info" invisible="1"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            class="btn-secondary" invisible="state in ['completed', 'cancelled']"/>
+                    <button name="action_reset" string="Reset to Pending" type="object"
+                            class="btn-secondary" invisible="state not in ['cancelled']"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="pending,confirmed,checked_in,in_progress,halfway,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_customer" type="object" class="oe_stat_button" 
+                                icon="fa-user" string="Customer"/>
+                        <button name="action_view_pet" type="object" class="oe_stat_button" 
+                                icon="fa-paw" string="Pet"/>
+                        <button name="action_view_sale_order" type="object" class="oe_stat_button"
+                                icon="fa-file-text-o" invisible="not sale_order_id">
+                            <field name="sale_order_id" widget="statinfo" string="Sales Order"/>
+                        </button>
+                        <button name="action_view_pos_order" type="object" class="oe_stat_button" 
+                                icon="fa-shopping-cart" invisible="not pos_order_id">
+                            <field name="pos_order_id" widget="statinfo" string="POS Order"/>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" 
+                                icon="fa-pencil-square-o" invisible="invoice_count == 0">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Customer Information">
+                            <field name="partner_id"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_email"/>
+                        </group>
+                        <group string="Appointment">
+                            <field name="appointment_date"/>
+                            <field name="preferred_time"/>
+                            <field name="create_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Pet Information">
+                            <field name="pet_id" placeholder="Select existing profile..."/>
+                            <field name="pet_name"/>
+                            <field name="pet_type"/>
+                            <field name="pet_category"/>
+                        </group>
+                        <group string="Service Details">
+                            <field name="service_type"/>
+                            <field name="service_id" invisible="service_type == 'treatments_only'" domain="[('is_addon','=',False)]"/>
+                            <field name="addon_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Extra Charges &amp; Policy">
+                        <group>
+                            <field name="has_detangling"/>
+                            <field name="has_handling"/>
+                            <field name="late_pickup_hours"/>
+                        </group>
+                        <group>
+                            <div class="text-muted small">
+                                <field name="policy_description" nolabel="1"/>
+                            </div>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Pricing">
+                            <field name="price_details" nolabel="1" colspan="2"/>
+                            <field name="total_price" widget="monetary" options="{'currency_field': 'currency_id'}" decoration-bf="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" placeholder="Special requests..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Grooming Appointment Tree View -->
+    <record id="grooming_appointment_view_tree" model="ir.ui.view">
+        <field name="name">grooming.appointment.tree</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <list string="Appointments" 
+                  decoration-warning="state == 'pending'"
+                  decoration-info="state == 'confirmed'"
+                  decoration-success="state == 'completed'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="appointment_date"/>
+                <field name="pet_name"/>
+                <field name="partner_id"/>
+                <field name="pet_type"/>
+                <field name="pet_category"/>
+                <field name="service_id"/>
+                <field name="total_price" widget="monetary"/>
+                <field name="appt_payment_status" widget="badge" 
+                       decoration-success="appt_payment_status == 'paid'" 
+                       decoration-danger="appt_payment_status == 'not_paid'"/>
+                <field name="state" widget="badge" 
+                       decoration-warning="state == 'pending'"
+                       decoration-info="state == 'confirmed'"
+                       decoration-primary="state == 'in_progress'"
+                       decoration-success="state == 'completed'"
+                       decoration-muted="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Calendar View -->
+    <record id="grooming_appointment_view_calendar" model="ir.ui.view">
+        <field name="name">grooming.appointment.calendar</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <calendar string="Appointments" date_start="appointment_date" 
+                      color="state" quick_create="0" event_open_popup="1">
+                <field name="pet_name"/>
+                <field name="partner_id"/>
+                <field name="total_price"/>
+            </calendar>
+        </field>
+    </record>
+    
+    <!-- Kanban View -->
+    <record id="grooming_appointment_view_kanban" model="ir.ui.view">
+        <field name="name">grooming.appointment.kanban</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="id"/>
+                <field name="pet_name"/>
+                <field name="partner_id"/>
+                <field name="appointment_date"/>
+                <field name="total_price"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_content">
+                            <strong><field name="pet_name"/></strong>
+                            <div class="text-muted"><field name="partner_id"/></div>
+                            <div><i class="fa fa-calendar"/> <field name="appointment_date"/></div>
+                            <div class="mt-2">
+                                <strong>TZS <field name="total_price"/></strong>
+                                <span t-if="record.appt_payment_status.raw_value == 'paid'" class="badge text-bg-success float-end">Paid</span>
+                                <span t-if="record.appt_payment_status.raw_value == 'not_paid'" class="badge text-bg-danger float-end">Not Paid</span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="grooming_appointment_view_search" model="ir.ui.view">
+        <field name="name">grooming.appointment.search</field>
+        <field name="model">grooming.appointment</field>
+        <field name="arch" type="xml">
+            <search string="Search Appointments">
+                <field name="pet_name"/>
+                <field name="partner_id"/>
+                <field name="customer_phone"/>
+                <filter name="today" string="Today" 
+                        domain="[('appointment_date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), 
+                                 ('appointment_date', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0)))]"/>
+                <filter name="pending" string="Pending" domain="[('state', '=', 'pending')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="in_progress" string="In Progress" domain="[('state', '=', 'in_progress')]"/>
+                <separator/>
+                <filter name="group_by_date" string="Date" context="{'group_by': 'appointment_date:day'}"/>
+                <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+    </data>
+</odoo>

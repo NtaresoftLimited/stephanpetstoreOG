@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_grooming_stock_request_form" model="ir.ui.view">
+        <field name="name">grooming.stock.request.form</field>
+        <field name="model">grooming.stock.request</field>
+        <field name="arch" type="xml">
+            <form string="Replenishment Request">
+                <header>
+                    <button name="action_submit_request" string="Submit Request" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve_request" string="Approve &amp; Receive" type="object" class="oe_highlight" invisible="state != 'submitted'" groups="base.group_system"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('received', 'transferred', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,received"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(stock.action_picking_tree_all)d" type="action" class="oe_stat_button" icon="fa-truck"
+                                invisible="not picking_id" context="{'search_default_id': picking_id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Receipt</span>
+                            </div>
+                        </button>
+                        <button name="action_view_vendor_bill" type="object" class="oe_stat_button" icon="fa-pencil-square-o"
+                                invisible="not bill_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Vendor Bill</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <span class="o_form_label">Replenishment Request</span>
+                        <h1 class="d-flex">
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="destination_warehouse_id" string="Destination Warehouse" readonly="1" force_save="1" options="{'no_open': True, 'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="create_date" string="Requested On" readonly="1"/>
+                            <field name="picking_id" string="Generated Receipt" invisible="not picking_id" readonly="1"/>
+                            <field name="bill_id" invisible="not bill_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Products" name="products">
+                            <field name="product_line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_grooming_stock_request_tree" model="ir.ui.view">
+        <field name="name">grooming.stock.request.tree</field>
+        <field name="model">grooming.stock.request</field>
+        <field name="arch" type="xml">
+            <list string="Replenishment Approvals" decoration-info="state == 'submitted'" decoration-success="state in ('approved', 'received')">
+                <field name="name" string="Reference"/>
+                <field name="destination_warehouse_id" string="Destination Warehouse"/>
+                <field name="create_date" string="Created on"/>
+                <field name="bill_id" string="Vendor Bill"/>
+                <field name="state" widget="badge" decoration-info="state == 'submitted'" decoration-success="state in ('approved', 'received')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_grooming_stock_request_line_tree" model="ir.ui.view">
+        <field name="name">grooming.stock.request.line.tree</field>
+        <field name="model">grooming.stock.request.line</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="product_id"/>
+                <field name="quantity"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_grooming_stock_request" model="ir.actions.act_window">
+        <field name="name">Replenishment Approvals</field>
+        <field name="res_model">grooming.stock.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage your replenishment approvals here!
+            </p>
+        </field>
+    </record>
+
+    <!-- Adding to Inventory -> Operations menu (Restricted to Administrator Only) -->
+    <menuitem id="menu_grooming_stock_request" 
+              name="Replenishment Approvals" 
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_grooming_stock_request"
+              groups="base.group_system"
+              sequence="15"/>
+</odoo>

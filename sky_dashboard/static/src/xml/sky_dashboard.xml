@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sky_dashboard.SkyDashboard">
+        <main class="o_sky_dashboard h-100 overflow-auto">
+            <div t-if="state.loading" class="o_sky_loading">
+                <i class="fa fa-circle-o-notch fa-spin"/><span>Loading overview…</span>
+            </div>
+            <div t-else="" class="container-fluid p-3 p-lg-4">
+                <header class="o_sky_header mb-4">
+                    <div>
+                        <span class="o_sky_eyebrow">STEPHANS PET STORE</span>
+                        <h1>SKY Dashboard</h1>
+                        <p>A clear view of your business this month.</p>
+                    </div>
+                    <button class="btn o_sky_refresh" t-on-click="loadDashboard">
+                        <i class="fa fa-refresh me-2"/>Refresh
+                    </button>
+                    <button t-if="state.canAccessDailyStock" class="btn o_sky_stock_button" t-on-click="openDailyStock">
+                        <i class="fa fa-picture-o me-2"/>Daily stock
+                    </button>
+                </header>
+
+                <section class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <button class="o_sky_metric" t-on-click="() => this.openOrders([['state', 'in', ['sale', 'done']]])">
+                            <span class="o_sky_icon o_sky_icon--amber"><i class="fa fa-line-chart"/></span>
+                            <span><small>Revenue this month</small><strong t-esc="formatMoney(state.data.monthly_revenue)"/></span>
+                        </button>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <button class="o_sky_metric" t-on-click="() => this.openOrders()">
+                            <span class="o_sky_icon o_sky_icon--brown"><i class="fa fa-shopping-bag"/></span>
+                            <span><small>Confirmed orders</small><strong t-esc="state.data.monthly_orders"/></span>
+                        </button>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <button class="o_sky_metric" t-on-click="openCustomers">
+                            <span class="o_sky_icon o_sky_icon--sand"><i class="fa fa-users"/></span>
+                            <span><small>Customers</small><strong t-esc="state.data.customers"/></span>
+                        </button>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <button class="o_sky_metric" t-on-click="openProducts">
+                            <span class="o_sky_icon o_sky_icon--rose"><i class="fa fa-cube"/></span>
+                            <span><small>Low stock items</small><strong t-esc="state.data.low_stock"/></span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="row g-3">
+                    <div class="col-12 col-xl-8">
+                        <div class="o_sky_panel h-100">
+                            <div class="o_sky_panel_header"><div><span>Recent activity</span><small>Latest sales orders</small></div><button t-on-click="() => this.openOrders()">View all</button></div>
+                            <div class="table-responsive">
+                                <table class="table o_sky_table mb-0">
+                                    <thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th class="text-end">Total</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="state.data.recent_orders" t-as="order" t-key="order.id" t-on-click="() => this.openOrder(order.id)">
+                                            <td class="fw-semibold" t-esc="order.name"/><td t-esc="order.customer"/><td t-esc="order.date"/>
+                                            <td><span t-attf-class="o_sky_badge o_sky_badge--{{ order.state }}" t-esc="order.state"/></td>
+                                            <td class="text-end fw-semibold" t-esc="formatMoney(order.amount)"/>
+                                        </tr>
+                                        <tr t-if="!state.data.recent_orders.length"><td colspan="5" class="text-center text-muted py-5">No sales orders yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-4">
+                        <div class="o_sky_panel h-100 p-4">
+                            <div class="o_sky_panel_title">Order overview</div>
+                            <div class="o_sky_donut_wrap">
+                                <div class="o_sky_donut" t-att-style="donutStyle"><div><strong t-esc="state.data.monthly_activity"/><span>This month</span></div></div>
+                            </div>
+                            <div class="o_sky_legend">
+                                <div><i class="is-quotation"/><span>Quotations</span><strong t-esc="state.data.states.quotation"/></div>
+                                <div><i class="is-confirmed"/><span>Confirmed</span><strong t-esc="state.data.states.confirmed"/></div>
+                                <div><i class="is-done"/><span>Completed</span><strong t-esc="state.data.states.done"/></div>
+                                <div><i class="is-cancelled"/><span>Cancelled</span><strong t-esc="state.data.states.cancelled"/></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </t>
+</templates>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="selcom_pos_terminal_view_form" model="ir.ui.view">
+        <field name="name">selcom.pos.terminal.view.form</field>
+        <field name="model">selcom.pos.terminal</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-exchange" string="Transaction" name="show_form_and_tree" type="object" />
+                    </div>
+                    <div class="oe_title" name="event_type_title">
+                        <h1><field name="name" class="mb-2"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="baseUrl"/>
+                            <field name="api_secret" password="True"/>
+                            <field name="msisdn"/>
+                        </group>
+                        <group>
+                             <field name="apikey" password="True"/>
+                             <field name="payment_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="selcom_pos_terminal_view_tree" model="ir.ui.view">
+        <field name="name">selcom.pos.terminal.view.tree</field>
+        <field name="model">selcom.pos.terminal</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="baseUrl" />
+            </list>
+        </field>
+    </record>
+
+    <record id="selcom_pos_terminal_action" model="ir.actions.act_window">
+        <field name="name">Selcom Pos Terminals</field>
+        <field name="res_model">selcom.pos.terminal</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="selcom_pos_reminal_menu"
+        name="Selcom Pos Terminal"
+        action="selcom_pos_terminal_action"
+        parent="point_of_sale.menu_point_config_product"/>
+
+</odoo>

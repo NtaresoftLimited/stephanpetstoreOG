@@ -1,0 +1,39 @@
+<odoo>
+    <data>
+
+        <!-- inherit sale form add payment info tab-->
+        <record id="view_sale_order_inherit" model="ir.ui.view">
+            <field name="name">view.sale.order.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[last()]" position="before">
+                    <page name="advance_payment_page" string="Payment Information" groups="pways_advance_payment_all.group_sale_advance_payment">
+                        <field name="payment_history_ids" readonly="1">
+                            <list>
+                                <field name="payment_date" string='Date'/>
+                                <field name="journal_id" string='Journal'/>
+                                <field name="advance_amount"/>
+                                <field name="total_amount"/>
+                                <field name="currency_id" groups="base.group_multi_currency"/>
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+                
+                <xpath expr="//button[@id='action_confirm']" position="before">
+                    <button class="oe_highlight" type="object" name="set_sale_advance_payment" string="Advance Payment" invisible="state == 'cancel'" groups="pways_advance_payment_all.group_sale_advance_payment"/>
+                </xpath>
+                <xpath expr="//field[@name='tax_totals']" position="after">
+                    <field name="advance_amount"/>
+                </xpath>
+                <xpath expr="//button[@name='action_view_invoice']" position="after">
+                    <button name="so_paid" string="Payment" type="object" class="oe_stat_button" icon="fa-dollar">
+                        <field name="so_payment_count" widget="statinfo" string="Payment" />    
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_sky_dashboard" model="ir.actions.client">
+        <field name="name">SKY</field>
+        <field name="tag">sky.dashboard</field>
+    </record>
+
+    <!-- One menu only: selecting the app opens the dashboard directly. Restricted to Administrator only. -->
+    <menuitem id="menu_sky_root"
+              name="SKY"
+              action="action_sky_dashboard"
+              web_icon="sky_dashboard,static/description/icon.png"
+              groups="base.group_system"
+              sequence="12"/>
+</odoo>

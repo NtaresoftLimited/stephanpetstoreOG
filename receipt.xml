@@ -1,0 +1,106 @@
+<t t-name="grooming.report_grooming_receipt">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.basic_layout">
+                        <div class="page" style="font-family: monospace; font-size: 13px; width: 100%; padding: 0; margin: 0; color: #000;">
+                            <!-- Header -->
+                            <div class="text-center" style="margin-bottom: 10px;">
+                                <div t-if="env.company.logo" style="margin-bottom: 5px;">
+                                    <img t-att-src="image_data_uri(env.company.logo)" style="max-height: 80px; max-width: 100%;" alt="Company Logo"/>
+                                </div>
+                                <h3 t-if="not env.company.logo" style="margin: 0; font-weight: bold; font-size: 18px;"><span t-esc="env.company.name"/></h3>
+                                <div style="font-size: 11px;">
+                                    <t t-if="env.company.street"><span t-esc="env.company.street"/><br/></t>
+                                    <t t-if="env.company.street2"><span t-esc="env.company.street2"/><br/></t>
+                                    <t t-if="env.company.city"><span t-esc="env.company.city"/></t>
+                                    <t t-if="env.company.state_id">, <span t-esc="env.company.state_id.name"/></t>
+                                    <t t-if="env.company.country_id">, <span t-esc="env.company.country_id.name"/></t>
+                                    <br t-if="env.company.city or env.company.state_id"/>
+                                    <t t-if="env.company.phone">Tel: <span t-esc="env.company.phone"/><br/></t>
+                                    <t t-if="env.company.email">Email: <span t-esc="env.company.email"/></t>
+                                </div>
+                                <div style="border-bottom: 1px dashed #000; margin-top: 5px; margin-bottom: 5px;"/>
+                                <h4 style="margin: 0; font-weight: bold; font-size: 15px;">GROOMING RECEIPT</h4>
+                            </div>
+
+                            <!-- Receipt Info -->
+                            <div style="margin-bottom: 10px; font-size: 12px; line-height: 1.2;">
+                                <strong>Receipt No:</strong> <span t-field="o.name"/><br/>
+                                <strong>Date:</strong> <span t-field="o.appointment_date" t-options="{&quot;widget&quot;: &quot;date&quot;}"/><br/>
+                                <strong>Customer:</strong> <span t-field="o.partner_id"/><br/>
+                                <strong>Phone:</strong> <span t-field="o.customer_phone"/><br/>
+                                <strong>Pet Name:</strong> <span t-field="o.pet_name"/><br/>
+                                <strong>Species:</strong> <span t-field="o.pet_type"/><br/>
+                                <strong>Size/Age:</strong> <span t-field="o.pet_category"/><br/>
+                                <strong>Status:</strong> <span t-field="o.state"/><br/>
+                                <strong>Payment Status:</strong> <span t-field="o.appt_payment_status"/>
+                                <t t-if="o.appt_payment_status == 'paid' and o.appt_payment_method">
+                                    <br/><strong>Payment Method:</strong> <span t-field="o.appt_payment_method"/>
+                                </t>
+                            </div>
+
+                            <div style="border-bottom: 1px dashed #000; margin-bottom: 5px;"/>
+
+                            <!-- Service Details Table -->
+                            <table style="width: 100%; font-size: 12px; margin-bottom: 5px; border-collapse: collapse; border: none;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; padding-bottom: 3px; border-bottom: 1px dashed #000; font-weight: bold;">Description</th>
+                                        <th style="text-align: right; padding-bottom: 3px; border-bottom: 1px dashed #000; font-weight: bold;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="o.sale_order_id">
+                                        <t t-foreach="o.sale_order_id.order_line" t-as="line">
+                                            <tr>
+                                                <td style="text-align: left; padding: 4px 0;">
+                                                    <span t-field="line.name"/>
+                                                </td>
+                                                <td style="text-align: right; padding: 4px 0;">
+                                                    <span t-esc="'{:,.0f}'.format(line.price_subtotal)"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+
+                            <div style="border-bottom: 1px dashed #000; margin-bottom: 5px;"/>
+
+                            <!-- Total -->
+                            <table style="width: 100%; font-size: 14px; font-weight: bold; margin-bottom: 10px; border: none;">
+                                <tr>
+                                    <td style="text-align: left;">TOTAL</td>
+                                    <td style="text-align: right;">TZS <span t-esc="'{:,.0f}'.format(o.total_price)"/></td>
+                                </tr>
+                            </table>
+
+                            <!-- Payment Info -->
+                            <t t-if="o.appt_payment_status == 'paid'">
+                                <div style="text-align: center; margin-top: 5px; font-weight: bold; font-size: 13px;">
+                                    *** PAID ***
+                                    <div t-if="o.appt_payment_method" style="font-size: 11px; font-weight: normal;">
+                                        Payment Method: <span t-field="o.appt_payment_method"/>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-if="o.appt_payment_status == 'not_paid'">
+                                <div style="text-align: center; margin-top: 5px; font-weight: bold; font-size: 13px;">
+                                    *** NOT PAID ***
+                                </div>
+                            </t>
+
+                            <!-- QR Code and Footer -->
+                            <div class="text-center" style="margin-top: 15px; text-align: center;">
+                                <div style="border-bottom: 1px dashed #000; margin-bottom: 10px;"/>
+                                
+                                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAACvklEQVR4nO1bwW3rMAwlaQM5ykAH6CjOBn+kj4zUDeJRvIF9DGCDBSnZSV1AcoAitSq+QxKb70DogRRJKcjwDDp6ig5g/DgoYd/C+HFQwr6F8eOghH0L48dBCfsWxi9hfTCgXl6P+mtGgHGxnV/oz37QE9yC+S0LBgA8q6Dvk3+PZ6jUxMf2fzeoUP4YIpQvIm07aOjWwFcf3fXR/d8LKp3f9ieGrqlYQ/f3/UmAUoTC+fXmGQGq9WFGPrr/ZPxd+jpRcgTwgrYfCNA1wfYosq1nHHRMfqclcqP1lUpeMbSDJunZl8+v9Wc3aD+14Pjl9ZlhlNLK3ZC7RrK1Bvbr/CHj/+j6gG9+JFb1QwtmbZc0iIOVJ8/jq61/HHQwPnjdpPW9N8EAbnoU+epUZNM32/qq+zfVAOObH2uwzq+6ZvCJG9sej+o/GT8O5k2YSqbW+gqcBKzT1Gz5Off9F0BTswrqH6+qL6zvLD/nPd9AcJKkv407Jg1nPKb/ZPw42NfFPla/pmbQmlpIFr9/4nzB3SRKZwznC6Cd8JqkX+rPXtBuZtl8Jztsfwr9rybks0h7WY6O7Pw3+/4X7ml40/+CZGqrr7LVF3SbDR/3XZfX0YbVz1nry9rmapHlI/nh6Ldam2CbX+WqL/gJ87Bq+VXkNiRxmz9nymffGrnJX7jy75hvGDbh5fbOUf3fDyr8/iRzjwjdO8slHQg3Kbvlut1R/d8PKoxf+69W26LxTYvoGqW+QnAytZJK2uZXf+b+JCKeJD/rfAP8xQ4dd9h8I2t9FzCLlpdGKq0RMZwujap5Dv6nQIXzUcuotq8B/zMzYjPLdqyF12/4kwIlGWXzYemPtPWVCzk631jOHECGHHY/J3t9A1Ta0P/6IaXqa+dH2eqL9v/urPQi40dBcfM3GD8OSti3MH4clLBvYfw4cl+fT2pcx0+ITXZSAAAAAElFTkSuQmCC" style="width: 120px; height: 120px; margin: 0 auto; display: block;" alt="QR Code"/>
+                                
+                                <p style="font-size: 11px; margin-top: 10px; font-weight: bold;">Thank you for choosing Stephan's Pet Store!</p>
+                                <p style="font-size: 10px;"><t t-if="env.company.website" t-esc="env.company.website"/><t t-else="">www.stephanspetstore.co.tz</t></p>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </t>

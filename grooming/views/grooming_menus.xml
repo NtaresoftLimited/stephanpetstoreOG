@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    <!-- Dashboard Client Action -->
+    <record id="action_grooming_dashboard" model="ir.actions.client">
+        <field name="name">Grooming Dashboard</field>
+        <field name="tag">grooming.main_dashboard</field>
+    </record>
+
+    <!-- Grooming App Menu (Root) -->
+    <!-- Setting action here makes it the default view when clicking the app icon -->
+    <menuitem id="menu_grooming_root"
+              name="Grooming"
+              web_icon="grooming,static/description/icon.png"
+              action="action_grooming_dashboard"
+              sequence="50"/>
+    
+    <!-- Dashboard Submenu (First item) -->
+    <menuitem id="menu_grooming_dashboard_main"
+              name="Dashboard"
+              parent="menu_grooming_root"
+              action="action_grooming_dashboard"
+              sequence="1"/>
+
+    <!-- Appointments Menu -->
+    <menuitem id="menu_grooming_appointments"
+              name="Appointments"
+              parent="menu_grooming_root"
+              sequence="10"/>
+
+    <!-- Pets Menu -->
+    <menuitem id="menu_grooming_pets"
+              name="Pets"
+              parent="menu_grooming_root"
+              action="action_grooming_pets"
+              sequence="15"/>
+
+    <!-- POS Orders Menu -->
+    <record id="action_grooming_pos_orders" model="ir.actions.act_window">
+        <field name="name">POS Orders</field>
+        <field name="res_model">pos.order</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No POS Orders found.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_grooming_pos_orders"
+              name="POS Orders"
+              parent="menu_grooming_root"
+              action="action_grooming_pos_orders"
+              sequence="20"/>
+    
+    <!-- All Appointments -->
+    <record id="action_grooming_appointments" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">list,kanban,calendar,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+    
+    <menuitem id="menu_all_appointments"
+              name="All Appointments"
+              parent="menu_grooming_appointments"
+              action="action_grooming_appointments"
+              sequence="10"/>
+    
+    <!-- Today's Appointments -->
+    <record id="action_grooming_today" model="ir.actions.act_window">
+        <field name="name">Today's Appointments</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+    
+    <menuitem id="menu_today_appointments"
+              name="Today"
+              parent="menu_grooming_appointments"
+              action="action_grooming_today"
+              sequence="5"/>
+    
+    <!-- Calendar View -->
+    <record id="action_grooming_calendar" model="ir.actions.act_window">
+        <field name="name">Appointment Calendar</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">calendar,list,form</field>
+    </record>
+    
+    <menuitem id="menu_calendar"
+              name="Calendar"
+              parent="menu_grooming_appointments"
+              action="action_grooming_calendar"
+              sequence="20"/>
+    
+    <!-- Configuration Menu -->
+    <menuitem id="menu_grooming_config"
+              name="Configuration"
+              parent="menu_grooming_root"
+              sequence="100"/>
+    
+    <!-- Services -->
+    <record id="action_grooming_services" model="ir.actions.act_window">
+        <field name="name">Services</field>
+        <field name="res_model">grooming.service</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    
+    <menuitem id="menu_services"
+              name="Services"
+              parent="menu_grooming_config"
+              action="action_grooming_services"
+              sequence="10"/>
+              
+    <menuitem id="menu_breeds"
+              name="Breeds"
+              parent="menu_grooming_config"
+              action="action_grooming_breeds"
+              sequence="20"/>
+    
+    <!-- ==================== EXPENSES ==================== -->
+    <menuitem id="menu_grooming_expenses_root"
+              name="Expenses"
+              parent="menu_grooming_root"
+              sequence="40"/>
+
+    <menuitem id="menu_grooming_expenses_dashboard"
+              name="All Expenses"
+              parent="menu_grooming_expenses_root"
+              action="action_grooming_expense"
+              sequence="10"/>
+
+    <!-- ========================================= -->
+    <!-- REPORTING MENU                            -->
+    <!-- ========================================= -->
+    <menuitem id="menu_grooming_reporting"
+              name="Reporting"
+              parent="menu_grooming_root"
+              sequence="50"/>
+    
+    <menuitem id="menu_appointment_analysis"
+              name="Appointment Analysis"
+              parent="menu_grooming_reporting"
+              action="action_grooming_appointment_analysis"
+              sequence="10"/>
+    
+    <menuitem id="menu_revenue_report"
+              name="Revenue Report"
+              parent="menu_grooming_reporting"
+              action="action_grooming_revenue_report"
+              sequence="20"/>
+    </data>
+</odoo>

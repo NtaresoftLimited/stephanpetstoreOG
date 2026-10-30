@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Alternative approach: Create a separate page in the notebook -->
+        <record id="pos_config_view_form_discount_limits_alt" model="ir.ui.view">
+            <field name="name">pos.config.form.discount.limits.alternative</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Discount Settings" name="discount_settings">
+                        <group string="Discount Limits">
+                            <field name="max_percentage_discount" widget="percentage"/>
+                            <field name="max_fixed_amount_discount" widget="monetary"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+        
+        <!-- Another alternative: Place after a specific field -->
+        <record id="pos_config_view_form_discount_limits_alt2" model="ir.ui.view">
+            <field name="name">pos.config.form.discount.limits.alternative2</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <group>
+                        <separator string="Discount Configuration"/>
+                        <group string="Discount Limits" name="discount_limits">
+                            <field name="max_percentage_discount" widget="percentage"/>
+                            <field name="max_fixed_amount_discount" widget="monetary"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

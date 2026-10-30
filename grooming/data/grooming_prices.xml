@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ======================= -->
+        <!-- PRICING MATRIX          -->
+        <!-- ======================= -->
+
+        <!-- STANDARD PACKAGE PRICES -->
+        <!-- Dog -->
+        <record id="price_standard_dog_mini" model="grooming.price">
+            <field name="service_id" ref="grooming_service_standard"/>
+            <field name="species">dog</field>
+            <field name="size_category">mini</field>
+            <field name="price">45000</field>
+        </record>
+        <record id="price_standard_dog_small" model="grooming.price">
+            <field name="service_id" ref="grooming_service_standard"/>
+            <field name="species">dog</field>
+            <field name="size_category">small</field>
+            <field name="price">50000</field>
+        </record>
+        <record id="price_standard_dog_medium" model="grooming.price">
+            <field name="service_id" ref="grooming_service_standard"/>
+            <field name="species">dog</field>
+            <field name="size_category">medium</field>
+            <field name="price">60000</field>
+        </record>
+        <record id="price_standard_dog_large" model="grooming.price">
+            <field name="service_id" ref="grooming_service_standard"/>
+            <field name="species">dog</field>
+            <field name="size_category">large</field>
+            <field name="price">70000</field>
+        </record>
+        <!-- Cat -->
+        <record id="price_standard_cat_kitten" model="grooming.price">
+            <field name="service_id" ref="grooming_service_standard"/>
+            <field name="species">cat</field>
+            <field name="size_category">kitten</field>
+            <field name="price">45000</field>
+        </record>
+        <record id="price_standard_cat_adult" model="grooming.price">
+            <field name="service_id" ref="grooming_service_standard"/>
+            <field name="species">cat</field>
+            <field name="size_category">adult</field>
+            <field name="price">60000</field>
+        </record>
+
+        <!-- PREMIUM PACKAGE PRICES -->
+        <!-- Dog -->
+        <record id="price_premium_dog_mini" model="grooming.price">
+            <field name="service_id" ref="grooming_service_premium"/>
+            <field name="species">dog</field>
+            <field name="size_category">mini</field>
+            <field name="price">50000</field>
+        </record>
+        <record id="price_premium_dog_small" model="grooming.price">
+            <field name="service_id" ref="grooming_service_premium"/>
+            <field name="species">dog</field>
+            <field name="size_category">small</field>
+            <field name="price">60000</field>
+        </record>
+        <record id="price_premium_dog_medium" model="grooming.price">
+            <field name="service_id" ref="grooming_service_premium"/>
+            <field name="species">dog</field>
+            <field name="size_category">medium</field>
+            <field name="price">70000</field>
+        </record>
+        <record id="price_premium_dog_large" model="grooming.price">
+            <field name="service_id" ref="grooming_service_premium"/>
+            <field name="species">dog</field>
+            <field name="size_category">large</field>
+            <field name="price">80000</field>
+        </record>
+        <!-- Cat -->
+        <record id="price_premium_cat_kitten" model="grooming.price">
+            <field name="service_id" ref="grooming_service_premium"/>
+            <field name="species">cat</field>
+            <field name="size_category">kitten</field>
+            <field name="price">60000</field>
+        </record>
+        <record id="price_premium_cat_adult" model="grooming.price">
+            <field name="service_id" ref="grooming_service_premium"/>
+            <field name="species">cat</field>
+            <field name="size_category">adult</field>
+            <field name="price">75000</field>
+        </record>
+
+        <!-- SUPER PREMIUM PACKAGE PRICES -->
+        <!-- Dog -->
+        <record id="price_super_dog_mini" model="grooming.price">
+            <field name="service_id" ref="grooming_service_super"/>
+            <field name="species">dog</field>
+            <field name="size_category">mini</field>
+            <field name="price">60000</field>
+        </record>
+        <record id="price_super_dog_small" model="grooming.price">
+            <field name="service_id" ref="grooming_service_super"/>
+            <field name="species">dog</field>
+            <field name="size_category">small</field>
+            <field name="price">75000</field>
+        </record>
+        <record id="price_super_dog_medium" model="grooming.price">
+            <field name="service_id" ref="grooming_service_super"/>
+            <field name="species">dog</field>
+            <field name="size_category">medium</field>
+            <field name="price">85000</field>
+        </record>
+        <record id="price_super_dog_large" model="grooming.price">
+            <field name="service_id" ref="grooming_service_super"/>
+            <field name="species">dog</field>
+            <field name="size_category">large</field>
+            <field name="price">90000</field>
+        </record>
+        <!-- Cat -->
+        <record id="price_super_cat_kitten" model="grooming.price">
+            <field name="service_id" ref="grooming_service_super"/>
+            <field name="species">cat</field>
+            <field name="size_category">kitten</field>
+            <field name="price">75000</field>
+        </record>
+        <record id="price_super_cat_adult" model="grooming.price">
+            <field name="service_id" ref="grooming_service_super"/>
+            <field name="species">cat</field>
+            <field name="size_category">adult</field>
+            <field name="price">85000</field>
+        </record>
+    </data>
+</odoo>

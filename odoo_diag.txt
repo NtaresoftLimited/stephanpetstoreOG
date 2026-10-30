@@ -1,0 +1,38 @@
+Checking Odoo service status...
+● odoo.service - Odoo
+     Loaded: loaded (/etc/systemd/system/odoo.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2026-06-23 13:13:43 UTC; 3 days ago
+       Docs: http://www.odoo.com
+   Main PID: 571 (python3)
+      Tasks: 11 (limit: 2307)
+     Memory: 895.1M
+        CPU: 11min 14.967s
+     CGroup: /system.slice/odoo.service
+             ├─571 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf
+             ├─730 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf
+             ├─731 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf
+             ├─732 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin gevent -c /etc/odoo.conf
+             ├─733 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf
+             └─734 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf
+
+Jun 23 13:13:43 166.1.227.183 systemd[1]: Started Odoo.
+Jun 23 13:13:52 166.1.227.183 python3[571]: Warn: Can't find .pfb for face 'Courier'
+Jun 23 13:14:03 166.1.227.183 python3[732]: Warn: Can't find .pfb for face 'Courier'
+
+Restarting Odoo service...
+
+Checking Odoo service status after restart...
+● odoo.service - Odoo
+     Loaded: loaded (/etc/systemd/system/odoo.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2026-06-27 13:04:46 UTC; 797ms ago
+       Docs: http://www.odoo.com
+   Main PID: 846987 (python3)
+      Tasks: 1 (limit: 2307)
+     Memory: 26.8M
+        CPU: 263ms
+     CGroup: /system.slice/odoo.service
+             └─846987 /usr/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo.conf
+
+Jun 27 13:04:46 166.1.227.183 systemd[1]: Started Odoo.
+
+Checking last 50 lines of Odoo log...

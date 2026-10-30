@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="grooming.ReplenishmentRequestPopup">
+        <Dialog title="props.title">
+            <div class="form-group p-3">
+                
+                <!-- Product Search -->
+                <div class="mb-3 text-start position-relative">
+                    <label class="form-label text-start w-100 fw-bold">Add Product to Replenishment</label>
+                    <input type="text" class="form-control" placeholder="Search product by name..." t-model="state.searchQuery" t-on-input="onSearchInput" />
+                    
+                    <t t-if="state.searchResults.length > 0">
+                        <div class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                            <t t-foreach="state.searchResults" t-as="product" t-key="product.id">
+                                <button class="list-group-item list-group-item-action text-start" t-on-click="() => this.addProduct(product)">
+                                    <t t-esc="product.display_name" />
+                                </button>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="mb-3 text-start mt-4">
+                    <label class="form-label text-start w-100 fw-bold">Products to Replenish</label>
+                    <table class="table table-sm table-striped mt-2">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th style="width: 120px;">Qty to Request</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="state.cartLines.length === 0">
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No products selected!</td>
+                                </tr>
+                            </t>
+                            <t t-foreach="state.cartLines" t-as="line" t-key="line.product_id">
+                                <tr>
+                                    <td class="align-middle"><t t-esc="line.product_name" /></td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm text-center" t-att-value="line.qty" t-on-change="(e) => this.updateQty(line, e.target.value)" min="1" />
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-sm btn-link text-danger" t-on-click="() => this.removeLine(line)">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="confirm">
+                    Submit Replenishment
+                </button>
+                <button class="btn btn-secondary" t-on-click="cancel">
+                    Cancel
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

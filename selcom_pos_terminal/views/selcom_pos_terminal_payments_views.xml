@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="selcom_pos_terminal_payments_view_form" model="ir.ui.view">
+        <field name="name">selcom.pos.terminal.payments.view.form</field>
+        <field name="model">selcom.pos.terminal.payments</field>
+        <field name="arch" type="xml">
+            <form create='false' edit="false">
+            <header>
+                <field name="status" widget="statusbar" />
+            </header>
+                <sheet>
+                    <div class="oe_title" name="event_type_title">
+                        <h1><field name="name" class="mb-2"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="terminal_id"/>
+                            <field name="session_id"/>
+                            <field name="company_id"/>
+
+                        </group>
+                        <group>
+                            <field name="selcom_uid"/>
+                            <field name="order_id"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="selcom_pos_terminal_payments_view_tree" model="ir.ui.view">
+        <field name="name">selcom.pos.terminal.payments.view.tree</field>
+        <field name="model">selcom.pos.terminal.payments</field>
+        <field name="arch" type="xml">
+            <list create='false' edit="false">
+                <field name="name" />
+                <field name="selcom_uid" />
+                <field name="terminal_id" />
+                <field name="session_id" />
+                <field name="order_id"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="status" widget="badge" decoration-info="status == 'pending'" decoration-success="status == 'paid'" decoration-danger="status in ['failed', 'expired', 'canceled']" />
+            </list>
+        </field>
+    </record>
+
+    <record id="selcom_pos_terminal_payments_action" model="ir.actions.act_window">
+        <field name="name">Selcom Pos Terminals Payments</field>
+        <field name="res_model">selcom.pos.terminal.payments</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

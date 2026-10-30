@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="stephans_preview_website_page" model="website.page">
+        <field name="name">Stephan's Website Preview</field>
+        <field name="url">/stephans-preview</field>
+        <field name="view_id" ref="stephans_website_theme.stephans_preview_page"/>
+        <field name="is_published" eval="True"/>
+    </record>
+    <record id="stephans_grooming_website_page" model="website.page">
+        <field name="name">Stephan's Grooming Studio</field>
+        <field name="url">/stephans-grooming</field>
+        <field name="view_id" ref="stephans_website_theme.grooming_page"/>
+        <field name="is_published" eval="True"/>
+    </record>
+</odoo>

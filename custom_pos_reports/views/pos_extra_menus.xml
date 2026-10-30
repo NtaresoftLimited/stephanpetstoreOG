@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ======================================================== -->
+    <!-- 1. PROFORMA INVOICES ACTIONS                              -->
+    <!-- ======================================================== -->
+    <record id="action_pos_proforma_invoices" model="ir.actions.act_window">
+        <field name="name">Proforma Invoices</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
+        <field name="domain">[]</field>
+        <field name="search_view_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="context">{'search_default_my_quotation': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Proforma Invoice
+            </p>
+            <p>
+                Manage quotations and proforma invoices directly from the Point of Sale module.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_pos_proforma_invoices_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="act_window_id" ref="action_pos_proforma_invoices"/>
+    </record>
+
+    <record id="action_pos_proforma_invoices_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sale.view_order_form"/>
+        <field name="act_window_id" ref="action_pos_proforma_invoices"/>
+    </record>
+
+    <!-- ======================================================== -->
+    <!-- 2. TOP NAVBAR MENUS                                       -->
+    <!-- ======================================================== -->
+    <!-- Exactly ONE top-level Proforma Invoices menu (Restricted to POS Managers / hidden from Cashiers) -->
+    <menuitem id="menu_pos_proforma_top"
+              name="Proforma Invoices"
+              parent="point_of_sale.menu_point_root"
+              action="action_pos_proforma_invoices"
+              groups="point_of_sale.group_pos_manager"
+              sequence="12"/>
+
+    <record id="menu_pos_proforma_top" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('point_of_sale.group_pos_manager')])]"/>
+    </record>
+
+    <!-- ======================================================== -->
+    <!-- 2.1. GROOMING APPOINTMENTS TOP NAVBAR MENU                -->
+    <!-- ======================================================== -->
+    <record id="action_pos_grooming_appointments" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">list,kanban,calendar,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No appointments found.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_pos_appointments_top"
+              name="Appointments"
+              parent="point_of_sale.menu_point_root"
+              action="action_pos_grooming_appointments"
+              sequence="11"/>
+
+    <!-- ======================================================== -->
+    <!-- 3. REMOVE CASH REGISTER IN POS SESSION VIEWS              -->
+    <!-- ======================================================== -->
+    <record id="view_pos_session_form_no_cash_register" model="ir.ui.view">
+        <field name="name">pos.session.form.no.cash.register</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='show_cash_register']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='cash_register_balance_start']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='cash_register_balance_end_real']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_pos_session_tree_no_cash_register" model="ir.ui.view">
+        <field name="name">pos.session.tree.no.cash.register</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='cash_register_balance_start']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='cash_register_balance_end_real']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='cash_register_balance_end']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

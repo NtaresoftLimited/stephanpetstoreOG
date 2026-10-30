@@ -1,0 +1,366 @@
+[
+  {
+    "id": 2262,
+    "name": "Bioline Tea Tree Oil Pet Soap",
+    "list_price": 14300.0,
+    "default_code": false,
+    "qty_available": -2.0
+  },
+  {
+    "id": 759,
+    "name": "Bioline Aloevera Conditioner 1L",
+    "list_price": 51298.0,
+    "default_code": "ITEM-66",
+    "qty_available": 0.0
+  },
+  {
+    "id": 2323,
+    "name": "Bioline Catnip Leaves 20/30gm ",
+    "list_price": 24000.0,
+    "default_code": false,
+    "qty_available": 0.0
+  },
+  {
+    "id": 768,
+    "name": "Bioline Catnip Toys 4Pcs",
+    "list_price": 11700.0,
+    "default_code": "ITEM-75",
+    "qty_available": 116.0
+  },
+  {
+    "id": 1778,
+    "name": "Bioline Chew Stop 120mls",
+    "list_price": 18720.0,
+    "default_code": false,
+    "qty_available": 10.0
+  },
+  {
+    "id": 946,
+    "name": "Bioline Dilutional Bottle 500mls",
+    "list_price": 7800.0,
+    "default_code": "ITEM-253",
+    "qty_available": 2.0
+  },
+  {
+    "id": 2484,
+    "name": "Bioline Eye Care ",
+    "list_price": 23319.0,
+    "default_code": "S-ITEM0829",
+    "qty_available": 144.0
+  },
+  {
+    "id": 1090,
+    "name": "Bioline Flea & Tick Collar For Cat",
+    "list_price": 77999.0,
+    "default_code": "ITEM-397",
+    "qty_available": 12.0
+  },
+  {
+    "id": 783,
+    "name": "Bioline Flea & Tick Collar For Cat Lemon Flavor",
+    "list_price": 18200.0,
+    "default_code": "ITEM-90",
+    "qty_available": 13.0
+  },
+  {
+    "id": 2290,
+    "name": "Bioline Flea and Tick Collar For Dogs ",
+    "list_price": 0.0,
+    "default_code": false,
+    "qty_available": -1.0
+  },
+  {
+    "id": 784,
+    "name": "Bioline Flea and Tick Collar Lemon for Dog",
+    "list_price": 16000.0,
+    "default_code": "ITEM-91",
+    "qty_available": 11.0
+  },
+  {
+    "id": 2307,
+    "name": "Bioline Goat Milk tablets  ",
+    "list_price": 23319.0,
+    "default_code": false,
+    "qty_available": 0.0
+  },
+  {
+    "id": 2457,
+    "name": "Bioline Kitten Shampoo ",
+    "list_price": 17757.0,
+    "default_code": false,
+    "qty_available": 0.0
+  },
+  {
+    "id": 797,
+    "name": "Bioline Long Coat Shampoo For Cat 250mls",
+    "list_price": 17757.0,
+    "default_code": "ITEM-104",
+    "qty_available": 6.0
+  },
+  {
+    "id": 778,
+    "name": "Bioline Matatabi Play Spray For Cat 175mls",
+    "list_price": 20912.0,
+    "default_code": "ITEM-85",
+    "qty_available": 10.0
+  },
+  {
+    "id": 799,
+    "name": "Bioline Mink Oil Shampoo 1L",
+    "list_price": 51258.0,
+    "default_code": "ITEM-106",
+    "qty_available": 2.0
+  },
+  {
+    "id": 885,
+    "name": "Bioline Mink Oil Shampoo 250mls",
+    "list_price": 18200.0,
+    "default_code": "ITEM-192",
+    "qty_available": 6.0
+  },
+  {
+    "id": 877,
+    "name": "Bioline Natural Oil Conditioner 1L",
+    "list_price": 51297.0,
+    "default_code": "ITEM-184",
+    "qty_available": 3.0
+  },
+  {
+    "id": 801,
+    "name": "Bioline Natural Oil Conditioner 250ml",
+    "list_price": 18200.0,
+    "default_code": "ITEM-108",
+    "qty_available": 8.0
+  },
+  {
+    "id": 802,
+    "name": "Bioline Neem Tree Oil Shampoo 1L",
+    "list_price": 51298.0,
+    "default_code": "ITEM-109",
+    "qty_available": 3.0
+  },
+  {
+    "id": 806,
+    "name": "Bioline Paw Balm Care  50g",
+    "list_price": 15210.0,
+    "default_code": "ITEM-113",
+    "qty_available": 15.0
+  },
+  {
+    "id": 769,
+    "name": "Bioline Paw Cleaning Foam for Cats 100ml",
+    "list_price": 27981.0,
+    "default_code": "ITEM-76",
+    "qty_available": 13.0
+  },
+  {
+    "id": 809,
+    "name": "Bioline Peach Blossom 118ml",
+    "list_price": 17757.0,
+    "default_code": "ITEM-116",
+    "qty_available": 21.0
+  },
+  {
+    "id": 810,
+    "name": "Bioline Pet Bubbles",
+    "list_price": 22230.0,
+    "default_code": "ITEM-117",
+    "qty_available": 8.0
+  },
+  {
+    "id": 811,
+    "name": "Bioline Pet Ear Mite 30ml",
+    "list_price": 23319.0,
+    "default_code": "ITEM-118",
+    "qty_available": 6.0
+  },
+  {
+    "id": 899,
+    "name": "Bioline Pet Roller",
+    "list_price": 11700.0,
+    "default_code": "ITEM-206",
+    "qty_available": 7.0
+  },
+  {
+    "id": 813,
+    "name": "Bioline Pet Styptic Powder",
+    "list_price": 23319.0,
+    "default_code": "ITEM-120",
+    "qty_available": 5.0
+  },
+  {
+    "id": 814,
+    "name": "Bioline Probiotics",
+    "list_price": 34970.0,
+    "default_code": "ITEM-121",
+    "qty_available": 61.0
+  },
+  {
+    "id": 815,
+    "name": "Bioline Puppy Pads M",
+    "list_price": 40500.0,
+    "default_code": "ITEM-122",
+    "qty_available": 0.0
+  },
+  {
+    "id": 816,
+    "name": "Bioline Puppy Shampoo 1L",
+    "list_price": 51298.0,
+    "default_code": "ITEM-123",
+    "qty_available": 1.0
+  },
+  {
+    "id": 796,
+    "name": "Bioline Puppy Shampoo 250ml",
+    "list_price": 17757.0,
+    "default_code": "ITEM-103",
+    "qty_available": 5.0
+  },
+  {
+    "id": 993,
+    "name": "Bioline Replacement Tape",
+    "list_price": 11000.0,
+    "default_code": "ITEM-300",
+    "qty_available": 3.0
+  },
+  {
+    "id": 817,
+    "name": "Bioline Stain Remover 300ml",
+    "list_price": 33930.0,
+    "default_code": "ITEM-124",
+    "qty_available": 2.0
+  },
+  {
+    "id": 818,
+    "name": "Bioline Stain Remover For Small Animals 118",
+    "list_price": 17938.0,
+    "default_code": "ITEM-125",
+    "qty_available": 6.0
+  },
+  {
+    "id": 820,
+    "name": "Bioline Tea Tree Oil Shampoo 250ML",
+    "list_price": 17757.0,
+    "default_code": "ITEM-127",
+    "qty_available": 12.0
+  },
+  {
+    "id": 821,
+    "name": "Bioline Teeth Cleaning  Spray 175ml",
+    "list_price": 17757.0,
+    "default_code": "ITEM-128",
+    "qty_available": 12.0
+  },
+  {
+    "id": 1465,
+    "name": "Bioline Tofu Cat Litter 6L",
+    "list_price": 37000.0,
+    "default_code": "ITEM-726",
+    "qty_available": 806.0
+  },
+  {
+    "id": 822,
+    "name": "Bioline Tooth Brush For Small Dog",
+    "list_price": 13991.0,
+    "default_code": "ITEM-129",
+    "qty_available": 7.0
+  },
+  {
+    "id": 900,
+    "name": "Bioline ToothBrush 4pcs Set",
+    "list_price": 13991.0,
+    "default_code": "ITEM-207",
+    "qty_available": 5.0
+  },
+  {
+    "id": 825,
+    "name": "Bioline ToothPaste With Chicken Flavor",
+    "list_price": 11700.0,
+    "default_code": "ITEM-132",
+    "qty_available": 95.0
+  },
+  {
+    "id": 826,
+    "name": "Bioline ToothPaste With Enzyme",
+    "list_price": 27981.0,
+    "default_code": "ITEM-133",
+    "qty_available": 6.0
+  },
+  {
+    "id": 827,
+    "name": "Bioline ToothPaste With Liquid Calcium 50g",
+    "list_price": 27981.0,
+    "default_code": "ITEM-134",
+    "qty_available": 10.0
+  },
+  {
+    "id": 824,
+    "name": "Bioline Toothpaste With Beef Flavor 100g",
+    "list_price": 11700.0,
+    "default_code": "ITEM-131",
+    "qty_available": 37.0
+  },
+  {
+    "id": 828,
+    "name": "Bioline Toothpaste With Orange Flavor 100g",
+    "list_price": 11700.0,
+    "default_code": "ITEM-135",
+    "qty_available": 119.0
+  },
+  {
+    "id": 829,
+    "name": "Bioline Toothpaste With Probiotics",
+    "list_price": 27981.0,
+    "default_code": "ITEM-136",
+    "qty_available": 7.0
+  },
+  {
+    "id": 830,
+    "name": "Bioline Trace Element 160tbs",
+    "list_price": 23319.0,
+    "default_code": "ITEM-137",
+    "qty_available": 67.0
+  },
+  {
+    "id": 831,
+    "name": "Bioline Training Pads L",
+    "list_price": 45000.0,
+    "default_code": "ITEM-138",
+    "qty_available": -4.0
+  },
+  {
+    "id": 833,
+    "name": "Bioline Universal Cosmetics wipes 10Pcs",
+    "list_price": 14300.0,
+    "default_code": "ITEM-140",
+    "qty_available": 74.0
+  },
+  {
+    "id": 834,
+    "name": "Bioline Universal Pet Wipes 30pcs",
+    "list_price": 18720.0,
+    "default_code": "ITEM-141",
+    "qty_available": 23.0
+  },
+  {
+    "id": 835,
+    "name": "Bioline White Coat Shampoo 200ml",
+    "list_price": 17757.0,
+    "default_code": "ITEM-142",
+    "qty_available": 5.0
+  },
+  {
+    "id": 845,
+    "name": "Bravecto Plus for Cat >2,8-6,25 kg",
+    "list_price": 113277.0,
+    "default_code": "ITEM-152",
+    "qty_available": 11.0
+  },
+  {
+    "id": 864,
+    "name": "Ear Care 50mls",
+    "list_price": 13659.0,
+    "default_code": "ITEM-171",
+    "qty_available": 5.0
+  }
+]

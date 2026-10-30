@@ -1,0 +1,68 @@
+$sky-amber: #c77e35;
+$sky-brown: #4e2a15;
+$sky-cream: #faf7f2;
+$sky-border: #eae3d9;
+$sky-text: #222222;
+
+.o_sky_dashboard {
+    background: #fff;
+    color: $sky-text;
+
+    button { font: inherit; }
+    .o_sky_loading { align-items: center; display: flex; gap: .75rem; height: 100%; justify-content: center; color: #766b62; }
+}
+
+.o_sky_header { align-items: center; display: flex; justify-content: space-between; gap: 1rem; }
+.o_sky_header h1 { font-size: 1.75rem; font-weight: 650; margin: .2rem 0; }
+.o_sky_header p { color: #756d66; margin: 0; }
+.o_sky_eyebrow { color: $sky-amber; font-size: .68rem; font-weight: 700; letter-spacing: .16em; }
+.o_sky_refresh { border: 1px solid $sky-border; border-radius: 9px; color: $sky-brown; background: #fff; }
+.o_sky_refresh:hover { border-color: $sky-amber; background: $sky-cream; }
+.o_sky_stock_button { border: 1px solid $sky-brown; border-radius: 9px; color: #fff; background: $sky-brown; }
+.o_sky_stock_button:hover { background: $sky-amber; border-color: $sky-amber; color: #fff; }
+
+.o_sky_metric {
+    align-items: center; background: #fff; border: 1px solid $sky-border; border-radius: 12px; display: flex;
+    gap: 1rem; min-height: 105px; padding: 1.2rem; text-align: left; transition: border-color .2s, box-shadow .2s, transform .2s; width: 100%;
+}
+.o_sky_metric:hover { border-color: rgba($sky-amber, .55); box-shadow: 0 8px 22px rgba(78, 42, 21, .08); transform: translateY(-2px); }
+.o_sky_metric small, .o_sky_metric strong { display: block; }
+.o_sky_metric small { color: #756d66; margin-bottom: .3rem; }
+.o_sky_metric strong { color: $sky-text; font-size: 1.45rem; line-height: 1.15; }
+.o_sky_icon { align-items: center; border-radius: 10px; display: flex; flex: 0 0 45px; height: 45px; justify-content: center; font-size: 1.15rem; }
+.o_sky_icon--amber { background: #fff4e8; color: $sky-amber; }
+.o_sky_icon--brown { background: #f2eae4; color: $sky-brown; }
+.o_sky_icon--sand { background: #f7efe5; color: #9a6839; }
+.o_sky_icon--rose { background: #faece8; color: #b95c3f; }
+
+.o_sky_panel { background: #fff; border: 1px solid $sky-border; border-radius: 12px; overflow: hidden; }
+.o_sky_panel_header { align-items: center; border-bottom: 1px solid $sky-border; display: flex; justify-content: space-between; padding: 1.1rem 1.25rem; }
+.o_sky_panel_header span, .o_sky_panel_header small { display: block; }
+.o_sky_panel_header span, .o_sky_panel_title { font-size: 1rem; font-weight: 650; }
+.o_sky_panel_header small { color: #8a8179; margin-top: .15rem; }
+.o_sky_panel_header button { background: none; border: 0; color: $sky-amber; font-weight: 600; }
+.o_sky_table th { background: $sky-cream; border-bottom-color: $sky-border; color: #756d66; font-size: .72rem; letter-spacing: .06em; padding: .8rem 1.1rem; text-transform: uppercase; }
+.o_sky_table td { border-bottom-color: #f3eee8; padding: .9rem 1.1rem; vertical-align: middle; }
+.o_sky_table tbody tr { cursor: pointer; transition: background .15s; }
+.o_sky_table tbody tr:hover { background: $sky-cream; }
+.o_sky_badge { background: #f4f1ed; border-radius: 999px; color: #6f665f; display: inline-block; font-size: .72rem; padding: .28rem .6rem; text-transform: capitalize; }
+.o_sky_badge--sale, .o_sky_badge--done { background: #edf5e9; color: #486a3c; }
+.o_sky_badge--cancel { background: #faece8; color: #9c4933; }
+
+.o_sky_donut_wrap { display: flex; justify-content: center; padding: 2rem 0 1.5rem; }
+.o_sky_donut { align-items: center; border-radius: 50%; display: flex; height: 180px; justify-content: center; width: 180px; }
+.o_sky_donut > div { align-items: center; background: #fff; border-radius: 50%; display: flex; flex-direction: column; height: 120px; justify-content: center; width: 120px; }
+.o_sky_donut strong { font-size: 1.7rem; }
+.o_sky_donut span { color: #847a72; font-size: .78rem; }
+.o_sky_legend { display: grid; gap: .75rem; }
+.o_sky_legend > div { align-items: center; display: grid; grid-template-columns: 12px 1fr auto; gap: .55rem; color: #635b55; }
+.o_sky_legend i { border-radius: 50%; height: 9px; width: 9px; }
+.o_sky_legend .is-quotation { background: $sky-amber; }
+.o_sky_legend .is-confirmed { background: $sky-brown; }
+.o_sky_legend .is-done { background: #d8b58e; }
+.o_sky_legend .is-cancelled { background: #e8e0d8; }
+
+@media (max-width: 575px) {
+    .o_sky_header { align-items: flex-start; flex-direction: column; }
+    .o_sky_refresh { width: 100%; }
+}

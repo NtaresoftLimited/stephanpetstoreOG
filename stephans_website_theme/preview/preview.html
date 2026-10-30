@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stephan's Pet Store - Local Preview (/stephans-preview)</title>
+    <link rel="stylesheet" href="preview.css">
+    <style>
+        /* Toolbar for local inspection */
+        .preview-bar {
+            background: #222222;
+            color: #ffffff;
+            font-size: 12px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 99999;
+            font-family: Inter, sans-serif;
+            border-bottom: 1px solid #444;
+        }
+        .preview-bar a {
+            color: #e8d1b5;
+            text-decoration: underline;
+        }
+        .preview-badge {
+            background: #c77e35;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-bar">
+        <div>
+            <span class="preview-badge">Safe Local Preview</span>
+            <span>Simulating <strong>/stephans-preview</strong> (Isolated Odoo 20 Theme - Production Untouched)</span>
+        </div>
+        <div>
+            <span>Desktop &bull; Tablet &bull; Mobile Ready</span>
+        </div>
+    </div>
+    
+    <main id="wrap" class="oe_structure stephans-theme">
+        <style>
+                    #wrapwrap > header#top,
+                    #wrapwrap > header.o_header_standard,
+                    #wrapwrap > footer:not(.stephans-footer),
+                    #wrapwrap > .o_footer {
+                        display: none !important;
+                    }
+                    #wrapwrap {
+                        padding-top: 0 !important;
+                        margin-top: 0 !important;
+                    }
+                </style>
+                <header class="stephans-master-header" data-stephans-header="true">
+            <!-- 1. Top Brown Info Bar -->
+            <div class="stephans-topbar">
+                <div class="stephans-topbar__inner">
+                    <div class="stephans-topbar__announcement">
+                        Now Delivering Across Tanzania
+                    </div>
+                    <div class="stephans-topbar__links">
+                        <a href="tel:+255786627873" class="stephans-topbar__link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            Call Us
+                        </a>
+                        <a href="mailto:info@stephanspetstore.co.tz" class="stephans-topbar__link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            Email Us
+                        </a>
+                        <a href="https://wa.me/255769324445" target="_blank" rel="noopener" class="stephans-topbar__link stephans-topbar__link--wa">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#25D366"><path d="M12.01 2.01c-5.52 0-9.99 4.47-9.99 9.99 0 1.77.46 3.44 1.28 4.9L2 22l5.24-1.28c1.42.78 3.05 1.22 4.77 1.22 5.52 0 9.99-4.47 9.99-9.99 0-5.52-4.47-9.99-9.99-9.99z"/><path fill="#FFF" d="M17.47 14.7c-.27-.14-1.61-.8-1.86-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.07-.15.18-.31.2-.58.06-.27-.14-1.15-.43-2.19-1.35-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.42.12-.55.12-.12.27-.32.41-.48.14-.16.18-.28.27-.47.1-.18.05-.35-.02-.48-.06-.14-.61-1.47-.83-2.02-.22-.53-.44-.46-.61-.47-.16-.01-.34-.01-.52-.01-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29 0 1.35.98 2.65 1.12 2.84.14.18 1.93 2.95 4.68 4.14 2.75 1.19 2.75.8 3.25.75.5-.05 1.61-.66 1.84-1.3.23-.64.23-1.19.16-1.3-.06-.11-.25-.18-.52-.32z"/></svg>
+                            Chat With Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Main Header Bar (Logo, Wide Search, 4 User Action Icons) -->
+            <div class="stephans-mainbar">
+                <div class="stephans-mainbar__inner">
+                    <!-- Mobile Hamburger -->
+                    <button class="stephans-mobile-menu-btn" type="button" aria-label="Toggle navigation" data-stephans-menu-button="true">
+                        <span></span><span></span><span></span>
+                    </button>
+
+                    <!-- Logo -->
+                    <a class="stephans-logo" href="/stephans-preview" aria-label="Stephan's Pet Store">
+                        <img src="../static/src/images/branding/logo.png" alt="Stephan's Pet Store"/>
+                    </a>
+
+                    <!-- Search Bar Container -->
+                    <form class="stephans-searchbar" action="/shop" method="get">
+                        <div class="stephans-searchbar__box">
+                            <svg class="stephans-searchbar__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <input type="text" name="search" class="stephans-searchbar__input" placeholder="Search For Products, Brands, and More..." autocomplete="off"/>
+                            <button type="submit" class="stephans-searchbar__btn">SEARCH</button>
+                        </div>
+                    </form>
+
+                    <!-- Right User Actions -->
+                    <div class="stephans-actions">
+                        <!-- Log In -->
+                        <a href="/web/login" class="stephans-action-item">
+                            <div class="stephans-action-item__icon-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#444444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <span class="stephans-action-item__label">LOG IN</span>
+                        </a>
+
+                        <!-- Location -->
+                        <a href="/contactus" class="stephans-action-item">
+                            <div class="stephans-action-item__icon-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#444444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                            </div>
+                            <span class="stephans-action-item__label">LOCATION</span>
+                        </a>
+
+                        <!-- Wishlist -->
+                        <a href="/shop/wishlist" class="stephans-action-item">
+                            <div class="stephans-action-item__icon-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#444444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            </div>
+                            <span class="stephans-action-item__label">WISHLIST</span>
+                        </a>
+
+                        <!-- Bag -->
+                        <a href="/shop/cart" class="stephans-action-item">
+                            <div class="stephans-action-item__icon-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#444444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            </div>
+                            <span class="stephans-action-item__label">BAG</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Category Navigation Bar -->
+            <nav class="stephans-nav-strip" aria-label="Main navigation" data-stephans-menu="true">
+                <div class="stephans-nav-strip__inner">
+                    <ul class="stephans-nav-list">
+                        <li><a href="/shop?search=dog">DOG <span class="stephans-chevron">&#9662;</span></a></li>
+                        <li><a href="/shop?search=cat">CAT <span class="stephans-chevron">&#9662;</span></a></li>
+                        <li><a href="/shop?search=birds">BIRDS <span class="stephans-chevron">&#9662;</span></a></li>
+                        <li><a href="/shop?search=small+animals">SMALL ANIMALS <span class="stephans-chevron">&#9662;</span></a></li>
+                        <li><a href="/shop">BRANDS</a></li>
+                        <li><a href="/grooming" class="stephans-nav-highlight"><span class="stephans-nav-icon">&#9986;</span> GROOMING</a></li>
+                        <li><a href="/contactus" class="stephans-nav-locator"><span class="stephans-nav-icon">&#127970;</span> STORE LOCATOR</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+                <section class="stephans-hero">
+                    <div class="stephans-hero__shade"></div>
+                    <div class="stephans-hero__content">
+                        <p class="stephans-kicker stephans-kicker--light">Happy Pet. Happy Home.</p>
+                        <h1>Everything Your Pet Deserves.</h1>
+                        <div class="stephans-hero__actions">
+                            <a class="stephans-button stephans-button--dark" href="/shop"><img src="../static/src/images/icons/icon-shopping-bag.png" alt=""/>Shop Collection</a>
+                            <a class="stephans-button stephans-button--outline" href="/grooming"><img src="../static/src/images/icons/calendar-stephans.svg" alt=""/>Book Grooming</a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="stephans-pets" aria-label="Shop by pet">
+                    <a href="/shop?search=dogs"><img src="../static/src/images/icons/minimalist-dog.png" alt=""/><strong>Dogs</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=cats"><img src="../static/src/images/icons/minimalist-cat.png" alt=""/><strong>Cats</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=small+animals"><img src="../static/src/images/icons/minimalist-rabbit.png" alt=""/><strong>Small Animals</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=birds"><img src="../static/src/images/icons/minimalist-bird.png" alt=""/><strong>Birds</strong><span>Explore &#8594;</span></a>
+                </section>
+
+                <section class="stephans-section stephans-arrivals">
+                    <div class="stephans-container">
+                        <div class="stephans-heading"><p class="stephans-kicker">New Arrivals</p><h2>Something new, thoughtfully chosen.</h2></div>
+                        <div class="stephans-products">
+                            <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="../static/src/images/products/plush-parrot-dog-toy.png" alt="Plush Parrot Dog Toy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
+                            <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="../static/src/images/products/cat-water-fountain.png" alt="Cat Water Fountain Bubble Boy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
+                            <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="../static/src/images/products/rabbit-house-c.png" alt="Rabbit House C"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
+                            <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="../static/src/images/products/flying-bird-cage.png" alt="Flying Bird Cage Medium"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
+                        </div>
+                        <div class="stephans-section__action"><a class="stephans-button stephans-button--plain" href="/shop">View All Products &#8594;</a></div>
+                    </div>
+                </section>
+
+                <section class="stephans-section stephans-categories">
+                    <div class="stephans-container">
+                        <div class="stephans-heading"><h2>Everything they need,<br/>chosen with care.</h2></div>
+                        <div class="stephans-categories__grid">
+                            <a href="/shop?search=food"><img src="../static/src/images/categories/food.png" alt=""/><strong>Food</strong><span>Shop now &#8594;</span></a>
+                            <a href="/shop?search=treats"><img src="../static/src/images/categories/treats.png" alt=""/><strong>Treats</strong><span>Shop now &#8594;</span></a>
+                            <a href="/shop?search=toys"><img src="../static/src/images/categories/toys.png" alt=""/><strong>Toys</strong><span>Shop now &#8594;</span></a>
+                            <a href="/shop?search=accessories"><img src="../static/src/images/categories/accessories.png" alt=""/><strong>Accessories</strong><span>Shop now &#8594;</span></a>
+                            <a href="/grooming"><img src="../static/src/images/categories/grooming.png" alt=""/><strong>Grooming</strong><span>Book now &#8594;</span></a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="stephans-grooming">
+                    <div class="stephans-container"><div class="stephans-grooming__content"><p class="stephans-kicker">Grooming Studio</p><h2>Professional<br/>Grooming</h2><p>Every appointment is tailored to your pet, with gentle handling and experienced groomers.</p><a class="stephans-button stephans-button--dark" href="/grooming">Book Appointment <img src="../static/src/images/icons/calendar-stephans.svg" alt=""/></a></div></div>
+                </section>
+
+                <section class="stephans-section stephans-reviews">
+                    <div class="stephans-container"><div class="stephans-heading"><p class="stephans-kicker">Loved by Pet Parents</p><h2>A little love, returned.</h2></div><div class="stephans-reviews__grid">
+                        <blockquote><div class="stephans-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>“Really friendly and helpful people. And a really big and good organized store for all pet-owners, they have a big sortiment :)”</p><cite>— Jennifer Pannagl</cite></blockquote>
+                        <blockquote><div class="stephans-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>“Amazing place with great customer service! My cats are loving their new supplies.”</p><cite>— Mark Hoffmann</cite></blockquote>
+                        <blockquote><div class="stephans-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>“East Africa's Number One Pet Store, A Whole New Different Shopping Experience”</p><cite>— Manje Riziq</cite></blockquote>
+                    </div></div>
+                </section>
+
+                <section class="stephans-section stephans-newsletter"><div class="stephans-container"><div class="stephans-newsletter__box"><div><p class="stephans-kicker">Stay in the Know</p><h2>From Stephan's,<br/>occasionally.</h2><p>A considered note on what's new, what's special, and what's worth knowing.</p><form class="stephans-newsletter__form" onsubmit="return false"><label class="visually-hidden" for="stephans-newsletter-email">Your email address</label><input id="stephans-newsletter-email" type="email" placeholder="Your email address"/><button type="submit">Subscribe</button></form><a class="stephans-whatsapp" href="https://wa.me/255769324445" target="_blank" rel="noopener"><img src="../static/src/images/icons/whatsapp-color.svg" alt=""/>Prefer WhatsApp? Talk to us &#8594;</a></div><img class="stephans-newsletter__image" src="../static/src/images/newsletter/newsletter-toys.png" alt="Stephan's pet toys and bowl"/></div></div></section>
+
+                <footer class="stephans-footer">
+            <div class="stephans-container">
+                <!-- Trust Banner Section -->
+                <div class="stephans-trust">
+                    <!-- Fast Delivery -->
+                    <div class="stephans-trust__item">
+                        <svg class="stephans-trust__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#222222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+                            <path d="M15 18H9"/>
+                            <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
+                            <circle cx="17" cy="18.5" r="2.5"/>
+                            <circle cx="7" cy="18.5" r="2.5"/>
+                        </svg>
+                        <div>
+                            <strong>Fast Delivery</strong>
+                            <small>Across Tanzania</small>
+                        </div>
+                    </div>
+
+                    <!-- Top Quality Products -->
+                    <div class="stephans-trust__item">
+                        <svg class="stephans-trust__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#222222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="6"/>
+                            <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.735.508l-6.257-3.29-6.257 3.29a.5.5 0 0 1-.735-.508l1.515-8.526"/>
+                        </svg>
+                        <div>
+                            <strong>Top Quality Products</strong>
+                            <small>For every pet</small>
+                        </div>
+                    </div>
+
+                    <!-- Secure Payments -->
+                    <div class="stephans-trust__item">
+                        <svg class="stephans-trust__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#222222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                        <div>
+                            <strong>Secure Payments</strong>
+                            <small>100% safe checkout</small>
+                        </div>
+                    </div>
+
+                    <!-- Care You Can Trust -->
+                    <div class="stephans-trust__item">
+                        <svg class="stephans-trust__svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#222222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                        </svg>
+                        <div>
+                            <strong>Care You Can Trust</strong>
+                            <small>We're pet lovers too</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Main Grid -->
+                <div class="stephans-footer__grid">
+                    <!-- Column 1: Brand & Socials -->
+                    <div class="stephans-footer__brand">
+                        <img src="../static/src/images/branding/logo.png" alt="Stephan's Pet Store"/>
+                        <p>Premium pet food, accessories, and professional grooming for your beloved companions.</p>
+                        <div class="stephans-socials">
+                            <!-- Instagram -->
+                            <a href="https://instagram.com/stephans_ps" aria-label="Instagram" target="_blank" rel="noopener">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
+                                    <defs>
+                                        <linearGradient id="ig-grad-preview" x1="12" y1="24" x2="12" y2="0" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0" stop-color="#b02e5b"/>
+                                            <stop offset="0.5" stop-color="#dd2a7b"/>
+                                            <stop offset="1" stop-color="#8134af"/>
+                                        </linearGradient>
+                                        <radialGradient id="ig-grad2-preview" cx="0.4" cy="1" r="1.1" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0" stop-color="#feda77"/>
+                                            <stop offset="0.5" stop-color="#f58529"/>
+                                            <stop offset="1" stop-color="transparent"/>
+                                        </radialGradient>
+                                    </defs>
+                                    <rect width="24" height="24" rx="6" fill="url(#ig-grad-preview)"/>
+                                    <rect width="24" height="24" rx="6" fill="url(#ig-grad2-preview)"/>
+                                    <path fill="#FFF" d="M12 7.03a4.97 4.97 0 100 9.94 4.97 4.97 0 000-9.94zm0 8.192a3.222 3.222 0 110-6.444 3.222 3.222 0 010 6.444zm5.02-7.59a1.18 1.18 0 11-2.36 0 1.18 1.18 0 012.36 0zM17.155 4H6.845A2.845 2.845 0 004 6.845v10.31A2.845 2.845 0 006.845 20h10.31A2.845 2.845 0 0020 17.155V6.845A2.845 2.845 0 0017.155 4zM18.25 17.155A1.095 1.095 0 0117.155 18.25H6.845A1.095 1.095 0 015.75 17.155V6.845A1.095 1.095 0 016.845 5.75h10.31A1.095 1.095 0 0118.25 6.845v10.31z"/>
+                                </svg>
+                            </a>
+                            <!-- Facebook -->
+                            <a href="https://facebook.com/stephanspetstore" aria-label="Facebook" target="_blank" rel="noopener">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
+                                    <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    <path fill="#FFF" d="M16.671 15.542l.532-3.469h-3.328v-2.25c0-.949.465-1.874 1.956-1.874h1.514V5.002c0 0-1.374-.235-2.686-.235-2.74 0-4.533 1.662-4.533 4.669v2.637H7.078v3.469h3.047v8.385a12.09 12.09 0 003.75 0v-8.385h2.796z"/>
+                                </svg>
+                            </a>
+                            <!-- WhatsApp -->
+                            <a href="https://wa.me/255786627873" aria-label="WhatsApp" target="_blank" rel="noopener">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
+                                    <path fill="#25D366" d="M12.01 2.01c-5.52 0-9.99 4.47-9.99 9.99 0 1.77.46 3.44 1.28 4.9L2 22l5.24-1.28c1.42.78 3.05 1.22 4.77 1.22 5.52 0 9.99-4.47 9.99-9.99 0-5.52-4.47-9.99-9.99-9.99z"/>
+                                    <path fill="#FFF" d="M17.47 14.7c-.27-.14-1.61-.8-1.86-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.07-.15.18-.31.2-.58.06-.27-.14-1.15-.43-2.19-1.35-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.42.12-.55.12-.12.27-.32.41-.48.14-.16.18-.28.27-.47.1-.18.05-.35-.02-.48-.06-.14-.61-1.47-.83-2.02-.22-.53-.44-.46-.61-.47-.16-.01-.34-.01-.52-.01-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29 0 1.35.98 2.65 1.12 2.84.14.18 1.93 2.95 4.68 4.14 2.75 1.19 2.75.8 3.25.75.5-.05 1.61-.66 1.84-1.3.23-.64.23-1.19.16-1.3-.06-.11-.25-.18-.52-.32z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: SHOP -->
+                    <div>
+                        <h4>Shop</h4>
+                        <a href="/shop?search=dogs">Dogs</a>
+                        <a href="/shop?search=cats">Cats</a>
+                        <a href="/shop?search=small+animals">Small Animals</a>
+                        <a href="/shop?search=pet+food">Pet Food</a>
+                        <a href="/shop?search=accessories">Accessories</a>
+                    </div>
+
+                    <!-- Column 3: GROOMING -->
+                    <div>
+                        <h4>Grooming</h4>
+                        <a href="/grooming">Grooming Services</a>
+                        <a href="/grooming">Grooming Packages</a>
+                        <a href="/grooming">Book Appointment</a>
+                        <a href="/about">About Grooming</a>
+                    </div>
+
+                    <!-- Column 4: ABOUT -->
+                    <div>
+                        <h4>About</h4>
+                        <a href="/about">About Us</a>
+                        <a href="/faqs">FAQs</a>
+                        <a href="/delivery">Delivery</a>
+                        <a href="/return-policy">Returns</a>
+                    </div>
+
+                    <!-- Column 5: CONTACT -->
+                    <div class="stephans-footer__contact">
+                        <h4>Contact</h4>
+                        <div class="stephans-footer__contact-row">
+                            <svg class="stephans-contact__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <a href="tel:+255786627873">+255 786 627 873</a>
+                        </div>
+                        <div class="stephans-footer__contact-row">
+                            <svg class="stephans-contact__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <a href="tel:+255769324445">+255 769 324 445</a>
+                        </div>
+                        <div class="stephans-footer__contact-row">
+                            <svg class="stephans-contact__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                            <p>11 Slipway Rd, Masaki, Dar es Salaam</p>
+                        </div>
+                        <div class="stephans-footer__contact-row">
+                            <svg class="stephans-contact__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                            <p>59 Mikocheni A, Dar es Salaam</p>
+                        </div>
+                        <div class="stephans-footer__contact-row">
+                            <svg class="stephans-contact__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <a href="mailto:info@stephanspetstore.co.tz">info@stephanspetstore.co.tz</a>
+                        </div>
+                        <div class="stephans-footer__hours">
+                            <div class="stephans-footer__contact-row">
+                                <svg class="stephans-contact__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B5A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>Mon – Friday: 9:00 AM – 8:30 PM<br/>Saturday: 10:00 AM – 8:30 PM<br/>Sunday: Closed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Bottom Legal -->
+                <div class="stephans-footer__bottom">
+                    <p>&#169; 2026 Stephan's Pet Store. All rights reserved.</p>
+                    <div>
+                        <a href="/return-policy">Return Policy</a>
+                        <a href="/terms">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // Local interactive mobile menu handler
+        document.addEventListener("DOMContentLoaded", () => {
+            const header = document.querySelector("[data-stephans-header='true']");
+            if (!header) return;
+            const button = header.querySelector("[data-stephans-menu-button='true']");
+            const menu = header.querySelector("[data-stephans-menu='true']");
+            if (!button || !menu) return;
+            button.addEventListener("click", () => {
+                const open = menu.classList.toggle("is-open");
+                button.setAttribute("aria-expanded", String(open));
+            });
+        });
+    </script>
+</body>
+</html>

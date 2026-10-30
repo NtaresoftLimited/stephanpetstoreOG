@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FORM VIEW -->
+    <record id="view_whatsapp_instance_form" model="ir.ui.view">
+        <field name="name">whatsapp.instance.form</field>
+        <field name="model">whatsapp.instance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_message" string="Send Test Message" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="active"/>
+                            <field name="pos_receipt_style"/>
+                        </group>
+                        <group>
+                            <field name="api_url"/>
+                            <field name="instance_id"/>
+                            <field name="token" password="True"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_whatsapp_instance_tree" model="ir.ui.view">
+        <field name="name">whatsapp.instance.list</field>
+        <field name="model">whatsapp.instance</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="instance_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- WIZARD VIEW -->
+    <record id="view_whatsapp_test_wizard_form" model="ir.ui.view">
+        <field name="name">whatsapp.test.wizard.form</field>
+        <field name="model">whatsapp.test.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="instance_id" readonly="1"/>
+                    <field name="phone" placeholder="+255..."/>
+                    <field name="message"/>
+                </group>
+                <footer>
+                    <button name="action_send" string="Send" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_whatsapp_instance" model="ir.actions.act_window">
+        <field name="name">WhatsApp Instances</field>
+        <field name="res_model">whatsapp.instance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

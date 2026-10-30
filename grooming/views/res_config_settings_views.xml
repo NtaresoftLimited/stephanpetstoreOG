@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.grooming</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Grooming" string="Grooming" name="grooming">
+                    <block title="Grooming Extra Charges &amp; Policy" name="grooming_extra_charges">
+                        <setting id="grooming_detangling_fee" string="Detangling Fee" help="Fee charged when detangling is required">
+                            <field name="grooming_detangling_fee" widget="monetary"/>
+                        </setting>
+                        <setting id="grooming_handling_fee" string="Handling Fee" help="Fee charged for difficult pets handling">
+                            <field name="grooming_handling_fee" widget="monetary"/>
+                        </setting>
+                        <setting id="grooming_late_pickup_fee" string="Late Pickup Fee (per Hour)" help="Hourly fee for late pickups">
+                            <field name="grooming_late_pickup_fee" widget="monetary"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="grooming_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module' : 'grooming', 'bin_size': False}</field>
+    </record>
+
+    <menuitem id="grooming_menu_settings"
+        name="Settings"
+        parent="menu_grooming_config"
+        sequence="0"
+        action="grooming_config_settings_action"
+        groups="base.group_system"/>
+</odoo>

@@ -1,0 +1,35 @@
+{
+    'license': 'LGPL-3',
+    'name': 'Custom POS Excel Reports & Expenses',
+    'version': '20.0.1.0.0',
+    'category': 'Point of Sale',
+    'summary': 'POS Reports, Cash Control, and Daily Store Expenses for Stephans Pet Store',
+    'author': 'Antigravity',
+    'depends': ['point_of_sale', 'grooming', 'product', 'account', 'mail'],
+    'data': [
+                'security/ir.access.csv',
+        'data/expense_sequence.xml',
+        'reports/thermal_report.xml',
+        'reports/thermal_template.xml',
+        'reports/a4_template.xml',
+        'data/cron.xml',
+        'views/pos_details_views.xml',
+        'views/pos_order_view.xml',
+        'views/store_expense_views.xml',
+        'views/dashboard_action.xml',
+        'views/brand_views.xml',
+        'views/product_views.xml',
+    ],
+    'assets': {
+        'point_of_sale.assets': [
+            'custom_pos_reports/static/src/xml/ZReportButton.xml',
+            'custom_pos_reports/static/src/js/ZReportButton.js',
+        ],
+        'web.assets_backend': [
+            'custom_pos_reports/static/src/js/dashboard.js',
+            'custom_pos_reports/static/src/xml/dashboard.xml',
+        ],
+    },
+    'installable': True,
+    'application': False,
+}

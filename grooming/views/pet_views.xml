@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+    <!-- Pet Form View -->
+    <record id="view_grooming_pet_form" model="ir.ui.view">
+        <field name="name">grooming.pet.form</field>
+        <field name="model">grooming.pet</field>
+        <field name="arch" type="xml">
+            <form string="Pet">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_appointments" type="object" class="oe_stat_button" icon="fa-calendar">
+                            <field name="appointment_count" widget="statinfo" string="Appointments"/>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                    </div>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Rex"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="species"/>
+                            <field name="breed_id" options="{'no_create': True}"/>
+                            <field name="gender"/>
+                        </group>
+                        <group>
+                            <field name="birth_date"/>
+                            <field name="age"/>
+                            <field name="color"/>
+                            <field name="weight"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Behavioral notes, allergies, etc."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Pet Tree View -->
+    <record id="view_grooming_pet_tree" model="ir.ui.view">
+        <field name="name">grooming.pet.tree</field>
+        <field name="model">grooming.pet</field>
+        <field name="arch" type="xml">
+            <list string="Pets">
+                <field name="name"/>
+                <field name="species"/>
+                <field name="breed_id"/>
+                <field name="partner_id"/>
+                <field name="age"/>
+                <field name="gender"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Pet Kanban View -->
+    <record id="view_grooming_pet_kanban" model="ir.ui.view">
+        <field name="name">grooming.pet.kanban</field>
+        <field name="model">grooming.pet</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="species"/>
+                <field name="breed_id"/>
+                <field name="image_128"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('grooming.pet', 'image_128', record.id.raw_value)" alt="Pet"/>
+                            </div>
+                            <div class="o_kanban_details d-flex flex-column ms-3">
+                                <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                <div><field name="species"/> - <field name="breed_id"/></div>
+                                <div><field name="partner_id"/></div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Pet Search View -->
+    <record id="view_grooming_pet_search" model="ir.ui.view">
+        <field name="name">grooming.pet.search</field>
+        <field name="model">grooming.pet</field>
+        <field name="arch" type="xml">
+            <search string="Search Pets">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="breed_id"/>
+                <filter string="Dogs" name="dogs" domain="[('species', '=', 'dog')]"/>
+                <filter string="Cats" name="cats" domain="[('species', '=', 'cat')]"/>
+                <separator/>
+                <filter string="Owner" name="group_owner" context="{'group_by': 'partner_id'}"/>
+                <filter string="Species" name="group_species" context="{'group_by': 'species'}"/>
+                <filter string="Breed" name="group_breed" context="{'group_by': 'breed_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_grooming_pets" model="ir.actions.act_window">
+        <field name="name">Pets</field>
+        <field name="res_model">grooming.pet</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create your first pet profile!
+          </p>
+        </field>
+    </record>
+    
+    <!-- Breed Views -->
+    <record id="view_grooming_breed_tree" model="ir.ui.view">
+        <field name="name">grooming.breed.tree</field>
+        <field name="model">grooming.breed</field>
+        <field name="arch" type="xml">
+            <list string="Breeds" editable="bottom">
+                <field name="name"/>
+                <field name="species"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="action_grooming_breeds" model="ir.actions.act_window">
+        <field name="name">Breeds</field>
+        <field name="res_model">grooming.breed</field>
+        <field name="view_mode">list</field>
+    </record>
+    </data>
+</odoo>

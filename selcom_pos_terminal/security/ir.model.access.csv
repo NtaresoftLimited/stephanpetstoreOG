@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+selcom_pos_terminal.access_selcom_pos_terminal,access_selcom_pos_terminal,selcom_pos_terminal.model_selcom_pos_terminal,base.group_user,1,1,1,1
+selcom_pos_terminal.access_selcom_pos_terminal_payments,access_selcom_pos_terminal_payments,selcom_pos_terminal.model_selcom_pos_terminal_payments,base.group_user,1,1,1,1
+
+
+

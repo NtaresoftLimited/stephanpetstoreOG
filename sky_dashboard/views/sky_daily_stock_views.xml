@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sky_daily_stock_search" model="ir.ui.view">
+        <field name="name">sky.daily.stock.report.search</field>
+        <field name="model">sky.daily.stock.report</field>
+        <field name="arch" type="xml">
+            <search string="Daily Stock Reports">
+                <field name="name"/>
+                <field name="report_date" string="Date"/>
+                <field name="warehouse_id" string="Warehouse"/>
+                <field name="pos_config_id" string="Branch"/>
+                <filter name="today" string="Today" domain="[('report_date', '=', context_today())]"/>
+                <filter name="last_7_days" string="Last 7 Days" domain="[('report_date', '&gt;=', (context_today() - relativedelta(days=6)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="group_warehouse" string="Warehouse" context="{'group_by': 'warehouse_id'}"/>
+                <filter name="group_date" string="Date" context="{'group_by': 'report_date'}"/>
+                <filter name="group_branch" string="Branch" context="{'group_by': 'pos_config_id'}"/>
+                <searchpanel>
+                    <field name="warehouse_id" icon="fa-building" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_sky_daily_stock_list" model="ir.ui.view">
+        <field name="name">sky.daily.stock.report.list</field>
+        <field name="model">sky.daily.stock.report</field>
+        <field name="arch" type="xml">
+            <list string="Stock Reports" create="false" edit="false" delete="false" decoration-muted="state == 'draft'">
+                <header>
+                    <button name="%(sky_dashboard.action_sky_stock_generate_wizard)d" type="action" string="Generate PDF" class="btn-primary" icon="fa-file-pdf-o"/>
+                </header>
+                <field name="report_date" string="Date"/>
+                <field name="warehouse_id" string="Warehouse"/>
+                <field name="pos_config_id" string="Branch"/>
+                <field name="product_count" string="Products"/>
+                <field name="total_sold_qty" string="Sold" sum="Sold"/>
+                <field name="total_returned_qty" string="Returns" sum="Returns"/>
+                <field name="state" widget="badge"/>
+                <field name="generated_at" string="Created"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sky_daily_stock_form" model="ir.ui.view">
+        <field name="name">sky.daily.stock.report.form</field>
+        <field name="model">sky.daily.stock.report</field>
+        <field name="arch" type="xml">
+            <form string="Stock Report" create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_download_pdf" type="object" string="Download PDF" class="btn-primary" icon="fa-file-pdf-o"/>
+                    <button name="action_regenerate" type="object" string="Regenerate" icon="fa-refresh" groups="sky_dashboard.group_sky_stock_manager" confirm="Recalculate figures for this report?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="report_date" string="Date"/>
+                            <field name="pos_config_id" string="Branch"/>
+                            <field name="warehouse_id" string="Warehouse"/>
+                        </group>
+                        <group>
+                            <field name="product_count" string="Products"/>
+                            <field name="total_sold_qty" string="Sold"/>
+                            <field name="total_returned_qty" string="Returns"/>
+                            <field name="generated_at" string="Created"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" nolabel="1" readonly="1">
+                        <list create="false" edit="false" delete="false" default_order="product_id">
+                            <field name="product_image" widget="image" options="{'size': [48, 48]}" width="56px" string="Photo"/>
+                            <field name="product_id" string="Product"/>
+                            <field name="opening_qty" string="Open" sum="Open"/>
+                            <field name="sold_qty" string="Sold" sum="Sold"/>
+                            <field name="returned_qty" string="Return" sum="Return"/>
+                            <field name="transfer_qty" string="Transfer" sum="Transfer"/>
+                            <field name="adjustment_qty" string="Adj" sum="Adj"/>
+                            <field name="closing_qty" string="Close" sum="Close"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sky_daily_stock" model="ir.actions.act_window">
+        <field name="name">Stock Reports</field>
+        <field name="res_model">sky.daily.stock.report</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sky_daily_stock_search"/>
+        <field name="context">{'search_default_last_7_days': 1, 'search_default_group_warehouse': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Daily stock reports appear automatically after each business day.</p>
+        </field>
+    </record>
+
+    <!-- Top navbar Stock menu: directly opens Inventory Stock page -->
+    <menuitem id="menu_sky_pos_stock"
+              name="Stock"
+              parent="point_of_sale.menu_point_root"
+              action="stock.action_product_stock_view"
+              sequence="45"
+              groups="point_of_sale.group_pos_user"/>
+
+    <!-- Stock menu under Point of Sale > Reporting (Hidden to keep reports minimalist) -->
+    <menuitem id="menu_sky_reporting_stock_generate"
+              name="Stock"
+              parent="point_of_sale.menu_point_rep"
+              action="stock.action_product_stock_view"
+              active="False"
+              sequence="60"/>
+    <record id="menu_sky_reporting_stock_generate" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Stock Report under Point of Sale > Reports (Directly opens Stock Card Wizard) -->
+    <menuitem id="menu_sky_cashiers_stock_report"
+              name="Stock Report"
+              parent="point_of_sale.menu_point_rep"
+              action="action_sky_stock_generate_wizard"
+              sequence="30"/>
+    <!-- Generate Reports wizard menu (Merged into Stock Report above) -->
+    <menuitem id="menu_sky_generate_stock_report"
+              name="Generate Reports"
+              parent="point_of_sale.menu_point_rep"
+              action="action_sky_stock_generate_wizard"
+              active="False"
+              sequence="70"/>
+    <record id="menu_sky_generate_stock_report" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+</odoo>

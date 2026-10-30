@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+access_pos_details_wizard_user,pos.details.wizard user access,pos.details.wizard,point_of_sale.group_pos_user,crud,
+access_product_brand_user,product.brand user access,product.brand,base.group_user,crud,
+access_pos_store_expense_cat_user,pos.store.expense.category user,pos.store.expense.category,point_of_sale.group_pos_user,r,
+access_pos_store_expense_cat_manager,pos.store.expense.category manager,pos.store.expense.category,point_of_sale.group_pos_manager,crud,
+access_pos_store_expense_user,pos.store.expense user,pos.store.expense,point_of_sale.group_pos_user,cru,
+access_pos_store_expense_manager,pos.store.expense manager,pos.store.expense,point_of_sale.group_pos_manager,crud,

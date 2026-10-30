@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data noupdate="0">
+    <!-- ======================= -->
+    <!-- BILLING PRODUCTS        -->
+    <!-- ======================= -->
+    
+    <record id="product_grooming_standard" model="product.product">
+        <field name="name">Grooming - Standard Package</field>
+        <field name="type">service</field>
+        <field name="list_price">50000</field>
+        <field name="default_code">GRM-STD</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_premium" model="product.product">
+        <field name="name">Grooming - Premium Package</field>
+        <field name="type">service</field>
+        <field name="list_price">70000</field>
+        <field name="default_code">GRM-PRM</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_super" model="product.product">
+        <field name="name">Grooming - Super Premium Package</field>
+        <field name="type">service</field>
+        <field name="list_price">85000</field>
+        <field name="default_code">GRM-SPR</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_addon" model="product.product">
+        <field name="name">Grooming - Add-on Treatment</field>
+        <field name="type">service</field>
+        <field name="list_price">10000</field>
+        <field name="default_code">GRM-ADD</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_misc" model="product.product">
+        <field name="name">Grooming - Extra Charges</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="default_code">GRM-MISC</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_handling" model="product.product">
+        <field name="name">Grooming - Behavioral Handling</field>
+        <field name="type">service</field>
+        <field name="list_price">10000</field>
+        <field name="default_code">GRM-HNDL</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_emergency" model="product.product">
+        <field name="name">Grooming - Emergency Charge</field>
+        <field name="type">service</field>
+        <field name="list_price">30000</field>
+        <field name="default_code">GRM-EMRG</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_sedation" model="product.product">
+        <field name="name">Grooming - Sedation</field>
+        <field name="type">service</field>
+        <field name="list_price">5000</field>
+        <field name="default_code">GRM-SEDA</field>
+        <field name="available_in_pos">True</field>
+    </record>
+    
+    <record id="product_grooming_detangling" model="product.product">
+        <field name="name">Grooming - Detangling</field>
+        <field name="type">service</field>
+        <field name="list_price">30000</field>
+        <field name="default_code">GRM-DET</field>
+        <field name="available_in_pos">True</field>
+    </record>
+
+    <!-- ======================= -->
+    <!-- PACKAGES                -->
+    <!-- ======================= -->
+
+    <!-- STANDARD PACKAGE -->
+    <record id="grooming_service_standard" model="grooming.service">
+        <field name="name">Standard Package</field>
+        <field name="sequence">1</field>
+        <field name="description">Includes: Warm bath, blow dry, ear cleaning, brush out &amp; sanitary trim (if needed)</field>
+        <field name="is_addon">False</field>
+        <field name="product_id" ref="product_grooming_standard"/>
+    </record>
+
+    <!-- PREMIUM PACKAGE -->
+    <record id="grooming_service_premium" model="grooming.service">
+        <field name="name">Premium Package</field>
+        <field name="sequence">2</field>
+        <field name="description">Includes: Warm deep clean bath, blow dry, ear cleaning, full hair cut or styling, nail trim &amp; teeth brushing</field>
+        <field name="is_addon">False</field>
+        <field name="product_id" ref="product_grooming_premium"/>
+    </record>
+
+    <!-- SUPER PREMIUM PACKAGE -->
+    <record id="grooming_service_super" model="grooming.service">
+        <field name="name">Super Premium Package</field>
+        <field name="sequence">3</field>
+        <field name="description">Includes: Warm deep clean bath, full cut/styling, nail trim, teeth brushing, de-shedding, flea &amp; tick treatment, soothing paw balm</field>
+        <field name="is_addon">False</field>
+        <field name="product_id" ref="product_grooming_super"/>
+    </record>
+
+    <!-- ======================= -->
+    <!-- ADD-ON SERVICES         -->
+    <!-- ======================= -->
+
+    <record id="grooming_addon_detangling" model="grooming.service">
+        <field name="name">Detangling Treatment</field>
+        <field name="sequence">10</field>
+        <field name="description">Professional detangling for matted fur</field>
+        <field name="is_addon">True</field>
+        <field name="product_id" ref="product_grooming_detangling"/>
+    </record>
+
+    <record id="grooming_addon_flea" model="grooming.service">
+        <field name="name">Flea &amp; Tick Treatment</field>
+        <field name="sequence">11</field>
+        <field name="description">Professional flea and tick treatment</field>
+        <field name="is_addon">True</field>
+        <field name="product_id" ref="product_grooming_addon"/>
+    </record>
+
+
+
+    <!-- Sequence for Grooming Stock Request -->
+    <record id="seq_grooming_stock_request" model="ir.sequence">
+        <field name="name">Grooming Stock Request</field>
+        <field name="code">grooming.stock.request</field>
+        <field name="prefix">SR/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="grooming_addon_nails" model="grooming.service">
+        <field name="name">Nail Trimming</field>
+        <field name="sequence">12</field>
+        <field name="description">Professional nail trimming</field>
+        <field name="is_addon">True</field>
+        <field name="product_id" ref="product_grooming_addon"/>
+    </record>
+
+    <record id="grooming_addon_emergency" model="grooming.service">
+        <field name="name">Emergency Grooming (After 6:30 PM)</field>
+        <field name="sequence">13</field>
+        <field name="description">Late hour grooming service</field>
+        <field name="is_addon">True</field>
+        <field name="product_id" ref="product_grooming_emergency"/>
+    </record>
+
+    <record id="grooming_addon_sedation" model="grooming.service">
+        <field name="name">Mild Sedation</field>
+        <field name="sequence">14</field>
+        <field name="description">Safe sedation under vet supervision</field>
+        <field name="is_addon">True</field>
+        <field name="product_id" ref="product_grooming_sedation"/>
+    </record>
+
+    <record id="grooming_addon_handling" model="grooming.service">
+        <field name="name">Behavioral Handling</field>
+        <field name="sequence">15</field>
+        <field name="description">Extra care for anxious/aggressive pets</field>
+        <field name="is_addon">True</field>
+        <field name="product_id" ref="product_grooming_handling"/>
+    </record>
+
+    <!-- ======================= -->
+    <!-- EMAIL TEMPLATES         -->
+    <!-- ======================= -->
+
+    <record id="email_template_grooming_confirmed" model="mail.template">
+        <field name="name">Grooming: Appointment Confirmation</field>
+        <field name="model_id" ref="model_grooming_appointment"/>
+        <field name="subject">Grooming Appointment Confirmed - {{ object.name }}</field>
+        <field name="email_from">{{ (object.env.company.email or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p>Hello <t t-out="object.partner_id.name or ''"/>,</p>
+                <p>Your grooming appointment for <strong><t t-out="object.pet_name"/></strong> has been confirmed!</p>
+                <p><strong>Date:</strong> <t t-out="object.appointment_date"/></p>
+                <p><strong>Package:</strong> <t t-out="object.service_id.name"/></p>
+                <p><strong>Total Price:</strong> <t t-out="object.total_price" t-options="{'widget': 'monetary', 'display_currency': object.currency_id}"/></p>
+                <br/>
+                <p>We have created your Order <strong t-out="object.sale_order_id.name or ''"></strong>.</p>
+                <p>We look forward to seeing you!</p>
+                <p>Best regards,<br/><t t-out="object.env.company.name"/></p>
+            </div>
+        </field>
+    </record>
+
+</data>
+</odoo>
