@@ -1,11 +1,11 @@
 @media(min-width:768px){
-  .stephans-mega{width:650px;max-width:90vw;grid-template-columns:1fr;gap:0;padding:0;overflow:hidden;background:rgba(255,255,255,.97);backdrop-filter:blur(12px)}
+  .stephans-mega{width:650px;max-width:calc(100vw - 32px);grid-template-columns:1fr;gap:0;padding:0;overflow:hidden;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);transition:width .24s ease,opacity .18s ease,transform .18s ease,visibility .18s}
   .stephans-mega__intro{display:none}
   .stephans-mega__grid{padding:16px;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-height:calc(100vh - 190px);overflow-y:auto}
   .stephans-mega__group{min-height:190px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;border:1px solid #f0ebe5;border-radius:12px;background:#fff;transition:box-shadow .2s ease}
   .stephans-mega__group:hover{box-shadow:0 7px 20px rgba(58,37,23,.08)}
   .stephans-mega__group.is-extra{display:none}
-  .stephans-mega.is-expanded{width:min(1280px,94vw)}
+  .stephans-mega.is-expanded{width:min(1200px,calc(100vw - 32px))}
   .stephans-mega.is-expanded .stephans-mega__grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   .stephans-mega.is-expanded .stephans-mega__group.is-extra{display:flex}
 }
@@ -21,6 +21,7 @@
 .stephans-mega__expand:hover span{background:#4a3224}
 .stephans-mega-item.is-open>button>span{display:inline-block;transform:rotate(180deg)}
 @media(max-width:767px){
+  .stephans-topbar{display:none}
   .stephans-mega{padding:12px;background:#fffdfb}
   .stephans-mega__grid{grid-template-columns:1fr;gap:10px}
   .stephans-mega__group{padding:13px;border:1px solid #f0ebe5;border-radius:12px;text-align:left}

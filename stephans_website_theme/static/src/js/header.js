@@ -74,7 +74,10 @@ const initializeStephanHeader = () => {
                     const expanded = group.classList.toggle("is-items-open");
                     toggle.setAttribute("aria-expanded", String(expanded));
                     toggle.firstElementChild.textContent = expanded ? "Show less" : "View all";
-                    item.querySelector(":scope > .stephans-mega")?.classList.add("is-expanded");
+                    const mega = item.querySelector(":scope > .stephans-mega");
+                    mega?.classList.add("is-expanded");
+                    const expandButton = mega?.querySelector("[data-mega-expand]");
+                    if (expandButton) expandButton.firstElementChild.textContent = expandButton.dataset.labelFeatured;
                 });
             });
 
@@ -85,10 +88,22 @@ const initializeStephanHeader = () => {
                 const expanded = mega.classList.toggle("is-expanded");
                 expandButton.firstElementChild.textContent = expanded ? expandButton.dataset.labelFeatured : expandButton.dataset.labelAll;
             });
+
+            item.addEventListener("focusin", open);
+            item.addEventListener("focusout", (event) => {
+                if (!item.contains(event.relatedTarget)) scheduleClose();
+            });
         });
 
-        const updateScrollState = () => header.classList.toggle("is-scrolled", window.scrollY > 72);
-        window.addEventListener("scroll", updateScrollState, { passive: true });
+        let scrollFrame = 0;
+        const updateScrollState = () => {
+            scrollFrame = 0;
+            header.classList.toggle("is-scrolled", window.scrollY > 72);
+        };
+        const requestScrollUpdate = () => {
+            if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollState);
+        };
+        window.addEventListener("scroll", requestScrollUpdate, { passive: true });
         updateScrollState();
 
         document.addEventListener("click", (event) => {
