@@ -24,6 +24,7 @@ export class RequestStockPopup extends Component {
             cartLines: [],
             searchQuery: "",
             searchResults: [],
+            stockAvailability: {}, // { product_id: qty }
         });
 
         onWillStart(async () => {
@@ -50,9 +51,17 @@ export class RequestStockPopup extends Component {
 
             // Load warehouses (exclude current destination warehouse from source choices)
             const allWh = await this.orm.call("stock.warehouse", "search_read", [[]], {
-                fields: ["id", "name"],
+                fields: ["id", "name", "code"],
             });
             this.state.warehouses = allWh.filter(wh => wh.id !== this.state.destinationWarehouseId);
+
+            // Default to Masaki Back Storage (code MBS)
+            const mbsWh = allWh.find(wh => wh.code === 'MBS');
+            if (mbsWh) {
+                this.state.sourceWarehouseId = mbsWh.id;
+            } else if (this.state.warehouses.length > 0) {
+                this.state.sourceWarehouseId = this.state.warehouses[0].id;
+            }
 
             // Load products from current order initially
             const currentOrder = this.props.pos.get_order();
@@ -62,8 +71,40 @@ export class RequestStockPopup extends Component {
                     product_name: line.get_product().display_name,
                     qty: line.get_quantity()
                 }));
+                const pids = this.state.cartLines.map(l => l.product_id);
+                await this.fetchStockAvailability(pids);
             }
         });
+    }
+
+    async fetchStockAvailability(productIds) {
+        if (!productIds || productIds.length === 0) return;
+        const toFetch = productIds.filter(id => !(id in this.state.stockAvailability));
+        if (toFetch.length === 0) return;
+        try {
+            const availMap = await this.orm.call(
+                "stock.picking", 
+                "get_warehouse_stock_availability", 
+                [this.state.sourceWarehouseId, toFetch]
+            );
+            if (availMap) {
+                Object.assign(this.state.stockAvailability, availMap);
+            }
+        } catch (e) {
+            console.warn("Failed to fetch warehouse stock availability:", e);
+        }
+    }
+
+    async onSourceWarehouseChange(ev) {
+        this.state.sourceWarehouseId = parseInt(ev.target.value);
+        this.state.stockAvailability = {};
+        const pids = this.state.cartLines.map(l => l.product_id);
+        if (pids.length > 0) {
+            await this.fetchStockAvailability(pids);
+        }
+        if (this.state.searchResults.length > 0) {
+            await this.fetchStockAvailability(this.state.searchResults.map(p => p.id));
+        }
     }
 
     async onSearchProduct(ev) {
@@ -81,6 +122,9 @@ export class RequestStockPopup extends Component {
                     limit: 10
                 });
                 this.state.searchResults = products;
+                if (products.length > 0) {
+                    this.fetchStockAvailability(products.map(p => p.id));
+                }
             } catch (error) {
                 console.error("Product search failed:", error);
             }
@@ -99,9 +143,25 @@ export class RequestStockPopup extends Component {
                 product_name: product.display_name,
                 qty: 1
             });
+            if (!(product.id in this.state.stockAvailability)) {
+                this.fetchStockAvailability([product.id]);
+            }
         }
         this.state.searchQuery = "";
         this.state.searchResults = [];
+    }
+
+    setMaxQty(line) {
+        const avail = this.state.stockAvailability[line.product_id] || 0;
+        if (avail > 0) {
+            line.qty = avail;
+        }
+    }
+
+    isQtyExceeded(line) {
+        const avail = this.state.stockAvailability[line.product_id];
+        if (avail === undefined || avail === null) return false;
+        return parseFloat(line.qty) > avail;
     }
 
     updateQty(line, amount) {
@@ -146,8 +206,6 @@ export class RequestStockPopup extends Component {
             // Clear the cart if we started with cart items
             const currentOrder = this.props.pos.get_order();
             if (currentOrder) {
-                // optional: if they wanted to clear pos cart. 
-                // Let's leave it clearing cart just in case they requested from cart
                 this.props.pos.removeOrder(currentOrder);
                 this.props.pos.add_new_order();
             }

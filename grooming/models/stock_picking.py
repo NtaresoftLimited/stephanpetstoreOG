@@ -315,27 +315,37 @@ class StockPicking(models.Model):
         return picking.id
 
     @api.model
-    def get_backstore_stock_availability(self, product_ids):
+    def get_warehouse_stock_availability(self, warehouse_id, product_ids):
         """
-        Returns a dict {product_id: available_quantity} for Masaki Back Storage (MBS).
+        Returns a dict {str(product_id): available_quantity} for the given warehouse (or MBS if not specified).
         """
         if not product_ids:
             return {}
-        mbs_wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
-        if not mbs_wh:
-            mbs_wh = self.env['stock.warehouse'].sudo().search([('name', 'ilike', 'Masaki Back Storage')], limit=1)
-        if not mbs_wh or not mbs_wh.lot_stock_id:
+        wh = None
+        if warehouse_id:
+            try:
+                wh = self.env['stock.warehouse'].sudo().browse(int(warehouse_id))
+            except Exception:
+                wh = None
+        if not wh or not wh.exists():
+            wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
+        if not wh or not wh.lot_stock_id:
             return {str(pid): 0.0 for pid in product_ids}
 
         quants = self.env['stock.quant'].sudo().search([
             ('product_id', 'in', product_ids),
-            ('location_id', 'child_of', mbs_wh.lot_stock_id.id)
+            ('location_id', 'child_of', wh.lot_stock_id.id)
         ])
         res = {str(pid): 0.0 for pid in product_ids}
         for q in quants:
             key = str(q.product_id.id)
             res[key] = res.get(key, 0.0) + q.quantity
         return res
+
+    @api.model
+    def get_backstore_stock_availability(self, product_ids):
+        mbs_wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
+        return self.get_warehouse_stock_availability(mbs_wh.id if mbs_wh else False, product_ids)
 
     @api.model
     def create_replenishment_from_pos(self, payload):
