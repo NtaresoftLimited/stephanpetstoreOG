@@ -1,6 +1,6 @@
 {
     "name": "SKY Dashboard",
-    "version": "18.0.1.0.3",
+    "version": "18.0.1.1.0",
     "category": "Productivity/Dashboard",
     "summary": "Minimal business overview for Stephans Pet Store",
     "author": "Stephans Pet Store",

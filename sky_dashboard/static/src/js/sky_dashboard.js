@@ -20,7 +20,7 @@ export class SkyDashboard extends Component {
         const isoDate = (date) => date.toISOString().slice(0, 10);
         this.state = useState({
             loading: true, data: null, canAccessDailyStock: false, isAdmin: false,
-            dateStart: isoDate(monday), dateEnd: isoDate(sunday), configId: 0,
+            dateStart: isoDate(monday), dateEnd: isoDate(sunday), configId: 0, activeTab: "business",
         });
 
         onWillStart(async () => {
@@ -59,6 +59,7 @@ export class SkyDashboard extends Component {
     onDateStart(event) { this.state.dateStart = event.target.value; }
     onDateEnd(event) { this.state.dateEnd = event.target.value; }
     onConfigChange(event) { this.state.configId = Number(event.target.value || 0); }
+    setActiveTab(tab) { this.state.activeTab = tab; }
 
     formatMoney(value) {
         return `${this.state.data.currency} ${new Intl.NumberFormat().format(value || 0)}`;
@@ -94,6 +95,28 @@ export class SkyDashboard extends Component {
             return `${colors[index % colors.length]} ${start}% ${cursor}%`;
         });
         return `background: conic-gradient(${segments.join(", ")})`;
+    }
+
+    get groomingStatusDonutStyle() {
+        const data = this.state.data.grooming;
+        const values = [data.pending, data.confirmed, data.in_progress, data.completed, data.cancelled];
+        const colors = ["#D8A019", "#16AFC4", "#8C32E8", "#18B886", "#B95C3F"];
+        const total = values.reduce((sum, value) => sum + value, 0);
+        if (!total) return "background: #eee8e1";
+        let cursor = 0;
+        return `background: conic-gradient(${values.map((value, index) => {
+            const start = cursor;
+            cursor += (value / total) * 100;
+            return `${colors[index]} ${start}% ${cursor}%`;
+        }).join(", ")})`;
+    }
+
+    get groomingPaymentDonutStyle() {
+        const data = this.state.data.grooming;
+        const total = data.paid + data.unpaid;
+        if (!total) return "background: #eee8e1";
+        const paidShare = (data.paid / total) * 100;
+        return `background: conic-gradient(#18B886 0 ${paidShare}%, #E8E0D8 ${paidShare}% 100%)`;
     }
 
     openOrders(domain = []) {
@@ -167,6 +190,34 @@ export class SkyDashboard extends Component {
             type: "ir.actions.act_window", name: "Store Expenses", res_model: "pos.store.expense",
             views: [[false, "list"], [false, "form"]], domain,
         });
+    }
+
+    openGroomingAppointments(domain = []) {
+        this.action.doAction({
+            type: "ir.actions.act_window", name: "Grooming Appointments",
+            res_model: "grooming.appointment",
+            views: [[false, "list"], [false, "kanban"], [false, "calendar"], [false, "form"]],
+            domain,
+        });
+    }
+
+    openGroomingAppointment(appointmentId) {
+        this.action.doAction({
+            type: "ir.actions.act_window", name: "Grooming Appointment",
+            res_model: "grooming.appointment", res_id: appointmentId,
+            views: [[false, "form"]],
+        });
+    }
+
+    newGroomingBooking() {
+        this.action.doAction({
+            type: "ir.actions.act_window", name: "New Grooming Booking",
+            res_model: "grooming.appointment", views: [[false, "form"]], target: "current",
+        });
+    }
+
+    openGroomingExpenses() {
+        this.action.doAction("grooming.action_grooming_expense");
     }
 }
 

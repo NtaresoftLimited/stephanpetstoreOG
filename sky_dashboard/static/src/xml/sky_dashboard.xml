@@ -26,7 +26,12 @@
                     </div>
                 </header>
 
-                <div t-if="state.isAdmin and state.data.pending_replenishments" class="alert alert-warning d-flex align-items-center justify-content-between mb-3 p-3 shadow-sm rounded-3">
+                <nav class="o_sky_tabs mb-4" aria-label="SKY dashboard sections">
+                    <button t-att-class="state.activeTab === 'business' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('business')"><i class="fa fa-line-chart me-2"/>Business overview</button>
+                    <button t-att-class="state.activeTab === 'grooming' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('grooming')"><i class="fa fa-paw me-2"/>Grooming</button>
+                </nav>
+
+                <div t-if="state.activeTab === 'business' and state.isAdmin and state.data.pending_replenishments" class="alert alert-warning d-flex align-items-center justify-content-between mb-3 p-3 shadow-sm rounded-3">
                     <div class="d-flex align-items-center">
                         <i class="fa fa-exclamation-triangle fa-lg me-3 text-warning"/>
                         <div>
@@ -36,7 +41,7 @@
                     <button class="btn btn-sm btn-dark ms-3" t-on-click="openReplenishments">Review &amp; Approve</button>
                 </div>
 
-                <section class="row g-3 mb-3">
+                <section t-if="state.activeTab === 'business'" class="row g-3 mb-3">
                     <div class="col-12 col-sm-6 col-xl-3">
                         <button class="o_sky_metric" t-on-click="() => this.openOrders([['state', 'in', ['sale', 'done']]])">
                             <span class="o_sky_icon o_sky_icon--amber"><i class="fa fa-line-chart"/></span>
@@ -63,7 +68,7 @@
                     </div>
                 </section>
 
-                <section class="o_sky_weekly mt-4 mb-4">
+                <section t-if="state.activeTab === 'business'" class="o_sky_weekly mt-4 mb-4">
                     <div class="o_sky_panel">
                         <div class="o_sky_weekly_header">
                             <div><span class="o_sky_eyebrow">POINT OF SALE</span><h2>Weekly sales &amp; expenses</h2></div>
@@ -150,7 +155,7 @@
                     </div>
                 </section>
 
-                <section class="row g-3">
+                <section t-if="state.activeTab === 'business'" class="row g-3">
                     <div class="col-12 col-xl-8">
                         <div class="o_sky_panel h-100">
                             <div class="o_sky_panel_header"><div><span>Recent activity</span><small>Latest sales orders</small></div><button t-on-click="() => this.openOrders()">View all</button></div>
@@ -182,6 +187,66 @@
                                 <div><i class="is-cancelled"/><span>Cancelled</span><strong t-esc="state.data.states.cancelled"/></div>
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <section t-if="state.activeTab === 'grooming'" class="o_sky_grooming">
+                    <div class="o_sky_panel mb-3">
+                        <div class="o_sky_weekly_header">
+                            <div><span class="o_sky_eyebrow">GROOMING STUDIO</span><h2>Appointments &amp; performance</h2><p class="text-muted mb-0">The same selected period used by SKY: <b t-esc="state.dateStart"/> to <b t-esc="state.dateEnd"/></p></div>
+                            <div class="o_sky_filters">
+                                <label>From<input type="date" class="form-control" t-att-value="state.dateStart" t-on-change="onDateStart"/></label>
+                                <label>To<input type="date" class="form-control" t-att-value="state.dateEnd" t-on-change="onDateEnd"/></label>
+                                <button class="btn o_sky_stock_button align-self-end" t-on-click="loadDashboard"><i class="fa fa-filter me-2"/>Apply</button>
+                            </div>
+                        </div>
+                        <div class="o_sky_quick_actions p-3">
+                            <button t-on-click="newGroomingBooking"><i class="fa fa-plus-circle"/><span>New booking</span></button>
+                            <button t-on-click="() => this.openGroomingAppointments([['state', '=', 'pending']])"><i class="fa fa-clock-o"/><span>Pending requests</span><b t-esc="state.data.grooming.pending"/></button>
+                            <button t-on-click="openGroomingExpenses"><i class="fa fa-file-text-o"/><span>Record expense</span></button>
+                            <button t-on-click="() => this.openGroomingAppointments()"><i class="fa fa-calendar"/><span>All appointments</span></button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments()"><small>Total</small><strong t-esc="state.data.grooming.total"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'pending']])"><small>Pending</small><strong t-esc="state.data.grooming.pending"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'confirmed']])"><small>Confirmed</small><strong t-esc="state.data.grooming.confirmed"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', 'in', ['checked_in', 'in_progress', 'halfway']]])"><small>In progress</small><strong t-esc="state.data.grooming.in_progress"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'completed']])"><small>Completed</small><strong t-esc="state.data.grooming.completed"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric is-cancelled" t-on-click="() => this.openGroomingAppointments([['state', '=', 'cancelled']])"><small>Cancelled</small><strong t-esc="state.data.grooming.cancelled"/></button></div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric"><small>Expected value</small><strong t-esc="formatMoney(state.data.grooming.expected_value)"/></div></div>
+                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric"><small>Completed paid revenue</small><strong t-esc="formatMoney(state.data.grooming.revenue)"/></div></div>
+                        <div class="col-6 col-xl-3"><button class="o_sky_week_metric is-expense" t-on-click="openGroomingExpenses"><small>Posted expenses</small><strong t-esc="formatMoney(state.data.grooming.expenses)"/></button></div>
+                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric is-net"><small>Net grooming income</small><strong t-esc="formatMoney(state.data.grooming.net_income)"/></div></div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-xl-8">
+                            <div class="o_sky_panel h-100">
+                                <div class="o_sky_panel_header"><div><span>Recent appointments</span><small>Latest appointments in the selected period</small></div><button t-on-click="() => this.openGroomingAppointments()">View all</button></div>
+                                <div class="table-responsive"><table class="table o_sky_table mb-0"><thead><tr><th>Date</th><th>Pet</th><th>Customer</th><th>Service</th><th>Status</th><th>Payment</th><th class="text-end">Total</th></tr></thead><tbody>
+                                    <tr t-foreach="state.data.grooming.recent" t-as="appointment" t-key="appointment.id" t-on-click="() => this.openGroomingAppointment(appointment.id)"><td t-esc="appointment.date"/><td class="fw-semibold" t-esc="appointment.pet"/><td t-esc="appointment.customer"/><td t-esc="appointment.service"/><td><span t-attf-class="o_sky_badge o_sky_badge--{{ appointment.state }}" t-esc="appointment.state_label"/></td><td><span t-attf-class="o_sky_badge o_sky_badge--{{ appointment.payment_status }}" t-esc="appointment.payment_status"/></td><td class="text-end fw-semibold" t-esc="formatMoney(appointment.amount)"/></tr>
+                                    <tr t-if="!state.data.grooming.recent.length"><td colspan="7" class="text-center text-muted py-5">No appointments in this period.</td></tr>
+                                </tbody></table></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-4">
+                            <div class="o_sky_panel h-100 p-4">
+                                <div class="o_sky_panel_title">Appointment status</div>
+                                <div class="o_sky_donut_wrap"><div class="o_sky_donut" t-att-style="groomingStatusDonutStyle"><div><strong t-esc="state.data.grooming.total"/><span>Total</span></div></div></div>
+                                <div class="o_sky_legend o_sky_groom_legend"><div><i class="is-pending"/><span>Pending</span><strong t-esc="state.data.grooming.pending"/></div><div><i class="is-groom-confirmed"/><span>Confirmed</span><strong t-esc="state.data.grooming.confirmed"/></div><div><i class="is-groom-progress"/><span>In progress</span><strong t-esc="state.data.grooming.in_progress"/></div><div><i class="is-groom-completed"/><span>Completed</span><strong t-esc="state.data.grooming.completed"/></div><div><i class="is-groom-cancelled"/><span>Cancelled</span><strong t-esc="state.data.grooming.cancelled"/></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title">Payment status</div><div class="o_sky_donut_wrap"><div class="o_sky_donut" t-att-style="groomingPaymentDonutStyle"><div><strong t-esc="state.data.grooming.paid"/><span>Paid</span></div></div></div><div class="o_sky_legend"><div><i class="is-groom-completed"/><span>Paid</span><strong t-esc="state.data.grooming.paid"/></div><div><i class="is-cancelled"/><span>Unpaid</span><strong t-esc="state.data.grooming.unpaid"/></div></div></div></div>
+                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title mb-3">Daily appointments</div><div class="o_sky_daily_list border-0 p-0"><div t-foreach="state.data.grooming.days" t-as="day" t-key="day.date"><span t-esc="day.label"/><b t-esc="day.appointments"/></div></div></div></div>
+                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title mb-3">Branch attribution</div><div class="o_sky_payment_rows"><div t-foreach="state.data.grooming.branches" t-as="branch" t-key="branch.name"><span><b t-esc="branch.name"/><small class="d-block text-muted"><t t-esc="branch.appointments"/> appointments</small></span><b t-esc="formatMoney(branch.revenue)"/></div><p t-if="!state.data.grooming.branches.length" class="text-muted">No branch data in this period.</p></div></div></div>
                     </div>
                 </section>
             </div>

@@ -136,6 +136,33 @@ class SaleOrder(models.Model):
             branch_rows.append(values)
         branch_rows.sort(key=lambda row: row["name"])
 
+        grooming_domain = [("appointment_date", ">=", utc_start), ("appointment_date", "<", utc_end)]
+        appointments = self.env["grooming.appointment"].search(
+            grooming_domain, order="appointment_date desc, id desc"
+        )
+        grooming_states = defaultdict(int)
+        grooming_days = {key: {"date": value["date"], "label": value["label"], "appointments": 0} for key, value in days.items()}
+        grooming_branches = defaultdict(lambda: {"appointments": 0, "revenue": 0.0})
+        for appointment in appointments:
+            grooming_states[appointment.state] += 1
+            local_date = fields.Datetime.context_timestamp(self, appointment.appointment_date).date().isoformat()
+            if local_date in grooming_days:
+                grooming_days[local_date]["appointments"] += 1
+            branch_name = appointment.pos_order_id.config_id.display_name if appointment.pos_order_id and appointment.pos_order_id.config_id else _("Unassigned")
+            grooming_branches[branch_name]["appointments"] += 1
+            if appointment.state == "completed" and appointment.appt_payment_status == "paid":
+                grooming_branches[branch_name]["revenue"] += appointment.total_price
+
+        paid_appointments = appointments.filtered(lambda appointment: appointment.appt_payment_status == "paid")
+        completed_paid = paid_appointments.filtered(lambda appointment: appointment.state == "completed")
+        grooming_revenue = sum(completed_paid.mapped("total_price"))
+        grooming_expenses = self.env["grooming.expense"].search([
+            ("date", ">=", start), ("date", "<=", end), ("state", "=", "posted")
+        ])
+        grooming_expense_total = sum(grooming_expenses.mapped("amount"))
+        grooming_state_labels = dict(self.env["grooming.appointment"]._fields["state"].selection)
+        grooming_category_labels = dict(self.env["grooming.expense"]._fields["category"].selection)
+
         company = self.env.company
         return {
             "currency": company.currency_id.symbol or company.currency_id.name,
@@ -171,5 +198,41 @@ class SaleOrder(models.Model):
                     "category": expense.category_id.display_name, "description": expense.description,
                     "state": expense.state, "amount": expense.amount,
                 } for expense in expense_records[:20]],
+            },
+            "grooming": {
+                "total": len(appointments),
+                "pending": grooming_states["pending"],
+                "confirmed": grooming_states["confirmed"],
+                "in_progress": sum(grooming_states[state] for state in ("checked_in", "in_progress", "halfway")),
+                "completed": grooming_states["completed"],
+                "cancelled": grooming_states["cancelled"],
+                "paid": len(paid_appointments),
+                "unpaid": len(appointments - paid_appointments),
+                "revenue": grooming_revenue,
+                "expenses": grooming_expense_total,
+                "net_income": grooming_revenue - grooming_expense_total,
+                "expected_value": sum(appointments.filtered(lambda appointment: appointment.state != "cancelled").mapped("total_price")),
+                "days": list(grooming_days.values()),
+                "branches": [
+                    {"name": name, **values}
+                    for name, values in sorted(grooming_branches.items())
+                ],
+                "recent": [{
+                    "id": appointment.id,
+                    "reference": appointment.name,
+                    "date": fields.Datetime.context_timestamp(self, appointment.appointment_date).strftime("%d %b %Y, %H:%M"),
+                    "customer": appointment.partner_id.display_name,
+                    "pet": appointment.pet_name,
+                    "service": appointment.service_id.display_name or _("Treatments Only"),
+                    "state": appointment.state,
+                    "state_label": grooming_state_labels.get(appointment.state, appointment.state),
+                    "payment_status": appointment.appt_payment_status,
+                    "amount": appointment.total_price,
+                } for appointment in appointments[:8]],
+                "expense_rows": [{
+                    "id": expense.id, "date": expense.date.isoformat(), "name": expense.name,
+                    "category": grooming_category_labels.get(expense.category, expense.category),
+                    "amount": expense.amount,
+                } for expense in grooming_expenses[:8]],
             },
         }

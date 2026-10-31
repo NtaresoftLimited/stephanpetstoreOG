@@ -22,6 +22,10 @@ $sky-text: #222222;
 .o_sky_stock_button:hover { background: $sky-amber; border-color: $sky-amber; color: #fff; }
 .o_sky_replenish_button { border: 1px solid #198754; border-radius: 9px; color: #fff; background: #198754; font-weight: 500; }
 .o_sky_replenish_button:hover { background: #157347; border-color: #146c43; color: #fff; }
+.o_sky_tabs { border-bottom: 1px solid $sky-border; display: flex; gap: 1.5rem; }
+.o_sky_tabs button { background: transparent; border: 0; border-bottom: 3px solid transparent; color: #756d66; font-weight: 600; padding: .65rem .15rem; }
+.o_sky_tabs button:hover { color: $sky-brown; }
+.o_sky_tabs button.is-active { border-bottom-color: $sky-amber; color: $sky-brown; }
 
 .o_sky_metric {
     align-items: center; background: #fff; border: 1px solid $sky-border; border-radius: 12px; display: flex;
@@ -50,6 +54,12 @@ $sky-text: #222222;
 .o_sky_badge { background: #f4f1ed; border-radius: 999px; color: #6f665f; display: inline-block; font-size: .72rem; padding: .28rem .6rem; text-transform: capitalize; }
 .o_sky_badge--sale, .o_sky_badge--done { background: #edf5e9; color: #486a3c; }
 .o_sky_badge--cancel { background: #faece8; color: #9c4933; }
+.o_sky_badge--paid { background: #edf5e9; color: #486a3c; }
+.o_sky_badge--not_paid, .o_sky_badge--cancelled { background: #faece8; color: #9c4933; }
+.o_sky_badge--pending { background: #fff5d9; color: #8b6713; }
+.o_sky_badge--confirmed { background: #e7f7fa; color: #12768a; }
+.o_sky_badge--checked_in, .o_sky_badge--in_progress, .o_sky_badge--halfway { background: #f1e8fd; color: #7130b0; }
+.o_sky_badge--completed { background: #e7f7ef; color: #187b59; }
 
 .o_sky_donut_wrap { display: flex; justify-content: center; padding: 2rem 0 1.5rem; }
 .o_sky_donut { align-items: center; border-radius: 50%; display: flex; height: 180px; justify-content: center; width: 180px; }
@@ -93,6 +103,23 @@ button.o_sky_week_metric { cursor: pointer; }
 .o_sky_mini_legend i { background: $sky-brown; border-radius: 50%; height: 8px; width: 8px; }
 .o_sky_mini_legend .is-expenses { background: $sky-amber; }
 .o_sky_mini_legend .is-payment { background: #d8b58e; }
+.o_sky_quick_actions { display: grid; gap: .75rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.o_sky_quick_actions button { align-items: center; background: #fff; border: 1px solid $sky-border; border-radius: 10px; color: $sky-text; display: flex; gap: .65rem; min-height: 58px; padding: .8rem 1rem; text-align: left; }
+.o_sky_quick_actions button:hover { border-color: $sky-amber; background: $sky-cream; }
+.o_sky_quick_actions i { color: $sky-amber; font-size: 1.15rem; }
+.o_sky_quick_actions span { flex: 1; }
+.o_sky_quick_actions b { background: $sky-brown; border-radius: 99px; color: #fff; font-size: .7rem; padding: .2rem .45rem; }
+.o_sky_groom_metric { background: #fff; border: 1px solid $sky-border; border-radius: 10px; display: block; min-height: 82px; padding: .9rem; text-align: left; width: 100%; }
+.o_sky_groom_metric:hover { border-color: $sky-amber; box-shadow: 0 6px 16px rgba(78, 42, 21, .06); }
+.o_sky_groom_metric small, .o_sky_groom_metric strong { display: block; }
+.o_sky_groom_metric small { color: #756d66; margin-bottom: .3rem; }
+.o_sky_groom_metric strong { font-size: 1.4rem; }
+.o_sky_groom_metric.is-cancelled strong { color: #b95c3f; }
+.o_sky_groom_legend .is-pending { background: #d8a019; }
+.o_sky_groom_legend .is-groom-confirmed { background: #16afc4; }
+.o_sky_groom_legend .is-groom-progress { background: #8c32e8; }
+.o_sky_groom_legend .is-groom-completed, .o_sky_legend .is-groom-completed { background: #18b886; }
+.o_sky_groom_legend .is-groom-cancelled { background: #b95c3f; }
 
 @media (max-width: 575px) {
     .o_sky_header { align-items: flex-start; flex-direction: column; }
@@ -102,4 +129,5 @@ button.o_sky_week_metric { cursor: pointer; }
     .o_sky_mini_donut_panel { align-items: flex-start; }
     .o_sky_mini_donut { flex-basis: 110px; height: 110px; width: 110px; }
     .o_sky_mini_donut > div { height: 74px; width: 74px; }
+    .o_sky_quick_actions { grid-template-columns: 1fr 1fr; }
 }
