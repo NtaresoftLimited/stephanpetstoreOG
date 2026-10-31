@@ -90,6 +90,8 @@
                             <li><a href="/stores" class="stephans-nav-locator"><img src="/stephans_website_theme/static/src/images/branding/favicon.png" alt="" class="stephans-nav-icon"/> Store Locator</a></li>
                         </ul>
                     </div>
+                    <!-- Apple-style Backdrop Overlay -->
+                    <div class="stephans-backdrop" aria-hidden="true" data-stephans-backdrop="true"></div>
                 </nav>
             </div>
         </header>

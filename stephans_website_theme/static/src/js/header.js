@@ -16,6 +16,9 @@ const initializeStephanHeader = () => {
                 item.classList.remove("is-open");
                 item.querySelector(":scope > button")?.setAttribute("aria-expanded", "false");
             });
+            if (!except) {
+                header.classList.remove("is-mega-open");
+            }
         };
 
         const resetMega = (item) => {
@@ -47,6 +50,7 @@ const initializeStephanHeader = () => {
                 window.clearTimeout(closeTimer);
                 closeMegas(item);
                 item.classList.add("is-open");
+                header.classList.add("is-mega-open");
                 button?.setAttribute("aria-expanded", "true");
             };
             const scheduleClose = () => {
@@ -105,6 +109,14 @@ const initializeStephanHeader = () => {
         };
         window.addEventListener("scroll", requestScrollUpdate, { passive: true });
         updateScrollState();
+
+        const backdrop = header.querySelector("[data-stephans-backdrop='true']");
+        backdrop?.addEventListener("click", () => {
+            megaItems.forEach(resetMega);
+            pinnedItem = null;
+            closeMegas();
+            setMobileOpen(false);
+        });
 
         document.addEventListener("click", (event) => {
             if (!header.contains(event.target)) {
