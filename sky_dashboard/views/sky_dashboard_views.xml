@@ -17,6 +17,7 @@
               name="Dashboard"
               parent="menu_sky_root"
               action="action_sky_dashboard"
+              groups="base.group_system"
               sequence="1"/>
 
     <menuitem id="menu_sky_replenishments"
@@ -25,4 +26,15 @@
               action="grooming.action_grooming_stock_request"
               groups="base.group_system"
               sequence="5"/>
+
+    <!-- Replace any groups left by older module versions: SKY is admin-only. -->
+    <record id="menu_sky_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+    <record id="menu_sky_dashboard" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+    <record id="menu_sky_replenishments" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
 </odoo>

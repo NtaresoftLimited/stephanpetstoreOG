@@ -10,7 +10,7 @@
                     <div>
                         <span class="o_sky_eyebrow">STEPHANS PET STORE</span>
                         <h1>SKY Dashboard</h1>
-                        <p>A clear view of your business this month.</p>
+                        <p>Administrator overview of sales, stock and operating expenses.</p>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <button class="btn o_sky_refresh" t-on-click="loadDashboard">
@@ -60,6 +60,78 @@
                             <span class="o_sky_icon o_sky_icon--rose"><i class="fa fa-cube"/></span>
                             <span><small>Low stock items</small><strong t-esc="state.data.low_stock"/></span>
                         </button>
+                    </div>
+                </section>
+
+                <section class="o_sky_weekly mt-4 mb-4">
+                    <div class="o_sky_panel">
+                        <div class="o_sky_weekly_header">
+                            <div><span class="o_sky_eyebrow">POINT OF SALE</span><h2>Weekly sales &amp; expenses</h2></div>
+                            <div class="o_sky_filters">
+                                <label>From<input type="date" class="form-control" t-att-value="state.dateStart" t-on-change="onDateStart"/></label>
+                                <label>To<input type="date" class="form-control" t-att-value="state.dateEnd" t-on-change="onDateEnd"/></label>
+                                <label>Point of Sale
+                                    <select class="form-select" t-on-change="onConfigChange">
+                                        <option value="0" t-att-selected="state.configId === 0">All locations</option>
+                                        <option t-foreach="state.data.pos_configs" t-as="config" t-key="config.id" t-att-value="config.id" t-att-selected="state.configId === config.id" t-esc="config.name"/>
+                                    </select>
+                                </label>
+                                <button class="btn o_sky_stock_button align-self-end" t-on-click="loadDashboard"><i class="fa fa-filter me-2"/>Apply</button>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 p-3">
+                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Gross sales</small><strong t-esc="formatMoney(state.data.weekly.gross_sales)"/></div></div>
+                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Returns</small><strong t-esc="formatMoney(state.data.weekly.returns)"/></div></div>
+                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Net sales</small><strong t-esc="formatMoney(state.data.weekly.net_sales)"/></div></div>
+                            <div class="col-6 col-lg"><button class="o_sky_week_metric is-expense" t-on-click="openExpenses"><small>Expenses</small><strong t-esc="formatMoney(state.data.weekly.expenses)"/></button></div>
+                            <div class="col-12 col-lg"><div class="o_sky_week_metric is-net"><small>Net after expenses</small><strong t-esc="formatMoney(state.data.weekly.net_after_expenses)"/></div></div>
+                        </div>
+                        <div class="o_sky_week_facts px-3 pb-3">
+                            <span><b t-esc="state.data.weekly.orders"/> orders</span>
+                            <span><b t-esc="state.data.weekly.items"/> items</span>
+                            <span>Average order <b t-esc="formatMoney(state.data.weekly.average_order)"/></span>
+                        </div>
+
+                        <div class="row g-3 px-3 pb-3">
+                            <div class="col-12 col-xl-8">
+                                <div class="table-responsive o_sky_inner_table">
+                                    <table class="table o_sky_table mb-0">
+                                        <thead><tr><th>Location</th><th class="text-end">Orders</th><th class="text-end">Sales</th><th class="text-end">Returns</th><th class="text-end">Expenses</th><th class="text-end">After expenses</th></tr></thead>
+                                        <tbody>
+                                            <tr t-foreach="state.data.weekly.branches" t-as="branch" t-key="branch.id" t-on-click="() => this.openPosOrders(branch.id)">
+                                                <td class="fw-semibold" t-esc="branch.name"/><td class="text-end" t-esc="branch.orders"/>
+                                                <td class="text-end" t-esc="formatMoney(branch.sales)"/><td class="text-end" t-esc="formatMoney(branch.returns)"/>
+                                                <td class="text-end" t-esc="formatMoney(branch.expenses)"/><td class="text-end fw-semibold" t-esc="formatMoney(branch.net_after_expenses)"/>
+                                            </tr>
+                                            <tr t-if="!state.data.weekly.branches.length"><td colspan="6" class="text-center text-muted py-4">No sales or approved expenses in this period.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-12 col-xl-4">
+                                <div class="o_sky_daily_list">
+                                    <div class="o_sky_panel_title mb-2">Daily movement</div>
+                                    <div t-foreach="state.data.weekly.days" t-as="day" t-key="day.date">
+                                        <span t-esc="day.label"/><small><b t-esc="formatMoney(day.sales)"/> sales · <b t-esc="formatMoney(day.expenses)"/> expenses</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 px-3 pb-3">
+                            <div class="col-12 col-lg-5">
+                                <div class="o_sky_panel_title mb-2">Payments received</div>
+                                <div class="o_sky_payment_rows"><div t-foreach="state.data.weekly.payments" t-as="payment" t-key="payment.name"><span t-esc="payment.name"/><b t-esc="formatMoney(payment.amount)"/></div><p t-if="!state.data.weekly.payments.length" class="text-muted">No payments.</p></div>
+                            </div>
+                            <div class="col-12 col-lg-7">
+                                <div class="o_sky_panel_title mb-2">Approved and paid expenses</div>
+                                <div class="table-responsive o_sky_inner_table"><table class="table o_sky_table mb-0"><thead><tr><th>Date</th><th>Branch</th><th>Category</th><th class="text-end">Amount</th></tr></thead><tbody>
+                                    <tr t-foreach="state.data.weekly.expense_rows" t-as="expense" t-key="expense.id" t-on-click="openExpenses"><td t-esc="expense.date"/><td t-esc="expense.branch"/><td t-esc="expense.category"/><td class="text-end" t-esc="formatMoney(expense.amount)"/></tr>
+                                    <tr t-if="!state.data.weekly.expense_rows.length"><td colspan="4" class="text-center text-muted py-4">No approved expenses.</td></tr>
+                                </tbody></table></div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

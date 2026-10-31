@@ -64,7 +64,28 @@ $sky-text: #222222;
 .o_sky_legend .is-done { background: #d8b58e; }
 .o_sky_legend .is-cancelled { background: #e8e0d8; }
 
+.o_sky_weekly_header { align-items: flex-end; border-bottom: 1px solid $sky-border; display: flex; justify-content: space-between; gap: 1rem; padding: 1.2rem; }
+.o_sky_weekly_header h2 { font-size: 1.25rem; margin: .2rem 0 0; }
+.o_sky_filters { align-items: flex-end; display: flex; flex-wrap: wrap; gap: .65rem; }
+.o_sky_filters label { color: #756d66; font-size: .72rem; font-weight: 600; }
+.o_sky_filters .form-control, .o_sky_filters .form-select { margin-top: .25rem; min-width: 145px; }
+.o_sky_week_metric { background: $sky-cream; border: 1px solid $sky-border; border-radius: 10px; display: block; min-height: 78px; padding: .9rem; text-align: left; width: 100%; }
+.o_sky_week_metric small, .o_sky_week_metric strong { display: block; }
+.o_sky_week_metric small { color: #756d66; margin-bottom: .35rem; }
+.o_sky_week_metric strong { font-size: 1.15rem; }
+button.o_sky_week_metric { cursor: pointer; }
+.o_sky_week_metric.is-expense { background: #fff6ef; }
+.o_sky_week_metric.is-net { background: #edf5e9; }
+.o_sky_week_facts { color: #756d66; display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.o_sky_inner_table { border: 1px solid $sky-border; border-radius: 9px; }
+.o_sky_daily_list { border: 1px solid $sky-border; border-radius: 9px; padding: 1rem; }
+.o_sky_daily_list > div:not(.o_sky_panel_title) { align-items: center; border-top: 1px solid #f3eee8; display: flex; justify-content: space-between; padding: .48rem 0; }
+.o_sky_daily_list small { color: #756d66; }
+.o_sky_payment_rows > div { border-bottom: 1px solid #f3eee8; display: flex; justify-content: space-between; padding: .55rem 0; }
+
 @media (max-width: 575px) {
     .o_sky_header { align-items: flex-start; flex-direction: column; }
     .o_sky_refresh { width: 100%; }
+    .o_sky_weekly_header { align-items: stretch; flex-direction: column; }
+    .o_sky_filters, .o_sky_filters label, .o_sky_filters .form-control, .o_sky_filters .form-select { width: 100%; }
 }

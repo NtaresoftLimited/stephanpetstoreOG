@@ -12,7 +12,16 @@ export class SkyDashboard extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.user = user;
-        this.state = useState({ loading: true, data: null, canAccessDailyStock: false, isAdmin: false });
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        const isoDate = (date) => date.toISOString().slice(0, 10);
+        this.state = useState({
+            loading: true, data: null, canAccessDailyStock: false, isAdmin: false,
+            dateStart: isoDate(monday), dateEnd: isoDate(sunday), configId: 0,
+        });
 
         onWillStart(async () => {
             let canAccessDailyStock = false;
@@ -35,9 +44,21 @@ export class SkyDashboard extends Component {
 
     async loadDashboard() {
         this.state.loading = true;
-        this.state.data = await this.orm.call("sale.order", "get_sky_dashboard_data", []);
+        this.state.data = await this.orm.call("sale.order", "get_sky_dashboard_data", [], {
+            options: {
+                date_start: this.state.dateStart,
+                date_end: this.state.dateEnd,
+                config_id: this.state.configId,
+            },
+        });
+        this.state.dateStart = this.state.data.weekly.date_start;
+        this.state.dateEnd = this.state.data.weekly.date_end;
         this.state.loading = false;
     }
+
+    onDateStart(event) { this.state.dateStart = event.target.value; }
+    onDateEnd(event) { this.state.dateEnd = event.target.value; }
+    onConfigChange(event) { this.state.configId = Number(event.target.value || 0); }
 
     formatMoney(value) {
         return `${this.state.data.currency} ${new Intl.NumberFormat().format(value || 0)}`;
@@ -98,6 +119,31 @@ export class SkyDashboard extends Component {
 
     openReplenishments() {
         this.action.doAction("grooming.action_grooming_stock_request");
+    }
+
+    openPosOrders(configId = 0) {
+        const domain = [
+            ["date_order", ">=", `${this.state.dateStart} 00:00:00`],
+            ["date_order", "<=", `${this.state.dateEnd} 23:59:59`],
+            ["state", "in", ["paid", "done", "invoiced"]],
+        ];
+        if (configId) domain.push(["config_id", "=", configId]);
+        this.action.doAction({
+            type: "ir.actions.act_window", name: "Point of Sale Orders", res_model: "pos.order",
+            views: [[false, "list"], [false, "form"]], domain,
+        });
+    }
+
+    openExpenses() {
+        const domain = [
+            ["date", ">=", this.state.dateStart], ["date", "<=", this.state.dateEnd],
+            ["state", "in", ["approved", "paid"]],
+        ];
+        if (this.state.configId) domain.push(["pos_config_id", "=", this.state.configId]);
+        this.action.doAction({
+            type: "ir.actions.act_window", name: "Store Expenses", res_model: "pos.store.expense",
+            views: [[false, "list"], [false, "form"]], domain,
+        });
     }
 }
 
