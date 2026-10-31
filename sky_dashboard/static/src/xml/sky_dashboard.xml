@@ -120,6 +120,21 @@
                         </div>
 
                         <div class="row g-3 px-3 pb-3">
+                            <div class="col-12 col-md-6">
+                                <div class="o_sky_mini_donut_panel">
+                                    <div class="o_sky_mini_donut" t-att-style="weeklyFinanceDonutStyle"><div><strong t-esc="formatMoney(state.data.weekly.net_after_expenses)"/><span>after expenses</span></div></div>
+                                    <div class="o_sky_mini_legend"><h3>Sales &amp; expenses</h3><div><i class="is-sales"/>Net sales <b t-esc="formatMoney(state.data.weekly.net_sales)"/></div><div><i class="is-expenses"/>Expenses <b t-esc="formatMoney(state.data.weekly.expenses)"/></div></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="o_sky_mini_donut_panel">
+                                    <div class="o_sky_mini_donut" t-att-style="paymentDonutStyle"><div><strong t-esc="state.data.weekly.payments.length"/><span>payment methods</span></div></div>
+                                    <div class="o_sky_mini_legend"><h3>Payment mix</h3><div t-foreach="state.data.weekly.payments.slice(0, 4)" t-as="payment" t-key="payment.name"><i class="is-payment"/> <span t-esc="payment.name"/><b t-esc="formatMoney(payment.amount)"/></div><div t-if="!state.data.weekly.payments.length" class="text-muted">No payments in this period.</div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 px-3 pb-3">
                             <div class="col-12 col-lg-5">
                                 <div class="o_sky_panel_title mb-2">Payments received</div>
                                 <div class="o_sky_payment_rows"><div t-foreach="state.data.weekly.payments" t-as="payment" t-key="payment.name"><span t-esc="payment.name"/><b t-esc="formatMoney(payment.amount)"/></div><p t-if="!state.data.weekly.payments.length" class="text-muted">No payments.</p></div>

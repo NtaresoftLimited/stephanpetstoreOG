@@ -31,11 +31,11 @@ $sky-text: #222222;
 .o_sky_metric small, .o_sky_metric strong { display: block; }
 .o_sky_metric small { color: #756d66; margin-bottom: .3rem; }
 .o_sky_metric strong { color: $sky-text; font-size: 1.45rem; line-height: 1.15; }
-.o_sky_icon { align-items: center; border-radius: 10px; display: flex; flex: 0 0 45px; height: 45px; justify-content: center; font-size: 1.15rem; }
-.o_sky_icon--amber { background: #fff4e8; color: $sky-amber; }
-.o_sky_icon--brown { background: #f2eae4; color: $sky-brown; }
-.o_sky_icon--sand { background: #f7efe5; color: #9a6839; }
-.o_sky_icon--rose { background: #faece8; color: #b95c3f; }
+.o_sky_icon { align-items: center; background: transparent; display: flex; flex: 0 0 32px; height: 45px; justify-content: center; font-size: 1.25rem; }
+.o_sky_icon--amber { color: $sky-amber; }
+.o_sky_icon--brown { color: $sky-brown; }
+.o_sky_icon--sand { color: #9a6839; }
+.o_sky_icon--rose { color: #b95c3f; }
 
 .o_sky_panel { background: #fff; border: 1px solid $sky-border; border-radius: 12px; overflow: hidden; }
 .o_sky_panel_header { align-items: center; border-bottom: 1px solid $sky-border; display: flex; justify-content: space-between; padding: 1.1rem 1.25rem; }
@@ -82,10 +82,24 @@ button.o_sky_week_metric { cursor: pointer; }
 .o_sky_daily_list > div:not(.o_sky_panel_title) { align-items: center; border-top: 1px solid #f3eee8; display: flex; justify-content: space-between; padding: .48rem 0; }
 .o_sky_daily_list small { color: #756d66; }
 .o_sky_payment_rows > div { border-bottom: 1px solid #f3eee8; display: flex; justify-content: space-between; padding: .55rem 0; }
+.o_sky_mini_donut_panel { align-items: center; border: 1px solid $sky-border; border-radius: 10px; display: flex; gap: 1.25rem; min-height: 190px; padding: 1.1rem; }
+.o_sky_mini_donut { align-items: center; border-radius: 50%; display: flex; flex: 0 0 140px; height: 140px; justify-content: center; width: 140px; }
+.o_sky_mini_donut > div { align-items: center; background: #fff; border-radius: 50%; display: flex; flex-direction: column; height: 94px; justify-content: center; padding: .5rem; text-align: center; width: 94px; }
+.o_sky_mini_donut strong { font-size: .9rem; line-height: 1.15; }
+.o_sky_mini_donut span { color: #847a72; font-size: .67rem; }
+.o_sky_mini_legend { flex: 1; min-width: 0; }
+.o_sky_mini_legend h3 { font-size: 1rem; margin: 0 0 .75rem; }
+.o_sky_mini_legend > div { align-items: center; display: grid; gap: .45rem; grid-template-columns: 9px 1fr auto; margin: .5rem 0; }
+.o_sky_mini_legend i { background: $sky-brown; border-radius: 50%; height: 8px; width: 8px; }
+.o_sky_mini_legend .is-expenses { background: $sky-amber; }
+.o_sky_mini_legend .is-payment { background: #d8b58e; }
 
 @media (max-width: 575px) {
     .o_sky_header { align-items: flex-start; flex-direction: column; }
     .o_sky_refresh { width: 100%; }
     .o_sky_weekly_header { align-items: stretch; flex-direction: column; }
     .o_sky_filters, .o_sky_filters label, .o_sky_filters .form-control, .o_sky_filters .form-select { width: 100%; }
+    .o_sky_mini_donut_panel { align-items: flex-start; }
+    .o_sky_mini_donut { flex-basis: 110px; height: 110px; width: 110px; }
+    .o_sky_mini_donut > div { height: 74px; width: 74px; }
 }

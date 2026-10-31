@@ -73,6 +73,29 @@ export class SkyDashboard extends Component {
         return `background: conic-gradient(#C77E35 0 ${quotation}%, #4E2A15 ${quotation}% ${confirmed}%, #D8B58E ${confirmed}% ${done}%, #E8E0D8 ${done}% 100%)`;
     }
 
+    get weeklyFinanceDonutStyle() {
+        const sales = Math.max(this.state.data.weekly.net_sales || 0, 0);
+        const expenses = Math.max(this.state.data.weekly.expenses || 0, 0);
+        const total = sales + expenses;
+        if (!total) return "background: #eee8e1";
+        const salesShare = (sales / total) * 100;
+        return `background: conic-gradient(#4E2A15 0 ${salesShare}%, #C77E35 ${salesShare}% 100%)`;
+    }
+
+    get paymentDonutStyle() {
+        const colors = ["#4E2A15", "#C77E35", "#D8B58E", "#7E9B76", "#B95C3F", "#8A8179"];
+        const values = this.state.data.weekly.payments.map((payment) => Math.max(payment.amount || 0, 0));
+        const total = values.reduce((sum, value) => sum + value, 0);
+        if (!total) return "background: #eee8e1";
+        let cursor = 0;
+        const segments = values.map((value, index) => {
+            const start = cursor;
+            cursor += (value / total) * 100;
+            return `${colors[index % colors.length]} ${start}% ${cursor}%`;
+        });
+        return `background: conic-gradient(${segments.join(", ")})`;
+    }
+
     openOrders(domain = []) {
         this.action.doAction({
             type: "ir.actions.act_window",
