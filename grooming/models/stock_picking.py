@@ -315,6 +315,29 @@ class StockPicking(models.Model):
         return picking.id
 
     @api.model
+    def get_backstore_stock_availability(self, product_ids):
+        """
+        Returns a dict {product_id: available_quantity} for Masaki Back Storage (MBS).
+        """
+        if not product_ids:
+            return {}
+        mbs_wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
+        if not mbs_wh:
+            mbs_wh = self.env['stock.warehouse'].sudo().search([('name', 'ilike', 'Masaki Back Storage')], limit=1)
+        if not mbs_wh or not mbs_wh.lot_stock_id:
+            return {str(pid): 0.0 for pid in product_ids}
+
+        quants = self.env['stock.quant'].sudo().search([
+            ('product_id', 'in', product_ids),
+            ('location_id', 'child_of', mbs_wh.lot_stock_id.id)
+        ])
+        res = {str(pid): 0.0 for pid in product_ids}
+        for q in quants:
+            key = str(q.product_id.id)
+            res[key] = res.get(key, 0.0) + q.quantity
+        return res
+
+    @api.model
     def create_replenishment_from_pos(self, payload):
         """
         Creates a custom grooming.stock.request (Replenishment Request) directly from the POS.

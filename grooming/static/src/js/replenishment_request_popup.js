@@ -20,6 +20,7 @@ export class ReplenishmentRequestPopup extends Component {
             cartLines: [],
             searchQuery: "",
             searchResults: [],
+            stockAvailability: {}, // { product_id: qty }
         });
 
         onWillStart(async () => {
@@ -31,8 +32,24 @@ export class ReplenishmentRequestPopup extends Component {
                     product_name: line.get_product().display_name,
                     qty: line.get_quantity()
                 }));
+                const pids = this.state.cartLines.map(l => l.product_id);
+                await this.fetchStockAvailability(pids);
             }
         });
+    }
+
+    async fetchStockAvailability(productIds) {
+        if (!productIds || productIds.length === 0) return;
+        const toFetch = productIds.filter(id => !(id in this.state.stockAvailability));
+        if (toFetch.length === 0) return;
+        try {
+            const availMap = await this.orm.call("stock.picking", "get_backstore_stock_availability", [toFetch]);
+            if (availMap) {
+                Object.assign(this.state.stockAvailability, availMap);
+            }
+        } catch (e) {
+            console.warn("Failed to fetch backstore stock availability:", e);
+        }
     }
 
     onSearchInput(ev) {
@@ -58,6 +75,9 @@ export class ReplenishmentRequestPopup extends Component {
                 }
             }
             this.state.searchResults = results;
+            if (results.length > 0) {
+                this.fetchStockAvailability(results.map(p => p.id));
+            }
         } else {
             this.state.searchResults = [];
         }
@@ -73,9 +93,25 @@ export class ReplenishmentRequestPopup extends Component {
                 product_name: product.display_name,
                 qty: 1
             });
+            if (!(product.id in this.state.stockAvailability)) {
+                this.fetchStockAvailability([product.id]);
+            }
         }
         this.state.searchQuery = "";
         this.state.searchResults = [];
+    }
+
+    setMaxQty(line) {
+        const avail = this.state.stockAvailability[line.product_id] || 0;
+        if (avail > 0) {
+            line.qty = avail;
+        }
+    }
+
+    isQtyExceeded(line) {
+        const avail = this.state.stockAvailability[line.product_id];
+        if (avail === undefined || avail === null) return false;
+        return parseFloat(line.qty) > avail;
     }
 
     updateQty(line, newQty) {
