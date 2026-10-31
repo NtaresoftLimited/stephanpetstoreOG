@@ -26,7 +26,8 @@
     position: absolute;
     top: 18px;
     left: 50%;
-    width: min(1180px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1180px;
     transform: translateX(-50%);
     align-items: center;
     justify-content: space-between;
@@ -69,7 +70,8 @@
 }
 
 .stephans-topbar__inner {
-    width: min(1280px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1280px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -113,7 +115,8 @@
 }
 
 .stephans-mainbar__inner {
-    width: min(1280px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1280px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -240,7 +243,8 @@
 }
 
 .stephans-nav-strip__inner {
-    width: min(1280px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1280px;
     margin: 0 auto;
 }
 
@@ -283,7 +287,8 @@
     position: absolute;
     top: 100%;
     left: 50%;
-    width: min(1240px, calc(100vw - 48px));
+    width: calc(100vw - 48px);
+    max-width: 1240px;
     transform: translate(-50%, 8px);
     display: grid;
     grid-template-columns: 210px 1fr;

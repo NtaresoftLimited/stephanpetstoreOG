@@ -18,10 +18,6 @@
     ],
     "assets": {
         "web.assets_frontend": [
-            "stephans_website_theme/static/src/scss/_variables.scss",
-            "stephans_website_theme/static/src/scss/header.scss",
-            "stephans_website_theme/static/src/scss/homepage.scss",
-            "stephans_website_theme/static/src/scss/footer.scss",
             "stephans_website_theme/static/src/js/header.js",
         ],
     },
