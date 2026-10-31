@@ -102,11 +102,15 @@ PAGES = {
 
 
 class StephansWebsitePages(http.Controller):
-    @http.route(['/about', '/stores', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True)
+    @http.route(['/about', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True)
     def content_page(self, **kw):
         key = request.httprequest.path.strip('/') or 'about'
         if key == 'faqs': key = 'faq'
         return request.render('stephans_website_theme.content_page', {'page': PAGES[key], 'page_key': key})
+
+    @http.route('/stores', type='http', auth='public', website=True, sitemap=True)
+    def stores_page(self, **kw):
+        return request.render('stephans_website_theme.stores_page')
 
     @http.route('/contact', type='http', auth='public', website=True, sitemap=True)
     def contact_page(self, **kw):
