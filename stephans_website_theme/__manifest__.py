@@ -1,6 +1,6 @@
 {
     "name": "Stephan's Pet Store Website Theme",
-    "version": "20.0.1.1.0",
+    "version": "20.0.1.1.1",
     "category": "Theme/eCommerce",
     "summary": "Isolated Stephan's Pet Store website preview",
     "author": "Stephan's Pet Store",

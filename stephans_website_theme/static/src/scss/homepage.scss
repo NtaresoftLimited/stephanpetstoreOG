@@ -1,4 +1,14 @@
-.stephans-theme { color: $stephans-dark; background: #fff; font-family: $stephans-sans; overflow: hidden; }
+.stephans-theme {
+  color: $stephans-dark;
+  background: #fff;
+  font-family: $stephans-sans;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+html { overflow-y: auto; }
+body, #wrapwrap { min-height: 100%; height: auto; }
+#wrapwrap { overflow-x: hidden; overflow-y: visible; }
 .stephans-theme *, .stephans-theme *::before, .stephans-theme *::after { box-sizing: border-box; }
 .stephans-theme h1, .stephans-theme h2 { font-family: $stephans-serif; font-weight: 500; }
 .stephans-container { width: calc(100% - 48px); max-width: 1240px; margin: 0 auto; }
