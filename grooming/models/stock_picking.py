@@ -446,3 +446,41 @@ class StockPicking(models.Model):
                     logging.getLogger(__name__).warning("Failed to auto-send WhatsApp on transfer validation: %s", str(e))
                     
         return res
+
+
+class StockMove(models.Model):
+    _inherit = 'stock.move'
+
+    source_available_qty = fields.Float(
+        string='Available',
+        compute='_compute_source_available_qty',
+        digits='Product Unit of Measure',
+        help='Available on-hand quantity in the Source Warehouse (Masaki Back Storage).'
+    )
+
+    @api.depends('product_id', 'location_id', 'picking_id.location_id', 'picking_id.custom_source_warehouse_id')
+    def _compute_source_available_qty(self):
+        mbs_wh = self.env['stock.warehouse'].search([('code', '=', 'MBS')], limit=1)
+        for move in self:
+            if not move.product_id:
+                move.source_available_qty = 0.0
+                continue
+
+            source_loc = (
+                (move.picking_id.custom_source_warehouse_id and move.picking_id.custom_source_warehouse_id.lot_stock_id)
+                or (move.location_id and move.location_id.usage == 'internal' and move.location_id)
+                or (move.picking_id.location_id and move.picking_id.location_id.usage == 'internal' and move.picking_id.location_id)
+            )
+
+            if not source_loc and mbs_wh:
+                source_loc = mbs_wh.lot_stock_id
+
+            if source_loc:
+                quants = self.env['stock.quant'].search([
+                    ('product_id', '=', move.product_id.id),
+                    ('location_id', 'child_of', source_loc.id)
+                ])
+                move.source_available_qty = sum(quants.mapped('quantity'))
+            else:
+                move.source_available_qty = 0.0
+
