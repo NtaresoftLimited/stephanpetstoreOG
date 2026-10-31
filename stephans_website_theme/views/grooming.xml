@@ -23,9 +23,6 @@
           }
         </style>
 
-        <!-- 3-Tier Header -->
-        <t t-call="stephans_website_theme.stephans_preview_header"/>
-
         <!-- Hero Section with Pet Tabs -->
         <section class="grooming-header">
           <div class="grooming-container">
@@ -262,7 +259,6 @@
         </section>
 
         <!-- Master 5-Column Footer (Includes Trust Banner) -->
-        <t t-call="stephans_website_theme.stephans_preview_footer"/>
       </main>
 
       <!-- Client-side Interaction Script -->

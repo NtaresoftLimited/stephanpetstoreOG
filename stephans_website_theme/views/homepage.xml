@@ -24,7 +24,6 @@
                         margin-top: 0 !important;
                     }
                 </style>
-                <t t-call="stephans_website_theme.stephans_preview_header"/>
 
                 <section class="stephans-hero">
                     <div class="stephans-hero__shade"></div>
@@ -85,7 +84,6 @@
 
                 <section class="stephans-section stephans-newsletter"><div class="stephans-container"><div class="stephans-newsletter__box"><div><p class="stephans-kicker">Stay in the Know</p><h2>From Stephan's,<br/>occasionally.</h2><p>A considered note on what's new, what's special, and what's worth knowing.</p><form class="stephans-newsletter__form" onsubmit="return false"><label class="visually-hidden" for="stephans-newsletter-email">Your email address</label><input id="stephans-newsletter-email" type="email" placeholder="Your email address"/><button type="submit">Subscribe</button></form><a class="stephans-whatsapp" href="https://wa.me/255769324445" target="_blank" rel="noopener"><img src="/stephans_website_theme/static/src/images/icons/whatsapp-color.svg" alt=""/>Prefer WhatsApp? Talk to us &#8594;</a></div><img class="stephans-newsletter__image" src="/stephans_website_theme/static/src/images/newsletter/newsletter-toys.webp" alt="Stephan's pet toys and bowl"/></div></div></section>
 
-                <t t-call="stephans_website_theme.stephans_preview_footer"/>
             </main>
         </t>
     </template>
