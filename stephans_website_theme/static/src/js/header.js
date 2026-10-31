@@ -8,12 +8,25 @@ const initializeStephanHeader = () => {
         const mobileMenu = header.querySelector("[data-stephans-menu='true']");
         const megaItems = [...header.querySelectorAll("[data-stephans-mega='true']")];
         let closeTimer;
+        let pinnedItem = null;
 
         const closeMegas = (except = null) => {
             megaItems.forEach((item) => {
                 if (item === except) return;
                 item.classList.remove("is-open");
                 item.querySelector(":scope > button")?.setAttribute("aria-expanded", "false");
+            });
+        };
+
+        const resetMega = (item) => {
+            const mega = item.querySelector(":scope > .stephans-mega");
+            mega?.classList.remove("is-expanded");
+            mega?.querySelectorAll(".stephans-mega__group.is-items-open").forEach((group) => group.classList.remove("is-items-open"));
+            const expandButton = mega?.querySelector("[data-mega-expand]");
+            if (expandButton) expandButton.firstElementChild.textContent = expandButton.dataset.labelAll;
+            mega?.querySelectorAll("[data-group-toggle]").forEach((button) => {
+                button.setAttribute("aria-expanded", "false");
+                button.firstElementChild.textContent = "View all";
             });
         };
 
@@ -37,6 +50,7 @@ const initializeStephanHeader = () => {
                 button?.setAttribute("aria-expanded", "true");
             };
             const scheduleClose = () => {
+                if (pinnedItem === item) return;
                 closeTimer = window.setTimeout(() => closeMegas(), 180);
             };
 
@@ -44,7 +58,32 @@ const initializeStephanHeader = () => {
             item.addEventListener("mouseleave", scheduleClose);
             button?.addEventListener("click", (event) => {
                 event.stopPropagation();
-                item.classList.contains("is-open") ? closeMegas() : open();
+                if (pinnedItem === item) {
+                    pinnedItem = null;
+                    closeMegas();
+                } else {
+                    pinnedItem = item;
+                    open();
+                }
+            });
+
+            item.querySelectorAll("[data-group-toggle]").forEach((toggle) => {
+                toggle.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    const group = toggle.closest(".stephans-mega__group");
+                    const expanded = group.classList.toggle("is-items-open");
+                    toggle.setAttribute("aria-expanded", String(expanded));
+                    toggle.firstElementChild.textContent = expanded ? "Show less" : "View all";
+                    item.querySelector(":scope > .stephans-mega")?.classList.add("is-expanded");
+                });
+            });
+
+            const expandButton = item.querySelector("[data-mega-expand]");
+            expandButton?.addEventListener("click", (event) => {
+                event.stopPropagation();
+                const mega = item.querySelector(":scope > .stephans-mega");
+                const expanded = mega.classList.toggle("is-expanded");
+                expandButton.firstElementChild.textContent = expanded ? expandButton.dataset.labelFeatured : expandButton.dataset.labelAll;
             });
         });
 
@@ -54,12 +93,16 @@ const initializeStephanHeader = () => {
 
         document.addEventListener("click", (event) => {
             if (!header.contains(event.target)) {
+                megaItems.forEach(resetMega);
+                pinnedItem = null;
                 closeMegas();
                 setMobileOpen(false);
             }
         });
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
+                megaItems.forEach(resetMega);
+                pinnedItem = null;
                 closeMegas();
                 setMobileOpen(false);
             }
