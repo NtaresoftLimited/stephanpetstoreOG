@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="contact_page" name="Stephan's Contact Page">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Contact | Stephan's Pet Store</t>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/contact.css?v=20.0.1.2.0"/>
+            <script defer="defer" src="/stephans_website_theme/static/src/js/contact.js?v=20.0.1.2.0"></script>
+            <main id="wrap" class="sp-contact-page">
+                <section class="sp-contact-intro">
+                    <div class="sp-contact-shell">
+                        <h1>How can we help?</h1>
+                        <p>Choose how you'd like to reach us.</p>
+                        <div class="sp-contact-rule"></div>
+                    </div>
+                </section>
+
+                <section class="sp-contact-options">
+                    <div class="sp-contact-shell">
+                        <div t-if="contact_sent" class="sp-contact-alert sp-contact-alert-success" role="status">Thank you. Your message has been received and our team will reply soon.</div>
+                        <div t-if="contact_error" class="sp-contact-alert sp-contact-alert-error" role="alert">Please enter your name, a valid email address, and a message.</div>
+                        <div class="sp-contact-grid">
+                            <article class="sp-contact-card">
+                                <svg class="sp-contact-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0 1 22 16.92z"/></svg>
+                                <h2>Call Us</h2><p>Speak directly with<br/>our team.</p>
+                                <div class="sp-contact-detail">+255 786 627 873<br/>+255 769 324 445</div>
+                                <a href="tel:+255786627873">Call Now <span>→</span></a>
+                            </article>
+                            <article class="sp-contact-card">
+                                <svg class="sp-contact-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 10h8"/></svg>
+                                <h2>WhatsApp</h2><p>Quick questions and<br/>support.</p>
+                                <a href="https://wa.me/255786627873" target="_blank" rel="noopener">Start a Chat <span>→</span></a>
+                            </article>
+                            <article class="sp-contact-card">
+                                <img class="sp-contact-icon sp-contact-icon-image" src="/stephans_website_theme/static/src/images/grooming/grooming-scissors-bubbles.png" alt=""/>
+                                <h2>Book Grooming</h2><p>Schedule a grooming<br/>appointment.</p>
+                                <a href="/grooming">Book Now <span>→</span></a>
+                            </article>
+                            <article class="sp-contact-card">
+                                <svg class="sp-contact-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                                <h2>Visit Store</h2><p>Find our locations<br/>and get directions.</p>
+                                <a href="https://www.google.com/maps/dir//11+Slipway+Rd,+Dar+es+Salaam,+Tanzania/@-6.7642817,39.2653047,17z/" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                            </article>
+                            <article class="sp-contact-card sp-contact-hours">
+                                <svg class="sp-contact-icon sp-contact-icon-brown" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg>
+                                <h2>Opening Hours</h2>
+                                <div class="sp-hours-row"><strong>Monday – Friday</strong><span>9:00 AM – 8:30 PM</span></div>
+                                <div class="sp-hours-row"><strong>Saturday</strong><span>10:00 AM – 8:30 PM</span></div>
+                                <div class="sp-hours-row"><strong>Sunday</strong><span>Closed</span></div>
+                            </article>
+                            <article class="sp-contact-card">
+                                <svg class="sp-contact-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="1"/><path d="m2 6 10 7 10-7"/></svg>
+                                <h2>Send a Message</h2><p>Send us a message<br/>and we'll reply soon.</p>
+                                <button type="button" class="sp-contact-link" data-contact-open="">Send Message <span>→</span></button>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="sp-contact-modal" data-contact-modal="" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sp-contact-modal-title">
+                    <div class="sp-contact-modal-panel">
+                        <button type="button" class="sp-contact-modal-close" data-contact-close="" aria-label="Close contact form">×</button>
+                        <p class="sp-contact-kicker">CONTACT US</p>
+                        <h2 id="sp-contact-modal-title">Send us a message.</h2>
+                        <p class="sp-contact-modal-copy">Tell us how we can help and our team will reply soon.</p>
+                        <form action="/contact/send" method="post" class="sp-contact-form">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <label for="sp-contact-name">Name</label>
+                            <input id="sp-contact-name" name="name" type="text" maxlength="120" required="required" autocomplete="name"/>
+                            <label for="sp-contact-email">Email</label>
+                            <input id="sp-contact-email" name="email" type="email" maxlength="254" required="required" autocomplete="email"/>
+                            <label for="sp-contact-message">Message</label>
+                            <textarea id="sp-contact-message" name="message" rows="5" maxlength="5000" required="required"></textarea>
+                            <button type="submit">Send Message <span>→</span></button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </t>
+    </template>
+</odoo>

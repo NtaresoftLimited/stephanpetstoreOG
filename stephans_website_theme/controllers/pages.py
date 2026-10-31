@@ -1,5 +1,6 @@
 from odoo import http
 from odoo.http import request
+from markupsafe import Markup, escape
 
 
 PAGES = {
@@ -101,11 +102,42 @@ PAGES = {
 
 
 class StephansWebsitePages(http.Controller):
-    @http.route(['/about', '/contact', '/stores', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True)
+    @http.route(['/about', '/stores', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True)
     def content_page(self, **kw):
         key = request.httprequest.path.strip('/') or 'about'
         if key == 'faqs': key = 'faq'
         return request.render('stephans_website_theme.content_page', {'page': PAGES[key], 'page_key': key})
+
+    @http.route('/contact', type='http', auth='public', website=True, sitemap=True)
+    def contact_page(self, **kw):
+        return request.render('stephans_website_theme.contact_page', {
+            'contact_sent': kw.get('sent') == '1',
+            'contact_error': kw.get('error') == '1',
+        })
+
+    @http.route('/contact/send', type='http', auth='public', website=True, methods=['POST'], csrf=True)
+    def contact_send(self, **post):
+        name = (post.get('name') or '').strip()[:120]
+        email = (post.get('email') or '').replace('\r', '').replace('\n', '').strip()[:254]
+        message = (post.get('message') or '').strip()[:5000]
+        if not name or '@' not in email or not message:
+            return request.redirect('/contact?error=1')
+
+        company = request.env.company
+        recipient = company.email or 'info@stephanspetstore.co.tz'
+        body = Markup(
+            '<p><strong>Name:</strong> %s</p>'
+            '<p><strong>Email:</strong> %s</p>'
+            '<p><strong>Message:</strong></p><p>%s</p>'
+        ) % (escape(name), escape(email), escape(message).replace('\n', Markup('<br/>')))
+        request.env['mail.mail'].sudo().create({
+            'subject': 'Website contact: %s' % name,
+            'body_html': body,
+            'email_from': recipient,
+            'reply_to': email,
+            'email_to': recipient,
+        })
+        return request.redirect('/contact?sent=1')
 
     @http.route(['/shop/dogs', '/shop/cats', '/shop/small-pets', '/shop/pet-food', '/shop/accessories'], type='http', auth='public', website=True)
     def shop_alias(self, **kw):

@@ -1,6 +1,6 @@
 {
     "name": "Stephan's Pet Store Website Theme",
-    "version": "20.0.1.1.2",
+    "version": "20.0.1.2.0",
     "category": "Theme/eCommerce",
     "summary": "Isolated Stephan's Pet Store website preview",
     "author": "Stephan's Pet Store",
@@ -12,6 +12,7 @@
         "views/layout.xml",
         "views/homepage.xml",
         "views/grooming.xml",
+        "views/contact.xml",
         "views/pages.xml",
         "data/pages.xml",
         "data/products.xml",
