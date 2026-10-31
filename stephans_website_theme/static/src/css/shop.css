@@ -1,17 +1,70 @@
-/* Preserve source resolution while giving catalogue photos more breathing room. */
-#products_grid .oe_product_image_img_wrapper {
-    background: #f7f4ee;
+/* Shop page catalogue display: 4 boxes per line, 2 lines (8 products per page), white picture background */
+#products_grid .oe_product_image_img_wrapper,
+#products_grid .oe_product,
+#products_grid .o_wsale_product_information,
+#products_grid .card,
+.oe_product_cart .card-body,
+.oe_product_cart {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
 }
 
 #products_grid .oe_product_image_img {
-    width: 88% !important;
-    height: 88% !important;
+    width: 90% !important;
+    height: 90% !important;
     margin: auto;
     object-fit: contain !important;
     object-position: center !important;
     transition: transform 0.2s ease;
+    background: #ffffff !important;
 }
 
 #products_grid .oe_product:hover .oe_product_image_img {
-    transform: scale(1.025);
+    transform: scale(1.03);
+}
+
+/* Enforce 4 product boxes per row on desktop (2 rows = 8 products) */
+@media (min-width: 992px) {
+    #products_grid .o_wsale_products_grid_table_wrapper table tbody tr {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+        margin-bottom: 20px !important;
+    }
+
+    #products_grid .o_wsale_products_grid_table_wrapper table tbody td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    #products_grid .o_wsale_products_grid_table_wrapper > .row {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+        margin: 0 0 20px 0 !important;
+    }
+
+    #products_grid .o_wsale_products_grid_table_wrapper > .row > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding: 0 !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+    #products_grid .o_wsale_products_grid_table_wrapper table tbody tr,
+    #products_grid .o_wsale_products_grid_table_wrapper > .row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    #products_grid .o_wsale_products_grid_table_wrapper table tbody td,
+    #products_grid .o_wsale_products_grid_table_wrapper > .row > div {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
 }

@@ -100,6 +100,15 @@ if published_placeholders:
     published_placeholders.write({published_field: False})
 
 website = env["website"].sudo().search([], limit=1)
+if website:
+    website_vals = {}
+    if "shop_ppg" in website._fields:
+        website_vals["shop_ppg"] = 8
+    if "shop_ppr" in website._fields:
+        website_vals["shop_ppr"] = 4
+    if website_vals:
+        website.sudo().write(website_vals)
+
 enabled_views = []
 for xmlid in ("website_sale.products_categories", "website_sale.filter_products_price"):
     view = website.viewref(xmlid) if website else env.ref(xmlid, raise_if_not_found=False)
