@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
@@ -18,7 +18,9 @@ export class SkyDashboard extends Component {
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
         const isoDate = (date) => date.toISOString().slice(0, 10);
-        this.state = useState({
+        // Owl 2 exposes useState; Owl 3 replaced it with proxy.
+        const createState = useState || proxy;
+        this.state = createState({
             loading: true, data: null, canAccessDailyStock: false, isAdmin: false,
             dateStart: isoDate(monday), dateEnd: isoDate(sunday), configId: 0, activeTab: "business",
         });
