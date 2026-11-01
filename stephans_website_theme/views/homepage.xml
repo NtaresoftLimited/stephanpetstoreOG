@@ -48,33 +48,35 @@
                     <div class="stephans-container">
                         <div class="stephans-heading"><p class="stephans-kicker">New Arrivals</p><h2>Something new, thoughtfully chosen.</h2></div>
                         <div class="stephans-rotator-container" data-stephans-product-rotator="true">
-                            <!-- Slide 1 -->
-                            <div class="stephans-products stephans-products-slide is-active">
-                                <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp" alt="Plush Parrot Dog Toy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="/stephans_website_theme/static/src/images/products/cat-water-fountain.webp" alt="Cat Water Fountain Bubble Boy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="/stephans_website_theme/static/src/images/products/rabbit-house-c.webp" alt="Rabbit House C"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="/stephans_website_theme/static/src/images/products/flying-bird-cage.webp" alt="Flying Bird Cage Medium"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
-                            </div>
-                            <!-- Slide 2 (Summit 10 & Whiskas) -->
-                            <div class="stephans-products stephans-products-slide">
-                                <article><a class="stephans-product__image" href="/shop/s-item0030-summit-10-wholechoice-adult-medium-chicken-10-kg-1"><img src="/web/image/product.template/1/image_512" alt="Summit 10 Adult Chicken 10kg"/></a><h3>Summit 10 WholeChoice Adult Medium Chicken 10-kg</h3><small>Dog Food</small><strong>Tsh 135,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop/2072"><img src="/web/image/product.template/2072/image_512" alt="Summit 10 Adult Lamb 2kg"/></a><h3>Summit 10 Whole Choice Adult Lamb 2kg</h3><small>Dog Food</small><strong>Tsh 35,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop/2084"><img src="/web/image/product.template/2084/image_512" alt="Summit 10 Cat Chicken 2kg"/></a><h3>Summit 10 Whole Choice Cat Chicken 2kg</h3><small>Cat Food</small><strong>Tsh 35,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop/2100"><img src="/web/image/product.template/2100/image_512" alt="Summit 10 Mobility+"/></a><h3>Summit 10 Care Nutritional Support Mobility+</h3><small>Health &amp; Wellness</small><strong>Tsh 45,000</strong></article>
-                            </div>
-                            <!-- Slide 3 (Gourmet & Sensitive) -->
-                            <div class="stephans-products stephans-products-slide">
-                                <article><a class="stephans-product__image" href="/shop/2073"><img src="/web/image/product.template/2073/image_512" alt="Summit 10 Adult Salmon 2kg"/></a><h3>Summit 10 Whole Choice Adult Salmon 2kg</h3><small>Dog Food</small><strong>Tsh 35,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop/2087"><img src="/web/image/product.template/2087/image_512" alt="Summit 10 Kitten 3kg"/></a><h3>Summit 10 Whole Choice Kitten 3kg</h3><small>Cat Food</small><strong>Tsh 48,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop/2075"><img src="/web/image/product.template/2075/image_512" alt="Summit 10 Grain Free Salmon 3kg"/></a><h3>Summit 10 Grain Free Fresh Sensitive Salmon 3kg</h3><small>Dog Food</small><strong>Tsh 50,000</strong></article>
-                                <article><a class="stephans-product__image" href="/shop/2082"><img src="/web/image/product.template/2082/image_512" alt="Summit 10 Pate Beef 400g"/></a><h3>Summit 10 Pate Delish with Beef 400g</h3><small>Wet Dog Food</small><strong>Tsh 12,000</strong></article>
-                            </div>
-                            <!-- Rotator Indicators -->
-                            <div class="stephans-rotator-dots">
-                                <button type="button" class="stephans-rotator-dot is-active" aria-label="Slide 1"></button>
-                                <button type="button" class="stephans-rotator-dot" aria-label="Slide 2"></button>
-                                <button type="button" class="stephans-rotator-dot" aria-label="Slide 3"></button>
-                            </div>
+                            <t t-if="product_slides">
+                                <t t-foreach="product_slides" t-as="slide">
+                                    <div t-attf-class="stephans-products stephans-products-slide #{'is-active' if slide_first else ''}">
+                                        <t t-foreach="slide" t-as="prod">
+                                            <article>
+                                                <a class="stephans-product__image" t-att-href="prod['url']">
+                                                    <img t-att-src="prod['image_url']" t-att-alt="prod['name']" loading="lazy"/>
+                                                </a>
+                                                <h3 t-out="prod['name']"></h3>
+                                                <small t-out="prod['category']"></small>
+                                                <strong t-out="prod['price_formatted']"></strong>
+                                            </article>
+                                        </t>
+                                    </div>
+                                </t>
+                                <div class="stephans-rotator-dots" t-if="len(product_slides) &gt; 1">
+                                    <t t-foreach="product_slides" t-as="slide">
+                                        <button type="button" t-attf-class="stephans-rotator-dot #{'is-active' if slide_first else ''}" t-att-aria-label="'Slide ' + str(slide_index + 1)"/>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="stephans-products stephans-products-slide is-active">
+                                    <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp" alt="Plush Parrot Dog Toy" loading="lazy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
+                                    <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="/stephans_website_theme/static/src/images/products/cat-water-fountain.webp" alt="Cat Water Fountain Bubble Boy" loading="lazy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
+                                    <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="/stephans_website_theme/static/src/images/products/rabbit-house-c.webp" alt="Rabbit House C" loading="lazy"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
+                                    <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="/stephans_website_theme/static/src/images/products/flying-bird-cage.webp" alt="Flying Bird Cage Medium" loading="lazy"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
+                                </div>
+                            </t>
                         </div>
                         <div class="stephans-section__action"><a class="stephans-button stephans-button--plain" href="/shop">View All Products &#8594;</a></div>
                     </div>
