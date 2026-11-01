@@ -11,33 +11,31 @@
     margin-top: 0 !important;
 }
 
-/* Master Header Component */
+/* Master Header Component - Sticky on scroll across all pages */
 .stephans-master-header {
     width: 100%;
     background: #ffffff;
     font-family: $stephans-sans;
-    position: relative;
-    z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.25s ease;
 }
 
-/* Next.js-aligned compact homepage chrome */
+.stephans-master-header.is-scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
+}
+
+/* Full retail header always active across all pages */
 .stephans-homebar {
-    display: none;
-    position: absolute;
-    top: 18px;
-    left: 50%;
-    width: calc(100% - 48px);
-    max-width: 1180px;
-    transform: translateX(-50%);
-    align-items: center;
-    justify-content: space-between;
-    z-index: 102;
+    display: none !important;
 }
 
-.is-home .stephans-homebar { display: flex; }
-.is-home .stephans-retail-header { display: none; }
-.is-home.is-scrolled .stephans-homebar { display: none; }
-.is-home.is-scrolled .stephans-retail-header { display: block; position: fixed; inset: 0 0 auto; }
+.stephans-retail-header {
+    display: block !important;
+    width: 100%;
+}
 
 .stephans-homebar__logo img { width: 128px; height: 48px; object-fit: contain; display: block; }
 .stephans-homebar__nav,

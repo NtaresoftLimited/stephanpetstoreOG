@@ -102,7 +102,7 @@ const initializeStephanHeader = () => {
         let scrollFrame = 0;
         const updateScrollState = () => {
             scrollFrame = 0;
-            header.classList.toggle("is-scrolled", window.scrollY > 72);
+            header.classList.toggle("is-scrolled", window.scrollY > 20);
         };
         const requestScrollUpdate = () => {
             if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollState);

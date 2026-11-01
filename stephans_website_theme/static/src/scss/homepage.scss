@@ -6,9 +6,19 @@
   overflow-y: visible;
 }
 
-html { overflow-y: auto; }
-body, #wrapwrap { min-height: 100%; height: auto; }
-#wrapwrap { overflow-x: hidden; overflow-y: visible; }
+html, body {
+  overflow-x: clip !important;
+}
+
+body, #wrapwrap {
+  min-height: 100%;
+  height: auto;
+}
+
+#wrapwrap {
+  overflow: visible !important;
+  overflow-x: clip !important;
+}
 .stephans-theme *, .stephans-theme *::before, .stephans-theme *::after { box-sizing: border-box; }
 .stephans-theme h1, .stephans-theme h2 { font-family: $stephans-serif; font-weight: 500; }
 .stephans-container { width: calc(100% - 48px); max-width: 1240px; margin: 0 auto; }
