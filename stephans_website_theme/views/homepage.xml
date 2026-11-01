@@ -10,7 +10,7 @@
                 been rebuilt. Keep this page-scoped stylesheet as a deterministic
                 preview fallback; it does not alter any global website bundle.
             -->
-            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/preview.css"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/preview.css?v=20.0.2.8.0"/>
             <main id="wrap" class="oe_structure stephans-theme">
                 <style>
                     #wrapwrap > header#top,
@@ -49,33 +49,35 @@
                         <div class="stephans-heading"><p class="stephans-kicker">New Arrivals</p><h2>Something new, thoughtfully chosen.</h2></div>
                         <div class="stephans-rotator-container" data-stephans-product-rotator="true">
                             <t t-if="product_slides">
-                                <t t-foreach="product_slides" t-as="slide">
-                                    <div t-attf-class="stephans-products stephans-products-slide #{'is-active' if slide_first else ''}">
-                                        <t t-foreach="slide" t-as="prod">
-                                            <article>
-                                                <a class="stephans-product__image" t-att-href="prod['url']">
-                                                    <img t-att-src="prod['image_url']" t-att-alt="prod['name']" loading="lazy"/>
-                                                </a>
-                                                <h3 t-out="prod['name']"></h3>
-                                                <small t-out="prod['category']"></small>
-                                                <strong t-out="prod['price_formatted']"></strong>
-                                            </article>
-                                        </t>
-                                    </div>
-                                </t>
+                                <div class="stephans-rotator-stage" aria-live="polite">
+                                    <t t-foreach="product_slides" t-as="slide">
+                                        <div t-attf-class="stephans-products stephans-products-slide #{'is-active' if slide_first else ''}" t-att-aria-hidden="'false' if slide_first else 'true'">
+                                            <t t-foreach="slide" t-as="prod">
+                                                <article>
+                                                    <a class="stephans-product__image" t-att-href="prod['url']">
+                                                        <img t-att-src="prod['image_url']" t-att-alt="prod['name']" t-att-loading="'eager' if slide_first else 'lazy'"/>
+                                                    </a>
+                                                    <h3><a t-att-href="prod['url']" t-out="prod['name']"></a></h3>
+                                                    <small t-out="prod['category']"></small>
+                                                    <strong t-out="prod['price_formatted']"></strong>
+                                                </article>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </div>
                                 <div class="stephans-rotator-dots" t-if="len(product_slides) &gt; 1">
                                     <t t-foreach="product_slides" t-as="slide">
-                                        <button type="button" t-attf-class="stephans-rotator-dot #{'is-active' if slide_first else ''}" t-att-aria-label="'Slide ' + str(slide_index + 1)"/>
+                                        <button type="button" t-attf-class="stephans-rotator-dot #{'is-active' if slide_first else ''}" t-att-aria-label="'Show products ' + str((slide_index * 4) + 1) + ' to ' + str((slide_index * 4) + 4)" t-att-aria-current="'true' if slide_first else 'false'"/>
                                     </t>
                                 </div>
                             </t>
                             <t t-else="">
-                                <div class="stephans-products stephans-products-slide is-active">
+                                <div class="stephans-rotator-stage"><div class="stephans-products stephans-products-slide is-active">
                                     <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp" alt="Plush Parrot Dog Toy" loading="lazy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
                                     <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="/stephans_website_theme/static/src/images/products/cat-water-fountain.webp" alt="Cat Water Fountain Bubble Boy" loading="lazy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
                                     <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="/stephans_website_theme/static/src/images/products/rabbit-house-c.webp" alt="Rabbit House C" loading="lazy"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
                                     <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="/stephans_website_theme/static/src/images/products/flying-bird-cage.webp" alt="Flying Bird Cage Medium" loading="lazy"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
-                                </div>
+                                </div></div>
                             </t>
                         </div>
                         <div class="stephans-section__action"><a class="stephans-button stephans-button--plain" href="/shop">View All Products &#8594;</a></div>

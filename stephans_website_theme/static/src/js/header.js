@@ -160,7 +160,7 @@ const initializeStephanHeader = () => {
     });
 };
 
-// Auto-rotate home page New Arrivals product grid every 20 seconds
+// Auto-rotate four-card live-catalog sets every 20 seconds.
 const initializeProductRotator = () => {
     document.querySelectorAll("[data-stephans-product-rotator='true']").forEach((rotator) => {
         if (rotator.dataset.initialized === "true") return;
@@ -169,45 +169,67 @@ const initializeProductRotator = () => {
         const dots = Array.from(rotator.querySelectorAll(".stephans-rotator-dot"));
         if (slides.length <= 1) return;
 
-        let currentIndex = 0;
-        let isPaused = false;
+        const ROTATION_MS = 20000;
+        let currentIndex = Math.max(0, slides.findIndex((slide) => slide.classList.contains("is-active")));
+        let isPointerPaused = false;
+        let isFocusPaused = false;
         let timer = null;
 
+        const preloadSlide = (index) => {
+            slides[index]?.querySelectorAll("img[loading='lazy']").forEach((image) => {
+                const preload = new Image();
+                preload.src = image.currentSrc || image.src;
+            });
+        };
+
         const showSlide = (nextIndex) => {
-            if (nextIndex === currentIndex) return;
-            slides[currentIndex].classList.remove("is-active");
-            if (dots[currentIndex]) dots[currentIndex].classList.remove("is-active");
-
-            currentIndex = nextIndex;
-
-            slides[currentIndex].classList.add("is-active");
-            if (dots[currentIndex]) dots[currentIndex].classList.add("is-active");
-        };
-
-        const nextSlide = () => {
-            showSlide((currentIndex + 1) % slides.length);
-        };
-
-        const startTimer = () => {
-            clearInterval(timer);
-            timer = setInterval(() => {
-                if (!isPaused) {
-                    nextSlide();
+            const normalizedIndex = (nextIndex + slides.length) % slides.length;
+            slides.forEach((slide, index) => {
+                const active = index === normalizedIndex;
+                slide.classList.toggle("is-active", active);
+                slide.setAttribute("aria-hidden", String(!active));
+                slide.inert = !active;
+                if (dots[index]) {
+                    dots[index].classList.toggle("is-active", active);
+                    dots[index].setAttribute("aria-current", String(active));
                 }
-            }, 20000); // exactly 20 seconds
+            });
+            currentIndex = normalizedIndex;
+            preloadSlide((currentIndex + 1) % slides.length);
         };
 
-        rotator.addEventListener("mouseenter", () => { isPaused = true; });
-        rotator.addEventListener("mouseleave", () => { isPaused = false; });
+        const isPaused = () => isPointerPaused || isFocusPaused || document.hidden;
+
+        const scheduleNext = () => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                if (!isPaused()) showSlide(currentIndex + 1);
+                scheduleNext();
+            }, ROTATION_MS);
+        };
+
+        rotator.addEventListener("pointerenter", () => { isPointerPaused = true; });
+        rotator.addEventListener("pointerleave", () => { isPointerPaused = false; scheduleNext(); });
+        rotator.addEventListener("focusin", () => { isFocusPaused = true; });
+        rotator.addEventListener("focusout", (event) => {
+            if (!rotator.contains(event.relatedTarget)) {
+                isFocusPaused = false;
+                scheduleNext();
+            }
+        });
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) scheduleNext();
+        });
 
         dots.forEach((dot, idx) => {
             dot.addEventListener("click", () => {
                 showSlide(idx);
-                startTimer();
+                scheduleNext();
             });
         });
 
-        startTimer();
+        showSlide(currentIndex);
+        scheduleNext();
         rotator.dataset.initialized = "true";
     });
 };
