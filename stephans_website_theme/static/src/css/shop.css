@@ -1,70 +1,231 @@
-/* Shop page catalogue display: 4 boxes per line, 2 lines (8 products per page), white picture background */
-#products_grid .oe_product_image_img_wrapper,
+/* ==========================================================================
+   Stephan's Pet Store - Shop Page Styles
+   - 4 product boxes per row (desktop/laptop/tablet >= 768px)
+   - 2 rows of 4 boxes = 8 products per page
+   - White picture and product box background for all items
+   ========================================================================== */
+
+/* 1. Main Grid Layout: Enforce 4 Columns on Desktop (2 rows of 4 = 8 products) */
+#products_grid #o_wsale_products_grid,
+#products_grid .o_wsale_products_grid_table,
+.o_wsale_products_grid_table.grid,
+#products_grid .grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+/* Force each product card to take exactly 1 column slot */
+#products_grid #o_wsale_products_grid > .oe_product,
+#products_grid .o_wsale_products_grid_table > .oe_product,
+.o_wsale_products_grid_table > .oe_product,
+.oe_product.g-col-6.g-col-md-3.g-col-lg-3,
+.oe_product {
+    grid-column: span 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+/* 2. Responsive Breakpoints: 2 Columns on Mobile (<768px) */
+@media (max-width: 767.98px) {
+    #products_grid #o_wsale_products_grid,
+    #products_grid .o_wsale_products_grid_table,
+    .o_wsale_products_grid_table.grid,
+    #products_grid .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+/* Legacy table/row fallback if ever used */
+#products_grid .o_wsale_products_grid_table_wrapper table tbody tr {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    margin-bottom: 20px !important;
+}
+#products_grid .o_wsale_products_grid_table_wrapper table tbody td {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+}
+
+/* 3. Product Box & Picture Background: Pure White to All */
 #products_grid .oe_product,
+#products_grid .o_wsale_product_grid_wrapper,
+#products_grid .oe_product_cart,
+#products_grid .oe_product_image,
+#products_grid .oe_product_image_link,
+#products_grid .oe_product_image_img_wrapper,
+#products_grid .oe_product_image_img,
+#products_grid .oe_product_image_img_secondary,
 #products_grid .o_wsale_product_information,
+#products_grid .o_wsale_product_information_text,
 #products_grid .card,
+.oe_product_cart,
 .oe_product_cart .card-body,
-.oe_product_cart {
+.oe_product_image,
+.oe_product_image_img_wrapper {
     background: #ffffff !important;
     background-color: #ffffff !important;
 }
 
-#products_grid .oe_product_image_img {
-    width: 90% !important;
-    height: 90% !important;
-    margin: auto;
-    object-fit: contain !important;
-    object-position: center !important;
-    transition: transform 0.2s ease;
+/* 4. Product Card Aesthetics (Matches Next.js / Stephans Brand) */
+#products_grid article.oe_product_cart,
+article.oe_product_cart {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border-radius: 14px !important;
+    border: 1px solid #eae3d9 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+#products_grid article.oe_product_cart:hover,
+article.oe_product_cart:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 25px rgba(58, 37, 23, 0.09) !important;
+    border-color: #c77e35 !important;
+}
+
+/* 5. Product Image Container & Fitting */
+#products_grid .oe_product_image,
+.oe_product_image {
+    aspect-ratio: 1 / 1 !important;
+    width: 100% !important;
+    min-height: 220px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    overflow: hidden !important;
+}
+
+#products_grid .oe_product_image_link,
+.oe_product_image_link {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     background: #ffffff !important;
 }
 
-#products_grid .oe_product:hover .oe_product_image_img {
-    transform: scale(1.03);
+#products_grid .oe_product_image_img_wrapper,
+.oe_product_image_img_wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ffffff !important;
 }
 
-/* Enforce 4 product boxes per row on desktop (2 rows = 8 products) */
-@media (min-width: 992px) {
-    #products_grid .o_wsale_products_grid_table_wrapper table tbody tr {
-        display: grid !important;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 20px !important;
-        margin-bottom: 20px !important;
-    }
-
-    #products_grid .o_wsale_products_grid_table_wrapper table tbody td {
-        display: block !important;
-        width: 100% !important;
-        padding: 0 !important;
-    }
-
-    #products_grid .o_wsale_products_grid_table_wrapper > .row {
-        display: grid !important;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 20px !important;
-        margin: 0 0 20px 0 !important;
-    }
-
-    #products_grid .o_wsale_products_grid_table_wrapper > .row > div {
-        width: 100% !important;
-        max-width: 100% !important;
-        flex: 0 0 100% !important;
-        padding: 0 !important;
-    }
+#products_grid .oe_product_image_img,
+#products_grid .oe_product_image_img_secondary,
+.oe_product_image_img,
+.oe_product_image_img_secondary {
+    max-width: 90% !important;
+    max-height: 90% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    margin: auto !important;
+    transition: transform 0.3s ease !important;
 }
 
-@media (min-width: 576px) and (max-width: 991px) {
-    #products_grid .o_wsale_products_grid_table_wrapper table tbody tr,
-    #products_grid .o_wsale_products_grid_table_wrapper > .row {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
-    }
+#products_grid article.oe_product_cart:hover .oe_product_image_img {
+    transform: scale(1.04) !important;
+}
 
-    #products_grid .o_wsale_products_grid_table_wrapper table tbody td,
-    #products_grid .o_wsale_products_grid_table_wrapper > .row > div {
-        display: block !important;
-        width: 100% !important;
-        padding: 0 !important;
-    }
+/* 6. Typography & Pricing */
+#products_grid .o_wsale_product_information,
+.o_wsale_product_information {
+    padding: 12px 14px 16px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    background: #ffffff !important;
+    border-top: 1px solid #f5f2ed !important;
+}
+
+#products_grid .o_wsale_products_item_title,
+.o_wsale_products_item_title {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #222222 !important;
+    line-height: 1.35 !important;
+    margin-bottom: 8px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    min-height: 36px !important;
+}
+
+#products_grid .o_wsale_products_item_title a,
+.o_wsale_products_item_title a {
+    color: #222222 !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
+}
+
+#products_grid .o_wsale_products_item_title a:hover,
+.o_wsale_products_item_title a:hover {
+    color: #c77e35 !important;
+}
+
+/* Price */
+#products_grid .oe_price,
+#products_grid .product_price,
+.product_price {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #3e220f !important;
+}
+
+/* 7. Pagination Styling */
+#products_grid .pagination {
+    margin-top: 40px !important;
+    margin-bottom: 40px !important;
+    gap: 8px !important;
+    justify-content: center !important;
+}
+
+#products_grid .pagination .page-item .page-link {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #555555 !important;
+    border: 1px solid #eae3d9 !important;
+    background: #ffffff !important;
+    transition: all 0.2s ease !important;
+}
+
+#products_grid .pagination .page-item.active .page-link {
+    background-color: #3e220f !important;
+    border-color: #3e220f !important;
+    color: #ffffff !important;
+}
+
+#products_grid .pagination .page-item .page-link:hover {
+    background-color: #f8f5f0 !important;
+    border-color: #c77e35 !important;
+    color: #3e220f !important;
 }
