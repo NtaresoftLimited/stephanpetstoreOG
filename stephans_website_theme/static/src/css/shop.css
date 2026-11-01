@@ -72,6 +72,12 @@
     background-color: #ffffff !important;
 }
 
+/* Skip off-screen card rendering until the browser approaches the next row. */
+#products_grid .oe_product {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 430px;
+}
+
 /* 4. Product Card Aesthetics (Matches Next.js / Stephans Brand) */
 #products_grid article.oe_product_cart,
 article.oe_product_cart {
