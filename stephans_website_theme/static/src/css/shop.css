@@ -368,3 +368,127 @@ article.oe_product_cart:hover {
         padding: 20px !important;
     }
 }
+
+/* Product description: theme-aligned reading width and content rhythm. */
+#product_full_description {
+    width: 100% !important;
+    max-width: 1240px !important;
+    margin: 40px auto 72px !important;
+    padding: 0 24px !important;
+    box-sizing: border-box !important;
+}
+
+#product_full_description > .stephans-product-description {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: clamp(28px, 4vw, 52px) !important;
+    border: 1px solid #eae3d9 !important;
+    border-radius: 20px !important;
+    background: #fbf8f5 !important;
+    box-shadow: 0 10px 32px rgba(58, 37, 23, 0.06) !important;
+}
+
+.stephans-product-description h3 {
+    max-width: 860px !important;
+    margin: 0 0 14px !important;
+    color: #2a211c !important;
+    font-family: "Playfair Display", Georgia, "Times New Roman", serif !important;
+    font-size: clamp(1.75rem, 3vw, 2.35rem) !important;
+    font-weight: 500 !important;
+    line-height: 1.18 !important;
+}
+
+.stephans-product-description h4 {
+    margin: 0 0 16px !important;
+    color: #3e220f !important;
+    font-family: "Playfair Display", Georgia, "Times New Roman", serif !important;
+    font-size: 1.35rem !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+}
+
+.stephans-product-description p,
+.stephans-product-description li {
+    color: #5f554e !important;
+    font-size: 0.96rem !important;
+    line-height: 1.72 !important;
+}
+
+.stephans-product-description > p {
+    max-width: 940px !important;
+    margin-bottom: 16px !important;
+}
+
+.stephans-product-description > p.lead {
+    max-width: 780px !important;
+    color: #4e2a15 !important;
+    font-size: 1.05rem !important;
+}
+
+.stephans-product-description > .row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 48px !important;
+    width: 100% !important;
+    margin: 34px 0 0 !important;
+}
+
+.stephans-product-description > .row > [class*="col-"] {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+}
+
+.stephans-product-description ul {
+    margin: 0 !important;
+    padding-left: 20px !important;
+}
+
+.stephans-product-description li + li {
+    margin-top: 7px !important;
+}
+
+.stephans-product-description .table {
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+}
+
+.stephans-product-description a {
+    color: #9a5d2d !important;
+    text-decoration-color: rgba(154, 93, 45, 0.4) !important;
+    text-underline-offset: 3px !important;
+}
+
+.stephans-product-description a:hover {
+    color: #4e2a15 !important;
+}
+
+@media (max-width: 991.98px) {
+    .stephans-product-description > .row {
+        grid-template-columns: 1fr !important;
+        gap: 28px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    #product_full_description {
+        margin: 24px auto 48px !important;
+        padding: 0 16px !important;
+    }
+
+    #product_full_description > .stephans-product-description {
+        padding: 22px 18px !important;
+        border-radius: 14px !important;
+    }
+
+    .stephans-product-description .table th,
+    .stephans-product-description .table td {
+        padding: 9px 10px !important;
+        font-size: 0.88rem !important;
+    }
+}
