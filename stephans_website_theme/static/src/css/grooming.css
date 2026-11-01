@@ -545,6 +545,69 @@
   cursor: not-allowed;
 }
 
+.grooming-form-wide {
+  grid-column: 1 / -1;
+}
+
+.grooming-textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.grooming-addon-option {
+  min-height: 58px;
+  padding: 10px 16px;
+  border: 1px solid #E8E0D8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.grooming-addon-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: #c77e35;
+}
+
+.grooming-addon-option span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: #333;
+  font-size: 13px;
+}
+
+.grooming-addon-option small {
+  color: #777;
+  margin-top: 2px;
+}
+
+.grooming-addon-option b {
+  color: #4E2A15;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.grooming-form-status {
+  display: none;
+  margin-top: 16px;
+  padding: 13px 16px;
+  border: 1px solid #d9a0a0;
+  border-radius: 10px;
+  background: #fff2f2;
+  color: #8a2727;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.grooming-form-status.is-visible {
+  display: block;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .grooming-policy-box {

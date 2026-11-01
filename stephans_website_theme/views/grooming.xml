@@ -6,11 +6,11 @@
       <t t-set="no_header" t-value="True"/>
       <t t-set="no_footer" t-value="True"/>
       
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css?v=20.0.2.3.0"/>
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/grooming.css?v=20.0.2.3.0"/>
-      <script defer="defer" src="/stephans_website_theme/static/src/js/grooming.js?v=20.0.2.3.0"></script>
+      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css?v=20.0.2.10.0"/>
+      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/grooming.css?v=20.0.2.10.0"/>
+      <script defer="defer" src="/stephans_website_theme/static/src/js/grooming.js?v=20.0.2.10.0"></script>
       
-      <main id="wrap" class="oe_structure stephans-theme grooming-site">
+      <main id="wrap" class="oe_structure stephans-theme grooming-site" t-att-data-prices="prices_json" t-att-data-detangling-fee="detangling_fee">
         <style>
           #wrapwrap &gt; header#top,
           #wrapwrap &gt; header.o_header_standard,
@@ -167,12 +167,29 @@
 
                 <!-- Your Name -->
                 <div>
-                  <input type="text" name="customer_name" id="field-customer-name" required="required" placeholder="Your Name" class="grooming-input"/>
+                  <input type="text" name="customer_name" id="field-customer-name" required="required" minlength="2" placeholder="Your Name" class="grooming-input" t-att-value="default_customer_name"/>
                 </div>
 
                 <!-- Phone Number -->
                 <div>
-                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number" class="grooming-input"/>
+                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number" class="grooming-input" t-att-value="default_customer_phone" inputmode="tel"/>
+                </div>
+
+                <!-- Optional confirmation email -->
+                <div>
+                  <input type="email" name="customer_email" id="field-customer-email" placeholder="Email Address (Optional)" class="grooming-input" t-att-value="default_customer_email"/>
+                </div>
+
+                <!-- Optional detangling treatment -->
+                <label class="grooming-addon-option">
+                  <input type="checkbox" name="has_detangling" id="field-detangling"/>
+                  <span><strong>Matted Coat / Heavy Detangling</strong><small>Allow extra groomer time</small></span>
+                  <b>+TZS <t t-out="'{:,.0f}'.format(detangling_fee)"/></b>
+                </label>
+
+                <!-- Care notes -->
+                <div class="grooming-form-wide">
+                  <textarea name="notes" id="field-notes" rows="4" maxlength="1000" placeholder="Special instructions: temperament, allergies or medical conditions (Optional)" class="grooming-input grooming-textarea"></textarea>
                 </div>
               </div>
 
@@ -255,6 +272,7 @@
                   <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
               </button>
+              <div class="grooming-form-status" id="grooming-form-status" role="alert" aria-live="assertive"></div>
             </form>
           </div>
         </section>

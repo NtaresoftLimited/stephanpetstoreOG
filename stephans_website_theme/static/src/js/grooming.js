@@ -41,11 +41,22 @@
         if (!root || root.dataset.groomingReady === "true") return;
         root.dataset.groomingReady = "true";
 
+        let prices = PRICES;
+        try {
+            if (root.dataset.prices) prices = JSON.parse(root.dataset.prices);
+        } catch (error) {
+            console.warn("Could not read Odoo grooming prices; using safe defaults.", error);
+        }
+        const detanglingFee = Number(root.dataset.detanglingFee || 30000);
+
         const tabs = $$(".grooming-tab", root);
         const petType = $("#field-pet-type", root);
         const breed = $("#field-breed-size", root);
         const packageField = $("#field-package", root);
         const form = $("#grooming-form", root);
+        const detangling = $("#field-detangling", root);
+        const status = $("#grooming-form-status", root);
+        const submitButton = $("#btn-submit", root);
         if (!tabs.length || !petType || !breed || !packageField) return;
 
         function updateDetails() {
@@ -67,8 +78,9 @@
                 included.style.display = "none";
             }
 
-            const price = PRICES[type] && PRICES[type][pkg] && PRICES[type][pkg][size];
-            if (price) {
+            const basePrice = prices[type] && prices[type][pkg] && prices[type][pkg][size];
+            if (basePrice) {
+                const price = basePrice + (detangling?.checked ? detanglingFee : 0);
                 const typeLabel = type === "dog" ? "Dog" : type === "cat" ? "Cat" : "Small Animal";
                 const sizeEntry = (BREED_SIZES[type] || []).find((entry) => entry[0] === size);
                 $("#total-summary", root).textContent = typeLabel + " • " + (sizeEntry ? sizeEntry[1] : size) + " • " + (pkg === "standard" ? "Essential" : "Signature") + " Package";
@@ -92,7 +104,7 @@
         }
 
         function activate(type) {
-            if (!PRICES[type]) return;
+            if (!prices[type]) return;
             tabs.forEach((tab) => {
                 const selected = tab.dataset.tab === type;
                 tab.classList.toggle("active", selected);
@@ -107,8 +119,10 @@
             grid.classList.toggle("single-col", smallAnimal);
             essential.style.display = smallAnimal ? "none" : "flex";
             signature.style.display = "flex";
-            $("#price-essential", root).textContent = money(60000);
-            $("#price-signature", root).textContent = money(smallAnimal ? 100000 : 80000);
+            const essentialPrices = Object.values(prices[type]?.standard || {});
+            const signaturePrices = Object.values(prices[type]?.super_premium || {});
+            $("#price-essential", root).textContent = money(essentialPrices.length ? Math.min(...essentialPrices) : 60000);
+            $("#price-signature", root).textContent = money(signaturePrices.length ? Math.min(...signaturePrices) : (smallAnimal ? 100000 : 80000));
 
             if (petType.value !== type) petType.value = type;
             rebuildOptions(type);
@@ -132,6 +146,7 @@
         petType.addEventListener("change", () => activate(petType.value));
         breed.addEventListener("change", updateDetails);
         packageField.addEventListener("change", updateDetails);
+        detangling?.addEventListener("change", updateDetails);
 
         $$(".grooming-pkg-card", root).forEach((card) => {
             card.tabIndex = 0;
@@ -147,35 +162,83 @@
         });
 
         const date = $("#field-date", root);
+        const timeField = $("#field-time", root);
+        const refreshTimeAvailability = () => {
+            if (!date.value) return;
+            const selectedDate = new Date(date.value + "T00:00:00");
+            const now = new Date();
+            const cutoff = new Date(now.getTime() + 15 * 60 * 1000);
+            const isToday = selectedDate.toDateString() === now.toDateString();
+            Array.from(timeField.options).forEach((option) => {
+                if (!option.value) return;
+                const [hour, minute] = option.value.split(":").map(Number);
+                const slot = new Date(selectedDate);
+                slot.setHours(hour, minute, 0, 0);
+                option.disabled = selectedDate < new Date(now.getFullYear(), now.getMonth(), now.getDate()) || (isToday && slot < cutoff);
+            });
+            if (timeField.selectedOptions[0]?.disabled) timeField.value = "";
+        };
         date.addEventListener("change", () => {
             if (date.value && new Date(date.value + "T12:00:00").getDay() === 0) {
                 window.alert("We are closed on Sundays. Please select another day for your pet's grooming.");
                 date.value = "";
             }
+            refreshTimeAvailability();
         });
 
-        form.addEventListener("submit", (event) => {
+        form.addEventListener("submit", async (event) => {
             event.preventDefault();
+            if (!form.reportValidity()) return;
+
+            status.classList.remove("is-visible");
+            status.textContent = "";
+            submitButton.disabled = true;
+            submitButton.setAttribute("aria-busy", "true");
+            const originalLabel = submitButton.querySelector("span").textContent;
+            submitButton.querySelector("span").textContent = "Saving appointment...";
+
             const type = petType.value;
             const size = breed.value;
             const pkg = packageField.value;
-            const price = PRICES[type] && PRICES[type][pkg] && PRICES[type][pkg][size] || 0;
             const sizeEntry = (BREED_SIZES[type] || []).find((entry) => entry[0] === size);
             const typeLabel = type === "dog" ? "Dog" : type === "cat" ? "Cat" : "Small Animal";
-            const bookingRef = "GRM-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-            const message = [
-                "Hi Stephan's Pet Store!", "I want to book a grooming appointment:", "", "*GROOMING APPOINTMENT BOOKING*",
-                "*Booking Ref:* #" + bookingRef,
-                "*Customer Name:* " + $("#field-customer-name", root).value,
-                "*Phone Number:* " + $("#field-customer-phone", root).value, "",
-                "*PET DETAILS*", "*Pet Name:* " + $("#field-pet-name", root).value + " (" + typeLabel + ")",
-                "*Breed Size:* " + (sizeEntry ? sizeEntry[1] : size), "", "*SERVICE DETAILS*",
-                "*Selected Package:* " + (pkg === "standard" ? "Essential" : "Signature") + " Package",
-                "*Preferred Date:* " + date.value, "*Preferred Time:* " + $("#field-time", root).value, "",
-                "*Total Amount:* " + money(price),
-            ].join("\n");
-            const target = "https://wa.me/255769324445?text=" + encodeURIComponent(message);
-            fetch("/grooming/book", { method: "POST", body: new FormData(form) }).finally(() => { window.location.href = target; });
+
+            try {
+                const response = await fetch("/grooming/book", {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" },
+                });
+                const result = await response.json();
+                if (!response.ok || !result.ok) throw new Error(result.error || "The booking could not be saved.");
+
+                const notes = $("#field-notes", root).value.trim();
+                const message = [
+                    "🐾 *NEW GROOMING BOOKING REQUEST*",
+                    "*Odoo Reference:* " + result.reference,
+                    "", "*CUSTOMER*",
+                    "Name: " + $("#field-customer-name", root).value,
+                    "Phone: " + $("#field-customer-phone", root).value,
+                    "", "*PET DETAILS*",
+                    "Pet: " + $("#field-pet-name", root).value + " (" + typeLabel + ")",
+                    "Size / Stage: " + (sizeEntry ? sizeEntry[1] : size),
+                    "", "*SERVICE*",
+                    "Package: " + (pkg === "standard" ? "Essential" : "Signature"),
+                    "Detangling: " + (detangling?.checked ? "Yes (+TZS 30,000)" : "No"),
+                    "Date: " + result.date_label,
+                    "Time: " + result.time_label,
+                    "Total: " + result.total_formatted,
+                    notes ? "Notes: " + notes : "",
+                ].filter(Boolean).join("\n");
+                window.location.href = "https://wa.me/255769324445?text=" + encodeURIComponent(message);
+            } catch (error) {
+                status.textContent = error.message || "The booking could not be saved. Please try again.";
+                status.classList.add("is-visible");
+                status.scrollIntoView({ behavior: "smooth", block: "center" });
+                submitButton.disabled = false;
+                submitButton.removeAttribute("aria-busy");
+                submitButton.querySelector("span").textContent = originalLabel;
+            }
         });
 
         activate(petType.value || "dog");

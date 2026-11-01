@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Pet Grooming Services',
-    'version': '18.0.1.0.1',
+    'version': '20.0.1.0.2',
     'category': 'Services',
     'summary': 'Pet grooming appointment booking and management for Odoo 20',
     'description': """
