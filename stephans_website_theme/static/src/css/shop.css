@@ -372,9 +372,9 @@ article.oe_product_cart:hover {
 /* Product description: theme-aligned reading width and content rhythm. */
 #product_full_description {
     width: 100% !important;
-    max-width: 1240px !important;
+    max-width: 1320px !important;
     margin: 40px auto 72px !important;
-    padding: 0 24px !important;
+    padding: 0 20px !important;
     box-sizing: border-box !important;
 }
 
@@ -392,7 +392,7 @@ article.oe_product_cart:hover {
 }
 
 .stephans-product-description h3 {
-    max-width: 860px !important;
+    max-width: 100% !important;
     margin: 0 0 14px !important;
     color: #2a211c !important;
     font-family: "Playfair Display", Georgia, "Times New Roman", serif !important;
@@ -418,12 +418,12 @@ article.oe_product_cart:hover {
 }
 
 .stephans-product-description > p {
-    max-width: 940px !important;
+    max-width: 100% !important;
     margin-bottom: 16px !important;
 }
 
 .stephans-product-description > p.lead {
-    max-width: 780px !important;
+    max-width: 100% !important;
     color: #4e2a15 !important;
     font-size: 1.05rem !important;
 }
