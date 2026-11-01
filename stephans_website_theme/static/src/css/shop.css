@@ -272,6 +272,22 @@ article.oe_product_cart:hover {
     padding-left: 0 !important;
 }
 
+/* Keep full-resolution product media while giving the packshot breathing room. */
+#product_detail .o_product_detail_img_wrapper {
+    overflow: hidden !important;
+    background: #ffffff !important;
+}
+
+#product_detail .o_product_detail_img_wrapper > img.product_detail_img {
+    width: 82% !important;
+    height: 82% !important;
+    max-width: 82% !important;
+    max-height: 82% !important;
+    margin: auto !important;
+    object-fit: contain !important;
+    object-position: center !important;
+}
+
 /* Product details column (50% on desktop) */
 #product_details {
     flex: 0 0 50% !important;
@@ -490,5 +506,12 @@ article.oe_product_cart:hover {
     .stephans-product-description .table td {
         padding: 9px 10px !important;
         font-size: 0.88rem !important;
+    }
+
+    #product_detail .o_product_detail_img_wrapper > img.product_detail_img {
+        width: 88% !important;
+        height: 88% !important;
+        max-width: 88% !important;
+        max-height: 88% !important;
     }
 }
