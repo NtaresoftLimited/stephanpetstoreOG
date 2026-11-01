@@ -9,6 +9,14 @@ const initializeStephanHeader = () => {
         const megaItems = [...header.querySelectorAll("[data-stephans-mega='true']")];
         let closeTimer;
         let pinnedItem = null;
+        let openItem = null;
+
+        const isDesktop = () => window.matchMedia("(min-width: 992px)").matches;
+
+        const cancelClose = () => {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+        };
 
         const closeMegas = (except = null) => {
             megaItems.forEach((item) => {
@@ -18,6 +26,9 @@ const initializeStephanHeader = () => {
             });
             if (!except) {
                 header.classList.remove("is-mega-open");
+                openItem = null;
+            } else {
+                openItem = except;
             }
         };
 
@@ -47,22 +58,27 @@ const initializeStephanHeader = () => {
         megaItems.forEach((item) => {
             const button = item.querySelector(":scope > button");
             const open = () => {
-                window.clearTimeout(closeTimer);
+                cancelClose();
                 closeMegas(item);
                 item.classList.add("is-open");
                 header.classList.add("is-mega-open");
                 button?.setAttribute("aria-expanded", "true");
+                openItem = item;
             };
             const scheduleClose = () => {
-                if (pinnedItem === item) return;
+                cancelClose();
+                if (pinnedItem && openItem === pinnedItem) return;
                 closeTimer = window.setTimeout(() => closeMegas(), 180);
             };
 
-            item.addEventListener("mouseenter", open);
+            item.addEventListener("pointerenter", (event) => {
+                if (!isDesktop() || event.pointerType === "touch") return;
+                open();
+            });
             item.addEventListener("mouseleave", scheduleClose);
             button?.addEventListener("click", (event) => {
                 event.stopPropagation();
-                if (pinnedItem === item) {
+                if (item.classList.contains("is-open") && pinnedItem === item) {
                     pinnedItem = null;
                     closeMegas();
                 } else {
@@ -134,6 +150,12 @@ const initializeStephanHeader = () => {
                 setMobileOpen(false);
             }
         });
+        window.addEventListener("resize", () => {
+            if (!isDesktop()) {
+                pinnedItem = null;
+                closeMegas();
+            }
+        }, { passive: true });
         header.dataset.initialized = "true";
     });
 };
@@ -190,11 +212,15 @@ const initializeProductRotator = () => {
     });
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+const initializeStephanWebsite = () => {
     initializeStephanHeader();
     initializeProductRotator();
-});
-document.addEventListener("website_preview_ready", () => {
-    initializeStephanHeader();
-    initializeProductRotator();
-});
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeStephanWebsite, { once: true });
+} else {
+    initializeStephanWebsite();
+}
+document.addEventListener("website_preview_ready", initializeStephanWebsite);
+window.addEventListener("pageshow", initializeStephanWebsite);
