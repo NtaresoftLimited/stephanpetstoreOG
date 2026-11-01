@@ -229,3 +229,142 @@ article.oe_product_cart:hover {
     border-color: #c77e35 !important;
     color: #3e220f !important;
 }
+
+/* 8. Fix Description in Product Box on /shop (prevent raw HTML or stretched cards) */
+#products_grid .oe_subdescription_wrapper,
+#products_grid .oe_subdescription,
+.oe_subdescription_wrapper,
+.oe_subdescription {
+    display: none !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 9. Product Details Page Width & Responsive Container Alignment */
+.o_wsale_product_page {
+    width: 100% !important;
+}
+
+#product_detail {
+    width: 100% !important;
+    max-width: 1320px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+#product_detail .row {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    align-items: flex-start !important;
+}
+
+/* Product gallery column (50% on desktop) */
+#product_detail .o_wsale_product_images {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding-right: 25px !important;
+    padding-left: 0 !important;
+}
+
+/* Product details column (50% on desktop) */
+#product_details {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding-left: 25px !important;
+    padding-right: 0 !important;
+}
+
+#product_details #o_wsale_product_details_content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Product full description container below product section */
+#product_full_description {
+    width: 100% !important;
+    max-width: 1320px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    box-sizing: border-box !important;
+}
+
+.stephans-product-description {
+    background: #ffffff !important;
+    border: 1px solid #eae3d9 !important;
+    border-radius: 14px !important;
+    padding: 32px !important;
+    margin-top: 24px !important;
+    margin-bottom: 40px !important;
+    box-shadow: 0 2px 12px rgba(58, 37, 23, 0.04) !important;
+}
+
+.stephans-product-description h3 {
+    color: #3e220f !important;
+    font-weight: 700 !important;
+    margin-bottom: 16px !important;
+    font-size: 1.5rem !important;
+}
+
+.stephans-product-description h4 {
+    color: #3e220f !important;
+    font-weight: 600 !important;
+    margin-top: 20px !important;
+    margin-bottom: 12px !important;
+    font-size: 1.15rem !important;
+}
+
+.stephans-product-description p,
+.stephans-product-description li {
+    color: #4a4a4a !important;
+    line-height: 1.6 !important;
+    font-size: 0.95rem !important;
+}
+
+.stephans-product-description .table {
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    border: 1px solid #eae3d9 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    margin-top: 10px !important;
+}
+
+.stephans-product-description .table th {
+    background: #fbf9f6 !important;
+    color: #3e220f !important;
+    font-weight: 600 !important;
+    width: 45% !important;
+    padding: 10px 14px !important;
+    border-color: #eae3d9 !important;
+}
+
+.stephans-product-description .table td {
+    padding: 10px 14px !important;
+    border-color: #eae3d9 !important;
+    color: #222222 !important;
+}
+
+@media (max-width: 991.98px) {
+    #product_detail .o_wsale_product_images,
+    #product_details {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    .stephans-product-description {
+        padding: 20px !important;
+    }
+}
