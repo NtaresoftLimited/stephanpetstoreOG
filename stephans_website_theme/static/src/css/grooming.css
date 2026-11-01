@@ -77,6 +77,11 @@
   color: #222222;
 }
 
+.grooming-tab:hover .grooming-tab-icon,
+.grooming-tab:focus-visible .grooming-tab-icon {
+  opacity: 1;
+}
+
 .grooming-tab:focus-visible {
   outline: 2px solid #c77e35;
   outline-offset: -4px;
