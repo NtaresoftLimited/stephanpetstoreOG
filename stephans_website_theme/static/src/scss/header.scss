@@ -27,7 +27,8 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
 }
 
-/* Full retail header always active across all pages */
+/* Inner pages keep the full sticky header. The homepage uses the optimized
+   compact-to-retail state rules in home_header.css. */
 .stephans-homebar {
     display: none !important;
 }

@@ -102,7 +102,7 @@ const initializeStephanHeader = () => {
         let scrollFrame = 0;
         const updateScrollState = () => {
             scrollFrame = 0;
-            header.classList.toggle("is-scrolled", window.scrollY > 20);
+            header.classList.toggle("is-scrolled", window.scrollY > 10);
         };
         const requestScrollUpdate = () => {
             if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollState);
@@ -138,5 +138,63 @@ const initializeStephanHeader = () => {
     });
 };
 
-document.addEventListener("DOMContentLoaded", initializeStephanHeader);
-document.addEventListener("website_preview_ready", initializeStephanHeader);
+// Auto-rotate home page New Arrivals product grid every 20 seconds
+const initializeProductRotator = () => {
+    document.querySelectorAll("[data-stephans-product-rotator='true']").forEach((rotator) => {
+        if (rotator.dataset.initialized === "true") return;
+
+        const slides = Array.from(rotator.querySelectorAll(".stephans-products-slide"));
+        const dots = Array.from(rotator.querySelectorAll(".stephans-rotator-dot"));
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+        let isPaused = false;
+        let timer = null;
+
+        const showSlide = (nextIndex) => {
+            if (nextIndex === currentIndex) return;
+            slides[currentIndex].classList.remove("is-active");
+            if (dots[currentIndex]) dots[currentIndex].classList.remove("is-active");
+
+            currentIndex = nextIndex;
+
+            slides[currentIndex].classList.add("is-active");
+            if (dots[currentIndex]) dots[currentIndex].classList.add("is-active");
+        };
+
+        const nextSlide = () => {
+            showSlide((currentIndex + 1) % slides.length);
+        };
+
+        const startTimer = () => {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (!isPaused) {
+                    nextSlide();
+                }
+            }, 20000); // exactly 20 seconds
+        };
+
+        rotator.addEventListener("mouseenter", () => { isPaused = true; });
+        rotator.addEventListener("mouseleave", () => { isPaused = false; });
+
+        dots.forEach((dot, idx) => {
+            dot.addEventListener("click", () => {
+                showSlide(idx);
+                startTimer();
+            });
+        });
+
+        startTimer();
+        rotator.dataset.initialized = "true";
+    });
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    initializeStephanHeader();
+    initializeProductRotator();
+});
+document.addEventListener("website_preview_ready", () => {
+    initializeStephanHeader();
+    initializeProductRotator();
+});

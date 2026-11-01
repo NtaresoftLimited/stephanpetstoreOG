@@ -1,0 +1,78 @@
+/* Next.js parity: compact floating chrome over the home hero, full header after scroll. */
+.stephans-master-header.is-home {
+    position: absolute !important;
+    inset: 0 0 auto 0;
+    z-index: 1040;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.stephans-master-header.is-home:not(.is-scrolled) .stephans-homebar {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    width: calc(100% - 48px);
+    max-width: 1520px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    transform: translateX(-50%);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.stephans-master-header.is-home:not(.is-scrolled) .stephans-retail-header {
+    display: none !important;
+}
+
+.stephans-master-header.is-home.is-scrolled {
+    position: fixed !important;
+    background: #fff !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09) !important;
+}
+
+.stephans-master-header.is-home.is-scrolled .stephans-homebar {
+    display: none !important;
+}
+
+.stephans-master-header.is-home.is-scrolled .stephans-retail-header {
+    display: block !important;
+}
+
+.stephans-homebar__nav,
+.stephans-homebar__actions {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 4px 22px rgba(35, 24, 17, 0.12);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+
+.stephans-homebar__nav a,
+.stephans-homebar__actions a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 767px) {
+    .stephans-master-header.is-home:not(.is-scrolled) .stephans-homebar {
+        top: 10px;
+        width: calc(100% - 24px);
+    }
+
+    .stephans-master-header.is-home.is-mobile-open:not(.is-scrolled) .stephans-retail-header {
+        display: block !important;
+        position: fixed;
+        top: 62px;
+        left: 0;
+        right: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stephans-master-header,
+    .stephans-homebar,
+    .stephans-retail-header {
+        transition: none !important;
+    }
+}
