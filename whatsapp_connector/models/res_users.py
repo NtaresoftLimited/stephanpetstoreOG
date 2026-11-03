@@ -74,32 +74,28 @@ class ResUsers(models.Model):
         if not last9 or len(last9) < 7:
             return []
 
-        local_zero = f"0{last9}"
-        self.env.cr.execute(
-            """
-            SELECT id
-            FROM res_partner
-            WHERE active IS TRUE
-              AND id != 1
-              AND (
-                  regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g') IN (%s, %s)
-                  OR regexp_replace(COALESCE(mobile, ''), '[^0-9]', '', 'g') IN (%s, %s)
-                  OR (
-                      length(%s) = 9 AND (
-                          right(regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g'), 9) = %s
-                          OR right(regexp_replace(COALESCE(mobile, ''), '[^0-9]', '', 'g'), 9) = %s
-                      )
-                  )
-              )
-            ORDER BY
-                (SELECT count(*) FROM sale_order so WHERE so.partner_id = res_partner.id) +
-                (SELECT count(*) FROM pos_order po WHERE po.partner_id = res_partner.id) DESC,
-                customer_rank DESC NULLS LAST,
-                id ASC
-            """,
-            (digits, local_zero, digits, local_zero, last9, last9, last9),
+        Partners = self.env['res.partner'].sudo()
+        phone_fields = ['phone']
+        if 'mobile' in Partners._fields:
+            phone_fields.append('mobile')
+
+        or_conditions = [(field, 'ilike', last9) for field in phone_fields]
+        domain = [('active', '=', True), ('id', '!=', 1)]
+        if len(or_conditions) > 1:
+            search_domain = ['|'] * (len(or_conditions) - 1) + or_conditions + domain
+        else:
+            search_domain = or_conditions + domain
+
+        candidates = Partners.search(search_domain, limit=25)
+        matching = candidates.filtered(
+            lambda partner: any(
+                normalize_whatsapp_phone(getattr(partner, field_name, False))[2] == last9
+                for field_name in phone_fields
+            )
         )
-        return [row[0] for row in self.env.cr.fetchall()]
+        return matching.sorted(
+            key=lambda partner: (-(getattr(partner, 'customer_rank', 0) or 0), partner.id)
+        ).ids
 
     @api.model
     def find_or_create_whatsapp_portal_user(self, raw_phone, customer_name=None):
@@ -150,12 +146,14 @@ class ResUsers(models.Model):
                 partner.write({'phone': e164})
         else:
             display_name = (customer_name or '').strip() or f"Customer ({e164})"
-            partner = PartnersSudo.create({
+            partner_values = {
                 'name': display_name,
                 'phone': e164,
-                'mobile': e164,
                 'customer_rank': 1,
-            })
+            }
+            if 'mobile' in PartnersSudo._fields:
+                partner_values['mobile'] = e164
+            partner = PartnersSudo.create(partner_values)
 
         # 4. Provision a Portal User (base.group_portal) linked to this partner
         portal_group = self.env.ref('base.group_portal')
@@ -184,7 +182,10 @@ class ResUsers(models.Model):
         user_sudo = self.sudo()
 
         e164, _digits, _last9 = normalize_whatsapp_phone(
-            target_phone or user_sudo.partner_id.phone or user_sudo.partner_id.mobile or user_sudo.login
+            target_phone
+            or user_sudo.partner_id.phone
+            or getattr(user_sudo.partner_id, 'mobile', False)
+            or user_sudo.login
         )
         if not e164:
             raise UserError(_("No valid WhatsApp number found for this account."))
