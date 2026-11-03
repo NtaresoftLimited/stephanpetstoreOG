@@ -108,6 +108,8 @@ class StephansGroomingWebsite(http.Controller):
             "default_customer_email": partner.email or "",
             "prices_json": json.dumps(self._get_website_prices()),
             "detangling_fee": detangling_fee,
+            "additional_title": "Professional Pet Grooming in Dar es Salaam",
+            "meta_description": "Book gentle professional grooming for dogs, cats and small animals at Stephan's Pet Store in Dar es Salaam.",
         })
 
     @http.route("/grooming/book", type="http", auth="public", website=True, methods=["POST"], csrf=True)
@@ -184,6 +186,13 @@ class StephansGroomingWebsite(http.Controller):
                 raise UserError("The selected grooming package is temporarily unavailable.")
             service = service.sudo()
 
+            det_type = post.get("detangling_type")
+            has_det = (det_type in ("moderate", "intensive")) or (post.get("has_detangling") in ("on", "1", "true"))
+            raw_notes = (post.get("notes") or "").strip()
+            if det_type in ("moderate", "intensive"):
+                det_label = "Intensive (+150,000/=)" if det_type == "intensive" else "Moderate (+100,000/=)"
+                raw_notes = f"{raw_notes} [Detangling: {det_label}]".strip()
+
             appointment = Appointment.create({
                 "partner_id": partner.id,
                 "pet_name": post["pet_name"].strip(),
@@ -193,8 +202,8 @@ class StephansGroomingWebsite(http.Controller):
                 "service_id": service.id,
                 "appointment_date": fields.Datetime.to_string(appointment_utc),
                 "preferred_time": preferred_time,
-                "has_detangling": post.get("has_detangling") in ("on", "1", "true"),
-                "notes": (post.get("notes") or "").strip() or False,
+                "has_detangling": has_det,
+                "notes": raw_notes or False,
             })
 
             request.env["calendar.event"].sudo().create({

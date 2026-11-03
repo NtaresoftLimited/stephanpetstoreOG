@@ -80,7 +80,9 @@
 
             const basePrice = prices[type] && prices[type][pkg] && prices[type][pkg][size];
             if (basePrice) {
-                const price = basePrice + (detangling?.checked ? detanglingFee : 0);
+                const detVal = root.querySelector('input[name="detangling_type"]:checked')?.value;
+                const detFee = detVal === "intensive" ? 150000 : detVal === "moderate" ? 100000 : 0;
+                const price = basePrice + detFee;
                 const typeLabel = type === "dog" ? "Dog" : type === "cat" ? "Cat" : "Small Animal";
                 const sizeEntry = (BREED_SIZES[type] || []).find((entry) => entry[0] === size);
                 $("#total-summary", root).textContent = typeLabel + " • " + (sizeEntry ? sizeEntry[1] : size) + " • " + (pkg === "standard" ? "Essential" : "Signature") + " Package";
@@ -147,6 +149,7 @@
         breed.addEventListener("change", updateDetails);
         packageField.addEventListener("change", updateDetails);
         detangling?.addEventListener("change", updateDetails);
+        root.querySelectorAll('input[name="detangling_type"]').forEach((r) => r.addEventListener("change", updateDetails));
 
         $$(".grooming-pkg-card", root).forEach((card) => {
             card.tabIndex = 0;
@@ -224,7 +227,12 @@
                     "Size / Stage: " + (sizeEntry ? sizeEntry[1] : size),
                     "", "*SERVICE*",
                     "Package: " + (pkg === "standard" ? "Essential" : "Signature"),
-                    "Detangling: " + (detangling?.checked ? "Yes (+TZS 30,000)" : "No"),
+                    (() => {
+                        const detVal = root.querySelector('input[name="detangling_type"]:checked')?.value;
+                        if (detVal === "intensive") return "Detangling: Intensive (+TZS 150,000)";
+                        if (detVal === "moderate") return "Detangling: Moderate (+TZS 100,000)";
+                        return "Detangling: No";
+                    })(),
                     "Date: " + result.date_label,
                     "Time: " + result.time_label,
                     "Total: " + result.total_formatted,

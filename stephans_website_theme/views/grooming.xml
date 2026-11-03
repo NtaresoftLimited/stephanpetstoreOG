@@ -180,12 +180,27 @@
                   <input type="email" name="customer_email" id="field-customer-email" placeholder="Email Address (Optional)" class="grooming-input" t-att-value="default_customer_email"/>
                 </div>
 
-                <!-- Optional detangling treatment -->
-                <label class="grooming-addon-option">
-                  <input type="checkbox" name="has_detangling" id="field-detangling"/>
-                  <span><strong>Matted Coat / Heavy Detangling</strong><small>Allow extra groomer time</small></span>
-                  <b>+TZS <t t-out="'{:,.0f}'.format(detangling_fee)"/></b>
-                </label>
+                <!-- Optional detangling treatments -->
+                <div class="grooming-addon-group grooming-form-wide">
+                  <div class="grooming-addon-label">Coat Detangling Care (Optional)</div>
+                  <div class="grooming-addon-grid">
+                    <label class="grooming-addon-option">
+                      <input type="radio" name="detangling_type" value="none" checked="checked"/>
+                      <span><strong>No Detangling</strong><small>Standard coat condition</small></span>
+                      <b>Included</b>
+                    </label>
+                    <label class="grooming-addon-option">
+                      <input type="radio" name="detangling_type" value="moderate" id="field-detangling-moderate"/>
+                      <span><strong>Moderate Detangling</strong><small>Mild to moderate knots &amp; tangles</small></span>
+                      <b>+100,000/=</b>
+                    </label>
+                    <label class="grooming-addon-option">
+                      <input type="radio" name="detangling_type" value="intensive" id="field-detangling-intensive"/>
+                      <span><strong>Intensive Detangling</strong><small>Severe matting &amp; deep restoration</small></span>
+                      <b>+150,000/=</b>
+                    </label>
+                  </div>
+                </div>
 
                 <!-- Care notes -->
                 <div class="grooming-form-wide">
