@@ -2,11 +2,11 @@
 <odoo>
   <template id="grooming_page" name="Pet Grooming Studio | Stephan's Pet Store">
     <t t-call="website.layout">
-      <t t-set="additional_title">Pet Grooming Studio | Stephan's Pet Store</t>
+      <t t-set="additional_title">Professional Pet Grooming in Dar es Salaam</t>
+      <t t-set="meta_description">Book gentle professional grooming for dogs, cats and small animals at Stephan's Pet Store in Dar es Salaam.</t>
       <t t-set="no_header" t-value="True"/>
       <t t-set="no_footer" t-value="True"/>
       
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css?v=20.0.2.10.0"/>
       <link rel="stylesheet" href="/stephans_website_theme/static/src/css/grooming.css?v=20.0.2.10.0"/>
       <script defer="defer" src="/stephans_website_theme/static/src/js/grooming.js?v=20.0.2.10.0"></script>
       
@@ -246,7 +246,7 @@
                   <div class="grooming-policy-footer">
                     <label class="grooming-agree-label">
                       <input type="checkbox" required="required" id="agree-policy"/>
-                      <span>I have read and agree to Stephan's Grooming Policy.</span>
+                      <span>I have read and agreed. <span class="text-danger font-weight-bold">*</span></span>
                     </label>
                     <a href="/grooming-policy" class="grooming-policy-link">
                       READ FULL POLICY <span>→</span>
