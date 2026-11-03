@@ -53,7 +53,7 @@ PAGES = {
         'intro': 'These guidelines keep every pet safe, comfortable and cared for throughout their appointment.',
         'sections': [
             ('Before your appointment', 'Please disclose medical conditions, allergies and behavioural concerns. Arrive approximately ten minutes early for check-in.'),
-            ('During grooming', 'Services may be adjusted when coat condition or behaviour requires additional handling, detangling or another safety measure.'),
+            ('During grooming', 'Every pet and every coat is different. Tangled or matted coats require extra time and careful attention. Additional care and fees (Moderate Detangling TSh 100,000, Intensive Detangling TSh 150,000, Handling Fee TSh 50,000, Sedation Fee TSh 50,000) will be discussed and agreed with you before proceeding.'),
             ('Pickup', 'We will contact you when grooming is complete. Please collect your pet within one hour to avoid late-pickup charges.'),
             ('Cancellations', 'Please tell us as early as possible when you need to reschedule or cancel an appointment.'),
         ],
@@ -102,21 +102,31 @@ PAGES = {
 
 
 class StephansWebsitePages(http.Controller):
-    @http.route(['/about', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True)
+    @http.route(['/about', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True, sitemap=True)
     def content_page(self, **kw):
         key = request.httprequest.path.strip('/') or 'about'
         if key == 'faqs': key = 'faq'
-        return request.render('stephans_website_theme.content_page', {'page': PAGES[key], 'page_key': key})
+        return request.render('stephans_website_theme.content_page', {
+            'page': PAGES[key],
+            'page_key': key,
+            'additional_title': PAGES[key]['title'],
+            'meta_description': PAGES[key]['intro'],
+        })
 
     @http.route('/stores', type='http', auth='public', website=True, sitemap=True)
     def stores_page(self, **kw):
-        return request.render('stephans_website_theme.stores_page')
+        return request.render('stephans_website_theme.stores_page', {
+            'additional_title': "Pet Stores in Dar es Salaam",
+            'meta_description': "Find Stephan's Pet Store locations in Masaki and Mikocheni, Dar es Salaam, with opening hours, contacts and directions.",
+        })
 
     @http.route('/contact', type='http', auth='public', website=True, sitemap=True)
     def contact_page(self, **kw):
         return request.render('stephans_website_theme.contact_page', {
             'contact_sent': kw.get('sent') == '1',
             'contact_error': kw.get('error') == '1',
+            'additional_title': "Contact Stephan's Pet Store",
+            'meta_description': "Contact Stephan's Pet Store in Dar es Salaam by phone, WhatsApp or email, find our locations, or book professional pet grooming.",
         })
 
     @http.route('/contact/send', type='http', auth='public', website=True, methods=['POST'], csrf=True)
