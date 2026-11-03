@@ -54,7 +54,7 @@ PAGES = {
         'sections': [
             ('Before your appointment', 'Please disclose medical conditions, allergies and behavioural concerns. Arrive approximately ten minutes early for check-in.'),
             ('During grooming', 'Every pet and every coat is different. Tangled or matted coats require extra time and careful attention. Additional care and fees (Moderate Detangling TSh 100,000, Intensive Detangling TSh 150,000, Handling Fee TSh 50,000, Sedation Fee TSh 50,000) will be discussed and agreed with you before proceeding.'),
-            ('Pickup', 'We will contact you when grooming is complete. Please collect your pet within one hour to avoid late-pickup charges.'),
+            ('Pickup', 'We will contact you when grooming is complete. Please collect your pet within one hour. After this, a late pickup fee of TSh 20,000 per hour applies when collection is delayed beyond this window.'),
             ('Cancellations', 'Please tell us as early as possible when you need to reschedule or cancel an appointment.'),
         ],
     },
