@@ -63,7 +63,7 @@ class WhatsappTransferWizard(models.TransientModel):
         
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.env['ir.config_parameter'].sudo().get_param('techovers_whatsapp.api_key') or ''}",
+            "Authorization": f"Bearer {self.env['ir.config_parameter'].sudo().get_param('stephans_whatsapp.api_key') or ''}",
             "User-Agent": "Odoo/18.0"
         }
         

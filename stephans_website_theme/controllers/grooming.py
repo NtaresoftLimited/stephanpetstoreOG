@@ -98,7 +98,7 @@ class StephansGroomingWebsite(http.Controller):
         partner = request.env.user.partner_id if not request.env.user._is_public() else request.env["res.partner"]
         now_local = datetime.now(NAIROBI_TZ)
         detangling_fee = request.env["ir.config_parameter"].sudo().get_float(
-            "grooming.detangling_fee", default=30000.0
+            "grooming.detangling_fee", default=100000.0
         )
         return request.render("stephans_website_theme.grooming_page", {
             "valid_times": VALID_TIMES,

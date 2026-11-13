@@ -39,7 +39,7 @@
         <field name="state">code</field>
         <field name="code">config = env['pos.whatsapp.config'].search([], limit=1)
 if not config:
-    manager_phone = env['ir.config_parameter'].sudo().get_param('techovers_whatsapp.manager_phone') or '+255719498263'
+    manager_phone = env['ir.config_parameter'].sudo().get_param('stephans_whatsapp.manager_phone') or '+255719498263'
     config = env['pos.whatsapp.config'].create({'name': 'WhatsApp POS Report Configuration', 'active': True, 'send_time': 22.0, 'phone_numbers': manager_phone})
 action = {
     'type': 'ir.actions.act_window',

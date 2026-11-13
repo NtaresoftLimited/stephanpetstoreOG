@@ -109,8 +109,8 @@ class TestGroomingBilling(TransactionCase):
             'preferred_time': '03:00 PM',
         })
         
-        # Base 60000 + detangling 30000 + handling 20000 + late pickup (2*10000) = 130000
-        self.assertEqual(appointment.total_price, 130000.0)
+        # Base 60000 + detangling 100000 + handling 20000 + late pickup (2*20000) = 220000
+        self.assertEqual(appointment.total_price, 220000.0)
     
     def test_create_sale_order_from_appointment(self):
         """Test creating a sales order from confirmed appointment"""

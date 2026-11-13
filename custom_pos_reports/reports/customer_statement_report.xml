@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="paperformat_customer_statement" model="report.paperformat">
-        <field name="name">TechOvers Customer Statement A4</field>
+        <field name="name">Stephan's Pet Store Customer Statement A4</field>
         <field name="format">A4</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">40</field>
@@ -13,7 +13,7 @@
 
     <record id="action_customer_statement" model="ir.actions.report">
         <field name="name">Customer Statement</field>
-        <field name="model">techovers.customer.statement</field>
+        <field name="model">stephans.customer.statement</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">custom_pos_reports.customer_statement</field>
         <field name="report_file">custom_pos_reports.customer_statement</field>
@@ -41,8 +41,8 @@
                                 <div style="font-size: 10px; color: #64748b; margin-top: 4px; line-height: 1.4; border: none !important;">
                                     TIN: <t t-out="company.vat or '131-518-544'"/><br/>
                                     <t t-out="company.phone or '+255 749 388 080'"/><br/>
-                                    <t t-out="company.email or 'info@techovers.co.tz'"/><br/>
-                                    <t t-out="company.website or 'https://www.techovers.co.tz'"/>
+                                    <t t-out="company.email or 'info@stephanspetstore.co.tz'"/><br/>
+                                    <t t-out="company.website or 'https://stephanspetstore.co.tz'"/>
                                 </div>
                             </td>
                         </tr>
@@ -172,28 +172,28 @@
                         <table style="width: 100%; border-collapse: collapse; border: none !important;">
                             <tr style="border: none !important;">
                                 <td style="width: 33%; vertical-align: top; text-align: left; padding: 0; border: none !important;">
-                                    <div style="color: #17231f; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">TECHOVERS</div>
+                                    <div style="color: #17231f; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">STEPHAN'S PET STORE</div>
                                     <div style="font-weight: 700; font-size: 10px; color: #1e293b; margin-bottom: 2px;">LIPA M-PESA</div>
                                     <div style="font-size: 10px; color: #475569; font-weight: 600;">Contact Store</div>
                                 </td>
                                 <td style="width: 33%; vertical-align: top; text-align: left; padding: 0; border: none !important;">
                                     <div style="font-weight: 800; font-size: 10px; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">BANK TRANSFER</div>
-                                    <div style="font-size: 10px; color: #475569; font-weight: 600; margin-bottom: 2px;">TechOvers Account</div>
-                                    <div style="font-size: 9px; color: #64748b;">TechOvers Co. Limited</div>
+                                    <div style="font-size: 10px; color: #475569; font-weight: 600; margin-bottom: 2px;">Stephan's Pet Store Account</div>
+                                    <div style="font-size: 9px; color: #64748b;">Stephan's Pet Store</div>
                                 </td>
                                 <td style="width: 34%; vertical-align: top; text-align: left; padding: 0; border: none !important;">
                                     <div style="font-weight: 700; font-size: 10px; color: #1e293b; margin-bottom: 2px;">Account Name:</div>
-                                    <div style="font-size: 10px; color: #475569; font-weight: 600;">TechOvers Co. Limited</div>
+                                    <div style="font-size: 10px; color: #475569; font-weight: 600;">Stephan's Pet Store</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                     <div style="border-top: 1px solid #e5e7eb !important; margin-top: 8px; margin-bottom: 6px;"/>
                     <div style="font-size: 9px; color: #64748b; text-align: center; line-height: 1.4;">
-                        TechOvers Co. Limited  |  MIKOCHENI, GARDEN ROAD, DAR ES SALAAM  |  Phone: +255 749 388 080  |  info@techovers.co.tz  |  www.techovers.co.tz
+                        Stephan's Pet Store  |  11 SLIPWAY ROAD, MASAKI, DAR ES SALAAM  |  Phone: +255 786 627 873  |  info@stephanspetstore.co.tz  |  stephanspetstore.co.tz
                     </div>
                     <div style="font-size: 9px; color: #17231f; font-style: italic; text-align: center; margin-top: 3px; font-weight: 600;">
-                        Thank you for your business.  Karibu sana TechOvers.
+                        Thank you for your business.  Karibu sana Stephan's Pet Store.
                     </div>
                 </div>
             </t>

@@ -85,7 +85,7 @@ class WhatsAppInstance(models.Model):
 
             _logger.warning(f"UltraMsg returned non-sent status: {res_json}")
             # Try WASenderAPI fallback if configured in system parameters
-            wasender_key = get_config_str(self.env, 'techovers_whatsapp.api_key')
+            wasender_key = get_config_str(self.env, 'stephans_whatsapp.api_key')
             if wasender_key:
                 wa_ok, wa_res = self._send_via_wasender(phone, body, wasender_key)
                 if wa_ok:

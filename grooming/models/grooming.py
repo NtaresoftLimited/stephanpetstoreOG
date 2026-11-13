@@ -256,7 +256,7 @@ class GroomingAppointment(models.Model):
     def _compute_policy_description(self):
         """Generate policy text based on current settings"""
         config = self.env['ir.config_parameter'].sudo()
-        detangling = config.get_float('grooming.detangling_fee', default=30000.0)
+        detangling = config.get_float('grooming.detangling_fee', default=100000.0)
         handling = config.get_float('grooming.handling_fee', default=20000.0)
         late_pickup = config.get_float('grooming.late_pickup_fee', default=20000.0)
         
@@ -300,7 +300,7 @@ class GroomingAppointment(models.Model):
 
             # 3. Extras
             config = self.env['ir.config_parameter'].sudo()
-            detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
+            detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
             handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
             late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
 
@@ -340,7 +340,7 @@ class GroomingAppointment(models.Model):
                 
             # 3. Extra Charges config
             config = self.env['ir.config_parameter'].sudo()
-            detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
+            detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
             handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
             late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
 
@@ -546,7 +546,7 @@ class GroomingAppointment(models.Model):
         if handling_product: self._ensure_pos_product(handling_product)
 
         config = self.env['ir.config_parameter'].sudo()
-        detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
+        detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
         handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
         late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
 
@@ -674,7 +674,7 @@ class GroomingAppointment(models.Model):
         misc_product = self.env.ref('grooming.product_grooming_misc', raise_if_not_found=False)
         
         config = self.env['ir.config_parameter'].sudo()
-        detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
+        detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
         handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
         late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
         
