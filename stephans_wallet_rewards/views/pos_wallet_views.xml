@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_wallet_transaction_form_website" model="ir.ui.view">
+        <field name="name">pos.wallet.transaction.form.website</field>
+        <field name="model">pos.wallet.transaction</field>
+        <field name="inherit_id" ref="pos_wallet_management.pos_wallet_transaction_form_view"/>
+        <field name="arch" type="xml">
+            <field name="pos_order_id" position="attributes">
+                <attribute name="invisible">not pos_order_id</attribute>
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="wallet_id" position="after">
+                <field name="sale_order_id" readonly="1" invisible="not sale_order_id"/>
+                <field name="payment_transaction_id" readonly="1" invisible="not payment_transaction_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="pos_wallet_transaction_tree_website" model="ir.ui.view">
+        <field name="name">pos.wallet.transaction.list.website</field>
+        <field name="model">pos.wallet.transaction</field>
+        <field name="inherit_id" ref="pos_wallet_management.pos_wallet_transaction_tree"/>
+        <field name="arch" type="xml">
+            <field name="trans_reason" position="after">
+                <field name="sale_order_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

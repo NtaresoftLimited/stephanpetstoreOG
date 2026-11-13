@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Cart / checkout totals: Paw Points hint.
+         Guests (and customers without a portal account): "Log in to earn points".
+         Signed-in portal customers: how many points this order earns. -->
+    <template id="cart_total_paw_points" inherit_id="website_sale.total" name="Paw Points hint">
+        <table name="cart_total_table" position="inside">
+            <t t-if="website_sale_order and website_sale_order.order_line">
+                <t t-set="paw_program" t-value="website_sale_order._paw_points_program_for_hint()"/>
+                <tr t-if="paw_program" class="o_paw_points_row">
+                    <td colspan="3" class="border-0 p-0">
+                        <div t-if="not website_sale_order._paw_points_allowed()" class="o_paw_points_hint">
+                            <img src="/stephans_wallet_rewards/static/src/img/paw-points.webp" alt=""/>
+                            <span>
+                                <a href="/web/login/whatsapp?redirect=%2Fshop%2Fcart">Log in to earn points</a>
+                                on this order: 1 <t t-out="paw_program.portal_point_name or 'point'"/> per 1,000 TSh.
+                            </span>
+                        </div>
+                        <t t-else="">
+                            <t t-set="paw_earn" t-value="website_sale_order._paw_points_estimate()"/>
+                            <div t-if="paw_earn" class="o_paw_points_hint o_paw_points_hint_ok">
+                                <img src="/stephans_wallet_rewards/static/src/img/paw-points.webp" alt=""/>
+                                <span>You'll earn <strong t-out="'{:,.1f}'.format(paw_earn).rstrip('0').rstrip('.')"/>
+                                    <t t-out="paw_program.portal_point_name or 'points'"/> with this order.</span>
+                            </div>
+                        </t>
+                    </td>
+                </tr>
+            </t>
+        </table>
+    </template>
+</odoo>

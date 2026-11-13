@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_sky_wallet" name="My Sky Wallet">
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Sky Wallet &amp; Paw Points"/>
+
+            <div class="o_stephans_portal_title">
+                <img src="/stephans_wallet_rewards/static/src/img/sky-wallet.webp" alt="" class="o_stephans_portal_title_icon"/>
+                <div>
+                    <h4>Sky Wallet &amp; Paw Points</h4>
+                    <p>One balance for our stores and this website.</p>
+                </div>
+            </div>
+
+            <div class="o_sky_wallet_grid">
+                <!-- Balance -->
+                <div class="o_sky_wallet_hero">
+                    <t t-if="wallet">
+                        <span class="o_sky_wallet_hero_label">Available balance</span>
+                        <span class="o_sky_wallet_hero_amount"
+                              t-out="wallet.amount"
+                              t-options='{"widget": "monetary", "display_currency": wallet.currency_id}'/>
+                        <span class="o_sky_wallet_hero_ref">Wallet <t t-out="wallet.name"/></span>
+                        <div class="o_sky_wallet_hero_actions">
+                            <a href="/shop" class="o_sky_wallet_btn">
+                                <i class="oi" data-icon="shopping_bag"/> Shop &amp; pay with wallet
+                            </a>
+                        </div>
+                        <p class="o_sky_wallet_hero_hint">
+                            <i class="oi" data-icon="storefront"/>
+                            Top up at our Masaki or Mikocheni store.
+                        </p>
+                    </t>
+                    <t t-else="">
+                        <span class="o_sky_wallet_hero_label">No Sky Wallet yet</span>
+                        <p class="o_sky_wallet_hero_hint mt-2">
+                            Ask our team at the Masaki or Mikocheni store to open your free Sky Wallet,
+                            then pay in store or online with one balance.
+                        </p>
+                    </t>
+                </div>
+
+                <!-- Paw Points -->
+                <div class="o_sky_points">
+                    <img src="/stephans_wallet_rewards/static/src/img/paw-points.webp" alt="" class="o_sky_points_icon"/>
+                    <t t-if="points_cards">
+                        <t t-foreach="points_cards" t-as="card">
+                            <t t-set="pts" t-value="card.points"/>
+                            <t t-set="reward" t-value="card.program_id.reward_ids.sorted('required_points')[:1]"/>
+                            <div class="o_sky_points_card">
+                                <span class="o_sky_points_value" t-out="'{:,.1f}'.format(pts).rstrip('0').rstrip('.')"/>
+                                <span class="o_sky_points_name" t-out="card.program_id.portal_point_name or 'Points'"/>
+                                <t t-if="reward and reward.required_points">
+                                    <t t-set="ready" t-value="int(pts // reward.required_points)"/>
+                                    <p t-if="ready" class="o_sky_points_hint o_sky_points_ready">
+                                        <i class="oi" data-icon="redeem"/>
+                                        You can claim <strong t-out="ready"/> &#215; <t t-out="reward.description"/> at checkout or in store.
+                                    </p>
+                                    <p t-else="" class="o_sky_points_hint">
+                                        <t t-out="'{:,.1f}'.format(reward.required_points - pts).rstrip('0').rstrip('.')"/>
+                                        more to unlock <t t-out="reward.description"/>.
+                                    </p>
+                                </t>
+                                <a t-attf-href="/my/loyalty_card/#{card.id}/history" class="o_wa_link">
+                                    <i class="oi" data-icon="history"/> Points history
+                                </a>
+                            </div>
+                        </t>
+                    </t>
+                    <div t-else="" class="o_sky_points_card">
+                        <span class="o_sky_points_value">0</span>
+                        <span class="o_sky_points_name">Paw Points</span>
+                        <p class="o_sky_points_hint">
+                            Earn 1 Paw Point for every 1,000 TSh you spend in store or online.
+                            100 points = 5,000 TSh off.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History -->
+            <h5 class="o_sky_wallet_section">Wallet history</h5>
+            <t t-if="not transactions">
+                <div class="o_stephans_portal_empty">
+                    <img src="/stephans_wallet_rewards/static/src/img/sky-wallet.webp" alt=""/>
+                    <div>
+                        <h5>No wallet activity yet</h5>
+                        <p>Top-ups, payments and refunds will appear here.</p>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="table-responsive">
+                    <table class="table table-hover o_portal_my_doc_table o_sky_wallet_table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Details</th>
+                                <th>Where</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="transactions" t-as="tx">
+                                <t t-set="is_in" t-value="tx.payment_type in ('CREDIT', 'REFUND')"/>
+                                <tr>
+                                    <td class="text-nowrap">
+                                        <span t-field="tx.create_date" t-options='{"format": "dd MMM yyyy HH:mm"}'/>
+                                    </td>
+                                    <td>
+                                        <span t-if="tx.payment_type == 'CREDIT'" class="o_sky_tx_badge o_sky_tx_in">Top-up</span>
+                                        <span t-elif="tx.payment_type == 'REFUND'" class="o_sky_tx_badge o_sky_tx_in">Refund</span>
+                                        <span t-else="" class="o_sky_tx_badge o_sky_tx_out">Payment</span>
+                                        <span class="o_sky_tx_ref" t-out="tx.name"/>
+                                    </td>
+                                    <td><t t-out="tx._sky_wallet_channel()"/></td>
+                                    <td t-attf-class="text-end text-nowrap fw-bold #{'o_sky_tx_amount_in' if is_in else 'o_sky_tx_amount_out'}">
+                                        <t t-out="'+' if is_in else '−'"/>
+                                        <span t-out="tx.amount" t-options='{"widget": "monetary", "display_currency": tx.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+
+            <p class="o_sky_wallet_help">
+                Questions about your balance? WhatsApp us on <strong t-out="support_whatsapp"/>.
+            </p>
+        </t>
+    </template>
+</odoo>
