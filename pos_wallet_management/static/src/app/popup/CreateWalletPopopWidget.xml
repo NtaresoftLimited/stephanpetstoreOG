@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.CreateWalletPopopWidget">
+        <Dialog header="false" footer="false" bodyClass="'p-0 test-webkul'">
+            <div class="popup wk-alert ">
+                <div class="title">
+                    <i class="fa fa-times cancel_recharge" t-on-click="cancel" style="font-size:25px;float:right;margin-right:-12px;margin-top:-15px;cursor:pointer" aria-hidden="true"></i>
+                </div>
+                <div class="wallet_status" style="height:80px;width:80px;margin-top:15px">
+                    <div class="show_tick draw"></div>
+                </div>
+                <center>
+                    <div class="wk_confirm_mark" style="border:3px solid #f8bb86">
+                        <div class="wk_warning">
+                            
+                            <span class="mark_line"></span>
+                            
+                            <span class="mark_dot"></span>
+                            
+                        </div>
+                    </div>
+                    <h2>
+                        <t t-out="props.title ||'Error !!!'" />
+                    </h2>
+                    <p>
+                        <t t-out="props.body ||''" />
+                    </p>
+                    <div>
+                        <button class="button create_wallet btn btn-primary fw-bolder btn-lg" t-on-click="click_create_wallet" style="margin-top:0px">Create &amp; Recharge</button>
+                    </div>
+                </center>
+            </div>
+        </Dialog>
+    </t>
+</templates>

@@ -78,6 +78,12 @@
     contain-intrinsic-size: auto 430px;
 }
 
+/* Above-the-fold cards must paint immediately; defer only later rows. */
+#products_grid .oe_product:nth-child(-n + 4) {
+    content-visibility: visible;
+    contain-intrinsic-size: none;
+}
+
 /* 4. Product Card Aesthetics (Matches Next.js / Stephans Brand) */
 #products_grid article.oe_product_cart,
 article.oe_product_cart {

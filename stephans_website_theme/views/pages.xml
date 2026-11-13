@@ -3,8 +3,8 @@
   <template id="content_page" name="Stephan's Content Page">
     <t t-call="website.layout">
       <t t-set="additional_title"><t t-out="page['title']"/></t>
+      <t t-set="meta_description" t-value="page['intro']"/>
       <t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css"/>
       <link rel="stylesheet" href="/stephans_website_theme/static/src/css/pages.css"/>
       <main id="wrap" class="oe_structure stephans-theme stephans-content-page">
         <style>#wrapwrap &gt; header#top,#wrapwrap &gt; header.o_header_standard,#wrapwrap &gt; footer:not(.stephans-footer),#wrapwrap &gt; .o_footer{display:none!important}#wrapwrap{padding-top:0!important}</style>

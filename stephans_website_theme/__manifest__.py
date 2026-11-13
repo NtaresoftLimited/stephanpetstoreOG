@@ -1,6 +1,6 @@
 {
     "name": "Stephan's Pet Store Website Theme",
-    "version": "20.0.2.10.0",
+    "version": "20.0.2.15.3",
     "category": "Theme/eCommerce",
     "summary": "Isolated Stephan's Pet Store website preview",
     "author": "Stephan's Pet Store",
@@ -10,6 +10,7 @@
         "views/header.xml",
         "views/footer.xml",
         "views/layout.xml",
+        "views/seo.xml",
         "views/homepage.xml",
         "views/grooming.xml",
         "views/contact.xml",
@@ -21,6 +22,10 @@
     ],
     "assets": {
         "web.assets_frontend": [
+            "stephans_website_theme/static/src/css/theme.css",
+            "stephans_website_theme/static/src/css/mega_menu.css",
+            "stephans_website_theme/static/src/css/home_header.css",
+            "stephans_website_theme/static/src/css/shop.css",
             "stephans_website_theme/static/src/js/header.js",
         ],
     },

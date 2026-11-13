@@ -177,7 +177,14 @@ class StephansGroomingWebsite(http.Controller):
             if "mobile" in Partner._fields:
                 partner_values["mobile"] = phone
             if partner:
-                partner.write({key: value for key, value in partner_values.items() if value})
+                # Never overwrite an existing customer's name or email from an unauthenticated booking form.
+                backfill = {}
+                if not partner.phone and phone:
+                    backfill["phone"] = phone
+                if "mobile" in Partner._fields and not partner.mobile and phone:
+                    backfill["mobile"] = phone
+                if backfill:
+                    partner.write(backfill)
             else:
                 partner = Partner.create(partner_values)
 
@@ -193,7 +200,7 @@ class StephansGroomingWebsite(http.Controller):
                 det_label = "Intensive (+150,000/=)" if det_type == "intensive" else "Moderate (+100,000/=)"
                 raw_notes = f"{raw_notes} [Detangling: {det_label}]".strip()
 
-            appointment = Appointment.create({
+            appointment_values = {
                 "partner_id": partner.id,
                 "pet_name": post["pet_name"].strip(),
                 "pet_type": pet_type,
@@ -204,7 +211,12 @@ class StephansGroomingWebsite(http.Controller):
                 "preferred_time": preferred_time,
                 "has_detangling": has_det,
                 "notes": raw_notes or False,
-            })
+            }
+            if "booking_source" in Appointment._fields:
+                appointment_values["booking_source"] = "odoo_website"
+            if "website_id" in Appointment._fields:
+                appointment_values["website_id"] = request.website.id
+            appointment = Appointment.create(appointment_values)
 
             request.env["calendar.event"].sudo().create({
                 "name": f"Grooming: {appointment.pet_name} — {appointment.name}",

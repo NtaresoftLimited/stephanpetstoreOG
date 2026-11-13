@@ -12,6 +12,14 @@ from odoo.exceptions import AccessDenied, UserError
 _logger = logging.getLogger(__name__)
 
 
+def get_config_str(env, key, default=''):
+    """Read a system parameter on Odoo 20 (get_str) and older versions (get_param)."""
+    params = env['ir.config_parameter'].sudo()
+    if hasattr(params, 'get_str'):
+        return params.get_str(key, default)
+    return params.get_param(key, default)
+
+
 def normalize_whatsapp_phone(raw_phone, default_country_code='255'):
     """
     Normalize a phone number into E.164 format (+255...), digits-only, and last-9-digits.
@@ -63,7 +71,7 @@ class ResUsers(models.Model):
 
     @api.model
     def _hash_whatsapp_otp(self, user_id, otp_code):
-        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret', 'stephans-wa-secret')
+        secret = get_config_str(self.env, 'database.secret', 'stephans-wa-secret')
         msg = f"{user_id}:{str(otp_code).strip()}".encode('utf-8')
         return hmac.new(secret.encode('utf-8'), msg, hashlib.sha256).hexdigest()
 
@@ -92,6 +100,9 @@ class ResUsers(models.Model):
                 normalize_whatsapp_phone(getattr(partner, field_name, False))[2] == last9
                 for field_name in phone_fields
             )
+            # Never hand a staff member's contact (and its documents) to a customer
+            # who happens to share the phone number.
+            and not any(not user.share for user in partner.with_context(active_test=False).user_ids)
         )
         return matching.sorted(
             key=lambda partner: (-(getattr(partner, 'customer_rank', 0) or 0), partner.id)
@@ -112,20 +123,19 @@ class ResUsers(models.Model):
 
         partner_ids = self.find_matching_partner_ids_by_phone(raw_phone)
 
-        # 1. Check if an active user is already linked to one of the matching partners or login
+        # 1. Check if an active portal user is already linked to one of the matching partners or login
         existing_user = UsersSudo.search([
             '|',
             ('partner_id', 'in', partner_ids if partner_ids else [0]),
             ('login', 'in', [e164, digits, f"0{last9}"]),
+            ('share', '=', True),
             ('active', '=', True),
-        ], order='share asc, id asc', limit=1)
+        ], order='id asc', limit=1)
 
         if existing_user:
-            if partner_ids and existing_user.partner_id.id not in partner_ids:
-                # Re-link if partner was a placeholder without orders
-                pass
             if not existing_user.partner_id.phone:
                 existing_user.partner_id.write({'phone': e164})
+            self._apply_whatsapp_customer_name(existing_user, customer_name, e164)
             return existing_user, e164
 
         # 2. Check if there is an inactive portal user for one of these partners
@@ -137,6 +147,7 @@ class ResUsers(models.Model):
         ], limit=1)
         if inactive_user:
             inactive_user.write({'active': True})
+            self._apply_whatsapp_customer_name(inactive_user, customer_name, e164)
             return inactive_user, e164
 
         # 3. Pick best existing partner or create a new customer partner
@@ -163,15 +174,37 @@ class ResUsers(models.Model):
         if UsersSudo.with_context(active_test=False).search_count([('login', '=', candidate_login)]) > 0:
             candidate_login = f"{e164}_{partner.id}"
 
+        group_field = 'group_ids' if 'group_ids' in UsersSudo._fields else 'groups_id'
         new_user = UsersSudo.with_context(no_reset_password=True, mail_create_nosubscribe=True).create({
             'name': partner.name or f"Customer ({e164})",
             'login': candidate_login,
             'partner_id': partner.id,
-            'groups_id': [(6, 0, [portal_group.id])],
+            group_field: [(6, 0, [portal_group.id])],
             'active': True,
         })
         _logger.info("Provisioned WhatsApp portal user id=%s (login=%s) for partner id=%s", new_user.id, new_user.login, partner.id)
         return new_user, e164
+
+    @api.model
+    def _apply_whatsapp_customer_name(self, user, customer_name, e164):
+        """Replace the auto-generated 'Customer (+255...)' placeholder once the customer tells us their name."""
+        name = (customer_name or '').strip()
+        if not name:
+            return
+        placeholder = f"Customer ({e164})"
+        partner = user.partner_id.sudo()
+        if partner.name in (False, '', placeholder):
+            partner.write({'name': name})
+
+    def whatsapp_otp_resend_wait(self, cooldown=60):
+        """Seconds the customer must still wait before another code can be sent (0 = may send now)."""
+        self.ensure_one()
+        expire = self.sudo().whatsapp_otp_expire
+        if not expire:
+            return 0
+        sent_at = expire - timedelta(minutes=5)
+        remaining = (sent_at + timedelta(seconds=cooldown) - fields.Datetime.now()).total_seconds()
+        return max(0, int(remaining))
 
     def generate_and_send_whatsapp_otp(self, target_phone=None):
         """
@@ -180,6 +213,8 @@ class ResUsers(models.Model):
         """
         self.ensure_one()
         user_sudo = self.sudo()
+        if not user_sudo.share:
+            raise UserError(_("WhatsApp OTP login is only available for customer portal accounts."))
 
         e164, _digits, _last9 = normalize_whatsapp_phone(
             target_phone
@@ -217,12 +252,6 @@ class ResUsers(models.Model):
         success, response = whatsapp.send_message(e164, msg)
         if not success:
             _logger.warning("WhatsApp gateway did not deliver OTP to %s: %s", e164, response)
-            try:
-                user_sudo.partner_id.message_post(
-                    body=_("Portal WhatsApp OTP generated: <b>%s</b> (Gateway status: %s)") % (otp_code, response)
-                )
-            except Exception:
-                pass
             return False, otp_code, response
 
         return True, otp_code, response
@@ -234,6 +263,8 @@ class ResUsers(models.Model):
         except AccessDenied:
             if not (isinstance(credential, dict) and credential.get('type') == 'whatsapp_otp' and credential.get('otp')):
                 raise
+            if not self.env.user.share:
+                raise AccessDenied(_("WhatsApp OTP login is only available for customer portal accounts."))
 
             otp_input = re.sub(r'\D', '', str(credential.get('otp', '')))
             if len(otp_input) != 6:

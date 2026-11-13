@@ -146,6 +146,8 @@ class StephansWebsiteHome(http.Controller):
     def homepage(self, **kwargs):
         return request.render("stephans_website_theme.stephans_preview_page", {
             "product_slides": self._get_balanced_product_slides(max_slides=4),
+            "additional_title": "Premium Pet Store & Grooming in Tanzania",
+            "meta_description": "Shop premium pet food, accessories and toys, or book professional pet grooming at Stephan's Pet Store in Masaki and Mikocheni, Dar es Salaam.",
         })
 
     @http.route("/stephans/api/new-arrivals", type="jsonrpc", auth="public", website=True)

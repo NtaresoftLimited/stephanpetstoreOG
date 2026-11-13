@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Pet Grooming Services',
-    'version': '20.0.1.0.2',
+    'version': '20.0.1.0.5',
     'category': 'Services',
     'summary': 'Pet grooming appointment booking and management for Odoo 20',
     'description': """
@@ -11,6 +11,7 @@
         - Service and pricing management
         - Add-on treatments
         - Appointment tracking
+        - Customer portal appointments & pet management
         - Backend management views
     """,
     'author': 'Stephans Pet Store',
@@ -31,15 +32,18 @@
         'product_auto_code',
     ],
     'data': [
+        'security/ir.access.csv',
         'data/grooming_data.xml',
         'data/grooming_cron.xml',
         'data/grooming_prices.xml',
         'data/breed_data.xml',
+        'data/portal_entry_data.xml',
         'views/grooming_views.xml',
         'views/expense_views.xml',
         'views/pet_views.xml',
         'views/grooming_dashboard.xml',
         'views/grooming_menus.xml',
+        'views/portal_templates.xml',
         'views/stock_request_views.xml',
         'views/res_config_settings_views.xml',
         'views/stock_picking_views.xml',
@@ -47,6 +51,9 @@
         'wizard/whatsapp_transfer_wizard_views.xml',
     ],
     'assets': {
+        'web.assets_frontend': [
+            'grooming/static/src/css/grooming_portal.css',
+        ],
         'web.assets_backend': [
             'grooming/static/src/components/dashboard/grooming_dashboard.js',
             'grooming/static/src/components/dashboard/grooming_dashboard.xml',

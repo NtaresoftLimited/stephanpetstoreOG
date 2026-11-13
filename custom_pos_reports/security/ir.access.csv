@@ -5,3 +5,8 @@ access_pos_store_expense_cat_user,pos.store.expense.category user,pos.store.expe
 access_pos_store_expense_cat_manager,pos.store.expense.category manager,pos.store.expense.category,point_of_sale.group_pos_manager,crud,
 access_pos_store_expense_user,pos.store.expense user,pos.store.expense,point_of_sale.group_pos_user,cru,
 access_pos_store_expense_manager,pos.store.expense manager,pos.store.expense,point_of_sale.group_pos_manager,crud,
+access_pos_whatsapp_config_manager,pos.whatsapp.config manager access,pos.whatsapp.config,point_of_sale.group_pos_manager,crud,
+access_techovers_customer_statement_user,techovers.customer.statement user access,techovers.customer.statement,base.group_user,crud,
+access_pos_dashboard_data,access_pos_dashboard_data,pos.dashboard.data,base.group_user,r,
+access_sale_order_payment_wizard_user,sale.order.payment.wizard user access,sale.order.payment.wizard,base.group_user,crud,
+access_pos_daily_sales_reports_wizard_user,pos.daily.sales.reports.wizard user access,pos.daily.sales.reports.wizard,point_of_sale.group_pos_user,crud,

@@ -14,3 +14,4 @@ from . import stock_request
 from . import account_payment_register
 from . import product_template
 from . import res_partner
+from . import portal_entry

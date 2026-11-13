@@ -3,8 +3,7 @@
     <template id="stores_page" name="Stephan's Store Locations">
         <t t-call="website.layout">
             <t t-set="additional_title">Pet Store Near Me in Dar es Salaam | Stephan's Locations</t>
-            <meta name="description" content="Find Stephan's Pet Store in Dar es Salaam for pet food, accessories, grooming products and expert pet care support."/>
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynHTmV3LvhJrI5fE0C3N8pU6wq1w=" crossorigin="anonymous"/>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
             <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/stores.css?v=20.0.1.3.0"/>
             <script defer="defer" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
             <script defer="defer" src="/stephans_website_theme/static/src/js/stores.js?v=20.0.1.3.0"></script>

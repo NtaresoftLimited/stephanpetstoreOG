@@ -225,7 +225,7 @@
             </div>
             <div class="overflow-hidden">
               <div class="tech-kpi-label">Total Sales</div>
-              <div class="tech-kpi-value"><t t-esc="state.currency"/> <t t-esc="format(state.data.total_sales)"/></div>
+              <div class="tech-kpi-value"><t t-out="state.currency"/> <t t-out="format(state.data.total_sales)"/></div>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@
             </div>
             <div class="overflow-hidden">
               <div class="tech-kpi-label">Total Orders</div>
-              <div class="tech-kpi-value"><t t-esc="state.data.total_orders"/></div>
+              <div class="tech-kpi-value"><t t-out="state.data.total_orders"/></div>
             </div>
           </div>
         </div>
@@ -251,7 +251,7 @@
             </div>
             <div class="overflow-hidden">
               <div class="tech-kpi-label">Items Sold</div>
-              <div class="tech-kpi-value"><t t-esc="state.data.items_sold"/></div>
+              <div class="tech-kpi-value"><t t-out="state.data.items_sold"/></div>
             </div>
           </div>
         </div>
@@ -264,7 +264,7 @@
             </div>
             <div class="overflow-hidden">
               <div class="tech-kpi-label">Total Expenses</div>
-              <div class="tech-kpi-value"><t t-esc="state.currency"/> <t t-esc="format(state.data.expenses_total)"/></div>
+              <div class="tech-kpi-value"><t t-out="state.currency"/> <t t-out="format(state.data.expenses_total)"/></div>
             </div>
           </div>
         </div>
@@ -277,7 +277,7 @@
             </div>
             <div class="overflow-hidden">
               <div class="tech-kpi-label">Total Unpaid</div>
-              <div class="tech-kpi-value"><t t-esc="state.currency"/> <t t-esc="format(state.data.total_unpaid)"/></div>
+              <div class="tech-kpi-value"><t t-out="state.currency"/> <t t-out="format(state.data.total_unpaid)"/></div>
             </div>
           </div>
         </div>
@@ -295,20 +295,20 @@
                 <t t-foreach="state.data.payments" t-as="box" t-key="box_index">
                   <div class="col-sm-6 col-md-3">
                     <div class="tech-payment-box">
-                      <div class="fw-bold text-dark small mb-2" t-esc="box.name"/>
+                      <div class="fw-bold text-dark small mb-2" t-out="box.name"/>
                       <t t-if="box.rows.length">
                         <table class="w-100 mb-2" style="font-size: 11px;">
                           <tbody>
                             <tr t-foreach="box.rows" t-as="r" t-key="r_index">
-                              <td class="text-muted py-1"><t t-esc="r.location"/>:</td>
-                              <td class="text-end fw-semibold py-1"><t t-esc="format(r.amount)"/></td>
+                              <td class="text-muted py-1"><t t-out="r.location"/>:</td>
+                              <td class="text-end fw-semibold py-1"><t t-out="format(r.amount)"/></td>
                             </tr>
                           </tbody>
                         </table>
                       </t>
                       <t t-else=""><div class="text-muted small mb-2">No payments</div></t>
                       <div class="border-top pt-1 text-end fw-bold small text-dark">
-                        Total: <t t-esc="state.currency"/> <t t-esc="format(box.total)"/>
+                        Total: <t t-out="state.currency"/> <t t-out="format(box.total)"/>
                       </div>
                     </div>
                   </div>
@@ -328,7 +328,7 @@
           <div class="card tech-card">
             <div class="card-header tech-header d-flex justify-content-between align-items-center">
               <span>Sales Breakdown</span>
-              <span class="badge bg-light text-dark border"><t t-esc="state.data.sales_breakdown ? state.data.sales_breakdown.length : 0"/> Products</span>
+              <span class="badge bg-light text-dark border"><t t-out="state.data.sales_breakdown ? state.data.sales_breakdown.length : 0"/> Products</span>
             </div>
             <div class="card-body p-0">
               <div class="table-responsive tech-scroll-container">
@@ -343,10 +343,10 @@
                   </thead>
                   <tbody>
                     <tr t-foreach="state.data.sales_breakdown" t-as="prod" t-key="prod_index">
-                      <td class="text-start fw-semibold" t-esc="prod.name"/>
-                      <td class="text-start text-muted" t-esc="prod.branch"/>
-                      <td class="text-center fw-bold" t-esc="format(prod.qty)"/>
-                      <td class="text-end fw-bold" style="color: #9D2065;"><t t-esc="format(prod.total)"/></td>
+                      <td class="text-start fw-semibold" t-out="prod.name"/>
+                      <td class="text-start text-muted" t-out="prod.branch"/>
+                      <td class="text-center fw-bold" t-out="format(prod.qty)"/>
+                      <td class="text-end fw-bold" style="color: #9D2065;"><t t-out="format(prod.total)"/></td>
                     </tr>
                     <tr t-if="!state.data.sales_breakdown || !state.data.sales_breakdown.length">
                       <td colspan="4" class="text-center text-muted py-3">No product sales found for this period.</td>
@@ -356,8 +356,8 @@
                     <tfoot>
                       <tr class="fw-bold bg-light">
                         <td colspan="2" class="text-start py-2">Total Sales (TSh):</td>
-                        <td class="text-center py-2"><t t-esc="format(state.data.items_sold)"/></td>
-                        <td class="text-end py-2" style="color: #9D2065;"><t t-esc="state.currency"/> <t t-esc="format(state.data.total_sales)"/></td>
+                        <td class="text-center py-2"><t t-out="format(state.data.items_sold)"/></td>
+                        <td class="text-end py-2" style="color: #9D2065;"><t t-out="state.currency"/> <t t-out="format(state.data.total_sales)"/></td>
                       </tr>
                     </tfoot>
                   </t>
@@ -374,7 +374,7 @@
           <div class="card tech-card">
             <div class="card-header tech-header d-flex justify-content-between align-items-center">
               <span>Expenses (TSh)</span>
-              <span class="badge bg-light text-danger border"><t t-esc="state.currency"/> <t t-esc="format(state.data.expenses_total)"/></span>
+              <span class="badge bg-light text-danger border"><t t-out="state.currency"/> <t t-out="format(state.data.expenses_total)"/></span>
             </div>
             <div class="card-body p-0">
               <div class="table-responsive tech-scroll-container">
@@ -388,9 +388,9 @@
                   </thead>
                   <tbody>
                     <tr t-foreach="state.data.expenses" t-as="exp" t-key="exp_index">
-                      <td class="text-start" t-esc="exp.reason"/>
-                      <td class="text-start text-muted" t-esc="exp.datetime"/>
-                      <td class="text-end fw-bold text-danger"><t t-esc="format(exp.amount)"/></td>
+                      <td class="text-start" t-out="exp.reason"/>
+                      <td class="text-start text-muted" t-out="exp.datetime"/>
+                      <td class="text-end fw-bold text-danger"><t t-out="format(exp.amount)"/></td>
                     </tr>
                     <tr t-if="!state.data.expenses || !state.data.expenses.length">
                       <td colspan="3" class="text-center text-muted py-3">No expenses recorded for this period.</td>
@@ -400,7 +400,7 @@
                     <tfoot>
                       <tr class="fw-bold bg-light">
                         <td colspan="2" class="text-start py-2">Total Expenses (TSh):</td>
-                        <td class="text-end text-danger py-2"><t t-esc="state.currency"/> <t t-esc="format(state.data.expenses_total)"/></td>
+                        <td class="text-end text-danger py-2"><t t-out="state.currency"/> <t t-out="format(state.data.expenses_total)"/></td>
                       </tr>
                     </tfoot>
                   </t>
@@ -430,11 +430,11 @@
                   </thead>
                   <tbody>
                     <tr t-foreach="state.data.proforma_invoices" t-as="pro" t-key="pro_index">
-                      <td class="fw-bold" t-esc="pro.number"/>
-                      <td class="text-truncate" style="max-width: 150px;" t-esc="pro.customer"/>
-                      <td class="text-end fw-bold"><t t-esc="format(pro.amount)"/></td>
+                      <td class="fw-bold" t-out="pro.number"/>
+                      <td class="text-truncate" style="max-width: 150px;" t-out="pro.customer"/>
+                      <td class="text-end fw-bold"><t t-out="format(pro.amount)"/></td>
                       <td class="text-center">
-                        <span class="badge bg-secondary" t-esc="pro.state_label"/>
+                        <span class="badge bg-secondary" t-out="pro.state_label"/>
                       </td>
                     </tr>
                     <tr t-if="!state.data.proforma_invoices || !state.data.proforma_invoices.length">
@@ -465,12 +465,12 @@
                   </thead>
                   <tbody>
                     <tr t-foreach="state.data.invoices" t-as="inv" t-key="inv_index">
-                      <td class="fw-bold" t-esc="inv.number"/>
-                      <td class="text-truncate" style="max-width: 130px;" t-esc="inv.customer"/>
-                      <td class="text-end fw-bold"><t t-esc="format(inv.total)"/></td>
-                      <td class="text-end text-muted"><t t-esc="format(inv.amount_due)"/></td>
+                      <td class="fw-bold" t-out="inv.number"/>
+                      <td class="text-truncate" style="max-width: 130px;" t-out="inv.customer"/>
+                      <td class="text-end fw-bold"><t t-out="format(inv.total)"/></td>
+                      <td class="text-end text-muted"><t t-out="format(inv.amount_due)"/></td>
                       <td class="text-center">
-                        <span t-attf-class="badge bg-{{ inv.status_badge }}" t-esc="inv.status"/>
+                        <span t-attf-class="badge bg-{{ inv.status_badge }}" t-out="inv.status"/>
                       </td>
                     </tr>
                     <tr t-if="!state.data.invoices || !state.data.invoices.length">
@@ -503,13 +503,13 @@
                   </thead>
                   <tbody>
                     <tr t-foreach="state.data.trend" t-as="row" t-key="row_index">
-                      <td t-esc="row.name"/>
+                      <td t-out="row.name"/>
                       <td>
                         <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'date'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
-                          <t t-esc="row.orders"/>
+                          <t t-out="row.orders"/>
                         </a>
                       </td>
-                      <td class="text-end fw-bold"><t t-esc="format(row.sales)"/></td>
+                      <td class="text-end fw-bold"><t t-out="format(row.sales)"/></td>
                     </tr>
                   </tbody>
                 </table>
@@ -526,17 +526,17 @@
                   <tbody>
                     <tr t-foreach="state.data.customers" t-as="row" t-key="row_index" t-att-class="row.unpaid > 0 ? 'table-warning' : ''">
                       <td>
-                        <t t-esc="row.name"/>
+                        <t t-out="row.name"/>
                         <t t-if="row.unpaid > 0">
-                          <div class="badge bg-danger ms-1">Owes <t t-esc="format(row.unpaid)"/></div>
+                          <div class="badge bg-danger ms-1">Owes <t t-out="format(row.unpaid)"/></div>
                         </t>
                       </td>
                       <td>
                         <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'customer'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
-                          <t t-esc="row.orders"/>
+                          <t t-out="row.orders"/>
                         </a>
                       </td>
-                      <td class="text-end fw-bold"><t t-esc="format(row.revenue)"/></td>
+                      <td class="text-end fw-bold"><t t-out="format(row.revenue)"/></td>
                     </tr>
                   </tbody>
                 </table>
@@ -552,13 +552,13 @@
                   <thead><tr><th>Cashier</th><th>Orders</th><th class="text-end">Revenue (TSh)</th></tr></thead>
                   <tbody>
                     <tr t-foreach="state.data.staff" t-as="row" t-key="row_index">
-                      <td t-esc="row.name"/>
+                      <td t-out="row.name"/>
                       <td>
                         <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'staff'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
-                          <t t-esc="row.orders"/>
+                          <t t-out="row.orders"/>
                         </a>
                       </td>
-                      <td class="text-end fw-bold"><t t-esc="format(row.revenue)"/></td>
+                      <td class="text-end fw-bold"><t t-out="format(row.revenue)"/></td>
                     </tr>
                   </tbody>
                 </table>
@@ -572,8 +572,8 @@
               <div class="card-body p-2">
                 <t t-foreach="state.data.categories" t-as="row" t-key="row_index">
                   <div class="d-flex justify-content-between border-bottom py-2 small">
-                    <span t-esc="row.name"/>
-                    <b><t t-esc="state.currency"/> <t t-esc="format(row.revenue)"/></b>
+                    <span t-out="row.name"/>
+                    <b><t t-out="state.currency"/> <t t-out="format(row.revenue)"/></b>
                   </div>
                 </t>
               </div>

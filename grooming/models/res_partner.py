@@ -16,11 +16,11 @@ class ResPartner(models.Model):
         return domain + [('is_replenishment_vendor', '=', False)]
 
     @api.model
-    def _search(self, domain, offset=0, limit=None, order=None):
+    def _search(self, domain, offset=0, limit=None, order=None, **kwargs):
         user = self.env.user
         if not user._is_superuser() and not user.has_group('stock.group_stock_manager') and not user.has_group('account.group_account_invoice'):
             domain = (domain or []) + [('is_replenishment_vendor', '=', False)]
-        return super()._search(domain, offset=offset, limit=limit, order=order)
+        return super()._search(domain, offset=offset, limit=limit, order=order, **kwargs)
 
     @api.model
     def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None, **kwargs):

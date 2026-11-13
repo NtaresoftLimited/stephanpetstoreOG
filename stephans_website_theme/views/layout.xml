@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="stephans_global_layout" inherit_id="website.layout" name="Stephan's Global Website Chrome">
-        <xpath expr="//head" position="inside"><link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/theme.css?v=20.0.2.7.0"/><link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/mega_menu.css?v=20.0.2.7.0"/><link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/home_header.css?v=20.0.2.7.0"/><link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/shop.css?v=20.0.2.9.0"/></xpath>
+        <xpath expr="//head" position="inside">
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/theme.css?v=20.0.2.15.2"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/mega_menu.css?v=20.0.2.15.2"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/home_header.css?v=20.0.2.15.2"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/shop.css?v=20.0.2.15.2"/>
+            <!-- Odoo 20 defers the frontend bundle. Load the navigation controller
+                 directly so the header is interactive on the first paint. The
+                 controller is idempotent, so its bundled copy remains safe. -->
+            <script type="text/javascript" defer="defer" src="/stephans_website_theme/static/src/js/header.js?v=20.0.2.15.2"/>
+        </xpath>
         <xpath expr="//header[@id='top']" position="replace"><t t-if="not no_header" t-call="stephans_website_theme.stephans_preview_header"/></xpath>
         <xpath expr="//footer[@id='bottom']" position="replace"><t t-if="not no_footer" t-call="stephans_website_theme.stephans_preview_footer"/></xpath>
     </template>

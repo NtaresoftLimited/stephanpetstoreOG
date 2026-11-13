@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.WalletRechargeWidget">
+        <div class="oe_status wallet-management" t-on-click="()=>pos.rechargeWallet('')" style="text-align: center;">
+            <div class="oe_icon btn btn-md">
+                <img src="/pos_wallet_management/static/description/recharge_button.png" width="25px" height="25px" />
+            </div>
+        </div>
+    </t>
+</templates>

@@ -9,3 +9,4 @@ from . import pos_payment_inherit
 from . import account_payment_register
 from . import sale_order_payment_wizard
 from . import store_expense
+from . import res_users

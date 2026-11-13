@@ -3,6 +3,8 @@ import logging
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+from .res_users import get_config_str
+
 _logger = logging.getLogger(__name__)
 
 
@@ -83,7 +85,7 @@ class WhatsAppInstance(models.Model):
 
             _logger.warning(f"UltraMsg returned non-sent status: {res_json}")
             # Try WASenderAPI fallback if configured in system parameters
-            wasender_key = self.env['ir.config_parameter'].sudo().get_param('techovers_whatsapp.api_key')
+            wasender_key = get_config_str(self.env, 'techovers_whatsapp.api_key')
             if wasender_key:
                 wa_ok, wa_res = self._send_via_wasender(phone, body, wasender_key)
                 if wa_ok:

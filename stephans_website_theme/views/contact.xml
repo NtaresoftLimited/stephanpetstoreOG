@@ -2,7 +2,8 @@
 <odoo>
     <template id="contact_page" name="Stephan's Contact Page">
         <t t-call="website.layout">
-            <t t-set="additional_title">Contact | Stephan's Pet Store</t>
+            <t t-set="additional_title">Contact Stephan's Pet Store</t>
+            <t t-set="meta_description">Contact Stephan's Pet Store in Dar es Salaam by phone, WhatsApp or email, find our locations, or book professional pet grooming.</t>
             <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/contact.css?v=20.0.1.2.0"/>
             <script defer="defer" src="/stephans_website_theme/static/src/js/contact.js?v=20.0.1.2.0"></script>
             <main id="wrap" class="sp-contact-page">
