@@ -7,7 +7,7 @@ class ResConfigSettings(models.TransientModel):
     grooming_detangling_fee = fields.Float(
         string="Detangling Fee",
         config_parameter='grooming.detangling_fee',
-        default=30000.0,
+        default=100000.0,
         help="Fee charged when detangling is required."
     )
     grooming_handling_fee = fields.Float(
@@ -19,6 +19,6 @@ class ResConfigSettings(models.TransientModel):
     grooming_late_pickup_fee = fields.Float(
         string="Late Pickup Fee (per Hour)",
         config_parameter='grooming.late_pickup_fee',
-        default=10000.0,
+        default=20000.0,
         help="Hourly fee for late pickups."
     )

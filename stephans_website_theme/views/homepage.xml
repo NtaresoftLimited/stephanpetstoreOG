@@ -2,15 +2,10 @@
 <odoo>
     <template id="stephans_preview_page" name="Stephan's Website Preview">
         <t t-call="website.layout">
-            <t t-set="additional_title">Stephan's Pet Store Preview</t>
+            <t t-set="additional_title">Premium Pet Store &amp; Grooming in Tanzania</t>
+            <t t-set="meta_description">Shop premium pet food, accessories and toys, or book professional pet grooming at Stephan's Pet Store in Masaki and Mikocheni, Dar es Salaam.</t>
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
-            <!--
-                Odoo 20 staging can serve the addon before its manifest assets have
-                been rebuilt. Keep this page-scoped stylesheet as a deterministic
-                preview fallback; it does not alter any global website bundle.
-            -->
-            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/preview.css"/>
             <main id="wrap" class="oe_structure stephans-theme">
                 <style>
                     #wrapwrap > header#top,
@@ -24,7 +19,6 @@
                         margin-top: 0 !important;
                     }
                 </style>
-                <t t-call="stephans_website_theme.stephans_preview_header"/>
 
                 <section class="stephans-hero">
                     <div class="stephans-hero__shade"></div>
@@ -39,20 +33,47 @@
                 </section>
 
                 <section class="stephans-pets" aria-label="Shop by pet">
-                    <a href="/shop?search=dogs"><img src="/stephans_website_theme/static/src/images/icons/minimalist-dog.webp" alt=""/><strong>Dogs</strong><span>Explore &#8594;</span></a>
-                    <a href="/shop?search=cats"><img src="/stephans_website_theme/static/src/images/icons/minimalist-cat.webp" alt=""/><strong>Cats</strong><span>Explore &#8594;</span></a>
-                    <a href="/shop?search=small+animals"><img src="/stephans_website_theme/static/src/images/icons/minimalist-rabbit.webp" alt=""/><strong>Small Animals</strong><span>Explore &#8594;</span></a>
-                    <a href="/shop?search=birds"><img src="/stephans_website_theme/static/src/images/icons/minimalist-bird.webp" alt=""/><strong>Birds</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=dogs"><img src="/stephans_website_theme/static/src/images/icons/minimalist-dog.webp" alt="Dog products" width="68" height="68" decoding="async"/><strong>Dogs</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=cats"><img src="/stephans_website_theme/static/src/images/icons/minimalist-cat.webp" alt="Cat products" width="68" height="68" decoding="async"/><strong>Cats</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=small+animals"><img src="/stephans_website_theme/static/src/images/icons/minimalist-rabbit.webp" alt="Small animal products" width="68" height="68" decoding="async"/><strong>Small Animals</strong><span>Explore &#8594;</span></a>
+                    <a href="/shop?search=birds"><img src="/stephans_website_theme/static/src/images/icons/minimalist-bird.webp" alt="Bird products" width="68" height="68" decoding="async"/><strong>Birds</strong><span>Explore &#8594;</span></a>
                 </section>
 
                 <section class="stephans-section stephans-arrivals">
                     <div class="stephans-container">
                         <div class="stephans-heading"><p class="stephans-kicker">New Arrivals</p><h2>Something new, thoughtfully chosen.</h2></div>
-                        <div class="stephans-products">
-                            <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp" alt="Plush Parrot Dog Toy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
-                            <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="/stephans_website_theme/static/src/images/products/cat-water-fountain.webp" alt="Cat Water Fountain Bubble Boy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
-                            <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="/stephans_website_theme/static/src/images/products/rabbit-house-c.webp" alt="Rabbit House C"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
-                            <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="/stephans_website_theme/static/src/images/products/flying-bird-cage.webp" alt="Flying Bird Cage Medium"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
+                        <div class="stephans-rotator-container" data-stephans-product-rotator="true">
+                            <t t-if="product_slides">
+                                <div class="stephans-rotator-stage" aria-live="polite">
+                                    <t t-foreach="product_slides" t-as="slide">
+                                        <div t-attf-class="stephans-products stephans-products-slide #{'is-active' if slide_first else ''}" t-att-aria-hidden="'false' if slide_first else 'true'">
+                                            <t t-foreach="slide" t-as="prod">
+                                                <article>
+                                                    <a class="stephans-product__image" t-att-href="prod['url']">
+                                                    <img t-att-src="prod['image_url']" t-att-alt="prod['name']" t-att-loading="'eager' if slide_first else 'lazy'" t-att-fetchpriority="'high' if slide_first else 'low'" decoding="async" width="512" height="512"/>
+                                                    </a>
+                                                    <h3><a t-att-href="prod['url']" t-out="prod['name']"></a></h3>
+                                                    <small t-out="prod['category']"></small>
+                                                    <strong t-out="prod['price_formatted']"></strong>
+                                                </article>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </div>
+                                <div class="stephans-rotator-dots" t-if="len(product_slides) &gt; 1">
+                                    <t t-foreach="product_slides" t-as="slide">
+                                        <button type="button" t-attf-class="stephans-rotator-dot #{'is-active' if slide_first else ''}" t-att-aria-label="'Show products ' + str((slide_index * 4) + 1) + ' to ' + str((slide_index * 4) + 4)" t-att-aria-current="'true' if slide_first else 'false'"/>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="stephans-rotator-stage"><div class="stephans-products stephans-products-slide is-active">
+                                    <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp" alt="Plush Parrot Dog Toy" loading="lazy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
+                                    <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="/stephans_website_theme/static/src/images/products/cat-water-fountain.webp" alt="Cat Water Fountain Bubble Boy" loading="lazy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
+                                    <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="/stephans_website_theme/static/src/images/products/rabbit-house-c.webp" alt="Rabbit House C" loading="lazy"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
+                                    <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="/stephans_website_theme/static/src/images/products/flying-bird-cage.webp" alt="Flying Bird Cage Medium" loading="lazy"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
+                                </div></div>
+                            </t>
                         </div>
                         <div class="stephans-section__action"><a class="stephans-button stephans-button--plain" href="/shop">View All Products &#8594;</a></div>
                     </div>
@@ -62,11 +83,11 @@
                     <div class="stephans-container">
                         <div class="stephans-heading"><h2>Everything they need,<br/>chosen with care.</h2></div>
                         <div class="stephans-categories__grid">
-                            <a href="/shop?search=food"><img src="/stephans_website_theme/static/src/images/categories/food.webp" alt=""/><strong>Food</strong><span>Shop now &#8594;</span></a>
-                            <a href="/shop?search=treats"><img src="/stephans_website_theme/static/src/images/categories/treats.webp" alt=""/><strong>Treats</strong><span>Shop now &#8594;</span></a>
-                            <a href="/shop?search=toys"><img src="/stephans_website_theme/static/src/images/categories/toys.webp" alt=""/><strong>Toys</strong><span>Shop now &#8594;</span></a>
-                            <a href="/shop?search=accessories"><img src="/stephans_website_theme/static/src/images/categories/accessories.webp" alt=""/><strong>Accessories</strong><span>Shop now &#8594;</span></a>
-                            <a href="/grooming"><img src="/stephans_website_theme/static/src/images/categories/grooming.webp" alt=""/><strong>Grooming</strong><span>Book now &#8594;</span></a>
+                            <a href="/shop?search=food"><img src="/stephans_website_theme/static/src/images/categories/food.webp" alt="Pet food" loading="lazy" decoding="async"/><strong>Food</strong><span>Shop now &#8594;</span></a>
+                            <a href="/shop?search=treats"><img src="/stephans_website_theme/static/src/images/categories/treats.webp" alt="Pet treats" loading="lazy" decoding="async"/><strong>Treats</strong><span>Shop now &#8594;</span></a>
+                            <a href="/shop?search=toys"><img src="/stephans_website_theme/static/src/images/categories/toys.webp" alt="Pet toys" loading="lazy" decoding="async"/><strong>Toys</strong><span>Shop now &#8594;</span></a>
+                            <a href="/shop?search=accessories"><img src="/stephans_website_theme/static/src/images/categories/accessories.webp" alt="Pet accessories" loading="lazy" decoding="async"/><strong>Accessories</strong><span>Shop now &#8594;</span></a>
+                            <a href="/grooming"><img src="/stephans_website_theme/static/src/images/categories/grooming.webp" alt="Professional pet grooming" loading="lazy" decoding="async"/><strong>Grooming</strong><span>Book now &#8594;</span></a>
                         </div>
                     </div>
                 </section>
@@ -85,7 +106,6 @@
 
                 <section class="stephans-section stephans-newsletter"><div class="stephans-container"><div class="stephans-newsletter__box"><div><p class="stephans-kicker">Stay in the Know</p><h2>From Stephan's,<br/>occasionally.</h2><p>A considered note on what's new, what's special, and what's worth knowing.</p><form class="stephans-newsletter__form" onsubmit="return false"><label class="visually-hidden" for="stephans-newsletter-email">Your email address</label><input id="stephans-newsletter-email" type="email" placeholder="Your email address"/><button type="submit">Subscribe</button></form><a class="stephans-whatsapp" href="https://wa.me/255769324445" target="_blank" rel="noopener"><img src="/stephans_website_theme/static/src/images/icons/whatsapp-color.svg" alt=""/>Prefer WhatsApp? Talk to us &#8594;</a></div><img class="stephans-newsletter__image" src="/stephans_website_theme/static/src/images/newsletter/newsletter-toys.webp" alt="Stephan's pet toys and bowl"/></div></div></section>
 
-                <t t-call="stephans_website_theme.stephans_preview_footer"/>
             </main>
         </t>
     </template>

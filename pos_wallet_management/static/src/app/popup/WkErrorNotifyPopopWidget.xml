@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.WkErrorNotifyPopopWidget">
+        <Dialog header="false" size="'md'" footer="false" bodyClass="'p-0 test-webkul'">
+            <div class="popup" id="box" >
+                <center class="modal-body">
+                    <t t-if="props.wallet_credits and props.wallet_credits!='0'">
+                        <button class="button cancel btn btn-primary fw-bolder btn-md mb-3" t-on-click="()=>this._callRechargeWallet('')" style="margin-top:0px">RECHARGE</button>
+                    </t>
+                    <div class="wk_mark mb-2"></div>
+                    <h2>
+                        <t t-out="props.title ||'Error !!!'" />
+                    </h2>
+                    <p>
+                        <t t-out="props.body ||''" />
+                    </p>
+                    <p t-if="props.wallet_credits" class="fw-bolder text-danger">
+                        Available Balance : <t t-out="props.wallet_credits" />
+                    </p>
+                    <div class="d-flex justify-content-start gap-2">
+                        <button class="button cancel btn btn-secondary fw-bolder btn-md" t-on-click="cancel" style="margin-top:0px">Ok</button>
+                        <t t-if="props.wallet_credits and props.wallet_credits!='0'">
+                            <button class="button cancel btn btn-primary fw-bolder btn-md" t-on-click="confirm" style="margin-top:0px">Continue</button>
+                        </t>
+                    </div>
+                    
+                </center>
+            </div>
+        </Dialog>
+    </t>
+</templates>

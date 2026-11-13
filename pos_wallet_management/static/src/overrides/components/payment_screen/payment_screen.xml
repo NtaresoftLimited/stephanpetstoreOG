@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.PaymentScreenMethods" t-inherit="point_of_sale.PaymentScreenMethods" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('paymentmethods')]" position="replace">
+            <div class="paymentmethods d-flex flex-column">
+
+                <h4 class="title-category pt-3 pb-2 px-3 m-0 bg-view border-bottom border-2">Payment method</h4>
+                <t t-if="pos.config and pos.config.show_wallet_type == 'checkbox'">
+                    <t t-foreach="payment_methods_from_config" t-as="paymentMethod" t-key="paymentMethod.id">
+                        <t t-if="paymentMethod and !paymentMethod.wallet_method">
+                            <div class="button paymentmethod btn btn-light rounded-0 border-bottom" t-on-click="() => this.addNewPaymentLine(paymentMethod)">
+                                <div class="payment-method-display d-flex align-items-center flex-grow-1">
+                                    <div>
+                                        <img class="payment-method-icon" t-att-src="paymentMethodImage(paymentMethod.id)" />
+                                    </div>
+                                    <span class="payment-name" t-out="paymentMethod.name" />
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+                <t t-else="">
+                    <t t-foreach="payment_methods_from_config" t-as="paymentMethod" t-key="paymentMethod.id">
+                        <t t-if="pos.get_order().wallet_recharge_data">
+                            <t t-if="!paymentMethod.wallet_method">
+                                <div class="button paymentmethod btn btn-light rounded-0 border-bottom" t-on-click="() => this.addNewPaymentLine(paymentMethod)">
+                                    <div class="payment-method-display d-flex align-items-center flex-grow-1">
+                                        <div>
+                                            <img class="payment-method-icon" t-att-src="paymentMethodImage(paymentMethod.id)" />
+                                        </div>
+                                        <span class="payment-name" t-out="paymentMethod.name" />
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <div class="button paymentmethod btn btn-light rounded-0 border-bottom" t-on-click="() => this.addNewPaymentLine(paymentMethod)">
+                                <div class="payment-method-display d-flex align-items-center flex-grow-1">
+                                    <div>
+                                        <img class="payment-method-icon" t-att-src="paymentMethodImage(paymentMethod.id)" />
+                                    </div>
+                                    <span class="payment-name" t-out="paymentMethod.name" />
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </div>
+            <t t-if="pos.config and pos.config.show_wallet_type == 'checkbox'">
+                    <div class="wallet_text">
+                        <div class="use_wallet justify-content-around align-items-center pt-2 border p-2" style="display: flex;justify-content: space-between;align-items: center;">
+                            <label class='switch'>
+                                <input id='use_wallet_payment' type='checkbox'/>
+                                <span class='check_box round'></span>
+                            </label>
+                            <div style="width: 70%; display: flex; flex-direction: column;">
+                                <span>Use Sky Wallet</span>
+                                <div class="wallet_balance"></div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+        </xpath>
+    </t>
+    <t t-name="pos_wallet_management.PaymentScreenButtons" t-inherit="point_of_sale.PaymentScreenButtons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('partner-button')]" position="attributes">
+            <attribute name="t-on-click">() => this._selectPartner()</attribute>
+        </xpath>
+    </t>
+</templates>

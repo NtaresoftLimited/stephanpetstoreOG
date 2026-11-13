@@ -41,7 +41,7 @@
                             <i class="fa fa-calendar"/>
                         </div>
                         <div>
-                            <div class="stat-value"><t t-esc="state.stats.total_appointments"/></div>
+                            <div class="stat-value"><t t-out="state.stats.total_appointments"/></div>
                             <div class="stat-label">Total Bookings</div>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                             <i class="fa fa-check-circle"/>
                         </div>
                         <div>
-                            <div class="stat-value"><t t-esc="state.stats.confirmed"/></div>
+                            <div class="stat-value"><t t-out="state.stats.confirmed"/></div>
                             <div class="stat-label">Confirmed</div>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                             <i class="fa fa-bath"/>
                         </div>
                         <div>
-                            <div class="stat-value"><t t-esc="state.stats.in_progress"/></div>
+                            <div class="stat-value"><t t-out="state.stats.in_progress"/></div>
                             <div class="stat-label">In Grooming</div>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                         </div>
                         <div>
                             <!-- Simple internal formatting or call JS helper -->
-                            <div class="stat-value" style="font-size: 1.5rem;"><t t-esc="formatCurrency(state.stats.total_revenue_month)"/></div>
+                            <div class="stat-value" style="font-size: 1.5rem;"><t t-out="formatCurrency(state.stats.total_revenue_month)"/></div>
                             <div class="stat-label">Revenue (Month)</div>
                         </div>
                     </div>
@@ -94,7 +94,7 @@
                             <i class="fa fa-credit-card"/>
                         </div>
                         <div>
-                            <div class="stat-value" style="font-size: 1.5rem;"><t t-esc="formatCurrency(state.stats.total_expenses_month)"/></div>
+                            <div class="stat-value" style="font-size: 1.5rem;"><t t-out="formatCurrency(state.stats.total_expenses_month)"/></div>
                             <div class="stat-label">Expenses (Month)</div>
                         </div>
                     </div>
@@ -123,15 +123,15 @@
                                 </thead>
                                 <tbody>
                                     <tr t-foreach="state.stats.recent_appointments" t-as="appt" t-key="appt.id">
-                                        <td><t t-esc="appt.appointment_date"/></td>
-                                        <td class="fw-bold"><t t-esc="appt.pet_name"/></td>
-                                        <td><t t-esc="appt.partner_id[1]"/></td>
+                                        <td><t t-out="appt.appointment_date"/></td>
+                                        <td class="fw-bold"><t t-out="appt.pet_name"/></td>
+                                        <td><t t-out="appt.partner_id[1]"/></td>
                                         <td>
                                             <span t-attf-class="badge-clean {{ appt.state === 'completed' ? 'badge-success-soft' : appt.state === 'pending' ? 'badge-warning-soft' : appt.state === 'cancelled' ? 'badge-gray-soft' : 'badge-info-soft' }}">
-                                                <t t-esc="appt.state"/>
+                                                <t t-out="appt.state"/>
                                             </span>
                                         </td>
-                                        <td class="text-end fw-bold"><t t-esc="formatCurrency(appt.total_price)"/></td>
+                                        <td class="text-end fw-bold"><t t-out="formatCurrency(appt.total_price)"/></td>
                                     </tr>
                                     <tr t-if="!state.stats.recent_appointments || !state.stats.recent_appointments.length">
                                         <td colspan="5" class="text-center text-muted py-3">No recent appointments</td>
@@ -152,7 +152,7 @@
                                  Here just a visual placeholder style or simple JS could set the style. -->
                             <div class="donut-chart" style="background: conic-gradient(#eab308 0% 25%, #06b6d4 25% 50%, #9333ea 50% 75%, #10b981 75% 100%);">
                                 <div class="donut-hole">
-                                    <div class="donut-value"><t t-esc="state.stats.total_appointments"/></div>
+                                    <div class="donut-value"><t t-out="state.stats.total_appointments"/></div>
                                     <div class="donut-label">Total</div>
                                 </div>
                             </div>
@@ -161,19 +161,19 @@
                         <div class="d-flex flex-column gap-2">
                            <div class="chart-legend-item">
                                 <span class="legend-dot" style="background-color: #eab308;"></span>
-                                <span>Pending (<t t-esc="state.stats.pending"/>)</span>
+                                <span>Pending (<t t-out="state.stats.pending"/>)</span>
                             </div>
                             <div class="chart-legend-item">
                                 <span class="legend-dot" style="background-color: #06b6d4;"></span>
-                                <span>Confirmed (<t t-esc="state.stats.confirmed"/>)</span>
+                                <span>Confirmed (<t t-out="state.stats.confirmed"/>)</span>
                             </div>
                             <div class="chart-legend-item">
                                 <span class="legend-dot" style="background-color: #9333ea;"></span>
-                                <span>In Grooming (<t t-esc="state.stats.in_progress"/>)</span>
+                                <span>In Grooming (<t t-out="state.stats.in_progress"/>)</span>
                             </div>
                             <div class="chart-legend-item">
                                 <span class="legend-dot" style="background-color: #10b981;"></span>
-                                <span>Completed (<t t-esc="state.stats.completed"/>)</span>
+                                <span>Completed (<t t-out="state.stats.completed"/>)</span>
                             </div>
                         </div>
                     </div>

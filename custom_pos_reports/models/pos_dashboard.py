@@ -174,23 +174,7 @@ class PosDashboard(models.TransientModel):
 
         expenses_list = []
         expenses_total_val = 0.0
-        if 'techovers.expense' in self.env:
-            domain_te = [
-                ('date', '>=', start),
-                ('date', '<=', end),
-                ('state', 'in', ('submitted', 'approved', 'paid')),
-                ('company_id', '=', self.env.company.id),
-            ]
-            if not is_manager:
-                domain_te.append(('create_uid', '=', self.env.uid))
-            te_expenses = self.env['techovers.expense'].sudo().search(domain_te, order='date desc, id desc')
-            for e in te_expenses:
-                cat_name = e.category_id.name or 'Expense'
-                reason = f"{cat_name}: {e.description}" if e.description else cat_name
-                dt_str = e.create_date.strftime('%Y-%m-%d %H:%M') if getattr(e, 'create_date', False) else str(e.date or '')
-                expenses_list.append({'reason': reason, 'amount': e.amount, 'datetime': dt_str})
-                expenses_total_val += e.amount
-        elif 'hr.expense' in self.env:
+        if 'hr.expense' in self.env:
             domain_hr = [
                 ('date', '>=', start),
                 ('date', '<=', end),

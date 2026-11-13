@@ -1,12 +1,16 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
+import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 export class SkyDashboard extends Component {
     static template = "sky_dashboard.SkyDashboard";
+    props = useProps({
+        ...standardActionServiceProps,
+    });
 
     setup() {
         this.orm = useService("orm");
@@ -18,9 +22,14 @@ export class SkyDashboard extends Component {
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
         const isoDate = (date) => date.toISOString().slice(0, 10);
-        this.state = useState({
+        const action = this.props?.action || this.__owl__?.props?.action;
+        const defaultTab = action?.params?.default_tab || action?.context?.default_tab || "business";
+        // Owl 2 exposes useState; Owl 3 replaced it with proxy.
+        const createState = useState || proxy;
+        this.state = createState({
             loading: true, data: null, canAccessDailyStock: false, isAdmin: false,
-            dateStart: isoDate(monday), dateEnd: isoDate(sunday), configId: 0, activeTab: "business",
+            dateStart: isoDate(monday), dateEnd: isoDate(sunday), configId: 0, activeTab: defaultTab,
+            pricingLoading: false, pricingData: null, pricingLocationId: 0, pricingTopMode: "price",
         });
 
         onWillStart(async () => {
@@ -36,7 +45,12 @@ export class SkyDashboard extends Component {
             } catch (e) {
                 console.warn("Could not check group base.group_system:", e);
             }
-            await this.loadDashboard();
+            if (defaultTab === "pricing") {
+                await this.loadPricingDashboard();
+                this.state.loading = false;
+            } else {
+                await this.loadDashboard();
+            }
             this.state.canAccessDailyStock = canAccessDailyStock;
             this.state.isAdmin = isAdmin;
         });
@@ -59,10 +73,66 @@ export class SkyDashboard extends Component {
     onDateStart(event) { this.state.dateStart = event.target.value; }
     onDateEnd(event) { this.state.dateEnd = event.target.value; }
     onConfigChange(event) { this.state.configId = Number(event.target.value || 0); }
-    setActiveTab(tab) { this.state.activeTab = tab; }
+    async setActiveTab(tab) {
+        this.state.activeTab = tab;
+        if (tab === "pricing" && !this.state.pricingData) {
+            await this.loadPricingDashboard();
+        } else if (tab !== "pricing" && !this.state.data) {
+            await this.loadDashboard();
+        }
+    }
+
+    async loadPricingDashboard() {
+        this.state.pricingLoading = true;
+        try {
+            this.state.pricingData = await this.orm.call("sale.order", "get_sky_pricing_dashboard_data", [], {
+                options: {
+                    location_id: this.state.pricingLocationId,
+                },
+            });
+        } catch (e) {
+            console.error("Failed to load pricing dashboard data:", e);
+        } finally {
+            this.state.pricingLoading = false;
+        }
+    }
+
+    async onPricingLocationChange(event) {
+        this.state.pricingLocationId = Number(event.target.value || 0);
+        await this.loadPricingDashboard();
+    }
+
+    setPricingTopMode(mode) {
+        this.state.pricingTopMode = mode;
+    }
+
+    formatPricingMoney(value) {
+        const curr = this.state.pricingData?.currency || "TZS";
+        return `${curr} ${new Intl.NumberFormat().format(Math.round(value || 0))}`;
+    }
+
+    openProduct(productId) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: "Product",
+            res_model: "product.product",
+            res_id: productId,
+            views: [[false, "form"]],
+        });
+    }
+
+    openAllProducts() {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: "Products",
+            res_model: "product.product",
+            views: [[false, "list"], [false, "form"]],
+            domain: [["active", "=", true], ["type", "!=", "service"]],
+        });
+    }
 
     formatMoney(value) {
-        return `${this.state.data.currency} ${new Intl.NumberFormat().format(value || 0)}`;
+        return `${this.state.data?.currency || 'TZS'} ${new Intl.NumberFormat().format(value || 0)}`;
     }
 
     get donutStyle() {

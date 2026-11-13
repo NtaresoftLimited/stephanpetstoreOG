@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+user_access_pos_wallet,user.access.pos.wallet,pos.wallet,point_of_sale.group_pos_user,r,
+user_access_pos_wallet_transaction,user.access.pos.wallet.transaction,pos.wallet.transaction,point_of_sale.group_pos_user,r,
+manager_access_pos_wallet,manager.access.pos.wallet,pos.wallet,point_of_sale.group_pos_manager,cru,
+manager_access_pos_wallet_transaction,manager.access.pos.wallet.transaction,pos.wallet.transaction,point_of_sale.group_pos_manager,r,
+manager_access_pos_wallet_cancel,manager.access.pos.wallet.cancellation,pos.wallet.cancellation,point_of_sale.group_pos_manager,cru,
+system_access_pos_wallet,system.access.pos.wallet,pos.wallet,base.group_system,cru,
+system_access_pos_wallet_transaction,system.access.pos.wallet.transaction,pos.wallet.transaction,base.group_system,r,
+system_access_pos_wallet_cancel,system.access.pos.wallet.cancellation,pos.wallet.cancellation,base.group_system,crud,

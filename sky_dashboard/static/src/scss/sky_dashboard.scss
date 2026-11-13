@@ -131,3 +131,58 @@ button.o_sky_week_metric { cursor: pointer; }
     .o_sky_mini_donut > div { height: 74px; width: 74px; }
     .o_sky_quick_actions { grid-template-columns: 1fr 1fr; }
 }
+
+/* Pricing, Margin & Stock Valuation Dashboard (Plain, Clean Modern) */
+.o_sky_kpi_card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    &.o_sky_kpi_blue {
+        border-left: 4px solid #3b82f6 !important;
+    }
+    &.o_sky_kpi_green {
+        border-left: 4px solid #10b981 !important;
+    }
+    &.o_sky_kpi_red {
+        border-left: 4px solid #ef4444 !important;
+    }
+    &.o_sky_kpi_purple {
+        border-left: 4px solid #6366f1 !important;
+    }
+}
+
+.o_sky_pie_circle {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.o_sky_plain_table {
+    th {
+        background-color: #f9fafb !important;
+        color: #6b7280 !important;
+        font-size: 0.72rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding: 0.75rem 1rem !important;
+        text-transform: uppercase;
+    }
+    td {
+        border-bottom: 1px solid #f3f4f6;
+        padding: 0.85rem 1rem !important;
+        font-size: 0.875rem;
+    }
+    tbody tr:hover {
+        background-color: #f9fafb;
+    }
+}

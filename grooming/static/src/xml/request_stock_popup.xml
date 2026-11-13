@@ -12,7 +12,7 @@
                             <option value="" disabled="1">Select Source Warehouse...</option>
                             <t t-foreach="state.warehouses" t-as="wh" t-key="wh.id">
                                 <option t-att-value="wh.id" t-att-selected="wh.id === state.sourceWarehouseId">
-                                    <t t-esc="wh.name" />
+                                    <t t-out="wh.name" />
                                 </option>
                             </t>
                         </select>
@@ -21,7 +21,7 @@
                         <label class="form-label text-start w-100 fw-bold">Destination (To Store)</label>
                         <div class="form-control bg-light text-dark fw-bold">
                             <i class="fa fa-map-marker text-danger me-1"></i>
-                            <t t-esc="state.destinationWarehouseName" />
+                            <t t-out="state.destinationWarehouseName" />
                         </div>
                     </div>
                 </div>
@@ -39,9 +39,9 @@
                         <t t-foreach="state.searchResults" t-as="product" t-key="product.id">
                             <t t-set="p_avail" t-value="state.stockAvailability[product.id]" />
                             <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-start py-2" t-on-click="() => this.addProduct(product)">
-                                <span class="text-truncate me-2 fw-medium" t-esc="product.display_name" />
+                                <span class="text-truncate me-2 fw-medium" t-out="product.display_name" />
                                 <span t-if="p_avail !== undefined and p_avail &gt; 0" class="badge rounded-pill bg-success text-white px-2 py-1 shrink-0" style="font-size: 0.75rem;">
-                                    <i class="fa fa-cubes me-1"/>Available: <t t-esc="p_avail"/>
+                                    <i class="fa fa-cubes me-1"/>Available: <t t-out="p_avail"/>
                                 </span>
                                 <span t-elif="p_avail !== undefined and p_avail &lt;= 0" class="badge rounded-pill bg-danger text-white px-2 py-1 shrink-0" style="font-size: 0.75rem;">
                                     <i class="fa fa-times me-1"/>Out of stock
@@ -80,15 +80,15 @@
                                 <t t-set="exceeded" t-value="isQtyExceeded(line)" />
                                 <tr>
                                     <td>
-                                        <div class="fw-semibold" t-esc="line.product_name" />
+                                        <div class="fw-semibold" t-out="line.product_name" />
                                         <div t-if="exceeded" class="text-danger small mt-1 fw-bold">
-                                            <i class="fa fa-exclamation-triangle me-1"/>Exceeds stock (<t t-esc="avail || 0"/> available)
+                                            <i class="fa fa-exclamation-triangle me-1"/>Exceeds stock (<t t-out="avail || 0"/> available)
                                         </div>
                                     </td>
                                     <td class="text-center">
                                         <div t-if="avail !== undefined and avail &gt; 0" class="d-flex align-items-center justify-content-center gap-1">
                                             <span class="badge bg-success text-white px-2 py-1" style="font-size: 0.8rem;">
-                                                <t t-esc="avail"/> units
+                                                <t t-out="avail"/> units
                                             </span>
                                             <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem; line-height: 1.5;" title="Fill maximum available quantity" t-on-click="() => this.setMaxQty(line)">
                                                 Max

@@ -74,12 +74,12 @@
                             <tfoot>
                                 <tr style="background: #f7f4ee; font-weight: bold; color: #4e2a15;">
                                     <td colspan="2" style="padding: 6px; border: 1px solid #e5dfd5; text-align: right;">Total for <span t-field="o.warehouse_id.name"/>:</td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.opening_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.sold_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.returned_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.transfer_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.adjustment_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.closing_qty for line in o.line_ids)"/></td>
+                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.opening_qty for line in o.line_ids)"/></td>
+                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.sold_qty for line in o.line_ids)"/></td>
+                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.returned_qty for line in o.line_ids)"/></td>
+                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.transfer_qty for line in o.line_ids)"/></td>
+                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.adjustment_qty for line in o.line_ids)"/></td>
+                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.closing_qty for line in o.line_ids)"/></td>
                                 </tr>
                             </tfoot>
                         </table>

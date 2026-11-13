@@ -1,0 +1,149 @@
+/* =====================================================================
+   Home page header — parity with Next.js components/app/Header.tsx.
+   Not scrolled: transparent floating bar (logo, pill nav with a sliding
+   indicator, pill actions). Scrolled > 10px: the floating bar fades up
+   and the full retail header slides down from the top.
+   ===================================================================== */
+.stephans-master-header.is-home{
+    position:absolute!important;
+    inset:0 0 auto 0;
+    height:0;
+    z-index:1040;
+    background:transparent!important;
+    box-shadow:none!important;
+}
+
+/* Floating bar */
+.stephans-master-header.is-home .stephans-homebar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:2;
+    width:100%;
+    max-width:1280px;
+    height:80px;
+    margin:0 auto;
+    padding:0 32px;
+    display:flex!important;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    opacity:1;
+    transform:none;
+    transition:opacity .5s ease-in-out,transform .5s ease-in-out;
+}
+.stephans-master-header.is-home.is-scrolled .stephans-homebar{
+    opacity:0;
+    transform:translateY(-100%);
+    pointer-events:none;
+}
+.stephans-master-header.is-home .stephans-homebar__logo img{
+    width:auto;
+    height:28px;
+    transition:opacity .2s;
+}
+.stephans-master-header.is-home .stephans-homebar__logo:hover img{opacity:.8}
+
+.stephans-homebar__nav,
+.stephans-homebar__actions{
+    height:34px;
+    padding:2px;
+    background:rgba(255,255,255,.6);
+    border:1px solid rgba(228,228,231,.5);
+    border-radius:999px;
+    box-shadow:0 2px 15px -3px rgba(0,0,0,.07),0 4px 6px -2px rgba(0,0,0,.02);
+    -webkit-backdrop-filter:blur(24px);
+    backdrop-filter:blur(24px);
+}
+
+/* Pill nav with sliding indicator */
+.stephans-master-header .stephans-homebar__nav{position:relative;gap:0}
+.stephans-homebar__indicator{
+    position:absolute;
+    top:2px;
+    left:0;
+    width:0;
+    height:calc(100% - 4px);
+    border-radius:999px;
+    background:#3e220f;
+    opacity:0;
+    pointer-events:none;
+    z-index:0;
+    transition:left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),opacity .2s ease;
+}
+.stephans-homebar__indicator.is-visible{opacity:1}
+.stephans-master-header .stephans-homebar__nav a{
+    position:relative;
+    z-index:1;
+    height:100%;
+    display:flex;
+    align-items:center;
+    padding:0 24px;
+    color:#3e220f;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    text-decoration:none;
+    border-radius:999px;
+    background:transparent!important;
+    transition:color .3s ease;
+    -webkit-tap-highlight-color:transparent;
+}
+.stephans-master-header .stephans-homebar__nav a:hover{color:#27272a}
+.stephans-master-header .stephans-homebar__nav a.is-indicated{color:#fff}
+
+/* Pill actions */
+.stephans-master-header .stephans-homebar__actions{gap:4px}
+.stephans-master-header .stephans-homebar__actions a{
+    width:auto;
+    height:100%;
+    padding:0 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    transition:background .2s;
+    -webkit-tap-highlight-color:transparent;
+}
+.stephans-master-header .stephans-homebar__actions a:hover{background:rgba(244,244,245,.5)}
+.stephans-master-header .stephans-homebar__actions img{opacity:.7;transition:opacity .2s,transform .2s}
+.stephans-master-header .stephans-homebar__actions a:hover img{opacity:1}
+
+/* Full retail header slides in from the top once scrolled. `top` is
+   animated (not transform) so the fixed mobile drawer inside it stays
+   anchored to the viewport. */
+.stephans-master-header.is-home .stephans-retail-header{
+    display:block!important;
+    position:fixed!important;
+    left:0;
+    right:0;
+    top:-240px!important;
+    z-index:1;
+    background:#fff;
+    border-bottom:1px solid #e4e4e7;
+    visibility:hidden;
+    transition:top .5s cubic-bezier(.4,0,.2,1),visibility 0s linear .5s;
+}
+.stephans-master-header.is-home.is-scrolled .stephans-retail-header{
+    top:0!important;
+    visibility:visible;
+    box-shadow:0 4px 20px rgba(0,0,0,.09);
+    transition:top .5s cubic-bezier(.4,0,.2,1),visibility 0s;
+}
+.stephans-master-header.is-home.is-mobile-open .stephans-retail-header .stephans-mainbar{display:block}
+
+@media (max-width:991px){
+    .stephans-master-header.is-home .stephans-homebar{padding:0 24px}
+}
+@media (max-width:767px){
+    .stephans-master-header.is-home .stephans-homebar{padding:0 16px}
+    .stephans-master-header.is-home .stephans-homebar__actions a:first-child{display:flex}
+}
+
+@media (prefers-reduced-motion: reduce){
+    .stephans-master-header,
+    .stephans-homebar,
+    .stephans-homebar__indicator,
+    .stephans-retail-header{transition:none!important}
+}

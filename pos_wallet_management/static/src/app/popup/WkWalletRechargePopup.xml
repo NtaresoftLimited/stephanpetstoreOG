@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.WkWalletRechargePopup">
+        <Dialog size="'md'" header="false" footer="false" bodyClass="'p-0 test-webkul'">
+            <div class="popup wk_wallet_recharge">
+                <div class="modal-header drag-handle" style="width:100%">
+                    <div class="title" style="font-size:25px; color:#6f42c1;width:100%">
+                        <i class="fa fa-times cancel_recharge float-end" style="cursor:pointer" t-on-click="cancel" aria-hidden="true"/>
+                    </div>
+                </div>
+                <main class="modal-body p-0">
+                    <div class="wallet_image" style="text-align: center;">
+                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/wallet.png" width="70px" height="70px" />
+                        <h3 style="font-size:18px">Sky Wallet Recharge</h3>
+                        <p style="font-size:14px">
+                            Your Sky Wallet balance is
+                            <t t-if="props.partner">
+                                <span class="fw-bolder"><t t-out="env.utils.formatCurrency(props.partner.wallet_credits)" /></span>
+                            </t>
+                        </p>
+                    </div>
+                    <div style="width:70%; margin:0 auto;">
+                        <form>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword2" class="form-label float-start">Amount</label>
+                                <input type="number" class="form-control rechage_amount" id="exampleInputPassword2"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label float-start">Remarks</label>
+                                <textarea class="form-control recharge_reason" cols="30" id="exampleInputPassword1">Sky Wallet Recharge</textarea>
+                            </div>
+                        </form>
+                    </div>
+                </main>
+                <footer class="footer modal-footer">
+                    <div class="modal-footer-left d-flex gap-2">
+                        <button t-on-click="wk_validate_recharge" class="button highlight btn btn-lg btn-primary validate_recharge">Add Money</button>
+                    </div>
+                </footer>
+            </div>
+        </Dialog>
+    </t>
+</templates>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lucy_dashboard" model="ir.actions.client">
+        <field name="name">LuCy</field>
+        <field name="tag">lucy.dashboard</field>
+    </record>
+
+    <record id="action_lucy_website_orders" model="ir.actions.act_window">
+        <field name="name">Website Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="domain">['|', ('website_id', '!=', False), ('lucy_order_channel', '=', 'nextjs')]</field>
+    </record>
+
+    <record id="action_lucy_all_orders" model="ir.actions.act_window">
+        <field name="name">Sales Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+    </record>
+
+    <record id="action_lucy_pos_orders" model="ir.actions.act_window">
+        <field name="name">Point of Sale Orders</field>
+        <field name="res_model">pos.order</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+    </record>
+
+    <record id="action_lucy_customers" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('customer_rank', '&gt;', 0)]</field>
+    </record>
+
+    <record id="action_lucy_products" model="ir.actions.act_window">
+        <field name="name">Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('active', '=', True), ('sale_ok', '=', True)]</field>
+    </record>
+
+    <record id="action_lucy_website_grooming" model="ir.actions.act_window">
+        <field name="name">Website Grooming Bookings</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">list,kanban,calendar,form,pivot,graph</field>
+        <field name="domain">[('booking_source', 'in', ['odoo_website', 'nextjs', 'portal'])]</field>
+    </record>
+
+    <record id="action_lucy_all_grooming" model="ir.actions.act_window">
+        <field name="name">All Grooming Appointments</field>
+        <field name="res_model">grooming.appointment</field>
+        <field name="view_mode">list,kanban,calendar,form,pivot,graph</field>
+    </record>
+
+    <record id="action_lucy_website_pages" model="ir.actions.act_window">
+        <field name="name">Website Pages</field>
+        <field name="res_model">website.page</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lucy_website_menus" model="ir.actions.act_window">
+        <field name="name">Website Menus</field>
+        <field name="res_model">website.menu</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lucy_public_categories" model="ir.actions.act_window">
+        <field name="name">eCommerce Categories</field>
+        <field name="res_model">product.public.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lucy_catalog_categories" model="ir.actions.act_window">
+        <field name="name">Next.js Catalog Categories</field>
+        <field name="res_model">product.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lucy_website_settings" model="ir.actions.act_window">
+        <field name="name">Website Configuration</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'website', 'bin_size': False}</field>
+    </record>
+
+    <record id="action_lucy_websites" model="ir.actions.act_window">
+        <field name="name">Websites</field>
+        <field name="res_model">website</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_lucy_sale_order_search" model="ir.ui.view">
+        <field name="name">sale.order.search.lucy.channels</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[last()]" position="after">
+                <field name="lucy_order_channel"/>
+            </xpath>
+            <xpath expr="//filter[last()]" position="after">
+                <separator/>
+                <filter name="lucy_website_orders" string="Website" domain="[('lucy_order_channel', 'in', ['website', 'nextjs'])]"/>
+                <filter name="lucy_grooming_orders" string="Grooming" domain="[('lucy_order_channel', '=', 'grooming')]"/>
+                <filter name="lucy_group_channel" string="Channel" context="{'group_by': 'lucy_order_channel'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lucy_grooming_search" model="ir.ui.view">
+        <field name="name">grooming.appointment.search.lucy.source</field>
+        <field name="model">grooming.appointment</field>
+        <field name="inherit_id" ref="grooming.grooming_appointment_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[last()]" position="after">
+                <field name="booking_source"/>
+                <field name="website_id"/>
+            </xpath>
+            <xpath expr="//filter[last()]" position="after">
+                <separator/>
+                <filter name="lucy_website_bookings" string="Website Bookings" domain="[('booking_source', 'in', ['odoo_website', 'nextjs', 'portal'])]"/>
+                <filter name="lucy_group_booking_source" string="Booking Source" context="{'group_by': 'booking_source'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lucy_grooming_form" model="ir.ui.view">
+        <field name="name">grooming.appointment.form.lucy.source</field>
+        <field name="model">grooming.appointment</field>
+        <field name="inherit_id" ref="grooming.grooming_appointment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='appointment_date']" position="after">
+                <field name="booking_source"/>
+                <field name="website_id" invisible="booking_source not in ['odoo_website', 'nextjs', 'portal']"/>
+                <field name="website_reference" invisible="booking_source not in ['odoo_website', 'nextjs', 'portal']"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

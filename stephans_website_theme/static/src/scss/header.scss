@@ -11,14 +11,52 @@
     margin-top: 0 !important;
 }
 
-/* Master Header Component */
+/* Master Header Component - Sticky on scroll across all pages */
 .stephans-master-header {
     width: 100%;
     background: #ffffff;
     font-family: $stephans-sans;
-    position: relative;
-    z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.25s ease;
 }
+
+.stephans-master-header.is-scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
+}
+
+/* Inner pages keep the full sticky header. The homepage uses the optimized
+   compact-to-retail state rules in home_header.css. */
+.stephans-homebar {
+    display: none !important;
+}
+
+.stephans-retail-header {
+    display: block !important;
+    width: 100%;
+}
+
+.stephans-homebar__logo img { width: 128px; height: 48px; object-fit: contain; display: block; }
+.stephans-homebar__nav,
+.stephans-homebar__actions {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,.88);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 999px;
+    box-shadow: 0 5px 24px rgba(35,24,17,.1);
+    backdrop-filter: blur(12px);
+}
+.stephans-homebar__nav { gap: 4px; padding: 4px; }
+.stephans-homebar__nav a { padding: 8px 16px; color: #2b2622; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 999px; }
+.stephans-homebar__nav a:hover { color: #8b4f22; background: #fff; }
+.stephans-homebar__actions { gap: 2px; padding: 5px 8px; }
+.stephans-homebar__actions a { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; }
+.stephans-homebar__actions a:hover { background: #f5eee6; }
+.stephans-homebar__actions img { width: 16px; height: 16px; object-fit: contain; }
+.stephans-homebar__menu { display: none; }
 
 /* 1. Top Bar */
 .stephans-topbar {
@@ -31,7 +69,8 @@
 }
 
 .stephans-topbar__inner {
-    width: min(1280px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1280px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -75,7 +114,8 @@
 }
 
 .stephans-mainbar__inner {
-    width: min(1280px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1280px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -202,7 +242,8 @@
 }
 
 .stephans-nav-strip__inner {
-    width: min(1280px, calc(100% - 48px));
+    width: calc(100% - 48px);
+    max-width: 1280px;
     margin: 0 auto;
 }
 
@@ -216,7 +257,8 @@
     gap: 34px;
     height: 44px;
 
-    li a {
+    li > a,
+    li > button {
         display: inline-flex;
         align-items: center;
         gap: 5px;
@@ -226,12 +268,94 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         text-decoration: none;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
         transition: color 0.2s;
 
         &:hover {
             color: $stephans-gold;
         }
     }
+}
+
+/* Mega menu positioning and display - full styles managed in mega_menu.css */
+.stephans-mega-item { 
+    position: static; 
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease;
+
+    &:hover,
+    &.is-open {
+        border-bottom-color: #9a5d2d;
+    }
+
+    > button {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s ease;
+
+        span {
+            font-size: 10px;
+            color: #888888;
+            transition: transform 0.2s ease;
+        }
+    }
+
+    &.is-open > button {
+        color: #8b4f22;
+
+        span {
+            transform: rotate(180deg);
+            color: #8b4f22;
+        }
+    }
+}
+
+.stephans-mega {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 4px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+    z-index: 120;
+}
+.stephans-mega-item.is-open > .stephans-mega { 
+    opacity: 1; 
+    visibility: visible; 
+    pointer-events: auto; 
+    transform: translate(-50%, 0); 
+}
+
+/* Apple-style Backdrop Overlay */
+.stephans-backdrop {
+    position: fixed;
+    top: 138px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(24, 24, 27, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    z-index: 95;
+}
+.stephans-master-header.is-mega-open .stephans-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .stephans-chevron {
@@ -317,4 +441,21 @@
             }
         }
     }
+
+    .stephans-homebar { top: 10px; width: calc(100% - 24px); }
+    .stephans-homebar__menu { display: block; width: 38px; height: 38px; padding: 7px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); }
+    .stephans-homebar__menu span { display: block; width: 20px; height: 2px; margin: 4px auto; background: #3e220f; }
+    .stephans-homebar__logo img { width: 108px; height: 42px; }
+    .stephans-homebar__nav { display: none; }
+    .stephans-homebar__actions a:first-child { display: none; }
+    .is-home.is-mobile-open .stephans-retail-header { display: block; position: absolute; top: 62px; left: 0; right: 0; }
+    .is-home.is-mobile-open .stephans-retail-header .stephans-topbar,
+    .is-home.is-mobile-open .stephans-retail-header .stephans-mainbar { display: none; }
+    .is-home.is-mobile-open .stephans-nav-strip { display: block; }
+    .stephans-mega { position: static; width: 100%; transform: none; display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 8px; padding: 18px; border-radius: 12px; opacity: 1; visibility: visible; box-shadow: none; }
+    .stephans-mega-item.is-open > .stephans-mega { display: grid; transform: none; }
+    .stephans-mega__intro { border-right: 0; border-bottom: 1px solid #eee5dc; padding: 0 0 14px; }
+    .stephans-mega__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stephans-nav-strip.is-open .stephans-nav-list { width: 100%; max-height: calc(100vh - 70px); overflow-y: auto; }
+    .stephans-nav-strip.is-open .stephans-nav-list > li { width: 100%; }
 }

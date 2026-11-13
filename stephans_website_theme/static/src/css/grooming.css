@@ -45,19 +45,18 @@
 
 /* Animal Tabs */
 .grooming-tabs {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr) 1px minmax(0, 1fr);
+  align-items: stretch;
   border-bottom: 1px solid #E8E0D8;
-  max-width: 760px;
+  width: min(100%, 660px);
   margin: 0 auto;
-  padding-bottom: 16px;
 }
 
 .grooming-tab {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   font-size: 19px;
   font-weight: 500;
@@ -66,8 +65,27 @@
   border: none;
   cursor: pointer;
   position: relative;
-  padding: 8px 12px;
+  min-width: 0;
+  min-height: 68px;
+  padding: 8px 16px;
+  white-space: nowrap;
   transition: color 0.2s ease;
+}
+
+.grooming-tab:hover,
+.grooming-tab:focus-visible {
+  color: #222222;
+}
+
+.grooming-tab:hover .grooming-tab-icon,
+.grooming-tab:focus-visible .grooming-tab-icon {
+  opacity: 1;
+}
+
+.grooming-tab:focus-visible {
+  outline: 2px solid #c77e35;
+  outline-offset: -4px;
+  border-radius: 4px;
 }
 
 .grooming-tab.active {
@@ -97,9 +115,9 @@
 .grooming-tab.active::after {
   content: "";
   position: absolute;
-  bottom: -17px;
-  left: 0;
-  right: 0;
+  bottom: -1px;
+  left: 16px;
+  right: 16px;
   height: 2px;
   background-color: #c77e35;
 }
@@ -107,6 +125,7 @@
 .grooming-tab-divider {
   width: 1px;
   height: 32px;
+  align-self: center;
   background-color: #E8E0D8;
 }
 
@@ -526,6 +545,69 @@
   cursor: not-allowed;
 }
 
+.grooming-form-wide {
+  grid-column: 1 / -1;
+}
+
+.grooming-textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.grooming-addon-option {
+  min-height: 58px;
+  padding: 10px 16px;
+  border: 1px solid #E8E0D8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.grooming-addon-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: #c77e35;
+}
+
+.grooming-addon-option span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: #333;
+  font-size: 13px;
+}
+
+.grooming-addon-option small {
+  color: #777;
+  margin-top: 2px;
+}
+
+.grooming-addon-option b {
+  color: #4E2A15;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.grooming-form-status {
+  display: none;
+  margin-top: 16px;
+  padding: 13px 16px;
+  border: 1px solid #d9a0a0;
+  border-radius: 10px;
+  background: #fff2f2;
+  color: #8a2727;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.grooming-form-status.is-visible {
+  display: block;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .grooming-policy-box {
@@ -543,15 +625,22 @@
     padding-bottom: 28px;
   }
   .grooming-tabs {
-    gap: 14px;
+    width: 100%;
   }
   .grooming-tab {
-    font-size: 16px;
-    padding: 6px 8px;
+    gap: 7px;
+    min-height: 58px;
+    padding: 6px 5px;
+    font-size: 14px;
   }
   .grooming-tab-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+  }
+  .grooming-tab.active::after {
+    left: 6px;
+    right: 6px;
   }
   .grooming-packages-grid {
     grid-template-columns: 1fr;

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<templates id="template" xml:space='preserve'>
+    <t t-name="PartnerList" t-inherit="point_of_sale.PartnerList" t-inherit-mode="extension">
+        <xpath expr="//th[3]" position="after">
+            <th class="py-2">Sky Wallet Balance</th>
+        </xpath>
+    </t>
+    <t t-name="PartnerLine" t-inherit="point_of_sale.PartnerLine" t-inherit-mode="extension">
+        <xpath expr="//td[3]" position="after">
+            <td>
+                <div class="ms-0 pe-5">
+                    <t t-out='env.utils.formatCurrency(props.partner.wallet_credits)'/>
+                </div>
+            </td>
+        </xpath>
+    </t>
+    <t t-name="PartnerLine" t-inherit="point_of_sale.PartnerLine" t-inherit-mode="extension">
+        <xpath expr="//td[hasclass('edit-partner-button-cell')]" position="after">
+            <td class="align-middle">
+                <t t-if="props.partner.wallet_id">
+                    <button class="wallet-recharge-button" style="width:56px;" t-on-click.prevent.stop="recharge_wallet">
+                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="35px" height="35px" />
+                    </button>
+                </t>
+                <t t-if="!props.partner.wallet_id">
+                    <button class="wallet-create-button" style="width:56px;" t-on-click.prevent.stop="create_wallet">
+                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="35px" height="35px" />
+                    </button>
+                </t>
+            </td>
+        </xpath>
+    </t>
+</templates>

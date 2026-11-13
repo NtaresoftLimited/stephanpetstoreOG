@@ -2,14 +2,15 @@
 <odoo>
   <template id="grooming_page" name="Pet Grooming Studio | Stephan's Pet Store">
     <t t-call="website.layout">
-      <t t-set="additional_title">Pet Grooming Studio | Stephan's Pet Store</t>
+      <t t-set="additional_title">Professional Pet Grooming in Dar es Salaam</t>
+      <t t-set="meta_description">Book gentle professional grooming for dogs, cats and small animals at Stephan's Pet Store in Dar es Salaam.</t>
       <t t-set="no_header" t-value="True"/>
       <t t-set="no_footer" t-value="True"/>
       
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css"/>
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/grooming.css"/>
+      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/grooming.css?v=20.0.2.10.0"/>
+      <script defer="defer" src="/stephans_website_theme/static/src/js/grooming.js?v=20.0.2.10.0"></script>
       
-      <main id="wrap" class="oe_structure stephans-theme grooming-site">
+      <main id="wrap" class="oe_structure stephans-theme grooming-site" t-att-data-prices="prices_json" t-att-data-detangling-fee="detangling_fee">
         <style>
           #wrapwrap &gt; header#top,
           #wrapwrap &gt; header.o_header_standard,
@@ -23,9 +24,6 @@
           }
         </style>
 
-        <!-- 3-Tier Header -->
-        <t t-call="stephans_website_theme.stephans_preview_header"/>
-
         <!-- Hero Section with Pet Tabs -->
         <section class="grooming-header">
           <div class="grooming-container">
@@ -33,18 +31,18 @@
             <h1 class="grooming-title">Gentle care.<br/>Professional grooming.</h1>
 
             <!-- Animal Selection Tabs -->
-            <div class="grooming-tabs">
-              <button type="button" class="grooming-tab active" data-tab="dog" id="tab-dog">
+            <div class="grooming-tabs" role="tablist" aria-label="Choose pet type">
+              <button type="button" class="grooming-tab active" data-tab="dog" id="tab-dog" role="tab" aria-selected="true">
                 <span class="grooming-tab-icon" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-dog.png'); mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-dog.png');"></span>
                 <span>Dogs</span>
               </button>
-              <div class="grooming-tab-divider"></div>
-              <button type="button" class="grooming-tab" data-tab="cat" id="tab-cat">
+              <div class="grooming-tab-divider" aria-hidden="true"></div>
+              <button type="button" class="grooming-tab" data-tab="cat" id="tab-cat" role="tab" aria-selected="false">
                 <span class="grooming-tab-icon" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-cat.png'); mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-cat.png');"></span>
                 <span>Cats</span>
               </button>
-              <div class="grooming-tab-divider"></div>
-              <button type="button" class="grooming-tab" data-tab="small_animal" id="tab-small_animal">
+              <div class="grooming-tab-divider" aria-hidden="true"></div>
+              <button type="button" class="grooming-tab" data-tab="small_animal" id="tab-small_animal" role="tab" aria-selected="false">
                 <span class="grooming-tab-icon" style="-webkit-mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-rabbit.png'); mask-image: url('/stephans_website_theme/static/src/images/icons/minimalist-rabbit.png');"></span>
                 <span>Small Animals</span>
               </button>
@@ -169,12 +167,44 @@
 
                 <!-- Your Name -->
                 <div>
-                  <input type="text" name="customer_name" id="field-customer-name" required="required" placeholder="Your Name" class="grooming-input"/>
+                  <input type="text" name="customer_name" id="field-customer-name" required="required" minlength="2" placeholder="Your Name" class="grooming-input" t-att-value="default_customer_name"/>
                 </div>
 
                 <!-- Phone Number -->
                 <div>
-                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number" class="grooming-input"/>
+                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number" class="grooming-input" t-att-value="default_customer_phone" inputmode="tel"/>
+                </div>
+
+                <!-- Optional confirmation email -->
+                <div>
+                  <input type="email" name="customer_email" id="field-customer-email" placeholder="Email Address (Optional)" class="grooming-input" t-att-value="default_customer_email"/>
+                </div>
+
+                <!-- Optional detangling treatments -->
+                <div class="grooming-addon-group grooming-form-wide">
+                  <div class="grooming-addon-label">Coat Detangling Care (Optional)</div>
+                  <div class="grooming-addon-grid">
+                    <label class="grooming-addon-option">
+                      <input type="radio" name="detangling_type" value="none" checked="checked"/>
+                      <span><strong>No Detangling</strong><small>Standard coat condition</small></span>
+                      <b>Included</b>
+                    </label>
+                    <label class="grooming-addon-option">
+                      <input type="radio" name="detangling_type" value="moderate" id="field-detangling-moderate"/>
+                      <span><strong>Moderate Detangling</strong><small>Mild to moderate knots &amp; tangles</small></span>
+                      <b>+100,000/=</b>
+                    </label>
+                    <label class="grooming-addon-option">
+                      <input type="radio" name="detangling_type" value="intensive" id="field-detangling-intensive"/>
+                      <span><strong>Intensive Detangling</strong><small>Severe matting &amp; deep restoration</small></span>
+                      <b>+150,000/=</b>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Care notes -->
+                <div class="grooming-form-wide">
+                  <textarea name="notes" id="field-notes" rows="4" maxlength="1000" placeholder="Special instructions: temperament, allergies or medical conditions (Optional)" class="grooming-input grooming-textarea"></textarea>
                 </div>
               </div>
 
@@ -231,7 +261,7 @@
                   <div class="grooming-policy-footer">
                     <label class="grooming-agree-label">
                       <input type="checkbox" required="required" id="agree-policy"/>
-                      <span>I have read and agree to Stephan's Grooming Policy.</span>
+                      <span>I have read and agreed. <span class="text-danger font-weight-bold">*</span></span>
                     </label>
                     <a href="/grooming-policy" class="grooming-policy-link">
                       READ FULL POLICY <span>→</span>
@@ -257,16 +287,16 @@
                   <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
               </button>
+              <div class="grooming-form-status" id="grooming-form-status" role="alert" aria-live="assertive"></div>
             </form>
           </div>
         </section>
 
         <!-- Master 5-Column Footer (Includes Trust Banner) -->
-        <t t-call="stephans_website_theme.stephans_preview_footer"/>
       </main>
 
       <!-- Client-side Interaction Script -->
-      <script type="text/javascript"><![CDATA[
+      <script type="application/x-stephans-legacy"><![CDATA[
         (function() {
           const PRICES = {
             dog: {
@@ -345,7 +375,9 @@
           function setTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.grooming-tab').forEach(b => {
-              b.classList.toggle('active', b.dataset.tab === tab);
+              const selected = b.dataset.tab === tab;
+              b.classList.toggle('active', selected);
+              b.setAttribute('aria-selected', String(selected));
             });
 
             // Update packages grid

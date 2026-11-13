@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="stores_page" name="Stephan's Store Locations">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Pet Store Near Me in Dar es Salaam | Stephan's Locations</t>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/stores.css?v=20.0.1.3.0"/>
+            <script defer="defer" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+            <script defer="defer" src="/stephans_website_theme/static/src/js/stores.js?v=20.0.1.3.0"></script>
+            <main id="wrap" class="sp-stores-page">
+                <div class="sp-stores-shell">
+                    <header class="sp-stores-intro">
+                        <p><span></span>Store Locator<span></span></p>
+                        <h1>Find us in Dar es Salaam.</h1>
+                    </header>
+
+                    <section class="sp-store-grid" aria-label="Our stores">
+                        <article class="sp-store-card">
+                            <div class="sp-store-pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+                            <h2>MASAKI</h2><p class="sp-store-kind">Main Store</p>
+                            <address>11 Slipway Rd, Masaki<br/>Dar es Salaam</address>
+                            <div class="sp-store-divider"></div>
+                            <a class="sp-store-directions" href="https://www.google.com/maps/dir/?api=1&amp;destination=-6.7452,39.2825" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                            <button class="sp-store-details-toggle" type="button" aria-expanded="false">Store details <span>＋</span></button>
+                            <div class="sp-store-details" hidden="hidden"><a href="tel:+255786627873">+255 786 627 873</a><p>Mon–Sat: 9:00 AM–8:30 PM</p></div>
+                        </article>
+                        <article class="sp-store-card">
+                            <div class="sp-store-pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+                            <h2>MIKOCHENI</h2><p class="sp-store-kind">Branch</p>
+                            <address>59 Mikocheni A<br/>Dar es Salaam</address>
+                            <div class="sp-store-divider"></div>
+                            <a class="sp-store-directions" href="https://www.google.com/maps/dir/?api=1&amp;destination=-6.7733,39.2699" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                            <button class="sp-store-details-toggle" type="button" aria-expanded="false">Store details <span>＋</span></button>
+                            <div class="sp-store-details" hidden="hidden"><a href="tel:+255786627873">+255 786 627 873</a><p>Mon–Sat: 9:00 AM–6:00 PM</p></div>
+                        </article>
+                    </section>
+
+                    <section class="sp-store-map-section" aria-labelledby="sp-store-map-title">
+                        <h2 id="sp-store-map-title">Our locations</h2>
+                        <div class="sp-store-map-wrap">
+                            <div id="sp-store-map" data-marker-image="/stephans_website_theme/static/src/images/branding/favicon.png" aria-label="Map showing Stephan's Pet Store locations"></div>
+                            <div class="sp-store-map-loading">Loading map…</div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </t>
+    </template>
+</odoo>
