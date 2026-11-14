@@ -101,18 +101,8 @@ export class ReplenishmentRequestPopup extends Component {
         this.state.searchResults = [];
     }
 
-    setMaxQty(line) {
-        const avail = this.state.stockAvailability[line.product_id] || 0;
-        if (avail > 0) {
-            line.qty = avail;
-        }
-    }
-
-    isQtyExceeded(line) {
-        const avail = this.state.stockAvailability[line.product_id];
-        if (avail === undefined || avail === null) return false;
-        return parseFloat(line.qty) > avail;
-    }
+    // No stock limit here: replenishment always buys into Masaki Back Storage, so requesting more
+    // than back storage holds is the normal case. (The limit belongs to RequestStockPopup only.)
 
     updateQty(line, newQty) {
         let val = parseFloat(newQty);

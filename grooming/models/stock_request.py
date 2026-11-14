@@ -57,15 +57,28 @@ class GroomingStockRequest(models.Model):
     picking_id = fields.Many2one('stock.picking', string='Generated Receipt', readonly=True)
     bill_id = fields.Many2one('account.move', string='Vendor Bill', readonly=True)
 
+    @api.model
+    def _get_backstore_warehouse(self):
+        """Replenishment only ever restocks Masaki Back Storage (warehouse code MBS)."""
+        mbs_wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
+        if not mbs_wh:
+            raise UserError(_("Masaki Back Storage warehouse (code: MBS) was not found."))
+        return mbs_wh
+
     @api.model_create_multi
     def create(self, vals_list):
-        mbs_wh = self.env['stock.warehouse'].search([('code', '=', 'MBS')], limit=1)
+        mbs_wh = self._get_backstore_warehouse()
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('grooming.stock.request') or _('New')
-            if not vals.get('destination_warehouse_id') and mbs_wh:
-                vals['destination_warehouse_id'] = mbs_wh.id
+            # Always Masaki Back Storage, whatever the caller sent (POS, import, script).
+            vals['destination_warehouse_id'] = mbs_wh.id
         return super().create(vals_list)
+
+    def write(self, vals):
+        if 'destination_warehouse_id' in vals:
+            vals = dict(vals, destination_warehouse_id=self._get_backstore_warehouse().id)
+        return super().write(vals)
 
     def action_view_vendor_bill(self):
         self.ensure_one()
@@ -265,11 +278,10 @@ class GroomingStockRequest(models.Model):
             if request.state != 'submitted':
                 raise UserError(_("Only submitted requests can be approved."))
             
-            # Destination must strictly be Masaki Back Storage
-            mbs_wh = self.env['stock.warehouse'].search([('code', '=', 'MBS')], limit=1)
-            dest_warehouse = request.destination_warehouse_id or mbs_wh
-            if not dest_warehouse:
-                raise UserError(_("Masaki Back Storage warehouse (code: MBS) was not found."))
+            # Destination is always Masaki Back Storage, never the value stored on the request.
+            dest_warehouse = self._get_backstore_warehouse()
+            if request.destination_warehouse_id != dest_warehouse:
+                request.destination_warehouse_id = dest_warehouse
 
             dest_location = dest_warehouse.lot_stock_id
             supplier_location = self.env['stock.location'].search([('usage', '=', 'supplier')], limit=1)
