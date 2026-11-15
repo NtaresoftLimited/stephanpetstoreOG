@@ -107,6 +107,14 @@ for s_id, d_id in pmap.items():
 # Sellable Odoo 18 products that never made it into the map (no sale, no stock) still need
 # to exist in Odoo 20 for the tills: look them up by code.
 dst_codes = {r["default_code"]: r for r in dp.values() if r["default_code"]}
+# Some codes are shared by two different products (product_auto_code reused its sequence),
+# so pair by code and name first.
+dst_code_names = {(r["default_code"], txt(r["name"]).strip().lower()): r for r in dp.values() if r["default_code"]}
+code_count = collections.Counter(r["default_code"] for r in sp.values() if r["default_code"] and r["active"])
+for code, n in sorted(code_count.items()):
+    if n > 1:
+        report("catalogue: product code used by several active Odoo 18 products",
+               "%s: %s" % (code, [txt(r["name"]) for r in sp.values() if r["default_code"] == code and r["active"]]))
 dst_barcodes = {r["barcode"]: r for r in dp.values() if r["barcode"]}
 dst_names = collections.defaultdict(list)
 for r in dp.values():
@@ -115,7 +123,8 @@ for r in dp.values():
 for s in sp.values():
     if s["id"] in pmap or not (s["active"] and s["available_in_pos"]):
         continue
-    d = dst_codes.get(s["default_code"]) or dst_barcodes.get(s["barcode"])
+    d = (dst_code_names.get((s["default_code"], txt(s["name"]).strip().lower()))
+         or dst_codes.get(s["default_code"]) or dst_barcodes.get(s["barcode"]))
     if not d and not s["default_code"] and not s["barcode"] and dst_names.get(txt(s["name"]).strip().lower()):
         continue  # code-less variant: present by name (prices differ per variant, not checked)
     if not d:
