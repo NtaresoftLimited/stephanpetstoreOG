@@ -15,8 +15,9 @@ COMMIT = os.environ.get("MIG_COMMIT") == "1"
 # Odoo 20 fields that must keep their Odoo 20 value even if Odoo 18 has a same-named field.
 KEEP_POS_FIELDS = {"last_data_change", "order_seq_id", "order_line_seq_id", "device_seq_id",
                    "order_backend_seq_id", "active", "sequence", "module_pos_urban_piper",
-                   # 70000 on Masaki is read by pos_dynamic_discount in Odoo 18; standard Odoo 20
-                   # treats it as a percentage. Copy it only once that module is ported.
+                   # Odoo 18 pos_dynamic_discount ignored discount_pc (its popup always opened at
+                   # 0; Masaki holds a meaningless 70000). Odoo 20 opens the popup at discount_pc,
+                   # so it is set to 0 below instead of copied.
                    "discount_pc"}
 SKIP_PARAMS = {"stephans_pet_grooming.mail_template_id"}  # record ids differ between databases
 
@@ -61,8 +62,16 @@ def map_product(ref):
         return env["product.product"].browse(rec.res_id).exists()
     rec = imd.search([("module", "=", "stephans_product_migration"), ("name", "=", "product_template_%d" % ref["template_id"])], limit=1)
     tmpl = env["product.template"].with_context(active_test=False).browse(rec.res_id).exists() if rec else env["product.template"]
-    if tmpl and len(tmpl.product_variant_ids) == 1:
-        return tmpl.product_variant_ids
+    variants = tmpl.with_context(active_test=False).product_variant_ids
+    if tmpl and len(variants) == 1:
+        return variants
+    if tmpl and ref.get("combination"):
+        # Same rule as the POS import: match the attribute values, never a different product code.
+        for variant in variants:
+            comb = sorted([v.attribute_id.name, v.name] for v in variant.product_template_attribute_value_ids)
+            if comb == ref["combination"] and not (ref.get("default_code") and variant.default_code
+                                                   and variant.default_code != ref["default_code"]):
+                return variant
     if ref.get("default_code"):
         found = env["product.product"].with_context(active_test=False).search([("default_code", "=", ref["default_code"])])
         if len(found) == 1:
@@ -193,6 +202,8 @@ for name, src in data["pos_configs"].items():
         raise SystemExit("Close the open session on %s first." % name)
     scalars = {k: v for k, v in src["scalars"].items() if k not in KEEP_POS_FIELDS}
     set_values(config, scalars, name)
+    if "discount_pc" in config._fields:
+        set_values(config, {"discount_pc": 0.0}, name)
     warehouse = env["stock.warehouse"].search([("code", "=", src["warehouse"])], limit=1)
     if warehouse.pos_type_id and config.picking_type_id != warehouse.pos_type_id:
         note(name, "picking_type_id", config.picking_type_id.display_name, warehouse.pos_type_id.display_name)
@@ -203,15 +214,24 @@ for name, src in data["pos_configs"].items():
             note(name, "discount_product_id", config.discount_product_id.display_name, product.display_name)
             config.discount_product_id = product.id or False
     tip = map_product(src["tip_product"])
-    if tip != config.tip_product_id and not config.iface_tipproduct:
+    # With tips off the product is unused, and Odoo 20 refills its default on every write.
+    if config.iface_tipproduct and tip and tip != config.tip_product_id:
         note(name, "tip_product_id", config.tip_product_id.display_name, tip.display_name)
         config.tip_product_id = tip.id or False
-    if "basic_employee_ids" in config._fields:
-        basic = Employee.browse([employees[n].id for n in src["basic_employees"] if n in employees])
-        advanced = Employee.browse([employees[n].id for n in src["advanced_employees"] if n in employees])
-        if set(config.basic_employee_ids.ids) != set(basic.ids) or set(config.advanced_employee_ids.ids) != set(advanced.ids):
-            note(name, "employees", config.basic_employee_ids.mapped("name"), basic.mapped("name"))
-            config.write({"basic_employee_ids": [(6, 0, basic.ids)], "advanced_employee_ids": [(6, 0, advanced.ids)]})
+    missing = [n for n in src["basic_employees"] + src["advanced_employees"] if n not in employees]
+    if missing:
+        raise SystemExit("%s: till employees not found in Odoo 20: %s" % (name, missing))
+    basic = Employee.browse([employees[n].id for n in src["basic_employees"]])
+    advanced = Employee.browse([employees[n].id for n in src["advanced_employees"]])
+    # Odoo 18 basic/advanced became Odoo 20 cashier/manager (pos_hr adds POS managers itself).
+    basic_field, advanced_field = (("cashier_employee_ids", "manager_employee_ids")
+                                   if "cashier_employee_ids" in config._fields
+                                   else ("basic_employee_ids", "advanced_employee_ids"))
+    if basic_field in config._fields:
+        if set(config[basic_field].ids) != set(basic.ids) or not advanced <= config[advanced_field]:
+            note(name, basic_field, config[basic_field].mapped("name"), basic.mapped("name"))
+            config.write({basic_field: [(6, 0, basic.ids)],
+                          advanced_field: [(4, emp.id) for emp in advanced]})
 
 for line in changes:
     print("CHANGE", line)

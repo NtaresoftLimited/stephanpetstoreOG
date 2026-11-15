@@ -42,7 +42,9 @@ def scalars(record, skip=()):
 
 def product_ref(product):
     return {"id": product.id, "template_id": product.product_tmpl_id.id, "default_code": product.default_code or False,
-            "name": product.display_name} if product else False
+            "name": product.display_name,
+            "combination": sorted([v.attribute_id.name, v.name] for v in product.product_template_attribute_value_ids),
+            } if product else False
 
 
 data = {"pos_configs": {}, "pricelists": [], "params": {}, "company": {}, "employees": [], "groups": {}}
