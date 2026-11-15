@@ -19,6 +19,10 @@ KEEP_POS_FIELDS = {"last_data_change", "order_seq_id", "order_line_seq_id", "dev
                    # 0; Masaki holds a meaningless 70000). Odoo 20 opens the popup at discount_pc,
                    # so it is set to 0 below instead of copied.
                    "discount_pc"}
+RENAMED_POS_FIELDS = {"is_header_or_footer": "use_header_or_footer",
+                      "auto_validate_terminal_payment": "auto_validate_electronic_payment",
+                      "is_closing_entry_by_product": "use_closing_entry_by_product",
+                      "is_order_printer": "use_order_printer"}  # Odoo 18 name -> Odoo 20 name
 SKIP_PARAMS = {"stephans_pet_grooming.mail_template_id"}  # record ids differ between databases
 
 with open(INPUT, encoding="utf-8") as f:
@@ -200,7 +204,7 @@ for name, src in data["pos_configs"].items():
         continue
     if config.current_session_id:
         raise SystemExit("Close the open session on %s first." % name)
-    scalars = {k: v for k, v in src["scalars"].items() if k not in KEEP_POS_FIELDS}
+    scalars = {RENAMED_POS_FIELDS.get(k, k): v for k, v in src["scalars"].items() if k not in KEEP_POS_FIELDS}
     set_values(config, scalars, name)
     if "discount_pc" in config._fields:
         set_values(config, {"discount_pc": 0.0}, name)

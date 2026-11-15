@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <!--
+            Stephan's Pet Store "Design 3" (Odoo 18 custom_receipts_for_pos) on the Odoo 20 receipt.
+            The same template is rendered by the till (JS) and the server (Python), so expressions
+            stick to the forms the standard receipt uses (x['k'], x.get('k'), and/or/not, ==).
+            Shown when the till's is_custom_receipt is set; otherwise the standard receipt prints.
+        -->
+        <template id="custom_receipts_for_pos.pos_order_receipt" inherit_id="point_of_sale.pos_order_receipt">
+            <xpath expr="//html[@id='pos-receipt']/div" position="attributes">
+                <attribute name="t-if">not config.get('is_custom_receipt')</attribute>
+            </xpath>
+            <xpath expr="//html[@id='pos-receipt']/div" position="after">
+                <div t-if="config.get('is_custom_receipt')" name="stephans_receipt" class="text-bold" style="padding-left: 3px; padding-right: 3px;">
+                    <!-- Header -->
+                    <div class="w-100 text-start mb-3" name="stephans_header">
+                        <div t-if="image['logo']" name="logo">
+                            <img t-att-src="image['logo']" class="w-50"/>
+                        </div>
+                        <div class="mt-2" t-if="config.get('phone')">Phone: <t t-out="config['phone']"/></div>
+                        <div t-if="config.get('email')">Email: <t t-out="config['email']"/></div>
+                        <div class="mt-3 text-huge">RECEIPT</div>
+                        <div t-out="extra_data['formated_date_order']"/>
+                        <div name="ticket_reference" t-out="order['pos_reference']"/>
+                        <div t-if="extra_data['cashier_name']" name="cashier_name">Served by : <t t-out="extra_data['cashier_name']"/></div>
+                        <div t-if="order['state'] == 'draft'" class="text-center text-large mt-2">Pro forma receipt</div>
+                        <div t-if="config['receipt_header']" class="text-center mt-2" style="white-space:pre-line" t-out="config['receipt_header']"/>
+                    </div>
+
+                    <!-- Lines -->
+                    <table class="w-100" style="border-top: 3px double black;" name="stephans_lines">
+                        <tbody>
+                            <tr style="border-bottom: 1px dashed black;">
+                                <td class="text-start w-70 text-large">Product</td>
+                                <td class="text-end w-30 text-large" t-if="not conditions['basic_receipt']">Amount</td>
+                            </tr>
+                            <t t-foreach="lines" t-as="line">
+                                <tr t-if="not (line['product_id'] == config.get('discount_product_id') and conditions['basic_receipt'])" class="lines">
+                                    <td class="text-start w-70 top" style="padding-top: 4px; padding-bottom: 4px;">
+                                        <div t-att-style="line['combo_parent_id'] and 'padding-left: 16px;' or ''" t-out="line['product_data']['display_name']"/>
+                                        <div t-if="not conditions['basic_receipt'] and not line['combo_parent_id'] and not line['is_service_fee_line']" class="font-monospace">
+                                            <t t-out="line['qty']"/> <t t-out="line['product_uom_name']"/> X <t t-out="line['unit_price']"/>
+                                        </div>
+                                        <div t-elif="conditions['basic_receipt'] or line['combo_parent_id']">
+                                            <t t-out="line['qty']"/> <t t-out="line['product_uom_name']"/>
+                                        </div>
+                                        <div t-if="line['discount'] and not conditions['basic_receipt'] and not line['combo_parent_id']" class="text-normal" style="font-style: italic; color: #808080;">
+                                            <t t-out="line['discount']"/>% discount
+                                        </div>
+                                        <div t-if="line['customer_note']" class="text-normal" t-out="line['customer_note']"/>
+                                        <div t-if="line.get('lot_names')" class="text-normal">
+                                            <t t-foreach="line['lot_names']" t-as="lot_name"><div class="lot-number" t-out="lot_name"/></t>
+                                        </div>
+                                        <div t-if="line.get('sale_order_name')" class="text-small">From <t t-out="line['sale_order_name']"/></div>
+                                    </td>
+                                    <td t-if="not conditions['basic_receipt']" class="text-end w-30 top font-monospace" style="padding-top: 4px;">
+                                        <t t-if="not line['combo_parent_id']" t-out="line['price_subtotal_incl']"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    <div t-if="order.get('general_customer_note')" class="mt-2">
+                        <span>Note: </span><span t-out="order['general_customer_note']"/>
+                    </div>
+
+                    <!-- Totals -->
+                    <table class="w-100 text-large mt-2" name="stephans_prices" t-if="not conditions['basic_receipt']">
+                        <tbody>
+                            <t t-if="config['iface_tax_included'] != 'total'">
+                                <tr style="border-top: 1px dashed black;">
+                                    <td class="text-start w-70">Subtotal : </td>
+                                    <td class="text-end w-30 font-monospace" t-out="extra_data['prices']['subtotal_amount']"/>
+                                </tr>
+                                <tr t-foreach="extra_data['prices']['taxes']" t-as="tax">
+                                    <td class="text-start w-70" t-out="tax['name']"/>
+                                    <td class="text-end w-30 font-monospace" t-out="tax['amount']"/>
+                                </tr>
+                            </t>
+                            <tr t-if="extra_data['prices'].get('rounding_amount')">
+                                <td class="text-start w-70">Rounding : </td>
+                                <td class="text-end w-30 font-monospace" t-out="extra_data['prices']['rounding_amount']"/>
+                            </tr>
+                            <tr>
+                                <td class="text-start w-70">TOTAL : </td>
+                                <td class="text-end w-30 font-monospace total-amount" t-out="extra_data['prices']['total_amount']"/>
+                            </tr>
+                            <t t-foreach="payments" t-as="payment">
+                                <tr t-if="not payment.get('is_change')" class="payment-line">
+                                    <td class="text-start w-70" t-out="payment['payment_method_data']['name']"/>
+                                    <td class="text-end w-30 font-monospace" t-out="payment['amount']"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td class="text-start w-70">CHANGE : </td>
+                                <td class="text-end w-30 font-monospace change-amount" t-out="extra_data['stephans_change']"/>
+                            </tr>
+                            <tr t-if="extra_data['prices'].get('discount_amount')" style="border-top: 1px dashed black;">
+                                <td class="text-start w-70">Discounts : </td>
+                                <td class="text-end w-30 font-monospace" t-out="extra_data['prices']['discount_amount']"/>
+                            </tr>
+                            <t t-if="config['iface_tax_included'] == 'total'">
+                                <tr t-foreach="extra_data['prices']['taxes']" t-as="tax">
+                                    <td class="text-start w-70" t-out="tax['name']"/>
+                                    <td class="text-end w-30 font-monospace" t-out="tax['amount']"/>
+                                </tr>
+                                <tr>
+                                    <td class="text-start w-70">Total Taxes : </td>
+                                    <td class="text-end w-30 font-monospace" t-out="extra_data['prices']['tax_amount']"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Paw Points / coupons (same data as pos_loyalty's block on the standard receipt) -->
+                    <table t-if="extra_data.get('loyalties')" class="w-100 mt-2">
+                        <tbody t-foreach="extra_data['loyalties']" t-as="loyalty">
+                            <tr class="loyalty">
+                                <td class="text-start" t-out="loyalty['name'] + ' ' + loyalty['type']"/>
+                                <td class="text-end w-50" t-out="loyalty['points']"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table t-if="extra_data.get('new_coupons')" class="w-100 mt-2">
+                        <tbody t-foreach="extra_data['new_coupons']" t-as="coupon">
+                            <tr>
+                                <td class="text-start text-top pt-3">
+                                    <div class="pb-1" t-out="coupon['name']"/>
+                                    <div class="pb-1"> Until: <t t-if="coupon['expiration_date']" t-out="coupon['expiration_date']"/><t t-else="">no expiration</t></div>
+                                </td>
+                                <td class="text-end pt-3">
+                                    <div><img t-att-src="coupon['barcode_base64']" style="width:300px;height:70px"/></div>
+                                    <div class="text-end pb-1" t-out="coupon['code']"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Footer -->
+                    <div t-if="config['receipt_footer']" class="w-100 text-center mt-3" style="white-space:pre-line" t-out="config['receipt_footer']"/>
+                    <t t-foreach="payments" t-as="payment">
+                        <div t-if="payment.get('ticket')" class="w-100 mt-2 text-normal" style="white-space:pre-line" t-out="payment['ticket']"/>
+                    </t>
+                    <div class="w-100 text-center mt-3 mb-2">Thank You... Please Visit Again ...</div>
+                </div>
+            </xpath>
+        </template>
+    </data>
+</odoo>
