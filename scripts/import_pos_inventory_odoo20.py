@@ -126,7 +126,9 @@ for src in data["products"]:
     if not dest:
         how = "created"
         vals = {
-            "name": src["display_name"] if src["combination"] else src["name"],
+            # display_name carries a "[code] " prefix; build the name from the attribute values.
+            "name": "%s (%s)" % (src["name"].strip(), ", ".join(v for _a, v in src["combination"]))
+                    if src["combination"] else src["name"],
             "default_code": src["default_code"] or False,
             "list_price": src["list_price"],
             "standard_price": src["standard_price"],
@@ -147,6 +149,9 @@ for src in data["products"]:
         if src["pos_categories"]:
             vals["pos_categ_ids"] = [(6, 0, [path_record("pos.category", p).id for p in src["pos_categories"]])]
         dest = Template.create(vals).product_variant_ids[:1]
+        # product_auto_code gives every new variant a fresh sequence code; keep the Odoo 18 one.
+        if src["default_code"] and dest.default_code != src["default_code"]:
+            dest.default_code = src["default_code"]
         if not src["active"]:
             dest.active = False
         else:
@@ -184,6 +189,15 @@ for login in sorted(filter(None, logins)):
         user.active = False
         stats["users_created"] += 1
     user_map[login] = user.id
+
+# POS cashier employees (pos_hr), matched by name; created by sync_config_odoo20.py.
+Employee = env["hr.employee"].sudo().with_context(active_test=False)
+employee_map = {}
+for name in sorted({o.get("employee") for o in data["orders"]} - {None, False}):
+    found = Employee.search([("name", "=", name)])
+    if len(found) != 1:
+        raise SystemExit("Employee %r: expected exactly one in Odoo 20, found %d (run sync_config_odoo20.py)" % (name, len(found)))
+    employee_map[name] = found.id
 
 # ---------------------------------------------------------------------------------------------
 # 3. POS sessions and orders (closed history)
@@ -237,6 +251,11 @@ line_map = {}
 for index, src in enumerate(data["orders"], 1):
     if src["uuid"] in existing_uuids:
         stats["orders_existing"] += 1
+        if src.get("employee"):
+            existing = Order.search([("uuid", "=", src["uuid"])], limit=1)
+            if existing.employee_id.id != employee_map[src["employee"]]:
+                existing.employee_id = employee_map[src["employee"]]
+                stats["employees_fixed"] += 1
         continue
     session = session_map.get(src["session_id"])
     if not session:
@@ -272,6 +291,7 @@ for index, src in enumerate(data["orders"], 1):
         "sequence_number": src["sequence_number"] or 0,
         "date_order": src["date_order"],
         "user_id": user_map.get(src["user_login"], admin.id),
+        "employee_id": employee_map.get(src.get("employee")) or False,
         "amount_total": src["amount_total"],
         "amount_tax": src["amount_tax"],
         "amount_paid": src["amount_paid"],

@@ -82,6 +82,7 @@ for index, order in enumerate(orders, 1):
         "session_id": order.session_id.id,
         "date_order": dt(order.date_order),
         "user_login": order.user_id.login,
+        "employee": order.employee_id.name if "employee_id" in order._fields and order.employee_id else False,
         "state": order.state,
         "amount_total": order.amount_total,
         "amount_tax": order.amount_tax,
