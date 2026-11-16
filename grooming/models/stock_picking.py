@@ -192,7 +192,7 @@ class StockPicking(models.Model):
             c.drawString(left + 4 * mm, row_top - 7 * mm, product_name[:65])
             
             qty = move.quantity if move.state == 'done' else move.product_uom_qty
-            uom = move.product_uom.name or ""
+            uom = move.uom_id.name or ""
             c.drawCentredString(left + col_1 + col_2 / 2, row_top - 7 * mm, f"{qty} {uom}")
             
             if move.product_id.barcode:
@@ -278,10 +278,9 @@ class StockPicking(models.Model):
         for line in payload.get('lines', []):
             product = self.env['product.product'].browse(line['product_id'])
             move_ids.append((0, 0, {
-                'name': product.name,
                 'product_id': product.id,
                 'product_uom_qty': line['qty'],
-                'product_uom': product.uom_id.id,
+                'uom_id': product.uom_id.id,
                 'location_id': src_location.id,
                 'location_dest_id': dest_location.id,
             }))

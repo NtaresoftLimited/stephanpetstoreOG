@@ -305,10 +305,9 @@ class GroomingStockRequest(models.Model):
                 'custom_source_warehouse_id': False,
                 'custom_destination_warehouse_id': dest_warehouse.id,
                 'move_ids': [(0, 0, {
-                    'name': line.product_id.name,
                     'product_id': line.product_id.id,
                     'product_uom_qty': line.quantity,
-                    'product_uom': line.product_id.uom_id.id,
+                    'uom_id': line.product_id.uom_id.id,
                     'location_id': supplier_location.id if supplier_location else False,
                     'location_dest_id': dest_location.id if dest_location else False,
                 }) for line in request.product_line_ids]
