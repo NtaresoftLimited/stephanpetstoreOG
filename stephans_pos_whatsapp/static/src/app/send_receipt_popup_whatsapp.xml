@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!-- Buttons that carry an `image` (WhatsApp) show that logo instead of an icon-font glyph. -->
+    <t t-name="stephans_pos_whatsapp.SendReceiptPopup" t-inherit="point_of_sale.SendReceiptPopup" t-inherit-mode="extension">
+        <xpath expr="//button[@t-foreach='item.buttons']" position="attributes">
+            <attribute name="t-att-class">button.btnClass || ''</attribute>
+            <attribute name="t-att-title">button.title || ''</attribute>
+        </xpath>
+        <xpath expr="//button[@t-foreach='item.buttons']/i" position="attributes">
+            <attribute name="t-if">!button.image or button.status === 'loading'</attribute>
+        </xpath>
+        <xpath expr="//button[@t-foreach='item.buttons']/i" position="after">
+            <img t-if="button.image and button.status !== 'loading'" t-att-src="button.image" alt="WhatsApp" class="o_whatsapp_receipt_logo"/>
+        </xpath>
+    </t>
+</templates>

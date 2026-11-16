@@ -78,6 +78,19 @@ The till code was still Odoo 18 and stopped the POS from starting (`WalletRechar
 - `enforce_cities` on Tanzania: City becomes a searchable list in the back office, the POS customer form and portal checkout. Every region has at least one town, so checkout is never blocked.
 - New contacts default to Tanzania / Dar es Salaam (`ir.default`).
 
+### `stephans_pos_whatsapp` (new module, v20.0.1.0.0): WhatsApp receipts
+- **Production:** Enterprise `whatsapp_pos` was installed but never configured. There was no WhatsApp account, the "POS Receipt" template was a draft, WhatsApp was off on both tills, and **0 receipts were ever sent**. The app doesn't exist on Community.
+- **The new button:** a WhatsApp button with the official logo, beside the phone field in the Send Receipt popup.
+- **Sending:** the server renders the receipt image and sends it through WaSender (`stephans_whatsapp.api_key`) with a thank-you caption.
+- **Phone numbers:** local Tanzanian numbers are accepted. Odoo's own phone check requires `+…`.
+- **Settings:** a per-till switch under Settings → Bills & Receipts. See the module README.
+- **Verified on staging:**
+  - the button renders with the logo, and is enabled for `07…`, `7…` and `+255…` numbers but not for junk;
+  - with the WaSender call intercepted, the send produces the right payload;
+  - the receipt image is publicly fetchable with its token (404 without);
+  - invalid numbers are rejected.
+  - No real message was sent during testing.
+
 ### Scripts
 - `scripts/switch_coa_tz_odoo20.py` now creates the **POSS** "Point of Sale" sale journal and sets it as `pos.config.journal_id` on every till. See §4.
 
