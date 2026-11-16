@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) Wisenetic Technologies.
 
-from email.policy import default
 from odoo import fields, models, api
 
 
 class PosConfig(models.Model):
     _inherit = "pos.config"
 
-
-
     is_display_stock = fields.Boolean(
         default=True, string="Display Stock in POS", help="Enable if you want to show stock of products")
     stock_type = fields.Selection(
         [('on_hand', 'On Hand'), ('forecasted', 'Forecasted')], default='on_hand',  help="Select to show on-hand and forecasted stock on the POS screen", required=True, string="Stock Type")
     is_restrict_out_of_stock_products = fields.Boolean(
+        default=True,
         help="Restrict ordering of out-of-stock products based on displayed quantity",
         string="Restrict Product Out of Stock in POS",
+    )
+    only_in_stock_products = fields.Boolean(
+        default=True,
+        help="Only display products that have available stock in the current session warehouse/location",
+        string="Only In-Stock Products in POS",
     )
     is_low_stock_screen_visible = fields.Boolean(
         default=True, help="Enable to display products with low stock levels on the POS screen",
@@ -62,24 +65,64 @@ class PosConfig(models.Model):
         related="company_id.point_of_sale_update_stock_quantities", readonly=False)
 
     stock_quantities_refresh_rate = fields.Selection(
-        [('1', '1 Min.'), ('3', '3 Min.'), ('5', '5 Min.'), ('10', '10 Min.')], default='3',  help="Select the interval to refresh stock quantities on the product screen", required=True, string="Refresh Time")
+        [('1', '1 Min.'), ('3', '3 Min.'), ('5', '5 Min.'), ('10', '10 Min.')], default='1',  help="Select the interval to refresh stock quantities on the product screen", required=True, string="Refresh Time")
 
     stock_warehouse = fields.Selection(
         [('all', 'All Warehouses'), ('current', 'Current Session Warehouse')],
-        default='all',  help="Select the warehouse to manage inventory for this point of sale", string="Warehouse Location")
+        default='current',  help="Select the warehouse to manage inventory for this point of sale", string="Warehouse Location")
 
     picking_type_location_id = fields.Many2one(
-        related='picking_type_id.default_location_src_id', readonly=False, string="Default Source Location")
+        related='picking_type_id.default_location_src_id', readonly=False, string="Default Source Location",
+        domain="[('usage', '=', 'internal')]")
 
     in_stock_pick = fields.Integer(
-        compute='default_demo', string='In Stock Pick')
+        compute='default_demo', store=True, string='In Stock Pick')
 
-    @api.depends('picking_type_location_id')
+    @api.depends('picking_type_id', 'picking_type_id.default_location_src_id', 'warehouse_id', 'warehouse_id.lot_stock_id')
     def default_demo(self):
         for pos_config in self:
-            pos_config.in_stock_pick = int(self.picking_type_location_id.id) if self.picking_type_location_id.id else None
+            loc = (
+                (pos_config.picking_type_id and pos_config.picking_type_id.default_location_src_id.id)
+                or (pos_config.warehouse_id and pos_config.warehouse_id.lot_stock_id.id)
+                or 0
+            )
+            pos_config.in_stock_pick = int(loc)
 
+    @api.model
+    def _load_pos_data_fields(self, config_id):
+        params = super()._load_pos_data_fields(config_id)
+        if params:
+            params += [
+                'is_display_stock',
+                'stock_type',
+                'is_restrict_out_of_stock_products',
+                'only_in_stock_products',
+                'is_low_stock_screen_visible',
+                'low_stock_threshold',
+                'low_stock_color',
+                'in_stock_color',
+                'stock_quantities_refresh_rate',
+                'stock_warehouse',
+                'picking_type_location_id',
+                'in_stock_pick',
+                'warehouse_id',
+                'picking_type_id',
+                'is_restrict_low_margin_products',
+                'margin_threshold_percent',
+                'margin_restriction_level',
+                'margin_check_product_type',
+            ]
+            return list(set(params))
+        return []
 
-
-    
-
+    @api.depends('session_ids', 'session_ids.state')
+    def _compute_last_session(self):
+        if self.ids:
+            self.env.cr.execute("""
+                UPDATE pos_session 
+                SET stop_at = write_date 
+                WHERE state = 'closed' 
+                AND stop_at IS NULL 
+                AND config_id IN %s
+            """, (tuple(self.ids),))
+        return super()._compute_last_session()

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_custom_receipt" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.custom.receipt</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='pos_bills_and_receipts_section']" position="inside">
+                <setting id="stephans_custom_receipt" string="Stephan's Receipt Design"
+                         help="Print receipts in the Stephan's Pet Store layout (Design 3). Logo, phone and email come from the receipt information above.">
+                    <field name="pos_is_custom_receipt"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
