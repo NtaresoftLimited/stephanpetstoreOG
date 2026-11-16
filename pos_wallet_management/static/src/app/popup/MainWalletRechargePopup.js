@@ -2,25 +2,24 @@
 /* See LICENSE file for full copyright and licensing details. */
 /* License URL : <https://store.webkul.com/license.html/> */
 
-import { onMounted } from "@odoo/owl";
+import { onMounted, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { WkWalletRechargePopup } from "@pos_wallet_management/app/popup/WkWalletRechargePopup";
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
 export class MainWalletRechargePopup extends Component {
 
     static template = "pos_wallet_management.MainWalletRechargePopup";
     static components = { Dialog };
-    static defaultProps = {
-        title: 'Confirm ?',
-        body: '',
-    };
-    static props= ["wallet_id","close"]
+    // Odoo 20 / OWL 3: components only get this.props through useProps().
+    props = useProps();
     setup() {
         super.setup();
         onMounted(this.WOnMounted);
         this.dialog = useService("dialog");
+        this.pos = usePos();
     }
 
     WOnMounted() {
@@ -36,7 +35,7 @@ export class MainWalletRechargePopup extends Component {
     wallet_key_press_input(event) {
         var self = this;
         var updown_press;
-        var all_wallets = self.env.services.pos.all_wallets;
+        var all_wallets = self.pos.all_wallets;
         $('.wallet-holder ul').empty();
         var search = $('.wallet_input').val();
         $('.wallet-holder').show();
@@ -95,8 +94,8 @@ export class MainWalletRechargePopup extends Component {
     click_validate_wallet() {
         var self = this;
         var wallet_input = $('.wallet_input').val();
-        if (wallet_input && self.env.services.pos.wallet_by_name[wallet_input]) {
-            var wallet = self.env.services.pos.wallet_by_name[wallet_input];
+        if (wallet_input && self.pos.wallet_by_name[wallet_input]) {
+            var wallet = self.pos.wallet_by_name[wallet_input];
             if (wallet && wallet.partner_id) {
                 self.cancel()
                 this.dialog.add(WkWalletRechargePopup,{

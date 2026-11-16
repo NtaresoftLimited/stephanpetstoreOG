@@ -4,219 +4,156 @@
 /* See LICENSE file for full copyright and licensing details. */
 /* License URL : <https://store.webkul.com/license.html/> */
 
+// Odoo 20 port: store/hook modules moved (app/services, app/hooks), order API is camelCase,
+// lines are added by product template, and relational fields are records.
+
 import { patch } from "@web/core/utils/patch";
-import { PosStore } from "@point_of_sale/app/store/pos_store";
+import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { MainWalletRechargePopup } from "@pos_wallet_management/app/popup/MainWalletRechargePopup";
-import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
 import { WkErrorNotifyPopopWidget } from "@pos_wallet_management/app/popup/WkErrorNotifyPopopWidget";
 import { _t } from "@web/core/l10n/translation";
 import { DataServiceOptions } from "@point_of_sale/app/models/data_service_options";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { WkWalletRechargePopup } from "@pos_wallet_management/app/popup/WkWalletRechargePopup";
-import { OrderTabs } from "@point_of_sale/app/components/order_tabs/order_tabs";
-
-patch(OrderTabs.prototype, {
-    selectFloatingOrder(order) {
-        super.selectFloatingOrder(order);
-        if (order != null && order.wallet_recharge_data) {
-            $('.rightpane').css("pointer-events", "none");
-            $('.rightpane').css("opacity", "0.3");
-        }
-        else {
-            $('.rightpane').css("pointer-events", "");
-            $('.rightpane').css("opacity", "1");
-        }
-    },
-});
 
 patch(DataServiceOptions.prototype, {
-    get databaseIndex(){
+    get databaseIndex() {
         return {
             ...super.databaseIndex,
             "pos.wallet": ["nfcid"],
         };
-    }
-})
+    },
+});
 
 patch(PosOrder.prototype, {
-    setup() {
-        super.setup(...arguments);
+    /** Payment line paid with the Sky Wallet method, if any. */
+    getWalletPaymentLine(pos) {
+        if (!pos.wallet_method) {
+            return null;
+        }
+        return this.payment_ids.find((line) => line.payment_method_id?.id === pos.wallet_method.id) || null;
     },
 
-    set_partner_for_wallet(partner, pos){
-        var self = this;
-        self.set_partner(partner);
-        if (self) {
-            if(self.check_existing_wallet_line(pos)!=null){
-                self.remove_paymentline(self.check_existing_wallet_line(pos));
-            }
+    setPartnerForWallet(partner, pos) {
+        this.setPartner(partner);
+        const walletLine = this.getWalletPaymentLine(pos);
+        if (walletLine) {
+            this.removePaymentline(walletLine);
         }
         return true;
     },
 
-    set_partner(partner) {
-        super.set_partner(partner);
+    get isWalletRecharge() {
+        return Boolean(this.wallet_recharge_data);
     },
-
-    check_existing_wallet_line(pos) {
-        var self = this;
-        var existing_wallet_line = null;
-        var paymentlines = self.payment_ids;
-        if(self && self.payment_ids && self.payment_ids.length){
-            if (pos.wallet_method) {
-                paymentlines.forEach(function (line) {
-                    if (line.payment_method.id == pos.wallet_method.id) {
-                        line.update({'is_wallet_payment_line': true});
-                        existing_wallet_line = line;
-                        return true;
-                    }
-                });
-            }
-        }
-        return existing_wallet_line;
-    },
-
-    remove_paymentline(line) {
-        super.remove_paymentline(line);
-        var self = this;
-        if (line && line.is_wallet_payment_line) {
-            $('#use_wallet_payment').prop('checked', false);
-            if (self.get_partner()){
-                $('div.wallet_balance').html("Balance: <span style='color: #247b45;font-weight: bold;'>" + formatCurrency(self.get_partner().wallet_credits, this.currency) + "</span>");
-            }
-
-        }
-    },
-
-    wallet_remaining_balance() {
-        var self = this;
-        var paymentlines = self.get_paymentlines();
-        var line_amount = 0;
-        if (self.pos.wallet_journal) {
-            paymentlines.forEach(function (line) {
-                if (line.cashregister.journal.id == self.pos.wallet_journal.id) {
-                    line_amount += line.amount;
-                }
-            });
-        }
-        var remianing_amount = self.get_partner().wallet_credits - line_amount
-        return remianing_amount.toFixed(2)
-    }
-})
-
+});
 
 patch(PosStore.prototype, {
-    async setup() {
-        await super.setup(...arguments);
+    async processServerData() {
+        await super.processServerData(...arguments);
+        this.wallet_method = this.models["pos.payment.method"].getAll().find((pm) => pm.wallet_method) || null;
+        this.wallet_product = this.models["product.product"].getAll().find((p) => p.default_code === "wk_wallet") || null;
+        this._loadWalletsData();
+    },
+
+    _loadWalletsData() {
+        this.all_wallets = this.models["pos.wallet"].getAll().sort((a, b) => b.id - a.id);
+        this.wallet_by_name = {};
+        for (const wallet of this.all_wallets) {
+            this.wallet_by_name[wallet.name] = wallet;
+        }
+    },
+
+    showWalletMethodMissing() {
+        this.dialog.add(WkErrorNotifyPopopWidget, {
+            title: _t("Sky Wallet payment method not found"),
+            body: _t("Please configure the Sky Wallet payment method in Point of Sale settings."),
+        });
     },
 
     async rechargeWallet(wallet_id) {
-        if (this.wallet_method) {
-            this.dialog.add(MainWalletRechargePopup, {
-                wallet_id: wallet_id || '',
-            });
+        if (!this.wallet_method) {
+            return this.showWalletMethodMissing();
         }
-        else {
-            this.dialog.add(WkErrorNotifyPopopWidget, {
-                title: _t('Sky Wallet payment method not found'),
-                body: _t('Please configure the Sky Wallet payment method in Point of Sale settings.'),
-            });
+        this.dialog.add(MainWalletRechargePopup, { wallet_id: wallet_id || "" });
+    },
+
+    openWalletRecharge() {
+        if (!this.wallet_method) {
+            return this.showWalletMethodMissing();
+        }
+        const partner = this.getOrder()?.getPartner();
+        if (partner) {
+            this.dialog.add(WkWalletRechargePopup, { partner });
         }
     },
 
-    async processServerData() {
-        await super.processServerData();
-        this.wallets = this.data.models["pos.wallet"].getAll();
-        this._loadJournalData();
-        this._loadWalletsData();
-        var products = this.data.models["product.product"].getAll();
-        for (var i = 0, len = products.length; i < len; i++) {
-            if (products[i].default_code == 'wk_wallet') {
-                products[i].not_returnable = true;
-                this.wallet_product = products[i];
-            }
+    _isWalletProductVals(vals) {
+        if (!this.wallet_product) {
+            return false;
         }
+        const product = vals.product_id;
+        const productId = typeof product === "number" ? product : product?.id;
+        if (productId) {
+            return productId === this.wallet_product.id;
+        }
+        const tmpl = vals.product_tmpl_id;
+        const tmplId = typeof tmpl === "number" ? tmpl : tmpl?.id;
+        return tmplId === this.wallet_product.product_tmpl_id?.id;
     },
-    _loadJournalData(){
-        var self = this;
-        var payment_methods = this.data.models['pos.payment.method'].getAll();
-        payment_methods.forEach(function(journal){
-            if(journal.wallet_method){
-                self.wallet_method = journal
-                return true;
-            }
-        })
-    },
-    _loadWalletsData(){
-        var self = this;
-        this.wallets = this.wallets.sort(function(a, b){
-            return b.id - a.id;
-        })
-        self.all_wallets = self.wallets;
-        self.wallet_by_name = {};
-        self.wallets.forEach(function(wallet) {
-            self.wallet_by_name[wallet.name] = wallet;
-        })
-    },
+
     async addLineToCurrentOrder(vals, opts = {}, configure = true) {
-        var self = this;
-        if (self.wallet_product && vals.product_id.id == self.wallet_product.id && !self.get_order().wallet_recharge_data) {
-            this.dialog.add(MainWalletRechargePopup,{
-                wallet_id: '',
-            })
+        const order = this.getOrder();
+        const isWalletProduct = this._isWalletProductVals(vals);
+        if (isWalletProduct && !order?.isWalletRecharge) {
+            // The recharge product is only sold through the recharge popup.
+            this.dialog.add(MainWalletRechargePopup, { wallet_id: "" });
+            return;
         }
-        else{
-            super.addLineToCurrentOrder(...arguments);
+        if (!isWalletProduct && order?.isWalletRecharge) {
+            this.dialog.add(AlertDialog, {
+                title: _t("Sky Wallet recharge"),
+                body: _t("A Sky Wallet recharge order can only contain the recharge. Start a new order for products."),
+            });
+            return;
         }
+        return await super.addLineToCurrentOrder(...arguments);
     },
 
-    async selectPartner(partner) {
-        var current_order = this.get_order();
-        if (current_order != null && current_order.wallet_recharge_data && this.is_wallet_orderline()) {
-            
-            this.dialog.add(AlertDialog,{
+    isWalletOrderline(order = this.getOrder()) {
+        if (!order || !this.wallet_product) {
+            return false;
+        }
+        return order.getOrderlines().some((line) => line.product_id?.id === this.wallet_product.id);
+    },
+
+    async selectPartner(currentOrder = this.getOrder()) {
+        if (currentOrder?.isWalletRecharge && this.isWalletOrderline(currentOrder)) {
+            this.dialog.add(AlertDialog, {
                 title: _t("Customer Change Not Allowed!"),
-                body: _t("Oops! You can't change the customer for a wallet recharge order.")
-            })
-        }
-        else{
-            const res = await super.selectPartner(partner);
-            current_order.wallet_recharge_data = null;
-            return res;
-        }
-    },
-
-    is_wallet_orderline() {
-        var self = this;
-        var current_order = this.get_order();
-        var wallet_line = false;
-        if (current_order.get_orderlines() && self.wallet_product) {
-            current_order.get_orderlines().forEach(function (orderline) {
-                if (orderline.product_id.id == self.wallet_product.id)
-                    wallet_line = true;
+                body: _t("Oops! You can't change the customer for a wallet recharge order."),
             });
+            return currentOrder.getPartner();
         }
-        return wallet_line;
+        return await super.selectPartner(...arguments);
     },
 
-    openWalletRecharge(){
-        if (this.wallet_method) {
-            let order = this.get_order();
-            if(order){
-                let partner = order.get_partner();
-                if(partner){
-                    this.dialog.add(WkWalletRechargePopup,{
-                        'partner': partner,
-                    })
-                }
+    /** Re-read the customer and wallet after the server has debited/credited the wallet. */
+    async refreshWalletPartner(partner) {
+        if (!partner || !this.wallet_method) {
+            return;
+        }
+        try {
+            await this.data.read("res.partner", [partner.id]);
+            const walletId = partner.wallet_id?.id;
+            if (walletId) {
+                await this.data.read("pos.wallet", [walletId]);
             }
-            
-        }else{
-            this.dialog.add(WkErrorNotifyPopopWidget, {
-                title: _t('Sky Wallet payment method not found'),
-                body: _t('Please configure the Sky Wallet payment method in Point of Sale settings.'),
-            });
+            this._loadWalletsData();
+        } catch (error) {
+            // Offline: the balance refreshes on the next successful read.
+            console.warn("Sky Wallet balance refresh failed", error);
         }
-    }
-})
+    },
+});

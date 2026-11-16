@@ -4,19 +4,16 @@
 /* See LICENSE file for full copyright and licensing details. */
 /* License URL : <https://store.webkul.com/license.html/> */
 
-import { Component, onMounted } from "@odoo/owl";
+import { Component, onMounted, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { usePos } from "@point_of_sale/app/store/pos_hook";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 
 export class WkErrorNotifyPopopWidget extends Component {
 
     static template = "pos_wallet_management.WkErrorNotifyPopopWidget";
     static components = { Dialog };
-    static defaultProps = {  
-        title: 'Confirm ?',
-        body: '',
-        confirmText:'Ok',
-    };
+    // Odoo 20 / OWL 3: components only get this.props through useProps().
+    props = useProps();
 
     setup() {
         super.setup();

@@ -6,7 +6,7 @@
 
 <templates id="template" xml:space="preserve">
     <t t-name="pos_wallet_management.WalletRechargeWidget">
-        <div class="oe_status wallet-management" t-on-click="()=>pos.rechargeWallet('')" style="text-align: center;">
+        <div class="oe_status wallet-management" t-on-click="() => this.pos.rechargeWallet('')" style="text-align: center;">
             <div class="oe_icon btn btn-md">
                 <img src="/pos_wallet_management/static/description/recharge_button.png" width="25px" height="25px" />
             </div>

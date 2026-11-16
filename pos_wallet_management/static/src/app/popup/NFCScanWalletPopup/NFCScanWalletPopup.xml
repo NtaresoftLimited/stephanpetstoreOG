@@ -18,14 +18,14 @@
                     <div class="position-relative w-100 fs-2" style="height: 35px;">
                         <!-- Centered Wallet Name -->
                         <div class="text-left">
-                            <span class="fs-2 fw-bolder border-bottom" t-out="props.wallet.name"/>
+                            <span class="fs-2 fw-bolder border-bottom" t-out="this.props.wallet.name"/>
                         </div>
 
                         <!-- Right-Aligned Button -->
                         <button 
                             class="btn btn-primary btn-md position-absolute" 
                             style="right: 0; top: 30%; transform: translateY(-50%);" 
-                            t-on-click="()=>this._callRechargeWallet(props.wallet.name)">
+                            t-on-click="()=>this._callRechargeWallet(this.props.wallet.name)">
                             <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="20px" />
                             Recharge
                         </button>
@@ -35,15 +35,15 @@
                     <div class="d-flex justify-content-between mt-3 flex-column gap-2">
                         <div class="d-flex flex-row">
                             <span class="fs-3 border-bottom fw-bolder ">Customer : </span>
-                            <span class="ms-4 fs-3" t-out="props.wallet.partner_id.name"/>
+                            <span class="ms-4 fs-3" t-out="this.props.wallet.partner_id.name"/>
                         </div>
                         <div class="d-flex flex-row">
                             <span class="fs-3 border-bottom fw-bolder me-3">Balance : </span>
-                            <span class="ms-4 fs-3" t-out="props.formatCurrency(props.wallet.amount)"/>
+                            <span class="ms-4 fs-3" t-out="this.props.formatCurrency(this.props.wallet.amount)"/>
                         </div>
                     </div>
                 </div>
-                <div t-if="props.wallet.pos_wallet_trans_id and props.wallet.pos_wallet_trans_id.length" class="w-100 mt-2">
+                <div t-if="this.props.wallet.pos_wallet_trans_id and this.props.wallet.pos_wallet_trans_id.length" class="w-100 mt-2">
                     <div class="text-center">
                         <span class="fs-2 border-bottom">Transaction</span>
                     </div>
@@ -56,19 +56,19 @@
                                 <div class="col wide p-2">Date</div>
                             </div>
                         </div>
-                        <t t-if="props.wallet.pos_wallet_trans_id" t-foreach="props.wallet.pos_wallet_trans_id" t-as="trans" t-key="trans_index">        
+                        <t t-if="this.props.wallet.pos_wallet_trans_id" t-foreach="this.props.wallet.pos_wallet_trans_id" t-as="trans" t-key="trans_index">        
                             <div class="transaction-row">
                                 <div class="col wide p-2 ">
                                     <div t-attf-class="{{trans.payment_type=='CREDIT'?'': 'text-danger'}}"><t t-out="trans.payment_type"></t></div>
                                 </div>
                                 <div class="col wide p-2">
-                                    <div><t t-out="props.formatCurrency(trans.amount)"></t></div>
+                                    <div><t t-out="this.props.formatCurrency(trans.amount)"></t></div>
                                 </div>
                                 <div class="col wide p-2">
                                     <div><t t-out="trans.created_by.name"></t></div>
                                 </div>
                                 <div class="col p-2">
-                                    <div><t t-out="getDate(trans)"></t></div>
+                                    <div><t t-out="this.getDate(trans)"></t></div>
                                 </div>
                             </div>
                         </t>
@@ -76,8 +76,8 @@
                 </div>
             </div>
             <t t-set-slot="footer">
-                <button class="btn btn-primary" t-on-click="this.selectCustomer">Select</button>
-                <button class="btn btn-secondary" t-on-click="this.props.close">Discard</button>
+                <button class="btn btn-primary" t-on-click="() =&gt; this.selectCustomer()">Select</button>
+                <button class="btn btn-secondary" t-on-click="() =&gt; this.props.close()">Discard</button>
             </t>
         </Dialog>
     </t>

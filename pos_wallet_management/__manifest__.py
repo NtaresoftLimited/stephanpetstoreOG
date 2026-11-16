@@ -17,7 +17,7 @@
     "name":  "Sky Wallet",
     "summary":  """Shared Sky Wallet customer credit for Stephan's Point of Sale.""",
     "category":  "Point of Sale",
-    "version":  "20.0.2.1.0",
+    "version":  "20.0.2.2.0",
     "sequence":  1,
     "author":  "Webkul Software Pvt. Ltd.",
     "license":  "Other proprietary",

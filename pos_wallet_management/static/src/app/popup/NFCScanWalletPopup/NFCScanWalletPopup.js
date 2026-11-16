@@ -2,32 +2,32 @@
 /* See LICENSE file for full copyright and licensing details. */
 /* License URL : <https://store.webkul.com/license.html/> */
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
-import { usePos } from "@point_of_sale/app/store/pos_hook";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { formatDateTime } from "@web/core/l10n/dates";
-import { parseUTCString } from "@point_of_sale/utils";
+import { formatDateTime, deserializeDateTime } from "@web/core/l10n/dates";
 import { WkWalletRechargePopup } from "@pos_wallet_management/app/popup/WkWalletRechargePopup";
 import { WkErrorNotifyPopopWidget } from "@pos_wallet_management/app/popup/WkErrorNotifyPopopWidget";
 
 export class NFCScanWalletPopup extends Component {
     static components = { Dialog };
+    // Odoo 20 / OWL 3: components only get this.props through useProps().
+    props = useProps();
     static template = "pos_wallet_management.NFCScanWalletPopup";
-    static props = [
-        "close",
-        "wallet",
-        "getPayload?",
-        "formatCurrency"
-    ]
     setup() {
         this.pos = usePos();
         this.dialog = useService("dialog");
     }
 
     getDate(item) {
-        return formatDateTime(parseUTCString(item.create_date));
+        // Odoo 20 models may already hold a luxon DateTime.
+        const value = item.create_date;
+        if (!value) {
+            return "";
+        }
+        return formatDateTime(typeof value === "string" ? deserializeDateTime(value) : value);
     }
 
     _callRechargeWallet(wallet_id){
@@ -45,11 +45,11 @@ export class NFCScanWalletPopup extends Component {
     }
 
     selectCustomer(){
-        const currentOrder = this.pos.get_order();
+        const currentOrder = this.pos.getOrder();
         if (!currentOrder) {
             return false;
         }
-        currentOrder.set_partner(this.props.getPayload());
+        currentOrder.setPartner(this.props.getPayload());
         this.props.close();
     }
 }

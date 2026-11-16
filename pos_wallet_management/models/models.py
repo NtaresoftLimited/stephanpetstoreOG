@@ -8,6 +8,7 @@
 #################################################################################
 
 from odoo import api, fields, models, _
+from odoo.fields import Domain
 import functools
 import json
 from odoo.exceptions import UserError, ValidationError
@@ -352,12 +353,12 @@ class ResPartner(models.Model):
         return data
 
     def _compute_wallet_counts(self):
-        wallet_data = self.env['pos.wallet'].read_group(
+        wallet_data = self.env['pos.wallet']._read_group(
             [('partner_id', 'in', self.ids), ('state', '=', 'confirm')],
             ['partner_id'],
-            ['partner_id']
+            ['__count'],
         )
-        mapped_data = dict([(wallet['partner_id'][0], wallet['partner_id_count']) for wallet in wallet_data])
+        mapped_data = {partner.id: count for partner, count in wallet_data if partner}
         for partner in self:
             partner.wallet_counts = mapped_data.get(partner.id, 0)
 
@@ -487,16 +488,27 @@ class PosOrder(models.Model):
         if wallet_method:
             for index, order in enumerate(orders):
                 order_data = order
-                pos_order = self.env['pos.order'].search(
-                    [('pos_reference', '=', order_data.get('name'))], limit=1
-                )
+                # Odoo 20: the UI payload identifies orders by uuid; keep the old name match as fallback.
+                pos_order = self.env['pos.order']
+                if order_data.get('uuid'):
+                    pos_order = pos_order.search([('uuid', '=', order_data['uuid'])], limit=1)
+                if not pos_order and order_data.get('name'):
+                    pos_order = self.env['pos.order'].search(
+                        [('pos_reference', '=', order_data.get('name'))], limit=1
+                    )
                 if order_data and order_data.get('partner_id') and pos_order:
-                    currency = pos_order.pricelist_id.currency_id
+                    # Tills run without a pricelist on Odoo 20; fall back to the order/company currency.
+                    currency = pos_order.currency_id or pos_order.pricelist_id.currency_id or pos_order.company_id.currency_id
 
                     wallet_trans_data_temp = order_data.get('wallet_recharge_data')
                     wallet_trans_data = False
-                    if wallet_trans_data_temp:
-                        wallet_trans_data = json.loads(wallet_trans_data_temp)
+                    if isinstance(wallet_trans_data_temp, dict):
+                        wallet_trans_data = wallet_trans_data_temp
+                    elif wallet_trans_data_temp:
+                        try:
+                            wallet_trans_data = json.loads(wallet_trans_data_temp)
+                        except (TypeError, ValueError):
+                            wallet_trans_data = False
 
                     # Wallet Recharge via POS order
                     if wallet_trans_data and wallet_trans_data.get('wallet_product_id'):
@@ -620,18 +632,12 @@ class PosSession(models.Model):
         return data
 
 
-class ProductProduct(models.Model):
-    _inherit = 'product.product'
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
 
-    def _load_pos_data(self, data):
-        res = super()._load_pos_data(data)
-        config_id = self.env['pos.config'].browse(data['pos.config']['data'][0]['id'])
-        discount_product_id = self.search([('default_code', '=', 'wk_wallet')], limit=1)
-        if discount_product_id:
-            product_ids_set = {product['id'] for product in res['data']}
-            if discount_product_id.id not in product_ids_set:
-                productModel = self.env['product.product'].with_context({**self.env.context, 'display_default_code': False})
-                product = productModel.search_read([('id', '=', discount_product_id.id)], fields=res['fields'], load=False)
-                self._process_pos_ui_product_product(product, config_id)
-                res['data'].extend(product)
-        return res
+    @api.model
+    def _load_pos_data_domain(self, data):
+        # Odoo 20 loads products by template; always include the Sky Wallet recharge product
+        # (default code wk_wallet), even on tills that limit their product categories.
+        domain = super()._load_pos_data_domain(data)
+        return list(Domain.OR([domain, [('product_variant_ids.default_code', '=', 'wk_wallet')]]))

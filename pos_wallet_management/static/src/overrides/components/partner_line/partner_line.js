@@ -3,7 +3,7 @@
 /* License URL : <https://store.webkul.com/license.html/> */
 
 import { _t } from "@web/core/l10n/translation";
-import { usePos } from "@point_of_sale/app/store/pos_hook";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { PartnerLine } from "@point_of_sale/app/screens/partner_list/partner_line/partner_line";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";

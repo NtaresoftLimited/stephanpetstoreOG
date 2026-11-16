@@ -4,35 +4,35 @@
 <!-- See LICENSE file for full copyright and licensing details. -->
 <!-- License URL : <https://store.webkul.com/license.html/> -->
 
-<templates id="template" xml:space='preserve'>
-    <t t-name="PartnerList" t-inherit="point_of_sale.PartnerList" t-inherit-mode="extension">
-        <xpath expr="//th[3]" position="after">
-            <th class="py-2">Sky Wallet Balance</th>
-        </xpath>
-    </t>
-    <t t-name="PartnerLine" t-inherit="point_of_sale.PartnerLine" t-inherit-mode="extension">
-        <xpath expr="//td[3]" position="after">
-            <td>
-                <div class="ms-0 pe-5">
-                    <t t-out='env.utils.formatCurrency(props.partner.wallet_credits)'/>
+<!-- Odoo 20 port: the partner list has no header row any more, and each line has a mobile
+     (ui.isSmall) and a table layout; the wallet balance and button are added to both. -->
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.PartnerLine" t-inherit="point_of_sale.PartnerLine" t-inherit-mode="extension">
+        <xpath expr="//td[hasclass('partner-line-email')]" position="after">
+            <td class="align-middle text-nowrap" t-if="this.pos.wallet_method">
+                <div class="d-flex align-items-center gap-2">
+                    <span t-if="this.props.partner.wallet_id" class="wallet_credits fw-bold"
+                        t-out="this.pos.formatCurrency(this.props.partner.wallet_credits or 0)"/>
+                    <button t-if="this.props.partner.wallet_id" class="wallet-recharge-button btn btn-light border" title="Recharge Sky Wallet"
+                        t-on-click.prevent.stop="() => this.recharge_wallet()">
+                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="28" height="28"/>
+                    </button>
+                    <button t-else="" class="wallet-create-button btn btn-light border" title="Create Sky Wallet"
+                        t-on-click.prevent.stop="() => this.create_wallet()">
+                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="28" height="28"/>
+                    </button>
                 </div>
             </td>
         </xpath>
-    </t>
-    <t t-name="PartnerLine" t-inherit="point_of_sale.PartnerLine" t-inherit-mode="extension">
-        <xpath expr="//td[hasclass('edit-partner-button-cell')]" position="after">
-            <td class="align-middle">
-                <t t-if="props.partner.wallet_id">
-                    <button class="wallet-recharge-button" style="width:56px;" t-on-click.prevent.stop="recharge_wallet">
-                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="35px" height="35px" />
-                    </button>
-                </t>
-                <t t-if="!props.partner.wallet_id">
-                    <button class="wallet-create-button" style="width:56px;" t-on-click.prevent.stop="create_wallet">
-                        <img style="pointer-events: none;" src="/pos_wallet_management/static/description/recharge_button.png" width="35px" height="35px" />
-                    </button>
-                </t>
-            </td>
+        <xpath expr="//div[hasclass('partner-line-email')]" position="after">
+            <div class="p-1 d-flex align-items-center gap-2" t-if="this.pos.wallet_method">
+                <span t-if="this.props.partner.wallet_id" class="wallet_credits fw-bold"
+                    t-out="this.pos.formatCurrency(this.props.partner.wallet_credits or 0)"/>
+                <button t-if="this.props.partner.wallet_id" class="wallet-recharge-button btn btn-light border"
+                    t-on-click.prevent.stop="() => this.recharge_wallet()">Recharge Sky Wallet</button>
+                <button t-else="" class="wallet-create-button btn btn-light border"
+                    t-on-click.prevent.stop="() => this.create_wallet()">Create Sky Wallet</button>
+            </div>
         </xpath>
     </t>
 </templates>
