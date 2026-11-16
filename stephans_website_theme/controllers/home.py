@@ -114,4 +114,4 @@ class StephansWebsiteHome(http.Controller):
     @http.route("/stephans/api/new-arrivals", type="jsonrpc", auth="public", website=True)
     def api_new_arrivals(self, **kwargs):
         slides = self._get_balanced_product_slides(max_slides=4)
-        return {"status": "success", "slides": slides, "rotation_ms": 20000}
+        return {"status": "success", "slides": slides, "rotation_ms": 15000}

@@ -250,7 +250,7 @@ const initializeStephanHeader = () => {
     });
 };
 
-// Auto-rotate four-card live-catalog sets every 20 seconds.
+// Auto-rotate four-card live-catalog sets every 15 seconds.
 const initializeProductRotator = () => {
     document.querySelectorAll("[data-stephans-product-rotator='true']").forEach((rotator) => {
         if (rotator.dataset.initialized === "true") return;
@@ -259,7 +259,7 @@ const initializeProductRotator = () => {
         const dots = Array.from(rotator.querySelectorAll(".stephans-rotator-dot"));
         if (slides.length <= 1) return;
 
-        const ROTATION_MS = 20000;
+        const ROTATION_MS = 15000;
         let currentIndex = Math.max(0, slides.findIndex((slide) => slide.classList.contains("is-active")));
         let isPointerPaused = false;
         let isFocusPaused = false;
