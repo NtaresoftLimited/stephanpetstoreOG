@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="grooming.GroomingDashboard" owl="1">
+    <t t-name="grooming.GroomingDashboard">
+        <t t-set="state" t-value="this.state"/>
+        <t t-set="formatCurrency" t-value="(v) =&gt; this.formatCurrency(v)"/>
         <div class="o_grooming_dashboard h-100 overflow-auto p-4">
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -13,7 +15,7 @@
                     <h5 class="fw-bold text-dark mb-3 ps-1">Quick Actions</h5>
                 </div>
                 <div class="col-md-3">
-                    <div t-on-click="openQuickAppointment" class="dashboard-card p-3 cursor-pointer text-center">
+                    <div t-on-click="() =&gt; this.openQuickAppointment()" class="dashboard-card p-3 cursor-pointer text-center">
                         <i class="fa fa-plus-circle fa-2x text-primary mb-2"/>
                         <div class="fw-bold">New Booking</div>
                     </div>
@@ -25,7 +27,7 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div t-on-click="openQuickExpense" class="dashboard-card p-3 cursor-pointer text-center">
+                    <div t-on-click="() =&gt; this.openQuickExpense()" class="dashboard-card p-3 cursor-pointer text-center">
                         <i class="fa fa-file-text-o fa-2x text-danger mb-2"/>
                         <div class="fw-bold">Record Expense</div>
                     </div>

@@ -94,7 +94,7 @@ class PosDashboard(models.TransientModel):
                     'method': method.name,
                     'amount': payment.amount,
                     'location': order.config_id.name,
-                    'is_cash': getattr(method, 'is_cash_count', False),
+                    'is_cash': getattr(method, 'is_cash_count', False) or getattr(method, 'type', '') == 'cash',
                     'is_customer_account': method.type == 'pay_later',
                 })
 
@@ -174,7 +174,23 @@ class PosDashboard(models.TransientModel):
 
         expenses_list = []
         expenses_total_val = 0.0
-        if 'hr.expense' in self.env:
+        if 'techovers.expense' in self.env:
+            domain_te = [
+                ('date', '>=', start),
+                ('date', '<=', end),
+                ('state', 'in', ('submitted', 'approved', 'paid')),
+                ('company_id', '=', self.env.company.id),
+            ]
+            if not is_manager:
+                domain_te.append(('create_uid', '=', self.env.uid))
+            te_expenses = self.env['techovers.expense'].sudo().search(domain_te, order='date desc, id desc')
+            for e in te_expenses:
+                cat_name = e.category_id.name or 'Expense'
+                reason = f"{cat_name}: {e.description}" if e.description else cat_name
+                dt_str = e.create_date.strftime('%Y-%m-%d %H:%M') if getattr(e, 'create_date', False) else str(e.date or '')
+                expenses_list.append({'reason': reason, 'amount': e.amount, 'datetime': dt_str})
+                expenses_total_val += e.amount
+        elif 'hr.expense' in self.env:
             domain_hr = [
                 ('date', '>=', start),
                 ('date', '<=', end),
@@ -306,16 +322,15 @@ class PosDashboard(models.TransientModel):
                 ('appointment_date', '>=', start_dt),
                 ('appointment_date', '<', end_dt),
             ]
-            grooming_groups = self.env['grooming.appointment'].sudo().read_group(
+            grooming_groups = self.env['grooming.appointment'].sudo()._read_group(
                 grooming_domain,
                 ['state'],
-                ['state'],
-                lazy=False,
+                ['__count'],
             )
             state_counts = {
-                group['state']: group['__count']
-                for group in grooming_groups
-                if group.get('state')
+                state: count
+                for state, count in grooming_groups
+                if state
             }
             total_count = sum(state_counts.values())
             pending_count = state_counts.get('pending', 0)
@@ -329,16 +344,15 @@ class PosDashboard(models.TransientModel):
 
             # If filtered period has no records, fallback to overall counts for the overview chart
             if total_count == 0:
-                all_groups = self.env['grooming.appointment'].sudo().read_group(
+                all_groups = self.env['grooming.appointment'].sudo()._read_group(
                     [],
                     ['state'],
-                    ['state'],
-                    lazy=False,
+                    ['__count'],
                 )
                 all_counts = {
-                    group['state']: group['__count']
-                    for group in all_groups
-                    if group.get('state')
+                    state: count
+                    for state, count in all_groups
+                    if state
                 }
                 pending_count = all_counts.get('pending', 0)
                 confirmed_count = all_counts.get('confirmed', 0)

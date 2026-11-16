@@ -11,6 +11,9 @@
 
   <!-- 2. POS Dashboard Component -->
   <t t-name="custom_pos_reports.PosDashboard">
+   <t t-set="state" t-value="this.state"/>
+   <t t-set="format" t-value="(v) =&gt; this.format(v)"/>
+   <t t-set="onOrderClick" t-value="(ev) =&gt; this.onOrderClick(ev)"/>
    <div class="o_pos_dashboard">
     <style>
       .tech-card {
@@ -185,25 +188,25 @@
           <div class="col-md-4 col-sm-5">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <label class="form-label mb-0 text-muted small fw-bold">Start Date</label>
-              <t t-if="!state.is_manager and state.min_date">
+              <t t-if="!this.state.is_manager and this.state.min_date">
                 <span class="badge bg-warning text-dark" style="font-size: 0.72rem; padding: 2px 6px;" title="Cashiers can only view sales of the last 1 week">
                   <i class="fa fa-lock me-1"/>1-Week Limit
                 </span>
               </t>
             </div>
-            <input type="date" class="form-control form-control-sm" t-model="state.date_start" t-att-min="state.min_date or undefined"/>
+            <input type="date" class="form-control form-control-sm" t-att-value="this.state.date_start" t-on-change="(ev) =&gt; this.state.date_start = ev.target.value" t-att-min="this.state.min_date or undefined"/>
           </div>
           <div class="col-md-4 col-sm-5">
             <label class="form-label mb-1 text-muted small fw-bold">End Date</label>
-            <input type="date" class="form-control form-control-sm" t-model="state.date_end" t-att-min="state.min_date or undefined"/>
+            <input type="date" class="form-control form-control-sm" t-att-value="this.state.date_end" t-on-change="(ev) =&gt; this.state.date_end = ev.target.value" t-att-min="this.state.min_date or undefined"/>
           </div>
           <div class="col-md-3 col-sm-10">
-            <button class="btn btn-sm tech-btn-primary w-100" t-on-click="applyFilters">
+            <button class="btn btn-sm tech-btn-primary w-100" t-on-click="() =&gt; this.applyFilters()">
               <i class="fa fa-filter me-1"/> Apply Filters
             </button>
           </div>
           <div class="col-md-1 col-sm-2 text-end">
-            <button class="btn btn-sm btn-outline-secondary w-100" t-on-click="applyFilters" title="Refresh">
+            <button class="btn btn-sm btn-outline-secondary w-100" t-on-click="() =&gt; this.applyFilters()" title="Refresh">
               <i class="fa fa-refresh"/>
             </button>
           </div>
@@ -505,7 +508,7 @@
                     <tr t-foreach="state.data.trend" t-as="row" t-key="row_index">
                       <td t-out="row.name"/>
                       <td>
-                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'date'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'date'" t-att-data-value="row.name" t-on-click.prevent="(ev) =&gt; this.onOrderClick(ev)">
                           <t t-out="row.orders"/>
                         </a>
                       </td>
@@ -532,7 +535,7 @@
                         </t>
                       </td>
                       <td>
-                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'customer'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'customer'" t-att-data-value="row.name" t-on-click.prevent="(ev) =&gt; this.onOrderClick(ev)">
                           <t t-out="row.orders"/>
                         </a>
                       </td>
@@ -554,7 +557,7 @@
                     <tr t-foreach="state.data.staff" t-as="row" t-key="row_index">
                       <td t-out="row.name"/>
                       <td>
-                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'staff'" t-att-data-value="row.name" t-on-click.prevent="onOrderClick">
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #9D2065;" t-att-data-type="'staff'" t-att-data-value="row.name" t-on-click.prevent="(ev) =&gt; this.onOrderClick(ev)">
                           <t t-out="row.orders"/>
                         </a>
                       </td>

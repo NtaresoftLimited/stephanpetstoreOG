@@ -113,10 +113,10 @@ class LucyDashboard(models.AbstractModel):
         healthy_stock = max(storable_products - low_stock, 0)
         inventory_value = 0.0
         if "stock.valuation.layer" in self.env:
-            valuation = self.env["stock.valuation.layer"].sudo().read_group(
-                [("company_id", "=", self.env.company.id)], ["value:sum"], []
+            valuation = self.env["stock.valuation.layer"].sudo()._read_group(
+                [("company_id", "=", self.env.company.id)], [], ["value:sum"]
             )
-            inventory_value = valuation[0].get("value", 0.0) if valuation else 0.0
+            inventory_value = (valuation[0][0] or 0.0) if valuation else 0.0
 
         all_period_grooming = self.env["grooming.appointment"].sudo().search([
             ("appointment_date", ">=", utc_start),

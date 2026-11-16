@@ -57,8 +57,9 @@ preflight)
     if (( open > 0 )); then echo "BLOCKER $open Odoo 18 till session(s) still open (close them in Odoo 18 first)"; blockers=$((blockers+1)); fi
     stale=$(ro_psql "$O18_DB" "select string_agg(name, ', ') from pos_session where state <> 'closed' and config_id not in ($POS_CONFIGS)")
     [[ -n "$stale" ]] && echo "NOTE  old sessions on retired tills still open (not migrated): $stale"
-    groom=$(ro_psql "$O18_DB" "select count(*) from grooming_appointment where state not in ('completed','cancelled')")
-    if (( groom > 0 )); then echo "BLOCKER $groom grooming booking(s) still open in Odoo 18 (finish or migrate them)"; blockers=$((blockers+1)); fi
+    groom18=$(ro_psql "$O18_DB" "select count(*) from grooming_appointment where state not in ('completed','cancelled')")
+    groom20=$(ro_psql "$O20_DB" "select count(*) from grooming_appointment where state not in ('completed','cancelled')")
+    if (( groom18 > groom20 )); then echo "BLOCKER $((groom18 - groom20)) grooming booking(s) still open in Odoo 18 not migrated to Odoo 20"; blockers=$((blockers+1)); fi
     skew=$(ro_psql "$O18_DB" "select count(*) from pos_order where create_date > now() - interval '1 day' and abs(extract(epoch from date_order - create_date)) > 3600")
     if (( skew > 0 )) && [[ "${SKIP_CLOCK_CHECK:-}" != 1 ]]; then
         echo "BLOCKER $skew order(s) in the last day with a till clock off by >1h (fix the Masaki device clock; SKIP_CLOCK_CHECK=1 once fixed)"; blockers=$((blockers+1)); fi

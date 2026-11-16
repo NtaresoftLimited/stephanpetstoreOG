@@ -121,28 +121,28 @@
         <section id="mega-menu-dogs" class="stephans-mega" aria-label="Dog categories">
             <div class="stephans-mega__intro">
                 <img src="/stephans_website_theme/static/src/images/icons/minimalist-dog.png" alt="Dogs"/>
-                <div><small>Shop for</small><h3>Dogs</h3><a href="/shop?search=dog">View all dog products →</a></div>
+                <div><small>Shop for</small><h3>Dogs</h3><a href="/shop/category/4">View all dog products →</a></div>
             </div>
             <div class="stephans-mega__grid">
                 <t t-set="extra" t-value="False"/>
-                <t t-set="title" t-value="'Food'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Adult Dog Food','Puppy Food','Senior Dog Food','Wet Food']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Treats'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/Treats_Stephans.webp'"/><t t-set="items" t-value="['Crunchy Treats','Dental Treats','Biscuits','Training Treats']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Bowls &amp; Feeders'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Food Bowls','Water Fountains','Elevated Bowls','Travel Bowls']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Tick, Flea &amp; Deworming'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/shield-tick.webp'"/><t t-set="items" t-value="['Dewormers','Tick &amp; Flea Treatments','Prevention','Wellness']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="8"/><t t-set="title" t-value="'Food'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Adult Dog Food','Puppy Food','Senior Dog Food','Wet Food']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="9"/><t t-set="title" t-value="'Treats'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/Treats_Stephans.webp'"/><t t-set="items" t-value="['Crunchy Treats','Dental Treats','Biscuits','Training Treats']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="11"/><t t-set="title" t-value="'Bowls &amp; Feeders'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Food Bowls','Water Fountains','Elevated Bowls','Travel Bowls']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="15"/><t t-set="title" t-value="'Tick, Flea &amp; Deworming'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/shield-tick.webp'"/><t t-set="items" t-value="['Dewormers','Tick &amp; Flea Treatments','Prevention','Wellness']"/><t t-call="stephans_website_theme.mega_group"/>
                 <t t-set="extra" t-value="True"/>
-                <t t-set="title" t-value="'Beds &amp; Comfort'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bed.svg'"/><t t-set="items" t-value="['Beds','Blankets','Mats &amp; Pads','Rugs']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Potty Training &amp; Clean Living'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-trash.svg'"/><t t-set="items" t-value="['Potty Trays','Pee Training Pads','Poop Bags','Deodorizing Sprays']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Toys'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-toy.svg'"/><t t-set="items" t-value="['Chew Toys','Fetch Toys','Interactive Toys','Plush Toys','Squeaky Toys']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Collars, Harnesses &amp; Leads'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-collar.svg'"/><t t-set="items" t-value="['Collars','Harnesses','Leads','Decorative Accessories']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Grooming Essentials'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/hairbrush.webp'"/><t t-set="items" t-value="['Bath &amp; Shampoo','Combs &amp; Brushes','Nail Care','Paw Care','Pet Wipes']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Oral Care'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-dental.svg'"/><t t-set="items" t-value="['Dental Sprays','Dental Water','Toothbrushes','Toothpaste']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Pet Apparel'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-shirt.svg'"/><t t-set="items" t-value="['Fashion Accessories','Dresses','Jackets &amp; Sweaters','Raincoats','Footwear']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Home &amp; Crates'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/bird-house.png'"/><t t-set="items" t-value="['Houses','Crates','Travel Essentials','Barriers &amp; Gates']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Nutritional Supplements'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-wellness.svg'"/><t t-set="items" t-value="['Joint &amp; Mobility','Calming Support','Skin &amp; Coat','Hairball Control']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Milk &amp; Milk Feeder'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bottle.svg'"/><t t-set="items" t-value="['Goat Milk Powder','Pet Milk','Milk Feeders']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Training &amp; Behavior'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-training.svg'"/><t t-set="items" t-value="['Muzzles','Handling Gloves','Pet Repellents','Training Equipment']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="12"/><t t-set="title" t-value="'Beds &amp; Comfort'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bed.svg'"/><t t-set="items" t-value="['Beds','Blankets','Mats &amp; Pads','Rugs']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="17"/><t t-set="title" t-value="'Potty Training &amp; Clean Living'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-trash.svg'"/><t t-set="items" t-value="['Potty Trays','Pee Training Pads','Poop Bags','Deodorizing Sprays']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="10"/><t t-set="title" t-value="'Toys'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-toy.svg'"/><t t-set="items" t-value="['Chew Toys','Fetch Toys','Interactive Toys','Plush Toys','Squeaky Toys']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="13"/><t t-set="title" t-value="'Collars, Harnesses &amp; Leads'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-collar.svg'"/><t t-set="items" t-value="['Collars','Harnesses','Leads','Decorative Accessories']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="14"/><t t-set="title" t-value="'Grooming Essentials'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/hairbrush.webp'"/><t t-set="items" t-value="['Bath &amp; Shampoo','Combs &amp; Brushes','Nail Care','Paw Care','Pet Wipes']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="15"/><t t-set="title" t-value="'Oral Care'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-dental.svg'"/><t t-set="items" t-value="['Dental Sprays','Dental Water','Toothbrushes','Toothpaste']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="4"/><t t-set="title" t-value="'Pet Apparel'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-shirt.svg'"/><t t-set="items" t-value="['Fashion Accessories','Dresses','Jackets &amp; Sweaters','Raincoats','Footwear']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="16"/><t t-set="title" t-value="'Home &amp; Crates'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/bird-house.png'"/><t t-set="items" t-value="['Houses','Crates','Travel Essentials','Barriers &amp; Gates']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="15"/><t t-set="title" t-value="'Nutritional Supplements'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-wellness.svg'"/><t t-set="items" t-value="['Joint &amp; Mobility','Calming Support','Skin &amp; Coat','Hairball Control']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="4"/><t t-set="title" t-value="'Milk &amp; Milk Feeder'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bottle.svg'"/><t t-set="items" t-value="['Goat Milk Powder','Pet Milk','Milk Feeders']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="4"/><t t-set="title" t-value="'Training &amp; Behavior'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-training.svg'"/><t t-set="items" t-value="['Muzzles','Handling Gloves','Pet Repellents','Training Equipment']"/><t t-call="stephans_website_theme.mega_group"/>
             </div>
-            <a href="/shop?search=dog" class="stephans-mega__viewall">View all Dog categories</a>
+            <a href="/shop/category/4" class="stephans-mega__viewall">View all Dog categories</a>
             <button type="button" class="stephans-mega__expand" data-mega-expand="true" data-label-all="View all DOG categories" data-label-featured="View featured DOG categories"><span>View all DOG categories</span></button>
         </section>
     </template>
@@ -151,27 +151,27 @@
         <section id="mega-menu-cats" class="stephans-mega" aria-label="Cat categories">
             <div class="stephans-mega__intro">
                 <img src="/stephans_website_theme/static/src/images/icons/minimalist-cat.png" alt="Cats"/>
-                <div><small>Shop for</small><h3>Cats</h3><a href="/shop?search=cat">View all cat products →</a></div>
+                <div><small>Shop for</small><h3>Cats</h3><a href="/shop/category/5">View all cat products →</a></div>
             </div>
             <div class="stephans-mega__grid">
                 <t t-set="extra" t-value="False"/>
-                <t t-set="title" t-value="'Cat Food'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Adult Cat Food','Kitten Food','Senior Cat Food','Wet Food']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Treats'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/Treats_Stephans.webp'"/><t t-set="items" t-value="['Crunchy Treats','Soft Treats','Dental Treats','Supplements']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Cat Litter &amp; Clean Living'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-trash.svg'"/><t t-set="items" t-value="['Cat Litter','Litter Boxes &amp; Trays','Litter Scoops','Litter Mats']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Tick, Flea &amp; Deworming'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/shield-tick.webp'"/><t t-set="items" t-value="['Dewormers','Tick &amp; Flea Treatments','Prevention','Oral Care']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="18"/><t t-set="title" t-value="'Cat Food'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Adult Cat Food','Kitten Food','Senior Cat Food','Wet Food']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="19"/><t t-set="title" t-value="'Treats'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/Treats_Stephans.webp'"/><t t-set="items" t-value="['Crunchy Treats','Soft Treats','Dental Treats','Supplements']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="27"/><t t-set="title" t-value="'Cat Litter &amp; Clean Living'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-trash.svg'"/><t t-set="items" t-value="['Cat Litter','Litter Boxes &amp; Trays','Litter Scoops','Litter Mats']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="25"/><t t-set="title" t-value="'Tick, Flea &amp; Deworming'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/shield-tick.webp'"/><t t-set="items" t-value="['Dewormers','Tick &amp; Flea Treatments','Prevention','Oral Care']"/><t t-call="stephans_website_theme.mega_group"/>
                 <t t-set="extra" t-value="True"/>
-                <t t-set="title" t-value="'Beds &amp; Comfort'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bed.svg'"/><t t-set="items" t-value="['Beds','Blankets','Mats &amp; Pads','Rugs']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Cat Toys'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-toy.svg'"/><t t-set="items" t-value="['Interactive Toys','Balls &amp; Chases','Plush and Soft Toys','Electronic Toys','Tunnels']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Collars, Harnesses &amp; Leads'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-collar.svg'"/><t t-set="items" t-value="['Collars','Harnesses','Leads','Bells &amp; Charms']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Grooming Essentials'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/hairbrush.webp'"/><t t-set="items" t-value="['Bath &amp; Shampoo','Combs &amp; Brushes','Nail Care','Paw Care','Pet Wipes']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Oral Care'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-dental.svg'"/><t t-set="items" t-value="['Dental Sprays','Dental Water','Toothbrushes','Toothpaste']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Pet Apparel'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-shirt.svg'"/><t t-set="items" t-value="['Fashion Accessories','Dresses','Jackets &amp; Sweaters','Raincoats','Footwear']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Cat Furniture &amp; Scratchers'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/small-pets-home.webp'"/><t t-set="items" t-value="['Cat Houses','Cat Trees','Scratching Mats','Window Perches']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Nutritional Supplements'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-wellness.svg'"/><t t-set="items" t-value="['Joint &amp; Mobility','Calming Support','Skin &amp; Coat','Hairball Control']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Milk &amp; Milk Feeder'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bottle.svg'"/><t t-set="items" t-value="['Goat Milk Powder','Pet Milk','Milk Feeders']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Home &amp; Crates'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/bird-house.png'"/><t t-set="items" t-value="['Traveling Essentials','Barriers &amp; Gates']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="22"/><t t-set="title" t-value="'Beds &amp; Comfort'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bed.svg'"/><t t-set="items" t-value="['Beds','Blankets','Mats &amp; Pads','Rugs']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="20"/><t t-set="title" t-value="'Cat Toys'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-toy.svg'"/><t t-set="items" t-value="['Interactive Toys','Balls &amp; Chases','Plush and Soft Toys','Electronic Toys','Tunnels']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="23"/><t t-set="title" t-value="'Collars, Harnesses &amp; Leads'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-collar.svg'"/><t t-set="items" t-value="['Collars','Harnesses','Leads','Bells &amp; Charms']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="24"/><t t-set="title" t-value="'Grooming Essentials'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/hairbrush.webp'"/><t t-set="items" t-value="['Bath &amp; Shampoo','Combs &amp; Brushes','Nail Care','Paw Care','Pet Wipes']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="25"/><t t-set="title" t-value="'Oral Care'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-dental.svg'"/><t t-set="items" t-value="['Dental Sprays','Dental Water','Toothbrushes','Toothpaste']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="5"/><t t-set="title" t-value="'Pet Apparel'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-shirt.svg'"/><t t-set="items" t-value="['Fashion Accessories','Dresses','Jackets &amp; Sweaters','Raincoats','Footwear']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="26"/><t t-set="title" t-value="'Cat Furniture &amp; Scratchers'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/small-pets-home.webp'"/><t t-set="items" t-value="['Cat Houses','Cat Trees','Scratching Mats','Window Perches']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="25"/><t t-set="title" t-value="'Nutritional Supplements'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-wellness.svg'"/><t t-set="items" t-value="['Joint &amp; Mobility','Calming Support','Skin &amp; Coat','Hairball Control']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="5"/><t t-set="title" t-value="'Milk &amp; Milk Feeder'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-bottle.svg'"/><t t-set="items" t-value="['Goat Milk Powder','Pet Milk','Milk Feeders']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="26"/><t t-set="title" t-value="'Home &amp; Crates'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/bird-house.png'"/><t t-set="items" t-value="['Traveling Essentials','Barriers &amp; Gates']"/><t t-call="stephans_website_theme.mega_group"/>
             </div>
-            <a href="/shop?search=cat" class="stephans-mega__viewall">View all Cat categories</a>
+            <a href="/shop/category/5" class="stephans-mega__viewall">View all Cat categories</a>
             <button type="button" class="stephans-mega__expand" data-mega-expand="true" data-label-all="View all CAT categories" data-label-featured="View featured CAT categories"><span>View all CAT categories</span></button>
         </section>
     </template>
@@ -180,16 +180,16 @@
         <section id="mega-menu-birds" class="stephans-mega" aria-label="Bird categories">
             <div class="stephans-mega__intro">
                 <img src="/stephans_website_theme/static/src/images/icons/minimalist-bird.png" alt="Birds"/>
-                <div><small>Shop for</small><h3>Birds</h3><a href="/shop?search=bird">View all bird products →</a></div>
+                <div><small>Shop for</small><h3>Birds</h3><a href="/shop/category/6">View all bird products →</a></div>
             </div>
             <div class="stephans-mega__grid">
                 <t t-set="extra" t-value="False"/>
-                <t t-set="title" t-value="'Bird Foods'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Seeds &amp; Mixes','Pellets','Treats','Supplements']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Bowls &amp; Feeders'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Food Bowls','Water Feeders','Seed Feeders','Travel Feeders']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Home'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/bird-house.png'"/><t t-set="items" t-value="['Cages','Nests','Cage Covers','Stands']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Perches &amp; Accessories'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-perch.svg'"/><t t-set="items" t-value="['Perches','Swings','Ladders','Toys']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="28"/><t t-set="title" t-value="'Bird Foods'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Seeds &amp; Mixes','Pellets','Treats','Supplements']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="31"/><t t-set="title" t-value="'Bowls &amp; Feeders'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Food Bowls','Water Feeders','Seed Feeders','Travel Feeders']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="36"/><t t-set="title" t-value="'Home'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/bird-house.png'"/><t t-set="items" t-value="['Cages','Nests','Cage Covers','Stands']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="6"/><t t-set="title" t-value="'Perches &amp; Accessories'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-perch.svg'"/><t t-set="items" t-value="['Perches','Swings','Ladders','Toys']"/><t t-call="stephans_website_theme.mega_group"/>
             </div>
-            <a href="/shop?search=bird" class="stephans-mega__viewall">View all Birds categories</a>
+            <a href="/shop/category/6" class="stephans-mega__viewall">View all Birds categories</a>
             <button type="button" class="stephans-mega__expand" data-mega-expand="true" data-label-all="View all BIRDS categories" data-label-featured="View featured BIRDS categories"><span>View all BIRDS categories</span></button>
         </section>
     </template>
@@ -198,23 +198,23 @@
         <section id="mega-menu-small-pets" class="stephans-mega" aria-label="Small animal categories">
             <div class="stephans-mega__intro">
                 <img src="/stephans_website_theme/static/src/images/icons/minimalist-rabbit.png" alt="Small Animals"/>
-                <div><small>Shop for</small><h3>Small Animals</h3><a href="/shop?search=small+pets">View all products →</a></div>
+                <div><small>Shop for</small><h3>Small Animals</h3><a href="/shop/category/7">View all products →</a></div>
             </div>
             <div class="stephans-mega__grid">
                 <t t-set="extra" t-value="False"/>
-                <t t-set="title" t-value="'Food'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Hamster Food','Guinea Pig Food','Rabbit Food','Hay']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Bowls &amp; Feeders'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Feeders &amp; Dispensers','Food Bowls','Water Bowls','Bottles']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Home &amp; Habitat'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/small-pets-home.webp'"/><t t-set="items" t-value="['Beds','Cages &amp; Habitats','Tunnels','Hammocks']"/><t t-call="stephans_website_theme.mega_group"/>
-                <t t-set="title" t-value="'Toys'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-toy.svg'"/><t t-set="items" t-value="['Tunnels &amp; Hideaways','Exercise Wheels','Climbing Toys','Chews']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="38"/><t t-set="title" t-value="'Food'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Hamster Food','Guinea Pig Food','Rabbit Food','Hay']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="41"/><t t-set="title" t-value="'Bowls &amp; Feeders'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/pet-bowl.webp'"/><t t-set="items" t-value="['Feeders &amp; Dispensers','Food Bowls','Water Bowls','Bottles']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="46"/><t t-set="title" t-value="'Home &amp; Habitat'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/small-pets-home.webp'"/><t t-set="items" t-value="['Beds','Cages &amp; Habitats','Tunnels','Hammocks']"/><t t-call="stephans_website_theme.mega_group"/>
+                <t t-set="cat_id" t-value="40"/><t t-set="title" t-value="'Toys'"/><t t-set="icon" t-value="'/stephans_website_theme/static/src/images/icons/icon-toy.svg'"/><t t-set="items" t-value="['Tunnels &amp; Hideaways','Exercise Wheels','Climbing Toys','Chews']"/><t t-call="stephans_website_theme.mega_group"/>
             </div>
-            <a href="/shop?search=small+pets" class="stephans-mega__viewall">View all Small Animals categories</a>
+            <a href="/shop/category/7" class="stephans-mega__viewall">View all Small Animals categories</a>
             <button type="button" class="stephans-mega__expand" data-mega-expand="true" data-label-all="View all SMALL ANIMALS categories" data-label-featured="View featured SMALL ANIMALS categories"><span>View all SMALL ANIMALS categories</span></button>
         </section>
     </template>
 
     <template id="mega_group" name="Mega Menu Group">
         <article t-attf-class="stephans-mega__group #{'is-extra' if extra else ''}">
-            <t t-set="group_url" t-value="'/shop?search=' + title.replace(' ', '+')"/>
+            <t t-set="group_url" t-value="('/shop/category/%s' % cat_id) if cat_id else ('/shop?search=' + title.replace(' ', '+'))"/>
             <h4>
                 <img t-att-src="icon" alt="" class="stephans-mega__group-icon" loading="lazy"/>
                 <a t-att-href="group_url" t-out="title"/>

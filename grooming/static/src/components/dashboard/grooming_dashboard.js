@@ -2,13 +2,14 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy, useState } from "@odoo/owl";
 
 export class GroomingDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({
+        const createState = useState || proxy;
+        this.state = createState({
             stats: {
                 total_appointments: 0,
                 pending: 0,

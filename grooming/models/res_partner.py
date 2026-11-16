@@ -30,8 +30,8 @@ class ResPartner(models.Model):
         return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order, **kwargs)
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
         user = self.env.user
         if not user._is_superuser() and not user.has_group('stock.group_stock_manager') and not user.has_group('account.group_account_invoice'):
-            args = (args or []) + [('is_replenishment_vendor', '=', False)]
-        return super().name_search(name=name, args=args, operator=operator, limit=limit)
+            domain = (domain or []) + [('is_replenishment_vendor', '=', False)]
+        return super().name_search(name=name, domain=domain, operator=operator, limit=limit)
