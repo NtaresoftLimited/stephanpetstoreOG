@@ -1,3 +1,5 @@
+from collections import defaultdict
+from datetime import datetime, timedelta
 import logging
 
 from odoo import http
@@ -8,47 +10,11 @@ _logger = logging.getLogger(__name__)
 
 
 class StephansWebsiteHome(http.Controller):
-    FEATURED_SLIDE = [
-        {
-            "id": "featured-parrot",
-            "name": "Plush Parrot Dog Toy",
-            "category": "Pet Toys",
-            "price_formatted": "Tsh 28,000",
-            "url": "/shop?search=Plush+Parrot+Dog+Toy",
-            "image_url": "/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp",
-        },
-        {
-            "id": "featured-fountain",
-            "name": "Cat Water Fountain Bubble Boy",
-            "category": "Cat Accessories",
-            "price_formatted": "Tsh 140,000",
-            "url": "/shop?search=Cat+Water+Fountain+Bubble+Boy",
-            "image_url": "/stephans_website_theme/static/src/images/products/cat-water-fountain.webp",
-        },
-        {
-            "id": "featured-rabbit",
-            "name": "Rabbit House C",
-            "category": "Pets",
-            "price_formatted": "Tsh 55,000",
-            "url": "/shop?search=Rabbit+House+C",
-            "image_url": "/stephans_website_theme/static/src/images/products/rabbit-house-c.webp",
-        },
-        {
-            "id": "featured-cage",
-            "name": "Flying Bird Cage Medium",
-            "category": "Pets",
-            "price_formatted": "Tsh 85,000",
-            "url": "/shop?search=Flying+Bird+Cage+Medium",
-            "image_url": "/stephans_website_theme/static/src/images/products/flying-bird-cage.webp",
-        },
-    ]
-
-    @staticmethod
-    def _normalise_name(value):
-        return " ".join((value or "").lower().split())
 
     def _format_product(self, product):
-        category = product.public_categ_ids[:1].name or "Pet Essentials"
+        category = product.public_categ_ids[:1].name or (
+            product.categ_id.name if product.categ_id and product.categ_id.name != "All" else "Pet Essentials"
+        )
         cache_key = product.write_date.strftime("%Y%m%d%H%M%S") if product.write_date else product.id
         return {
             "id": product.id,
@@ -60,87 +26,82 @@ class StephansWebsiteHome(http.Controller):
         }
 
     def _get_balanced_product_slides(self, env=None, max_slides=4):
-        """Return one fixed featured slide followed by live four-product sets.
+        """Return best seller products from last month and this week (strictly In-Stock Only).
 
-        Live records must be active, saleable, website-published, priced and have
-        a product image. Pet buckets improve variety; a global fallback ensures a
-        thin category never prevents complete four-card slides.
+        Groups products into 4-product slides for the homepage carousel.
+        Products must be:
+        - active = True, sale_ok = True, website_published = True
+        - list_price > 0
+        - qty_available > 0 (In-Stock Only)
+        - has image
+        - sorted by total sales quantity in POS & sales orders from start of last month up to today.
         """
-        slides = [list(self.FEATURED_SLIDE)]
-        if max_slides <= 1:
-            return slides
-
         if env is None:
             try:
                 env = request.env
             except Exception:
-                return slides
+                return []
 
         try:
+            now = datetime.now()
+            first_of_this_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            last_month_start = (first_of_this_month - timedelta(days=1)).replace(day=1)
+
+            total_sold = defaultdict(float)
+
+            # 1. POS order lines
+            pos_lines = env["pos.order.line"].sudo().search([
+                ("order_id.date_order", ">=", last_month_start),
+                ("order_id.state", "in", ["paid", "done", "invoiced"]),
+                ("product_id.type", "!=", "service"),
+            ])
+            for line in pos_lines:
+                if line.product_id and line.product_id.product_tmpl_id:
+                    total_sold[line.product_id.product_tmpl_id.id] += line.qty
+
+            # 2. Sale order lines (web shop / direct sales)
+            so_lines = env["sale.order.line"].sudo().search([
+                ("order_id.date_order", ">=", last_month_start),
+                ("order_id.state", "in", ["sale", "done"]),
+                ("product_id.type", "!=", "service"),
+            ])
+            for line in so_lines:
+                if line.product_id and line.product_id.product_tmpl_id:
+                    total_sold[line.product_id.product_tmpl_id.id] += line.product_uom_qty
+
+            # 3. Eligible in-stock published products
             ProductTemplate = env["product.template"].sudo()
-            candidates = list(ProductTemplate.search([
+            domain = [
                 ("active", "=", True),
                 ("sale_ok", "=", True),
                 ("website_published", "=", True),
                 ("list_price", ">", 0),
-                ("image_1920", "!=", False),
-            ], order="create_date desc, id desc", limit=max(64, max_slides * 20)))
-
-            featured_names = {
-                self._normalise_name(product["name"])
-                for product in self.FEATURED_SLIDE
-            }
-            candidates = [
-                product for product in candidates
-                if self._normalise_name(product.name) not in featured_names
+                ("qty_available", ">", 0),
+                "|", ("image_1920", "!=", False), ("image_128", "!=", False),
             ]
+            candidates = list(ProductTemplate.search(domain))
 
-            buckets = {"dog": [], "cat": [], "small": [], "bird": [], "other": []}
-            for product in candidates:
-                category_text = " ".join(product.public_categ_ids.mapped("name")).lower()
-                if any(word in category_text for word in ("dog", "puppy", "canine")):
-                    bucket = "dog"
-                elif any(word in category_text for word in ("cat", "kitten", "feline")):
-                    bucket = "cat"
-                elif any(word in category_text for word in ("bird", "avian")):
-                    bucket = "bird"
-                elif any(word in category_text for word in ("small animal", "rabbit", "hamster", "guinea")):
-                    bucket = "small"
-                else:
-                    bucket = "other"
-                buckets[bucket].append(product)
+            # 4. Rank candidates by (quantity sold desc, qty_available desc, id desc)
+            ranked = sorted(
+                candidates,
+                key=lambda p: (total_sold.get(p.id, 0.0), p.qty_available, p.id),
+                reverse=True,
+            )
 
-            used_ids = set()
-            bucket_order = ("dog", "cat", "small", "bird")
-            for _slide_number in range(max_slides - 1):
-                selected = []
+            # 5. Chunk into 4-product slides
+            slides = []
+            target_count = max_slides * 4
+            selected = ranked[:target_count]
 
-                # Prefer one product per pet family for a balanced row.
-                for bucket_name in bucket_order:
-                    product = next(
-                        (item for item in buckets[bucket_name] if item.id not in used_ids),
-                        None,
-                    )
-                    if product:
-                        selected.append(product)
-                        used_ids.add(product.id)
-
-                # Fill gaps from the newest remaining live catalog products.
-                for product in candidates:
-                    if len(selected) == 4:
-                        break
-                    if product.id not in used_ids:
-                        selected.append(product)
-                        used_ids.add(product.id)
-
-                if len(selected) != 4:
-                    break
-                slides.append([self._format_product(product) for product in selected])
+            for i in range(0, len(selected), 4):
+                chunk = selected[i:i + 4]
+                if len(chunk) == 4:
+                    slides.append([self._format_product(p) for p in chunk])
 
             return slides
         except Exception:
-            _logger.exception("Could not build Stephan's live new-arrival slides")
-            return slides
+            _logger.exception("Could not build Stephan's live best-seller slides")
+            return []
 
     @http.route("/", type="http", auth="public", website=True, sitemap=True)
     def homepage(self, **kwargs):

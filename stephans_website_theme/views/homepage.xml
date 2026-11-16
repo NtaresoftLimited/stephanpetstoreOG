@@ -41,7 +41,7 @@
 
                 <section class="stephans-section stephans-arrivals">
                     <div class="stephans-container">
-                        <div class="stephans-heading"><p class="stephans-kicker">New Arrivals</p><h2>Something new, thoughtfully chosen.</h2></div>
+                        <div class="stephans-heading"><p class="stephans-kicker">Best Sellers</p><h2>Something new, thoughtfully chosen.</h2></div>
                         <div class="stephans-rotator-container" data-stephans-product-rotator="true">
                             <t t-if="product_slides">
                                 <div class="stephans-rotator-stage" aria-live="polite">
@@ -68,10 +68,9 @@
                             </t>
                             <t t-else="">
                                 <div class="stephans-rotator-stage"><div class="stephans-products stephans-products-slide is-active">
-                                    <article><a class="stephans-product__image" href="/shop?search=Plush+Parrot+Dog+Toy"><img src="/stephans_website_theme/static/src/images/products/plush-parrot-dog-toy.webp" alt="Plush Parrot Dog Toy" loading="lazy"/></a><h3>Plush Parrot Dog Toy</h3><small>Pet Toys</small><strong>Tsh 28,000</strong></article>
-                                    <article><a class="stephans-product__image" href="/shop?search=Cat+Water+Fountain+Bubble+Boy"><img src="/stephans_website_theme/static/src/images/products/cat-water-fountain.webp" alt="Cat Water Fountain Bubble Boy" loading="lazy"/></a><h3>Cat Water Fountain Bubble Boy</h3><small>Cat Accessories</small><strong>Tsh 140,000</strong></article>
-                                    <article><a class="stephans-product__image" href="/shop?search=Rabbit+House+C"><img src="/stephans_website_theme/static/src/images/products/rabbit-house-c.webp" alt="Rabbit House C" loading="lazy"/></a><h3>Rabbit House C</h3><small>Pets</small><strong>Tsh 55,000</strong></article>
-                                    <article><a class="stephans-product__image" href="/shop?search=Flying+Bird+Cage+Medium"><img src="/stephans_website_theme/static/src/images/products/flying-bird-cage.webp" alt="Flying Bird Cage Medium" loading="lazy"/></a><h3>Flying Bird Cage Medium</h3><small>Pets</small><strong>Tsh 85,000</strong></article>
+                                    <div class="text-center py-5 w-100 text-muted">
+                                        <p>Discover our best-selling pet essentials in the shop.</p>
+                                    </div>
                                 </div></div>
                             </t>
                         </div>
