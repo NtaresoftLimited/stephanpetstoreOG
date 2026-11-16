@@ -110,6 +110,15 @@ env.invalidate_all()
 for prov_id, code in provider_journal:
     env["payment.provider"].sudo().browse(prov_id).journal_id = new_by_code.get(code) or bank
 
+# Odoo 20 posts each session's sales entry (and pay-later invoices) to the company "Point of Sale"
+# journal POSS and creates it on demand, which cashiers are not allowed to do; and pos.config.journal_id
+# must be a sale journal (staging had the cash journals there). Create POSS now and use it on every till.
+poss = Journal.with_company(company)._ensure_company_account_journal()
+if not poss.default_account_id:
+    poss.default_account_id = sales.default_account_id
+for cfg in env["pos.config"].sudo().search([("company_id", "=", company.id)]):
+    cfg.journal_id = poss
+
 # ---- 6. production sells tax-free ----------------------------------------------------------------
 company.write({"account_sale_tax_id": False, "account_purchase_tax_id": False})
 
