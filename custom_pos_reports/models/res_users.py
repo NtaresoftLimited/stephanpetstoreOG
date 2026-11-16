@@ -13,7 +13,7 @@ class ResUsers(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if 'groups_id' in vals or 'action_id' in vals:
+        if 'group_ids' in vals or 'groups_id' in vals or 'action_id' in vals:
             self._assign_cashier_home_action()
         return res
 

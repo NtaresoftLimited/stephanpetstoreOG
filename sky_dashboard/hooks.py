@@ -10,12 +10,12 @@ def post_init_hook(env):
 
     pos_user_group = env.ref("point_of_sale.group_pos_user")
     all_pos_users = env["res.users"].sudo().search(
-        [("groups_id", "in", pos_user_group.id), ("active", "=", True)]
+        [("group_ids", "in", pos_user_group.id), ("active", "=", True)]
     )
-    (cashier_users | all_pos_users).write({"groups_id": [(4, cashier_group.id)]})
+    (cashier_users | all_pos_users).write({"group_ids": [(4, cashier_group.id)]})
 
     pos_manager_group = env.ref("point_of_sale.group_pos_manager")
     pos_managers = env["res.users"].sudo().search(
-        [("groups_id", "in", pos_manager_group.id), ("active", "=", True)]
+        [("group_ids", "in", pos_manager_group.id), ("active", "=", True)]
     )
-    pos_managers.write({"groups_id": [(4, manager_group.id)]})
+    pos_managers.write({"group_ids": [(4, manager_group.id)]})
