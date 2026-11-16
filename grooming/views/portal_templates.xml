@@ -1,47 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-    <!-- Portal Home: Add Grooming Appointments Card (Odoo 18 structure) -->
-    <template id="portal_my_home_appointment" name="Grooming Appointments"
-              inherit_id="portal.portal_my_home" priority="20">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
-            <t t-set="portal_client_category_enable" t-value="True"/>
-        </xpath>
-        <div id="portal_client_category" position="inside">
-            <t t-call="portal.portal_docs_entry">
-                <t t-set="icon" t-value="'/grooming/static/description/icon.png'"/>
-                <t t-set="title">Pet Grooming Appointments</t>
-                <t t-set="url" t-value="'/my/grooming'"/>
-                <t t-set="text">View your pet grooming appointments &amp; status</t>
-                <t t-set="placeholder_count" t-value="'grooming_appointment_count'"/>
-            </t>
-        </div>
+    <!-- Shared: grooming icon (same artwork as the website's Grooming menu) and species icons -->
+    <template id="portal_pet_icon" name="Portal Pet Icon">
+        <t t-set="_species_img" t-value="{'dog': 'dog', 'cat': 'cat', 'bird': 'bird'}.get(species or '', 'rabbit')"/>
+        <img t-if="pet_with_photo and pet_with_photo.image_1920"
+             t-att-src="'/web/image/grooming.pet/%s/avatar_128' % pet_with_photo.id"
+             alt="" t-attf-class="o_grooming_pet_icon o_grooming_pet_photo #{icon_class or ''}"/>
+        <img t-else="" t-attf-src="/grooming/static/src/img/pet-#{_species_img}.webp"
+             alt="" t-attf-class="o_grooming_pet_icon #{icon_class or ''}"/>
     </template>
 
-    <!-- My Grooming Appointments List -->
+    <template id="portal_status_badge" name="Portal Grooming Status Badge">
+        <span t-attf-class="badge rounded-pill #{extra_class or ''} #{
+            'text-bg-warning' if state == 'pending' else
+            'text-bg-info' if state in ('confirmed', 'checked_in') else
+            'text-bg-primary' if state in ('in_progress', 'halfway') else
+            'text-bg-success' if state == 'completed' else
+            'text-bg-danger'
+        }">
+            <t t-out="(state or '').replace('_', ' ').title()"/>
+        </span>
+    </template>
+
+    <!-- 1. Portal Breadcrumbs -->
+    <template id="portal_my_home_menu_grooming" name="Portal layout : Grooming menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'grooming_appointments' or appointment" t-attf-class="breadcrumb-item #{'active ' if not appointment else ''}">
+                <a t-if="appointment" href="/my/grooming">Pet Grooming</a>
+                <t t-else="">Pet Grooming</t>
+            </li>
+            <li t-if="appointment" class="breadcrumb-item active">
+                <t t-out="appointment.name"/>
+            </li>
+            <li t-if="page_name == 'my_pets' or pet or page_name == 'pet_new'" t-attf-class="breadcrumb-item #{'active ' if not pet and page_name != 'pet_new' else ''}">
+                <a t-if="pet or page_name == 'pet_new'" href="/my/pets">My Pets</a>
+                <t t-else="">My Pets</t>
+            </li>
+            <li t-if="pet" class="breadcrumb-item active">
+                <t t-out="pet.name"/>
+            </li>
+            <li t-if="page_name == 'pet_new'" class="breadcrumb-item active">
+                <span>Register Pet</span>
+            </li>
+        </xpath>
+    </template>
+
+    <!-- 2. My Grooming Appointments List -->
     <template id="portal_my_appointments" name="My Grooming Appointments">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs_searchbar" t-value="True"/>
-            <t t-call="portal.portal_searchbar">
-                <t t-set="title">Pet Grooming Appointments</t>
-            </t>
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Pet Grooming Appointments"/>
+
+            <div class="o_stephans_portal_title">
+                <img src="/grooming/static/src/img/grooming-scissors.webp" alt="" class="o_stephans_portal_title_icon"/>
+                <div>
+                    <h4>Pet Grooming Appointments</h4>
+                    <p>Track bookings, status and totals for every grooming visit.</p>
+                </div>
+                <a href="/grooming" class="btn btn-primary btn-sm rounded-pill px-3">
+                    <i class="oi" data-icon="calendar_add_on"/> Book New Appointment
+                </a>
+            </div>
 
             <t t-if="not appointments">
-                <div class="alert alert-info mt-3" role="alert">
-                    <p class="mb-0">You don't have any grooming appointments yet.</p>
-                    <a href="/grooming" class="btn btn-primary mt-2">Book Now</a>
+                <div class="o_stephans_portal_empty">
+                    <img src="/grooming/static/src/img/grooming-scissors.webp" alt=""/>
+                    <div>
+                        <h5>No grooming appointments yet</h5>
+                        <p>Treat your pet to a bath, haircut or de-shedding with our certified groomers.</p>
+                    </div>
+                    <a href="/grooming" class="btn btn-primary text-nowrap rounded-pill px-4">Book Grooming Now</a>
                 </div>
             </t>
 
             <t t-if="appointments">
-                <div class="table-responsive">
-                    <table class="table table-hover o_portal_my_doc_table">
-                        <thead>
+                <div class="table-responsive card shadow-sm mt-3 border-0">
+                    <table class="table table-hover align-middle mb-0 o_portal_my_doc_table">
+                        <thead class="table-light">
                             <tr>
                                 <th>Reference</th>
-                                <th>Pet Name</th>
-                                <th>Date</th>
-                                <th>Service</th>
+                                <th>Pet</th>
+                                <th>Date &amp; Time</th>
+                                <th>Service Package</th>
                                 <th>Status</th>
                                 <th class="text-end">Total</th>
                             </tr>
@@ -50,28 +90,25 @@
                             <t t-foreach="appointments" t-as="apt">
                                 <tr>
                                     <td>
-                                        <a t-attf-href="/my/grooming/#{apt.id}">
+                                        <a t-attf-href="/my/grooming/#{apt.id}" class="fw-bold text-decoration-none">
                                             <t t-out="apt.name"/>
                                         </a>
                                     </td>
-                                    <td><t t-out="apt.pet_name"/></td>
+                                    <td>
+                                        <span class="d-inline-flex align-items-center gap-2">
+                                            <t t-call="grooming.portal_pet_icon" species="apt.pet_type" pet_with_photo="apt.pet_id" icon_class="'o_grooming_pet_icon_sm'"/>
+                                            <t t-out="apt.pet_name"/>
+                                        </span>
+                                    </td>
                                     <td>
                                         <span t-field="apt.appointment_date" t-options='{"format": "dd MMM yyyy HH:mm"}'/>
                                     </td>
                                     <td><t t-out="apt.service_id.name or 'Treatments Only'"/></td>
                                     <td>
-                                        <span t-attf-class="badge rounded-pill #{
-                                            'text-bg-warning' if apt.state == 'pending' else
-                                            'text-bg-info' if apt.state in ('confirmed', 'checked_in') else
-                                            'text-bg-primary' if apt.state in ('in_progress', 'halfway') else
-                                            'text-bg-success' if apt.state == 'completed' else
-                                            'text-bg-danger'
-                                        }">
-                                            <t t-out="(apt.state or '').replace('_', ' ').title()"/>
-                                        </span>
+                                        <t t-call="grooming.portal_status_badge" state="apt.state"/>
                                     </td>
-                                    <td class="text-end">
-                                        <span t-field="apt.total_price" t-options='{"widget": "monetary", "display_currency": apt.currency_id}'/>
+                                    <td class="text-end fw-bold">
+                                        <span t-field="apt.total_price" t-options='{"widget": "monetary", "display_currency": apt.currency_id or res_company.currency_id}'/>
                                     </td>
                                 </tr>
                             </t>
@@ -79,69 +116,67 @@
                     </table>
                 </div>
 
-                <div t-if="pager" class="o_portal_pager text-center">
+                <div t-if="pager" class="o_portal_pager text-center mt-3">
                     <t t-call="portal.pager"/>
                 </div>
             </t>
         </t>
     </template>
 
-    <!-- Appointment Detail -->
+    <!-- 3. Appointment Detail -->
     <template id="portal_appointment_detail" name="Appointment Details">
         <t t-call="portal.portal_layout">
-            <div class="card mt-3">
-                <div class="card-header">
+            <div class="card mt-3 shadow-sm border-0">
+                <div class="card-header bg-light py-3">
                     <div class="row align-items-center">
                         <div class="col-12 col-lg-6">
-                            <h4 class="mb-0">
-                                <i class="fa fa-paw me-2"/>
+                            <h4 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                                <img src="/grooming/static/src/img/grooming-scissors.webp" alt="" class="o_stephans_portal_inline_icon"/>
                                 <t t-out="appointment.name"/>
                             </h4>
                         </div>
-                        <div class="col-12 col-lg-6 text-lg-end">
-                            <span t-attf-class="badge rounded-pill fs-6 #{
-                                'text-bg-warning' if appointment.state == 'pending' else
-                                'text-bg-info' if appointment.state in ('confirmed', 'checked_in') else
-                                'text-bg-primary' if appointment.state in ('in_progress', 'halfway') else
-                                'text-bg-success' if appointment.state == 'completed' else
-                                'text-bg-danger'
-                            }">
-                                <t t-out="(appointment.state or '').replace('_', ' ').title()"/>
-                            </span>
+                        <div class="col-12 col-lg-6 text-lg-end mt-2 mt-lg-0">
+                            <t t-call="grooming.portal_status_badge" state="appointment.state" extra_class="'fs-6 px-3 py-2'"/>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-body">
-                    <div class="row">
+                <div class="card-body p-4">
+                    <div class="row g-4">
                         <!-- Pet Info -->
-                        <div class="col-md-6 mb-4">
-                            <h5 class="border-bottom pb-2">Pet Information</h5>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold border-bottom pb-2 d-flex align-items-center gap-2">
+                                <t t-call="grooming.portal_pet_icon" species="appointment.pet_type" pet_with_photo="appointment.pet_id" icon_class="'o_grooming_pet_icon_sm'"/>
+                                Pet Information
+                            </h5>
                             <dl class="row mb-0">
-                                <dt class="col-sm-4">Pet Name</dt>
-                                <dd class="col-sm-8"><t t-out="appointment.pet_name"/></dd>
+                                <dt class="col-sm-4 text-muted">Pet Name</dt>
+                                <dd class="col-sm-8 fw-semibold"><t t-out="appointment.pet_name"/></dd>
 
-                                <dt class="col-sm-4">Species</dt>
-                                <dd class="col-sm-8"><t t-out="(appointment.pet_type or '').title()"/></dd>
+                                <dt class="col-sm-4 text-muted">Species</dt>
+                                <dd class="col-sm-8 text-capitalize"><t t-out="(appointment.pet_type or '').replace('_', ' ')"/></dd>
 
-                                <dt class="col-sm-4">Size/Age</dt>
-                                <dd class="col-sm-8"><t t-out="(appointment.pet_category or '').replace('_', ' ').title()"/></dd>
+                                <dt class="col-sm-4 text-muted">Size / Age</dt>
+                                <dd class="col-sm-8 text-capitalize"><t t-out="(appointment.pet_category or '').replace('_', ' ')"/></dd>
                             </dl>
                         </div>
 
                         <!-- Appointment Info -->
-                        <div class="col-md-6 mb-4">
-                            <h5 class="border-bottom pb-2">Appointment Details</h5>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold border-bottom pb-2 d-flex align-items-center gap-2">
+                                <img src="/grooming/static/src/img/grooming-scissors.webp" alt="" class="o_grooming_pet_icon o_grooming_pet_icon_sm"/>
+                                Appointment Details
+                            </h5>
                             <dl class="row mb-0">
-                                <dt class="col-sm-4">Date &amp; Time</dt>
-                                <dd class="col-sm-8">
+                                <dt class="col-sm-4 text-muted">Date &amp; Time</dt>
+                                <dd class="col-sm-8 fw-semibold">
                                     <span t-field="appointment.appointment_date" t-options='{"format": "EEEE, dd MMM yyyy HH:mm"}'/>
                                 </dd>
 
-                                <dt class="col-sm-4">Service</dt>
+                                <dt class="col-sm-4 text-muted">Service</dt>
                                 <dd class="col-sm-8"><t t-out="appointment.service_id.name or 'Treatments Only'"/></dd>
 
-                                <dt t-if="appointment.addon_ids" class="col-sm-4">Add-ons</dt>
+                                <dt t-if="appointment.addon_ids" class="col-sm-4 text-muted">Add-ons</dt>
                                 <dd t-if="appointment.addon_ids" class="col-sm-8">
                                     <t t-foreach="appointment.addon_ids" t-as="addon">
                                         <span class="badge text-bg-secondary me-1"><t t-out="addon.name"/></span>
@@ -152,13 +187,13 @@
                     </div>
 
                     <!-- Pricing -->
-                    <div class="row">
+                    <div class="row mt-4">
                         <div class="col-12">
-                            <h5 class="border-bottom pb-2">Pricing</h5>
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold">Total Amount:</span>
-                                <span class="fs-4 text-primary">
-                                    <span t-field="appointment.total_price" t-options='{"widget": "monetary", "display_currency": appointment.currency_id}'/>
+                            <h5 class="fw-bold border-bottom pb-2">Pricing</h5>
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <span class="fw-bold fs-5">Total Amount:</span>
+                                <span class="fs-4 text-primary fw-bold">
+                                    <span t-field="appointment.total_price" t-options='{"widget": "monetary", "display_currency": appointment.currency_id or res_company.currency_id}'/>
                                 </span>
                             </div>
                         </div>
@@ -168,18 +203,18 @@
                     <t t-if="appointment.sale_order_id">
                         <div class="row mt-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Billing</h5>
-                                <p>
+                                <h5 class="fw-bold border-bottom pb-2">Billing &amp; Invoices</h5>
+                                <p class="mb-1">
                                     <strong>Sales Order:</strong>
-                                    <a t-attf-href="/my/orders/#{appointment.sale_order_id.id}">
+                                    <a t-attf-href="/my/orders/#{appointment.sale_order_id.id}" class="ms-1">
                                         <t t-out="appointment.sale_order_id.name"/>
                                     </a>
                                 </p>
                                 <t t-if="appointment.sale_order_id.invoice_ids">
-                                    <p>
+                                    <p class="mb-0">
                                         <strong>Invoices:</strong>
                                         <t t-foreach="appointment.sale_order_id.invoice_ids" t-as="inv">
-                                            <a t-attf-href="/my/invoices/#{inv.id}" class="me-2">
+                                            <a t-attf-href="/my/invoices/#{inv.id}" class="me-2 ms-1">
                                                 <t t-out="inv.name"/>
                                             </a>
                                         </t>
@@ -193,20 +228,272 @@
                     <t t-if="appointment.notes">
                         <div class="row mt-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Special Requests</h5>
-                                <p t-out="appointment.notes"/>
+                                <h5 class="fw-bold border-bottom pb-2">Special Requests &amp; Notes</h5>
+                                <p class="text-muted mb-0" t-out="appointment.notes"/>
                             </div>
                         </div>
                     </t>
                 </div>
 
-                <div class="card-footer">
+                <div class="card-footer bg-white py-3 d-flex flex-wrap gap-2 justify-content-between">
                     <a href="/my/grooming" class="btn btn-secondary">
-                        <i class="fa fa-arrow-left me-2"/>Back to Appointments
+                        <i class="oi" data-icon="arrow_back"/> Back to Appointments
                     </a>
-                    <a href="/grooming" class="btn btn-primary ms-2">
-                        <i class="fa fa-plus me-2"/>Book Another Appointment
+                    <a href="/grooming" class="btn btn-primary">
+                        <i class="oi" data-icon="add"/> Book Another Appointment
                     </a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- 4. My Pets List -->
+    <template id="portal_my_pets" name="My Pets">
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="My Pets"/>
+
+            <div class="o_stephans_portal_title">
+                <img src="/grooming/static/src/img/pet-dog.webp" alt="" class="o_stephans_portal_title_icon"/>
+                <div>
+                    <h4>My Registered Pets</h4>
+                    <p>Keep your pets' details handy for faster grooming bookings.</p>
+                </div>
+                <a href="/my/pets/new" class="btn btn-primary btn-sm rounded-pill px-3">
+                    <i class="oi" data-icon="add"/> Register New Pet
+                </a>
+            </div>
+
+            <t t-if="not pets">
+                <div class="o_stephans_portal_empty">
+                    <img src="/grooming/static/src/img/pet-cat.webp" alt=""/>
+                    <div>
+                        <h5>No pets registered yet</h5>
+                        <p>Register your dogs, cats, birds or small animals to personalise appointments and store care details.</p>
+                    </div>
+                    <a href="/my/pets/new" class="btn btn-primary text-nowrap rounded-pill px-4">Register a Pet</a>
+                </div>
+            </t>
+
+            <t t-if="pets">
+                <div class="row g-3">
+                    <t t-foreach="pets" t-as="pet_rec">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm border rounded-3 overflow-hidden">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <span class="o_grooming_pet_avatar">
+                                            <t t-call="grooming.portal_pet_icon" species="pet_rec.species" pet_with_photo="pet_rec"/>
+                                        </span>
+                                        <div>
+                                            <h5 class="card-title fw-bold mb-0">
+                                                <a t-attf-href="/my/pets/#{pet_rec.id}" class="text-decoration-none text-dark">
+                                                    <t t-out="pet_rec.name"/>
+                                                </a>
+                                            </h5>
+                                            <span class="badge text-bg-secondary text-uppercase" style="font-size: 11px;">
+                                                <t t-out="pet_rec.species"/>
+                                            </span>
+                                            <span t-if="pet_rec.breed_id" class="text-muted ms-1 small">
+                                                <t t-out="pet_rec.breed_id.name"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted mb-3">
+                                        <div t-if="pet_rec.age" class="d-flex justify-content-between py-1 border-bottom">
+                                            <span>Age:</span> <strong class="text-dark"><t t-out="pet_rec.age"/></strong>
+                                        </div>
+                                        <div t-if="pet_rec.weight" class="d-flex justify-content-between py-1 border-bottom">
+                                            <span>Weight:</span> <strong class="text-dark"><t t-out="pet_rec.weight"/> kg</strong>
+                                        </div>
+                                        <div t-if="pet_rec.gender" class="d-flex justify-content-between py-1 border-bottom">
+                                            <span>Gender:</span> <strong class="text-dark text-capitalize"><t t-out="pet_rec.gender"/></strong>
+                                        </div>
+                                        <div t-if="pet_rec.notes" class="mt-2 text-truncate">
+                                            <em><t t-out="pet_rec.notes"/></em>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a t-attf-href="/my/pets/#{pet_rec.id}" class="btn btn-outline-secondary btn-sm flex-fill">View Profile</a>
+                                        <a href="/grooming" class="btn btn-primary btn-sm flex-fill d-inline-flex align-items-center justify-content-center gap-1">
+                                            <img src="/grooming/static/src/img/grooming-scissors.webp" alt="" class="o_grooming_btn_icon"/> Book Grooming
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <div t-if="pager" class="o_portal_pager text-center mt-4">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- 5. Register New Pet -->
+    <template id="portal_pet_new" name="Register Pet">
+        <t t-call="portal.portal_layout">
+            <div class="card mt-3 shadow-sm border-0">
+                <div class="card-header bg-light py-3">
+                    <h4 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                        <img src="/grooming/static/src/img/pet-dog.webp" alt="" class="o_stephans_portal_inline_icon"/>
+                        Register Your Pet
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div t-if="error" class="alert alert-danger" role="alert"><t t-out="error"/></div>
+                    <form action="/my/pets/create" method="post" class="o_no_wait_lazy_js">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="pet_name">Pet Name *</label>
+                                <input type="text" id="pet_name" name="name" class="form-control" required="required" maxlength="80" placeholder="e.g. Max, Bella, Milo"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="pet_species">Species *</label>
+                                <select id="pet_species" name="species" class="form-select" required="required">
+                                    <option value="dog" selected="selected">Dog</option>
+                                    <option value="cat">Cat</option>
+                                    <option value="bird">Bird</option>
+                                    <option value="fish">Fish</option>
+                                    <option value="other">Small Animal / Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="pet_breed">Breed</label>
+                                <select id="pet_breed" name="breed_id" class="form-select">
+                                    <option value="">Select or leave blank</option>
+                                    <t t-foreach="breeds" t-as="b">
+                                        <option t-att-value="b.id"><t t-out="b.name"/> (<t t-out="(b.species or '').title()"/>)</option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="pet_gender">Gender</label>
+                                <select id="pet_gender" name="gender" class="form-select">
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="pet_weight">Weight (kg)</label>
+                                <input type="number" id="pet_weight" step="0.1" min="0" max="150" name="weight" class="form-control" placeholder="e.g. 5.5"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="pet_birth">Date of Birth</label>
+                                <input type="date" id="pet_birth" name="birth_date" class="form-control"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="pet_color">Coat Color / Markings</label>
+                                <input type="text" id="pet_color" name="color" class="form-control" maxlength="80" placeholder="e.g. Golden, Black &amp; White"/>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="pet_notes">Care Notes / Allergies / Temperament</label>
+                                <textarea id="pet_notes" name="notes" class="form-control" rows="3" maxlength="2000" placeholder="Tell us about allergies, sensitivities, temperament or medical conditions..."></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="/my/pets" class="btn btn-secondary"><i class="oi" data-icon="arrow_back"/> Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 o_no_wait_lazy_js"><i class="oi" data-icon="check"/> Save Pet Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- 6. Pet Detail View -->
+    <template id="portal_pet_detail" name="Pet Profile">
+        <t t-call="portal.portal_layout">
+            <div class="card mt-3 shadow-sm border-0">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                        <t t-call="grooming.portal_pet_icon" species="pet.species" pet_with_photo="pet" icon_class="'o_grooming_pet_icon_md'"/>
+                        <span><t t-out="pet.name"/>'s Profile</span>
+                    </h4>
+                    <span class="badge text-bg-primary text-uppercase px-3 py-2"><t t-out="pet.species"/></span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold border-bottom pb-2">Profile Information</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4 text-muted">Species</dt>
+                                <dd class="col-sm-8 text-capitalize"><t t-out="pet.species"/></dd>
+                                <dt class="col-sm-4 text-muted">Breed</dt>
+                                <dd class="col-sm-8"><t t-out="pet.breed_id.name or 'Not specified'"/></dd>
+                                <dt class="col-sm-4 text-muted">Gender</dt>
+                                <dd class="col-sm-8 text-capitalize"><t t-out="pet.gender or 'Not specified'"/></dd>
+                                <dt class="col-sm-4 text-muted">Age</dt>
+                                <dd class="col-sm-8"><t t-out="pet.age or 'Not specified'"/></dd>
+                                <dt class="col-sm-4 text-muted">Weight</dt>
+                                <dd class="col-sm-8"><t t-if="pet.weight"><t t-out="pet.weight"/> kg</t><t t-else="">Not specified</t></dd>
+                                <dt class="col-sm-4 text-muted">Color</dt>
+                                <dd class="col-sm-8"><t t-out="pet.color or 'Not specified'"/></dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold border-bottom pb-2">Care &amp; Special Notes</h5>
+                            <p t-if="pet.notes" class="text-muted"><t t-out="pet.notes"/></p>
+                            <p t-else="" class="text-muted fst-italic">No special notes recorded.</p>
+                            <div class="mt-4 p-3 rounded-3 o_grooming_cta">
+                                <img src="/grooming/static/src/img/grooming-scissors.webp" alt="" class="o_grooming_cta_icon"/>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Need grooming for <t t-out="pet.name"/>?</h6>
+                                    <p class="small text-muted mb-2">Book a bath, styling or de-shedding with our certified groomers.</p>
+                                    <a href="/grooming" class="btn btn-primary btn-sm rounded-pill px-3">
+                                        <i class="oi" data-icon="calendar_add_on"/> Book Grooming Appointment
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Past Grooming Appointments for this Pet -->
+                    <div class="mt-5">
+                        <h5 class="fw-bold border-bottom pb-2 d-flex align-items-center gap-2">
+                            <img src="/grooming/static/src/img/grooming-scissors.webp" alt="" class="o_grooming_pet_icon o_grooming_pet_icon_sm"/>
+                            Grooming History
+                        </h5>
+                        <t t-if="not appointments">
+                            <p class="text-muted fst-italic">No past grooming appointments recorded for this pet yet.</p>
+                        </t>
+                        <t t-if="appointments">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Reference</th>
+                                            <th>Date</th>
+                                            <th>Service</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="appointments" t-as="apt">
+                                            <tr>
+                                                <td><a t-attf-href="/my/grooming/#{apt.id}"><t t-out="apt.name"/></a></td>
+                                                <td><span t-field="apt.appointment_date" t-options='{"format": "dd MMM yyyy"}'/></td>
+                                                <td><t t-out="apt.service_id.name or 'Treatments Only'"/></td>
+                                                <td>
+                                                    <t t-call="grooming.portal_status_badge" state="apt.state"/>
+                                                </td>
+                                                <td class="text-end fw-bold">
+                                                    <span t-field="apt.total_price" t-options='{"widget": "monetary", "display_currency": apt.currency_id or res_company.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+                <div class="card-footer bg-white py-3">
+                    <a href="/my/pets" class="btn btn-secondary"><i class="oi" data-icon="arrow_back"/> Back to My Pets</a>
                 </div>
             </div>
         </t>

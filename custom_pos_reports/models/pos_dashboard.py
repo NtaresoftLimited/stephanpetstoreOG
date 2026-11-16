@@ -94,7 +94,7 @@ class PosDashboard(models.TransientModel):
                     'method': method.name,
                     'amount': payment.amount,
                     'location': order.config_id.name,
-                    'is_cash': getattr(method, 'is_cash_count', False),
+                    'is_cash': getattr(method, 'is_cash_count', False) or getattr(method, 'type', '') == 'cash',
                     'is_customer_account': method.type == 'pay_later',
                 })
 
@@ -322,16 +322,15 @@ class PosDashboard(models.TransientModel):
                 ('appointment_date', '>=', start_dt),
                 ('appointment_date', '<', end_dt),
             ]
-            grooming_groups = self.env['grooming.appointment'].sudo().read_group(
+            grooming_groups = self.env['grooming.appointment'].sudo()._read_group(
                 grooming_domain,
                 ['state'],
-                ['state'],
-                lazy=False,
+                ['__count'],
             )
             state_counts = {
-                group['state']: group['__count']
-                for group in grooming_groups
-                if group.get('state')
+                state: count
+                for state, count in grooming_groups
+                if state
             }
             total_count = sum(state_counts.values())
             pending_count = state_counts.get('pending', 0)
@@ -345,16 +344,15 @@ class PosDashboard(models.TransientModel):
 
             # If filtered period has no records, fallback to overall counts for the overview chart
             if total_count == 0:
-                all_groups = self.env['grooming.appointment'].sudo().read_group(
+                all_groups = self.env['grooming.appointment'].sudo()._read_group(
                     [],
                     ['state'],
-                    ['state'],
-                    lazy=False,
+                    ['__count'],
                 )
                 all_counts = {
-                    group['state']: group['__count']
-                    for group in all_groups
-                    if group.get('state')
+                    state: count
+                    for state, count in all_groups
+                    if state
                 }
                 pending_count = all_counts.get('pending', 0)
                 confirmed_count = all_counts.get('confirmed', 0)

@@ -4,11 +4,11 @@
         <field name="name">Daily Stock A4</field>
         <field name="default" eval="False"/>
         <field name="format">A4</field>
-        <field name="orientation">Landscape</field>
-        <field name="margin_top">10</field>
-        <field name="margin_bottom">10</field>
-        <field name="margin_left">10</field>
-        <field name="margin_right">10</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">8</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">8</field>
+        <field name="margin_right">8</field>
         <field name="header_line" eval="False"/>
         <field name="dpi">96</field>
     </record>
@@ -24,69 +24,83 @@
 
     <template id="report_sky_daily_stock">
         <t t-call="web.html_container">
-            <t t-foreach="docs" t-as="o">
-                <t t-call="web.external_layout">
-                    <div class="page" style="page-break-before: always; page-break-after: always; font-family: Arial, sans-serif; color: #222;">
-                        <div style="border-bottom: 2px solid #c77e35; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end;">
-                            <div>
-                                <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #c77e35;">STEPHAN'S PET STORE</div>
-                                <h2 style="margin: 3px 0 0 0; color: #4e2a15; font-size: 18px;">
-                                    <span t-if="o.date_end and o.date_end != o.report_date">Stock Report · </span>
-                                    <span t-else="">Daily Stock · </span>
-                                    <span t-field="o.warehouse_id.name"/>
-                                    <small t-if="o.pos_config_id and o.pos_config_id.name != o.warehouse_id.name" style="font-size: 12px; color: #777; font-weight: normal;"> (<span t-field="o.pos_config_id.name"/>)</small>
-                                </h2>
+            <t t-call="web.basic_layout">
+                <t t-set="page_size" t-value="20"/>
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="all_lines" t-value="o.line_ids"/>
+                    <t t-set="total_pages" t-value="(len(all_lines) + page_size - 1) // page_size if all_lines else 1"/>
+                    <t t-foreach="range(total_pages)" t-as="page_idx">
+                        <t t-set="page_lines" t-value="all_lines[page_idx * page_size : (page_idx + 1) * page_size]"/>
+                        <div class="page" t-attf-style="#{'page-break-before: always;' if (not o_first or page_idx &gt; 0) else ''} page-break-inside: avoid; font-family: Arial, sans-serif; color: #222;">
+                            <div style="border-bottom: 2px solid #c77e35; padding-bottom: 6px; margin-bottom: 8px; display: table; width: 100%;">
+                                <div style="display: table-cell; vertical-align: bottom;">
+                                    <div style="font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #c77e35;">STEPHAN'S PET STORE</div>
+                                    <h2 style="margin: 2px 0 0 0; color: #4e2a15; font-size: 16px;">
+                                        <span t-if="o.date_end and o.date_end != o.report_date">Stock Report · </span>
+                                        <span t-else="">Daily Stock · </span>
+                                        <span t-field="o.warehouse_id.name"/>
+                                        <small t-if="o.pos_config_id and o.pos_config_id.name != o.warehouse_id.name" style="font-size: 11px; color: #777; font-weight: normal;"> (<span t-field="o.pos_config_id.name"/>)</small>
+                                    </h2>
+                                </div>
+                                <div style="display: table-cell; vertical-align: bottom; text-align: right; color: #555; font-size: 11px; font-weight: 600;">
+                                    <div>
+                                        <span t-field="o.report_date" t-options='{"widget": "date"}'/>
+                                        <t t-if="o.date_end and o.date_end != o.report_date">
+                                            – <span t-field="o.date_end" t-options='{"widget": "date"}'/>
+                                        </t>
+                                    </div>
+                                    <div style="font-size: 9px; color: #888; font-weight: normal; margin-top: 2px;">
+                                        Page <span t-out="page_idx + 1"/> of <span t-out="total_pages"/> (<span t-out="len(page_lines)"/> products)
+                                    </div>
+                                </div>
                             </div>
-                            <div style="text-align: right; color: #555; font-size: 12px; font-weight: 600;">
-                                <span t-field="o.report_date" t-options='{"widget": "date"}'/>
-                                <t t-if="o.date_end and o.date_end != o.report_date">
-                                    – <span t-field="o.date_end" t-options='{"widget": "date"}'/>
-                                </t>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 9.5px;">
+                                <thead>
+                                    <tr style="background: #f7f4ee; color: #4e2a15;">
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 44px; text-align: center;">Photo</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; text-align: left;">Product</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 52px; text-align: center;">Open</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 52px; text-align: center;">Sold</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 52px; text-align: center;">Return</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 52px; text-align: center;">Transfer</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 52px; text-align: center;">Adj</th>
+                                        <th style="padding: 5px; border: 1px solid #e5dfd5; width: 52px; text-align: center;">Close</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="page_lines" t-as="line" style="height: 36px; page-break-inside: avoid;">
+                                        <td style="padding: 2px; border: 1px solid #eee; text-align: center; vertical-align: middle; width: 44px; height: 34px;">
+                                            <t t-set="img_uri" t-value="line.get_pdf_image_uri()"/>
+                                            <img t-if="img_uri" t-att-src="img_uri" style="width: 30px; height: 30px; object-fit: contain; display: inline-block;"/>
+                                            <div t-else="" style="width: 30px; height: 30px; line-height: 30px; background: #f8f6f2; color: #bbb; font-size: 7px; border: 1px solid #e5dfd5; border-radius: 3px; display: inline-block; text-align: center;">N/A</div>
+                                        </td>
+                                        <td style="padding: 4px 6px; border: 1px solid #eee; vertical-align: middle;"><span t-field="line.product_id.display_name"/></td>
+                                        <td style="padding: 4px; border: 1px solid #eee; text-align: center; vertical-align: middle;"><span t-field="line.opening_qty"/></td>
+                                        <td style="padding: 4px; border: 1px solid #eee; text-align: center; vertical-align: middle;"><span t-field="line.sold_qty"/></td>
+                                        <td style="padding: 4px; border: 1px solid #eee; text-align: center; vertical-align: middle;"><span t-field="line.returned_qty"/></td>
+                                        <td style="padding: 4px; border: 1px solid #eee; text-align: center; vertical-align: middle;"><span t-field="line.transfer_qty"/></td>
+                                        <td style="padding: 4px; border: 1px solid #eee; text-align: center; vertical-align: middle;"><span t-field="line.adjustment_qty"/></td>
+                                        <td style="padding: 4px; border: 1px solid #eee; text-align: center; vertical-align: middle; font-weight: 700;"><span t-field="line.closing_qty"/></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot t-if="page_idx + 1 == total_pages">
+                                    <tr style="background: #f7f4ee; font-weight: bold; color: #4e2a15;">
+                                        <td colspan="2" style="padding: 5px 6px; border: 1px solid #e5dfd5; text-align: right;">Total for <span t-field="o.warehouse_id.name"/>:</td>
+                                        <td style="padding: 5px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.opening_qty for line in all_lines)"/></td>
+                                        <td style="padding: 5px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.sold_qty for line in all_lines)"/></td>
+                                        <td style="padding: 5px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.returned_qty for line in all_lines)"/></td>
+                                        <td style="padding: 5px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.transfer_qty for line in all_lines)"/></td>
+                                        <td style="padding: 5px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.adjustment_qty for line in all_lines)"/></td>
+                                        <td style="padding: 5px; border: 1px solid #e5dfd5; text-align: center;"><span t-out="'%.0f' % sum(line.closing_qty for line in all_lines)"/></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div style="margin-top: 6px; font-size: 8px; color: #888; display: table; width: 100%;">
+                                <div style="display: table-cell;">Generated <span t-field="o.generated_at"/></div>
+                                <div style="display: table-cell; text-align: right;">Showing items <span t-out="page_idx * page_size + 1"/>–<span t-out="page_idx * page_size + len(page_lines)"/> of <span t-out="len(all_lines)"/></div>
                             </div>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-                            <thead>
-                                <tr style="background: #f7f4ee; color: #4e2a15;">
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 48px; text-align: center;">Photo</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; text-align: left;">Product</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 55px; text-align: center;">Open</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 55px; text-align: center;">Sold</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 55px; text-align: center;">Return</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 55px; text-align: center;">Transfer</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 55px; text-align: center;">Adj</th>
-                                    <th style="padding: 6px; border: 1px solid #e5dfd5; width: 55px; text-align: center;">Close</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="o.line_ids" t-as="line">
-                                    <td style="padding: 3px; border: 1px solid #eee; text-align: center;">
-                                        <img t-if="line.product_id.image_128" t-att-src="image_data_uri(line.product_id.image_128)" style="max-width: 38px; max-height: 38px; object-fit: contain;"/>
-                                    </td>
-                                    <td style="padding: 5px; border: 1px solid #eee;"><span t-field="line.product_id.display_name"/></td>
-                                    <td style="padding: 5px; border: 1px solid #eee; text-align: center;"><span t-field="line.opening_qty"/></td>
-                                    <td style="padding: 5px; border: 1px solid #eee; text-align: center;"><span t-field="line.sold_qty"/></td>
-                                    <td style="padding: 5px; border: 1px solid #eee; text-align: center;"><span t-field="line.returned_qty"/></td>
-                                    <td style="padding: 5px; border: 1px solid #eee; text-align: center;"><span t-field="line.transfer_qty"/></td>
-                                    <td style="padding: 5px; border: 1px solid #eee; text-align: center;"><span t-field="line.adjustment_qty"/></td>
-                                    <td style="padding: 5px; border: 1px solid #eee; text-align: center; font-weight: 700;"><span t-field="line.closing_qty"/></td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr style="background: #f7f4ee; font-weight: bold; color: #4e2a15;">
-                                    <td colspan="2" style="padding: 6px; border: 1px solid #e5dfd5; text-align: right;">Total for <span t-field="o.warehouse_id.name"/>:</td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.opening_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.sold_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.returned_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.transfer_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.adjustment_qty for line in o.line_ids)"/></td>
-                                    <td style="padding: 6px; border: 1px solid #e5dfd5; text-align: center;"><span t-esc="'%.0f' % sum(line.closing_qty for line in o.line_ids)"/></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                        <div style="margin-top: 10px; font-size: 8px; color: #888;">
-                            Generated <span t-field="o.generated_at"/>
-                        </div>
-                    </div>
+                    </t>
                 </t>
             </t>
         </t>

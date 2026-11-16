@@ -50,10 +50,9 @@ class SkyStockGenerateWizard(models.TransientModel):
     def _get_warehouse_options(self):
         options = [("all", _("All Warehouses"))]
         warehouses = (
-            self.env["pos.config"]
+            self.env["stock.warehouse"]
             .sudo()
-            .search([("active", "=", True), ("warehouse_id", "!=", False)])
-            .mapped("warehouse_id")
+            .search([("active", "=", True)])
             .sorted("name")
         )
         for w in warehouses:
@@ -72,15 +71,15 @@ class SkyStockGenerateWizard(models.TransientModel):
         help="Recalculate figures to ensure latest live stock metrics.",
     )
 
-    def _get_target_configs(self):
-        all_configs = self.env["pos.config"].sudo().search(
-            [("active", "=", True), ("warehouse_id", "!=", False)]
+    def _get_target_warehouses(self):
+        all_warehouses = self.env["stock.warehouse"].sudo().search(
+            [("active", "=", True)]
         )
         if self.warehouse_option == "all":
-            return all_configs
-        return all_configs.filtered(
-            lambda c: str(c.warehouse_id.id) == str(self.warehouse_option)
-            or c.warehouse_id.name.lower() == str(self.warehouse_option).lower()
+            return all_warehouses
+        return all_warehouses.filtered(
+            lambda w: str(w.id) == str(self.warehouse_option)
+            or w.name.lower() == str(self.warehouse_option).lower()
         )
 
     def _generate_reports(self):
@@ -90,15 +89,15 @@ class SkyStockGenerateWizard(models.TransientModel):
         if self.end_date > fields.Date.context_today(self):
             raise UserError(_("A stock report cannot be generated for a future date."))
 
-        target_configs = self._get_target_configs()
-        if not target_configs:
-            raise UserError(_("No eligible warehouse or POS branch found."))
+        target_warehouses = self._get_target_warehouses()
+        if not target_warehouses:
+            raise UserError(_("No eligible warehouse found."))
 
         reports = self.env["sky.daily.stock.report"].sudo().generate_for_range(
             self.start_date,
             self.end_date,
-            target_configs.ids,
             replace=self.replace_existing,
+            warehouse_ids=target_warehouses.ids,
         )
         if not reports:
             raise UserError(_("No reports could be generated for the selected warehouse(s)."))

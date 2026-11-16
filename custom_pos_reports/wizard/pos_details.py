@@ -454,11 +454,16 @@ class PosDetails(models.TransientModel):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         doc_url = f"{base_url}/web/content/{attachment.id}/{file_name}?access_token={attachment.access_token}"
         
+        from odoo.exceptions import UserError
+        api_key = self.env['ir.config_parameter'].sudo().get_param('stephans_whatsapp.api_key')
+        if not api_key:
+            raise UserError("WhatsApp API key is not configured. Please set 'stephans_whatsapp.api_key' in System Parameters.")
+
         import requests
         url = "https://wasenderapi.com/api/send-message"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer 99fdd082b088ec50a4461bd03796de7e9a892770feddb7d8f0ed6e800e126856",
+            "Authorization": f"Bearer {api_key}",
             "User-Agent": "Odoo/18.0"
         }
         

@@ -1,0 +1,189 @@
+.o_action_manager:has(.o_lucy_dashboard),
+.o_action:has(.o_lucy_dashboard) {
+    position: relative !important;
+    overflow: hidden !important;
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+.o_lucy_dashboard {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
+    padding: 24px 24px 80px 24px !important;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Override Odoo 20 webclient_layout.scss scrollbar suppression on .o_action */
+    scrollbar-width: thin !important;
+    scrollbar-color: #c77e35 #f0ebe5 !important;
+
+    &::-webkit-scrollbar {
+        width: 10px !important;
+        height: 10px !important;
+        display: block !important;
+    }
+    &::-webkit-scrollbar-track {
+        background: #f0ebe5 !important;
+        border-radius: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #c77e35 !important;
+        border-radius: 5px;
+        border: 2px solid #f0ebe5 !important;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #4e2a15 !important;
+    }
+
+    .o_lucy_header, .o_lucy_panel_header, .o_lucy_filters, .o_lucy_statuses, .o_lucy_quick_actions, .o_lucy_toolbar, .o_lucy_section_title, .o_lucy_date_badge {
+        display: flex;
+        align-items: center;
+    }
+    .o_lucy_header { justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+    .o_lucy_header h1, .o_lucy_section_title h2 { margin: 2px 0; font-family: "Playfair Display", Georgia, serif; font-size: 30px; font-weight: 500; }
+    .o_lucy_header p { margin: 0; color: var(--o-gray-600, #6c757d); }
+    .o_lucy_eyebrow { color: #c77e35; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+    .o_lucy_date_badge { gap: 10px; color: #4e2a15; }
+    .o_lucy_date_badge strong { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: #f5eee6; font-size: 18px; }
+    .o_lucy_date_badge span { font-size: 13px; }
+    .o_lucy_toolbar { justify-content: space-between; gap: 18px; margin-bottom: 22px; padding: 8px; border: 1px solid #e5e5e7; border-radius: 16px; background: rgba(255,255,255,.92); box-shadow: 0 1px 2px rgba(0,0,0,.03); backdrop-filter: blur(18px); }
+    .o_lucy_tabs { display: flex; gap: 4px; overflow-x: auto; }
+    .o_lucy_tab { padding: 9px 15px; border: 0; border-radius: 9px; color: #6b625b; background: transparent; font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .o_lucy_tab:hover { color: #4e2a15; background: #faf7f2; }
+    .o_lucy_tab.active { color: #fff; background: #4e2a15; }
+    .o_lucy_filters { gap: 10px; align-items: end; }
+    .o_lucy_filters label { font-size: 12px; color: var(--o-gray-600, #6c757d); }
+    .o_lucy_filters input { margin-top: 4px; }
+    .o_lucy_primary { color: #fff; border-color: #4e2a15; background: #4e2a15; }
+    .o_lucy_primary:hover, .o_lucy_primary:focus { color: #fff; border-color: #2f190c; background: #2f190c; }
+    .o_lucy_loading { padding: 60px; text-align: center; color: var(--o-gray-600, #6c757d); }
+    .o_lucy_cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    .o_lucy_cards_secondary { margin-top: 16px; }
+    .o_lucy_cards_six { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .o_lucy_card, .o_lucy_panel {
+        border: 1px solid #e5e5e7;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, .035);
+    }
+    .o_lucy_card { min-height: 126px; padding: 20px; text-align: left; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .o_lucy_card:hover { border-color: #d5c2b0; box-shadow: 0 12px 32px rgba(78,42,21,.07); transform: translateY(-1px); }
+    .o_lucy_card span, .o_lucy_card small { display: block; color: var(--o-gray-600, #6c757d); }
+    .o_lucy_card strong { display: block; margin: 5px 0; font-size: 26px; }
+    .o_lucy_quick_actions { gap: 8px; flex-wrap: wrap; margin: 18px 0; }
+    .o_lucy_grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+    .o_lucy_tab_panel { animation: lucyFade .18s ease; }
+    .o_lucy_section_title { justify-content: space-between; gap: 20px; margin: 4px 0 18px; }
+    .o_lucy_section_title span { color: #c77e35; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+    .o_lucy_panel { overflow: hidden; }
+    .o_lucy_panel_header { justify-content: space-between; padding: 16px 18px 8px; }
+    .o_lucy_panel_header h2 { margin: 0; font-size: 17px; }
+    .o_lucy_panel_header small { color: #8a8179; }
+    .o_lucy_statuses { gap: 14px; flex-wrap: wrap; padding: 0 18px 14px; color: var(--o-gray-600, #6c757d); font-size: 12px; }
+    .o_lucy_statuses b { color: var(--o-main-text-color, #212529); }
+    .o_lucy_channel_rows { padding: 8px 18px 18px; }
+    .o_lucy_channel_rows > div { display: flex; justify-content: space-between; gap: 18px; padding: 13px 0; border-bottom: 1px solid #f0ebe5; }
+    .o_lucy_channel_rows > div:last-child { border-bottom: 0; }
+    .o_lucy_status_grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 8px 18px 18px; }
+    .o_lucy_status_grid button { padding: 16px; border: 1px solid #eee7df; border-radius: 10px; background: #faf7f2; text-align: left; }
+    .o_lucy_status_grid b, .o_lucy_status_grid span { display: block; }
+    .o_lucy_status_grid b { color: #4e2a15; font-size: 22px; }
+    .o_lucy_status_grid span { margin-top: 3px; color: #756c65; font-size: 12px; }
+    .o_lucy_orders_panel { margin: 18px 0; }
+    .o_lucy_progress_list { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 8px 18px 20px; }
+    .o_lucy_progress_list button { padding: 14px; border: 1px solid #eee7df; border-radius: 10px; background: #fff; text-align: left; }
+    .o_lucy_progress_list i { display: block; width: 8px; height: 8px; margin-bottom: 12px; border-radius: 50%; background: #c77e35; }
+    .o_lucy_progress_list i.confirmed, .o_lucy_progress_list i.paid, .o_lucy_progress_list i.delivered { background: #6f9365; }
+    .o_lucy_progress_list i.processing { background: #4e2a15; }
+    .o_lucy_progress_list i.cancelled { background: #b95c3f; }
+    .o_lucy_progress_list span, .o_lucy_progress_list b { display: block; }
+    .o_lucy_progress_list span { color: #756c65; font-size: 12px; }
+    .o_lucy_progress_list b { margin-top: 4px; font-size: 20px; }
+    .o_lucy_flow { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; padding: 28px; }
+    .o_lucy_flow span { padding: 10px 16px; border: 1px solid #e8ded3; border-radius: 999px; background: #faf7f2; color: #4e2a15; font-weight: 700; }
+    .o_lucy_flow i { color: #c77e35; font-style: normal; }
+    .o_lucy_action_panel { padding: 24px; }
+    .o_lucy_action_panel h2 { font-family: "Playfair Display", Georgia, serif; font-weight: 500; }
+    .o_lucy_action_panel > strong { display: block; color: #4e2a15; font-size: 34px; }
+    .o_lucy_chart_panel { margin-top: 18px; }
+    .o_lucy_donut_layout { display: grid; grid-template-columns: minmax(150px, .8fr) minmax(190px, 1.2fr); align-items: center; gap: 22px; padding: 12px 20px 22px; }
+    .o_lucy_donut {
+        position: relative;
+        width: 156px;
+        height: 156px;
+        margin: 0 auto;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,.025);
+    }
+    .o_lucy_donut::after { content: ""; position: absolute; inset: 22px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.025); }
+    .o_lucy_donut_center { position: absolute; z-index: 1; inset: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .o_lucy_donut_center strong { max-width: 104px; color: #1d1d1f; font-size: 17px; line-height: 1.15; overflow-wrap: anywhere; }
+    .o_lucy_donut_center span { margin-top: 4px; color: #86868b; font-size: 10px; letter-spacing: .03em; }
+    .o_lucy_chart_legend { display: flex; flex-direction: column; gap: 2px; }
+    .o_lucy_chart_legend > div, .o_lucy_chart_legend > button { display: grid; grid-template-columns: 9px minmax(80px, 1fr) auto; align-items: center; gap: 9px; width: 100%; padding: 9px 4px; border: 0; border-bottom: 1px solid #f1f1f3; background: transparent; color: #1d1d1f; text-align: left; }
+    .o_lucy_chart_legend > :last-child { border-bottom: 0; }
+    .o_lucy_chart_legend i { width: 8px; height: 8px; border-radius: 50%; }
+    .o_lucy_chart_legend span { color: #6e6e73; font-size: 12px; }
+    .o_lucy_chart_legend b { font-size: 12px; font-weight: 650; }
+    .o_lucy_bar_chart { display: flex; align-items: end; gap: 12px; min-height: 190px; padding: 18px 24px 8px; border-top: 1px solid #f2f2f4; overflow-x: auto; }
+    .o_lucy_bar_chart.compact { min-height: 190px; border-top: 0; }
+    .o_lucy_bar_day { display: flex; flex: 1 0 42px; min-width: 42px; height: 160px; flex-direction: column; justify-content: end; align-items: center; gap: 8px; }
+    .o_lucy_bar_stage { position: relative; display: flex; align-items: end; justify-content: center; gap: 3px; width: 100%; height: 132px; border-bottom: 1px solid #ececef; }
+    .o_lucy_bar_stage > i { display: block; width: 14px; max-width: 35%; min-height: 3px; border-radius: 5px 5px 2px 2px; transition: height .3s ease; }
+    .o_lucy_bar_sales { background: #4e2a15; }
+    .o_lucy_bar_expense { background: #d8c4b0; }
+    .o_lucy_bar_grooming { background: #c77e35; }
+    .o_lucy_bar_day small { color: #86868b; font-size: 10px; white-space: nowrap; }
+    .o_lucy_chart_key { display: flex; justify-content: flex-end; gap: 16px; padding: 4px 22px 16px; color: #86868b; font-size: 11px; }
+    .o_lucy_chart_key span { display: flex; align-items: center; gap: 6px; }
+    .o_lucy_chart_key i { width: 8px; height: 8px; border-radius: 2px; }
+    .o_lucy_chart_key i.sales { background: #4e2a15; }
+    .o_lucy_chart_key i.expense { background: #d8c4b0; }
+    .o_lucy_valuation_panel { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 18px; }
+    .o_lucy_catalog_tabs { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); margin-bottom: 20px; border-bottom: 1px solid #dedee2; background: #faf9f7; overflow-x: auto; }
+    .o_lucy_catalog_tabs button { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 82px; padding: 16px 24px; border: 0; border-right: 1px solid #e2dfda; background: transparent; color: #929294; font-size: 19px; transition: color .18s ease, background .18s ease; white-space: nowrap; }
+    .o_lucy_catalog_tabs button:last-child { border-right: 0; }
+    .o_lucy_catalog_tabs button::after { content: ""; position: absolute; right: 14%; bottom: 0; left: 14%; height: 2px; border-radius: 2px 2px 0 0; background: transparent; }
+    .o_lucy_catalog_tabs button:hover { color: #4e2a15; background: rgba(255,255,255,.7); }
+    .o_lucy_catalog_tabs button.active { color: #1d1d1f; background: #fff; }
+    .o_lucy_catalog_tabs button.active::after { background: #c77e35; }
+    .o_lucy_catalog_tabs span { font-size: 27px; filter: grayscale(1) sepia(.7); opacity: .48; }
+    .o_lucy_catalog_tabs button.active span { filter: sepia(.8) saturate(1.2); opacity: .9; }
+    .o_lucy_catalog_tabs b { font-weight: 600; }
+    .o_lucy_catalog_readiness, .o_lucy_catalog_products { margin-top: 18px; }
+    .o_lucy_product_cell { display: flex; align-items: center; gap: 12px; min-width: 240px; }
+    .o_lucy_product_cell img { width: 42px; height: 42px; border: 1px solid #ececef; border-radius: 9px; background: #fff; object-fit: contain; }
+    tbody tr { cursor: pointer; }
+    @keyframes lucyFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+    @media (max-width: 992px) {
+        .o_lucy_header { align-items: flex-start; flex-direction: column; }
+        .o_lucy_toolbar { align-items: flex-start; flex-direction: column; }
+        .o_lucy_cards, .o_lucy_cards_six, .o_lucy_grid { grid-template-columns: 1fr 1fr; }
+        .o_lucy_progress_list { grid-template-columns: repeat(3, 1fr); }
+        .o_lucy_donut_layout { grid-template-columns: 1fr; }
+        .o_lucy_catalog_tabs { grid-template-columns: repeat(4, minmax(170px, 1fr)); }
+    }
+    @media (max-width: 576px) {
+        padding: 16px;
+        .o_lucy_cards, .o_lucy_cards_six, .o_lucy_grid { grid-template-columns: 1fr; }
+        .o_lucy_filters { width: 100%; flex-wrap: wrap; }
+        .o_lucy_tabs { width: 100%; }
+        .o_lucy_progress_list { grid-template-columns: 1fr 1fr; }
+        .o_lucy_section_title { align-items: flex-start; flex-direction: column; }
+        .o_lucy_valuation_panel { align-items: flex-start; flex-direction: column; }
+        .o_lucy_catalog_tabs { display: flex; }
+        .o_lucy_catalog_tabs button { min-width: 155px; min-height: 68px; font-size: 16px; }
+    }
+}

@@ -41,6 +41,9 @@
           <setting string="Restrict Product Out of Stock Except if Product Type is Service" help="Restrict ordering of out-of-stock products based on displayed quantity">
             <field name="is_restrict_out_of_stock_products"/>
           </setting>
+          <setting string="Only In-Stock Products in POS" help="Only display products that have available stock in the current session warehouse">
+            <field name="only_in_stock_products"/>
+          </setting>
           <setting string="Low Stock Products Screen" help="Enable to display products with low stock levels on the POS screen">
             <field name="is_low_stock_screen_visible"/>
             <div class="content-group mt16" invisible="not is_low_stock_screen_visible">
@@ -55,7 +58,7 @@
             <div class="content-group mt16" invisible="stock_warehouse == 'all'">
               <div class="row">
                 <label for="picking_type_location_id" class="col-lg-4 o_light_label"></label>
-                <field name="picking_type_location_id"/>
+                <field name="picking_type_location_id" domain="[('usage', '=', 'internal')]"/>
               </div>
             </div>
           </setting>

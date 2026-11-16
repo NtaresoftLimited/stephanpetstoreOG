@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lucy_website_navigation_list" model="ir.ui.view">
+        <field name="name">lucy.website.navigation.list</field>
+        <field name="model">lucy.website.navigation</field>
+        <field name="arch" type="xml">
+            <list string="Next.js Website Menus" default_order="sequence,id" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="key"/>
+                <field name="level"/>
+                <field name="parent_id"/>
+                <field name="url"/>
+                <field name="category_id" optional="show"/>
+                <field name="is_featured" optional="show"/>
+                <field name="published"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lucy_website_navigation_form" model="ir.ui.view">
+        <field name="name">lucy.website.navigation.form</field>
+        <field name="model">lucy.website.navigation</field>
+        <field name="arch" type="xml">
+            <form string="Next.js Website Menu">
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <widget name="web_ribbon" title="Unpublished" bg_color="text-bg-secondary" invisible="published"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="key"/>
+                            <field name="level"/>
+                            <field name="parent_id" invisible="level == 'root'"/>
+                        </group>
+                        <group>
+                            <field name="url"/>
+                            <field name="category_id"/>
+                            <field name="sequence"/>
+                            <field name="is_featured" invisible="level != 'group'"/>
+                            <field name="published"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <field name="child_ids" invisible="level == 'item'">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="key"/>
+                            <field name="level"/>
+                            <field name="url"/>
+                            <field name="category_id" optional="show"/>
+                            <field name="is_featured" optional="show"/>
+                            <field name="published"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lucy_website_navigation_search" model="ir.ui.view">
+        <field name="name">lucy.website.navigation.search</field>
+        <field name="model">lucy.website.navigation</field>
+        <field name="arch" type="xml">
+            <search string="Next.js Website Menus">
+                <field name="name"/>
+                <field name="key"/>
+                <field name="category_id"/>
+                <filter name="published" string="Published" domain="[('published', '=', True)]"/>
+                <filter name="unpublished" string="Unpublished" domain="[('published', '=', False)]"/>
+                <separator/>
+                <filter name="root" string="Header Categories" domain="[('level', '=', 'root')]"/>
+                <filter name="group" string="Mega-menu Groups" domain="[('level', '=', 'group')]"/>
+                <filter name="item" string="Submenu Items" domain="[('level', '=', 'item')]"/>
+                <group>
+                    <filter name="group_level" string="Level" context="{'group_by': 'level'}"/>
+                    <filter name="group_parent" string="Parent" context="{'group_by': 'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lucy_nextjs_navigation" model="ir.actions.act_window">
+        <field name="name">Next.js Menus &amp; Categories</field>
+        <field name="res_model">lucy.website.navigation</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lucy_website_navigation_search"/>
+        <field name="context">{'search_default_published': 1}</field>
+    </record>
+</odoo>

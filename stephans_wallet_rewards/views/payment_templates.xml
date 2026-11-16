@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Show the customer's Sky Wallet balance next to the option at checkout. -->
+    <template id="payment_method_form_sky_wallet" inherit_id="payment.method_form">
+        <xpath expr="//label[hasclass('o_payment_option_label')]" position="after">
+            <t t-if="provider_sudo.code == 'sky_wallet'">
+                <t t-set="sky_wallet_balance" t-value="provider_sudo._sky_wallet_balance_display()"/>
+                <span t-if="sky_wallet_balance" class="o_sky_wallet_balance" t-out="sky_wallet_balance"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- No "secured by" badge for an internal balance. -->
+    <template id="payment_method_form_sky_wallet_secured" inherit_id="payment.method_form">
+        <xpath expr="//t[@t-set='hide_secured_by']" position="attributes">
+            <attribute name="t-value" separator=" " add="or provider_sudo.code == 'sky_wallet'"/>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lucy.LucyDashboard">
+        <div class="o_lucy_dashboard" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; box-sizing: border-box;">
+            <header class="o_lucy_header">
+                <div>
+                    <div class="o_lucy_eyebrow">STEPHAN'S PET STORE</div>
+                    <h1>LuCy Dashboard</h1>
+                    <p>Website, grooming, point of sale and inventory management.</p>
+                </div>
+                <div class="o_lucy_date_badge">
+                    <strong t-out="this.todayDayNumber"/>
+                    <span t-out="this.todayFormattedDate"/>
+                </div>
+            </header>
+
+            <div class="o_lucy_toolbar">
+                <nav class="o_lucy_tabs" aria-label="LuCy dashboard sections">
+                    <button t-foreach="[['overview','Overview'],['website','Website'],['grooming','Grooming'],['pos','Point of Sale'],['catalog','Catalog'],['inventory','Inventory']]" t-as="tab" t-key="tab[0]" t-att-class="'o_lucy_tab ' + (this.state.activeTab === tab[0] ? 'active' : '')" t-on-click="() => this.setActiveTab(tab[0])" t-out="tab[1]"/>
+                </nav>
+                <div class="o_lucy_filters">
+                    <label>From<input type="date" class="form-control" t-att-value="this.state.dateStart" t-on-change="(ev) =&gt; this.onDateStart(ev)"/></label>
+                    <label>To<input type="date" class="form-control" t-att-value="this.state.dateEnd" t-on-change="(ev) =&gt; this.onDateEnd(ev)"/></label>
+                    <button class="btn o_lucy_primary" t-on-click="(ev) =&gt; this.load(ev)"><i class="fa fa-refresh me-1"/> Apply</button>
+                </div>
+            </div>
+
+            <t t-if="this.state.loading">
+                <div class="o_lucy_loading"><i class="fa fa-spinner fa-spin"/> Loading LuCy…</div>
+            </t>
+            <t t-elif="this.state.data">
+                <!-- OVERVIEW -->
+                <div t-if="this.state.activeTab === 'overview'" class="o_lucy_tab_panel">
+                    <div class="o_lucy_cards">
+                        <button class="o_lucy_card" t-on-click="() => this.openAction('lucy.action_lucy_customers')"><span>Registered customers</span><strong t-out="this.state.data.sky.customers"/><small>Open customers</small></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openAction('lucy.action_lucy_products')"><span>Active products</span><strong t-out="this.state.data.sky.products"/><small>Website and store catalog</small></button>
+                        <button class="o_lucy_card"><span>Total revenue</span><strong t-out="this.money(this.state.data.overview.consolidated_revenue)"/><small>Deduplicated selected period</small></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openAction('lucy.action_lucy_all_orders')"><span>Orders</span><strong t-out="this.state.data.sky.weekly.orders + this.state.data.website.orders"/><small>POS and website</small></button>
+                    </div>
+                    <div class="o_lucy_cards o_lucy_cards_secondary">
+                        <button class="o_lucy_card" t-on-click="() => this.setActiveTab('website')"><span>Website orders</span><strong t-out="this.state.data.website.orders"/><small t-out="this.money(this.state.data.website.revenue)"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.setActiveTab('grooming')"><span>Grooming appointments</span><strong t-out="this.state.data.sky.grooming.total"/><small t-out="this.money(this.state.data.sky.grooming.revenue)"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.setActiveTab('pos')"><span>POS transactions</span><strong t-out="this.state.data.sky.weekly.orders"/><small t-out="this.money(this.state.data.sky.weekly.net_sales)"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.setActiveTab('inventory')"><span>Low stock</span><strong t-out="this.state.data.inventory.low_stock"/><small>Products requiring attention</small></button>
+                    </div>
+                    <div class="o_lucy_grid">
+                        <section class="o_lucy_panel">
+                            <div class="o_lucy_panel_header"><div><h2>Revenue by channel</h2><small>Selected period</small></div></div>
+                            <div class="o_lucy_donut_layout">
+                                <div class="o_lucy_donut" t-att-style="this.donutStyle(this.revenueSegments)">
+                                    <div class="o_lucy_donut_center"><strong t-out="this.money(this.state.data.overview.consolidated_revenue)"/><span>Total revenue</span></div>
+                                </div>
+                                <div class="o_lucy_chart_legend">
+                                    <div t-foreach="this.revenueSegments" t-as="segment" t-key="segment.name"><i t-att-style="'background:' + segment.color"/><span t-out="segment.name"/><b t-out="this.money(segment.value)"/></div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="o_lucy_panel">
+                            <div class="o_lucy_panel_header"><div><h2>Business status</h2><small>Items requiring attention</small></div></div>
+                            <div class="o_lucy_status_grid">
+                                <button t-on-click="() => this.openWebsiteOrders('draft')"><b t-out="this.state.data.website.draft"/><span>Website quotations</span></button>
+                                <button t-on-click="() => this.openGrooming('pending')"><b t-out="this.state.data.grooming.pending"/><span>Pending grooming</span></button>
+                                <button t-on-click="() => this.openAction('grooming.action_grooming_stock_request')"><b t-out="this.state.data.inventory.pending_replenishments"/><span>Replenishments</span></button>
+                                <button t-on-click="() => this.setActiveTab('inventory')"><b t-out="this.state.data.inventory.out_of_stock"/><span>Out of stock</span></button>
+                            </div>
+                        </section>
+                    </div>
+                    <section class="o_lucy_panel o_lucy_chart_panel">
+                        <div class="o_lucy_panel_header"><div><h2>Daily movement</h2><small>POS sales and approved expenses</small></div></div>
+                        <div class="o_lucy_bar_chart">
+                            <div class="o_lucy_bar_day" t-foreach="this.state.data.sky.weekly.days" t-as="day" t-key="day.date">
+                                <div class="o_lucy_bar_stage" t-att-title="day.label + ': ' + this.money(day.sales)">
+                                    <i class="o_lucy_bar_sales" t-att-style="this.chartHeight(day.sales, this.state.data.sky.weekly.days, 'sales')"/>
+                                    <i class="o_lucy_bar_expense" t-att-style="this.chartHeight(day.expenses, this.state.data.sky.weekly.days, 'sales')"/>
+                                </div>
+                                <small t-out="day.label"/>
+                            </div>
+                        </div>
+                        <div class="o_lucy_chart_key"><span><i class="sales"/>Sales</span><span><i class="expense"/>Expenses</span></div>
+                    </section>
+                </div>
+
+                <!-- WEBSITE -->
+                <div t-if="this.state.activeTab === 'website'" class="o_lucy_tab_panel">
+                    <div class="o_lucy_section_title"><div><span>WEBSITE COMMERCE</span><h2>Orders and fulfilment</h2></div><button class="btn o_lucy_primary" t-on-click="() => this.openAction('lucy.action_lucy_website_settings')">Website configuration</button></div>
+                    <div class="o_lucy_cards">
+                        <button class="o_lucy_card" t-on-click="() => this.openWebsiteOrders('all')"><span>Website orders</span><strong t-out="this.state.data.website.orders"/><small>Selected period</small></button>
+                        <button class="o_lucy_card"><span>Website revenue</span><strong t-out="this.money(this.state.data.website.revenue)"/><small>Confirmed orders</small></button>
+                        <button class="o_lucy_card"><span>Average order</span><strong t-out="this.money(this.state.data.website.average_order)"/><small>Average order value</small></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openWebsiteOrders('payment_pending')"><span>Awaiting payment</span><strong t-out="this.state.data.website.payment_pending"/><small>Needs follow-up</small></button>
+                    </div>
+                    <section class="o_lucy_panel o_lucy_orders_panel">
+                        <div class="o_lucy_panel_header"><div><h2>Website order status</h2><small>Native Odoo sales, payment and delivery states</small></div><button class="btn btn-link" t-on-click="() => this.openWebsiteOrders('all')">View all orders</button></div>
+                        <div class="o_lucy_progress_list">
+                            <button t-on-click="() => this.openWebsiteOrders('draft')"><i class="pending"/><span>Quotation</span><b t-out="this.state.data.website.draft"/></button>
+                            <button t-on-click="() => this.openWebsiteOrders('confirmed')"><i class="confirmed"/><span>Confirmed</span><b t-out="this.state.data.website.confirmed"/></button>
+                            <button t-on-click="() => this.openWebsiteOrders('paid')"><i class="paid"/><span>Paid</span><b t-out="this.state.data.website.paid"/></button>
+                            <button t-on-click="() => this.openWebsiteOrders('processing')"><i class="processing"/><span>Processing</span><b t-out="this.state.data.website.processing"/></button>
+                            <button t-on-click="() => this.openWebsiteOrders('delivered')"><i class="delivered"/><span>Delivered</span><b t-out="this.state.data.website.delivered"/></button>
+                            <button t-on-click="() => this.openWebsiteOrders('cancelled')"><i class="cancelled"/><span>Cancelled</span><b t-out="this.state.data.website.cancelled"/></button>
+                        </div>
+                    </section>
+                    <section class="o_lucy_panel">
+                        <div class="o_lucy_panel_header"><div><h2>Recent website orders</h2><small>Latest activity in the selected period</small></div></div>
+                        <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th class="text-end">Total</th></tr></thead><tbody>
+                            <tr t-foreach="this.state.data.website.recent" t-as="order" t-key="order.id" t-on-click="() => this.openRecord('sale.order', order.id, 'Website Order')"><td t-out="order.name"/><td t-out="order.customer"/><td t-out="order.date"/><td class="text-capitalize" t-out="order.state"/><td class="text-end" t-out="this.money(order.amount)"/></tr>
+                            <tr t-if="!this.state.data.website.recent.length"><td colspan="5" class="text-center text-muted py-4">No website orders in this period.</td></tr>
+                        </tbody></table></div>
+                    </section>
+                </div>
+
+                <!-- GROOMING -->
+                <div t-if="this.state.activeTab === 'grooming'" class="o_lucy_tab_panel">
+                    <div class="o_lucy_section_title"><div><span>GROOMING STUDIO</span><h2>Appointments and status</h2></div><button class="btn o_lucy_primary" t-on-click="() => this.openAction('lucy.action_lucy_all_grooming')">All appointments</button></div>
+                    <div class="o_lucy_cards o_lucy_cards_six">
+                        <button class="o_lucy_card" t-on-click="() => this.openGrooming('all')"><span>Website bookings</span><strong t-out="this.state.data.grooming.website_bookings"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openGrooming('pending')"><span>Pending</span><strong t-out="this.state.data.grooming.pending"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openGrooming('confirmed')"><span>Confirmed</span><strong t-out="this.state.data.grooming.confirmed"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openGrooming('in_progress')"><span>In progress</span><strong t-out="this.state.data.grooming.in_progress"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openGrooming('completed')"><span>Completed</span><strong t-out="this.state.data.grooming.completed"/></button>
+                        <button class="o_lucy_card" t-on-click="() => this.openGrooming('cancelled')"><span>Cancelled</span><strong t-out="this.state.data.grooming.cancelled"/></button>
+                    </div>
+                    <div class="o_lucy_grid">
+                        <section class="o_lucy_panel">
+                            <div class="o_lucy_panel_header"><div><h2>Appointment status</h2><small>Selected period</small></div></div>
+                            <div class="o_lucy_donut_layout">
+                                <div class="o_lucy_donut" t-att-style="this.donutStyle(this.groomingSegments)"><div class="o_lucy_donut_center"><strong t-out="this.state.data.grooming.website_bookings"/><span>Appointments</span></div></div>
+                                <div class="o_lucy_chart_legend"><button t-foreach="this.groomingSegments" t-as="segment" t-key="segment.name" t-on-click="() =&gt; this.openGrooming(segment.name.toLowerCase().replace(' ', '_'))"><i t-att-style="'background:' + segment.color"/><span t-out="segment.name"/><b t-out="segment.value"/></button></div>
+                            </div>
+                        </section>
+                        <section class="o_lucy_panel o_lucy_chart_panel">
+                            <div class="o_lucy_panel_header"><div><h2>Appointments by day</h2><small>Booking movement</small></div></div>
+                            <div class="o_lucy_bar_chart compact"><div class="o_lucy_bar_day" t-foreach="this.state.data.sky.grooming.days" t-as="day" t-key="day.date"><div class="o_lucy_bar_stage"><i class="o_lucy_bar_grooming" t-att-style="this.chartHeight(day.appointments, this.state.data.sky.grooming.days, 'appointments')"/></div><small t-out="day.label"/></div></div>
+                        </section>
+                    </div>
+                    <section class="o_lucy_panel">
+                        <div class="o_lucy_panel_header"><div><h2>Recent website grooming bookings</h2><small>Odoo website, Next.js and portal</small></div></div>
+                        <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Reference</th><th>Customer</th><th>Pet</th><th>Date</th><th>Status</th></tr></thead><tbody>
+                            <tr t-foreach="this.state.data.grooming.recent" t-as="booking" t-key="booking.id" t-on-click="() => this.openRecord('grooming.appointment', booking.id, 'Grooming Appointment')"><td t-out="booking.reference"/><td t-out="booking.customer"/><td t-out="booking.pet"/><td t-out="booking.date"/><td class="text-capitalize" t-out="booking.state.replaceAll('_', ' ')"/></tr>
+                            <tr t-if="!this.state.data.grooming.recent.length"><td colspan="5" class="text-center text-muted py-4">No website grooming bookings in this period.</td></tr>
+                        </tbody></table></div>
+                    </section>
+                </div>
+
+                <!-- POS -->
+                <div t-if="this.state.activeTab === 'pos'" class="o_lucy_tab_panel">
+                    <div class="o_lucy_section_title"><div><span>POINT OF SALE</span><h2>Sales and expenses</h2></div><button class="btn o_lucy_primary" t-on-click="(ev) =&gt; this.openPosOrders(ev)">POS orders</button></div>
+                    <div class="o_lucy_cards">
+                        <button class="o_lucy_card"><span>Gross sales</span><strong t-out="this.money(this.state.data.sky.weekly.gross_sales)"/></button>
+                        <button class="o_lucy_card"><span>Returns</span><strong t-out="this.money(this.state.data.sky.weekly.returns)"/></button>
+                        <button class="o_lucy_card"><span>Expenses</span><strong t-out="this.money(this.state.data.sky.weekly.expenses)"/></button>
+                        <button class="o_lucy_card"><span>Net after expenses</span><strong t-out="this.money(this.state.data.sky.weekly.net_after_expenses)"/></button>
+                    </div>
+                    <div class="o_lucy_grid">
+                        <section class="o_lucy_panel"><div class="o_lucy_panel_header"><div><h2>Sales by POS location</h2><small t-out="this.state.data.sky.weekly.orders + ' orders · ' + this.state.data.sky.weekly.items + ' items'"/></div></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Location</th><th>Orders</th><th class="text-end">Sales</th><th class="text-end">After expenses</th></tr></thead><tbody><tr t-foreach="this.state.data.sky.weekly.branches" t-as="branch" t-key="branch.id"><td t-out="branch.name"/><td t-out="branch.orders"/><td class="text-end" t-out="this.money(branch.sales)"/><td class="text-end" t-out="this.money(branch.net_after_expenses)"/></tr></tbody></table></div></section>
+                        <section class="o_lucy_panel"><div class="o_lucy_panel_header"><div><h2>Payments received</h2><small>By payment method</small></div></div><div class="o_lucy_donut_layout"><div class="o_lucy_donut" t-att-style="this.donutStyle(this.paymentSegments)"><div class="o_lucy_donut_center"><strong t-out="this.money(this.state.data.sky.weekly.net_sales)"/><span>Received</span></div></div><div class="o_lucy_chart_legend"><div t-foreach="this.paymentSegments" t-as="segment" t-key="segment.name"><i t-att-style="'background:' + segment.color"/><span t-out="segment.name"/><b t-out="this.money(segment.value)"/></div><p t-if="!this.paymentSegments.length" class="text-muted">No payments</p></div></div></section>
+                    </div>
+                    <section class="o_lucy_panel o_lucy_chart_panel"><div class="o_lucy_panel_header"><div><h2>Sales and expenses by day</h2><small>Selected period</small></div></div><div class="o_lucy_bar_chart"><div class="o_lucy_bar_day" t-foreach="this.state.data.sky.weekly.days" t-as="day" t-key="day.date"><div class="o_lucy_bar_stage"><i class="o_lucy_bar_sales" t-att-style="this.chartHeight(day.sales, this.state.data.sky.weekly.days, 'sales')"/><i class="o_lucy_bar_expense" t-att-style="this.chartHeight(day.expenses, this.state.data.sky.weekly.days, 'sales')"/></div><small t-out="day.label"/></div></div><div class="o_lucy_chart_key"><span><i class="sales"/>Sales</span><span><i class="expense"/>Expenses</span></div></section>
+                </div>
+
+                <!-- CATALOG -->
+                <div t-if="this.state.activeTab === 'catalog'" class="o_lucy_tab_panel">
+                    <div class="o_lucy_section_title"><div><span>NEXT.JS CATALOG</span><h2>Products, sales and readiness</h2></div><button class="btn o_lucy_primary" t-on-click="() => this.openAction('lucy.action_lucy_nextjs_navigation')">Manage website menus</button></div>
+                    <nav class="o_lucy_catalog_tabs" aria-label="Catalog animal categories">
+                        <button t-foreach="this.state.data.catalog" t-as="category" t-key="category.key" t-att-class="this.state.activeCatalogKey === category.key ? 'active' : ''" t-on-click="() => this.setCatalogCategory(category.key)">
+                            <span t-out="category.icon"/><b t-out="category.name"/>
+                        </button>
+                    </nav>
+                    <t t-if="this.activeCatalog">
+                        <div class="o_lucy_cards">
+                            <button class="o_lucy_card" t-on-click="() => this.openCatalogProducts('all')"><span>Active products</span><strong t-out="this.activeCatalog.products"/><small t-out="this.activeCatalog.published + ' published online'"/></button>
+                            <button class="o_lucy_card"><span>Units available</span><strong t-out="Math.round(this.activeCatalog.stock_units)"/><small t-out="this.money(this.activeCatalog.inventory_value) + ' inventory value'"/></button>
+                            <button class="o_lucy_card"><span>Units sold</span><strong t-out="Math.round(this.activeCatalog.units_sold)"/><small>Selected period</small></button>
+                            <button class="o_lucy_card"><span>Combined revenue</span><strong t-out="this.money(this.activeCatalog.pos_revenue + this.activeCatalog.website_revenue)"/><small>POS and website</small></button>
+                        </div>
+                        <div class="o_lucy_grid">
+                            <section class="o_lucy_panel"><div class="o_lucy_panel_header"><div><h2>Stock health</h2><small t-out="this.activeCatalog.name + ' catalog'"/></div></div><div class="o_lucy_donut_layout"><div class="o_lucy_donut" t-att-style="this.donutStyle(this.catalogStockSegments)"><div class="o_lucy_donut_center"><strong t-out="this.activeCatalog.products"/><span>Products</span></div></div><div class="o_lucy_chart_legend"><div t-foreach="this.catalogStockSegments" t-as="segment" t-key="segment.name"><i t-att-style="'background:' + segment.color"/><span t-out="segment.name"/><b t-out="segment.value"/></div></div></div></section>
+                            <section class="o_lucy_panel"><div class="o_lucy_panel_header"><div><h2>Revenue source</h2><small>Selected period</small></div></div><div class="o_lucy_donut_layout"><div class="o_lucy_donut" t-att-style="this.donutStyle(this.catalogRevenueSegments)"><div class="o_lucy_donut_center"><strong t-out="this.money(this.activeCatalog.pos_revenue + this.activeCatalog.website_revenue)"/><span>Revenue</span></div></div><div class="o_lucy_chart_legend"><div t-foreach="this.catalogRevenueSegments" t-as="segment" t-key="segment.name"><i t-att-style="'background:' + segment.color"/><span t-out="segment.name"/><b t-out="this.money(segment.value)"/></div></div></div></section>
+                        </div>
+                        <section class="o_lucy_panel o_lucy_catalog_readiness">
+                            <div class="o_lucy_panel_header"><div><h2>Catalog readiness</h2><small>Items requiring content attention</small></div></div>
+                            <div class="o_lucy_status_grid">
+                                <button t-on-click="() => this.openCatalogProducts('missing_images')"><b t-out="this.activeCatalog.missing_images"/><span>Missing images</span></button>
+                                <button t-on-click="() => this.openCatalogProducts('zero_price')"><b t-out="this.activeCatalog.zero_price"/><span>Zero sale price</span></button>
+                                <button t-on-click="() => this.openCatalogProducts('missing_description')"><b t-out="this.activeCatalog.missing_description"/><span>Missing description</span></button>
+                                <button t-on-click="() => this.openCatalogProducts('out_of_stock')"><b t-out="this.activeCatalog.out_of_stock"/><span>Out of stock</span></button>
+                            </div>
+                        </section>
+                        <section class="o_lucy_panel o_lucy_catalog_products">
+                            <div class="o_lucy_panel_header"><div><h2>Top products</h2><small>Ranked by POS and website revenue</small></div><button class="btn btn-link" t-on-click="() => this.openCatalogProducts('all')">View all</button></div>
+                            <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Product</th><th class="text-end">Price</th><th class="text-end">Stock</th><th class="text-end">Units sold</th><th class="text-end">Revenue</th></tr></thead><tbody><tr t-foreach="this.activeCatalog.top_products" t-as="product" t-key="product.id" t-on-click="() => this.openRecord('product.template', product.id, 'Product')"><td><div class="o_lucy_product_cell"><img t-att-src="product.image" t-att-alt="product.name"/><span t-out="product.name"/></div></td><td class="text-end" t-out="this.money(product.price)"/><td class="text-end" t-out="Math.round(product.stock)"/><td class="text-end" t-out="Math.round(product.units)"/><td class="text-end" t-out="this.money(product.revenue)"/></tr><tr t-if="!this.activeCatalog.top_products.length"><td colspan="5" class="text-center text-muted py-4">No products found in this category.</td></tr></tbody></table></div>
+                        </section>
+                    </t>
+                </div>
+
+                <!-- INVENTORY -->
+                <div t-if="this.state.activeTab === 'inventory'" class="o_lucy_tab_panel">
+                    <div class="o_lucy_section_title"><div><span>INVENTORY</span><h2>Stock and replenishments</h2></div><button class="btn o_lucy_primary" t-on-click="() => this.openAction('sky_dashboard.action_sky_daily_stock')">Daily stock</button></div>
+                    <div class="o_lucy_cards">
+                        <button class="o_lucy_card" t-on-click="() => this.openAction('lucy.action_lucy_products')"><span>Active products</span><strong t-out="this.state.data.inventory.active_products"/></button>
+                        <button class="o_lucy_card"><span>Inventory value</span><strong t-out="this.money(this.state.data.inventory.inventory_value)"/></button>
+                        <button class="o_lucy_card"><span>Low stock</span><strong t-out="this.state.data.inventory.low_stock"/></button>
+                        <button class="o_lucy_card"><span>Out of stock</span><strong t-out="this.state.data.inventory.out_of_stock"/></button>
+                    </div>
+                    <div class="o_lucy_grid">
+                        <section class="o_lucy_panel"><div class="o_lucy_panel_header"><div><h2>Stock health</h2><small>Storable products</small></div></div><div class="o_lucy_donut_layout"><div class="o_lucy_donut" t-att-style="this.donutStyle(this.stockSegments)"><div class="o_lucy_donut_center"><strong t-out="this.state.data.inventory.storable_products"/><span>Products</span></div></div><div class="o_lucy_chart_legend"><div t-foreach="this.stockSegments" t-as="segment" t-key="segment.name"><i t-att-style="'background:' + segment.color"/><span t-out="segment.name"/><b t-out="segment.value"/></div></div></div></section>
+                        <section class="o_lucy_panel o_lucy_action_panel"><h2>Replenishment approvals</h2><strong t-out="this.state.data.inventory.pending_replenishments"/><p>Requests awaiting administrator review.</p><button class="btn o_lucy_primary" t-on-click="() => this.openAction('grooming.action_grooming_stock_request')">Open replenishments</button></section>
+                    </div>
+                    <section class="o_lucy_panel o_lucy_action_panel o_lucy_valuation_panel"><div><h2>Pricing and valuation</h2><p>Review product prices, cost and stock valuation using the existing SKY tools.</p></div><button class="btn btn-outline-secondary" t-on-click="() => this.openAction('sky_dashboard.action_sky_pricing_dashboard')">Open valuation</button></section>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

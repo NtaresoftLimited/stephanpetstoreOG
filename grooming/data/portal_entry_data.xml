@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Customer portal (/my) cards. Icons use the same artwork as the website
+         (Grooming menu scissors, pet icons, shopping bag). noupdate="0" so module
+         upgrades keep the icons in sync. -->
+    <data noupdate="0">
+        <record id="portal_entry_grooming" model="portal.entry">
+            <field name="name">Grooming Appointments</field>
+            <field name="description">View your pet grooming appointments &amp; status</field>
+            <field name="url">/my/grooming</field>
+            <field name="image" type="bytes" file="grooming/static/src/img/grooming-scissors.webp"/>
+            <field name="placeholder_count">grooming_appointment_count</field>
+            <field name="category">client_category</field>
+            <field name="sequence" eval="20"/>
+        </record>
+
+        <record id="portal_entry_pets" model="portal.entry">
+            <field name="name">My Pets</field>
+            <field name="description">Manage your registered pets &amp; care details</field>
+            <field name="url">/my/pets</field>
+            <field name="image" type="bytes" file="grooming/static/src/img/pet-dog.webp"/>
+            <field name="placeholder_count">pet_count</field>
+            <field name="category">client_category</field>
+            <field name="sequence" eval="25"/>
+        </record>
+
+        <record id="portal_entry_pos_orders" model="portal.entry">
+            <field name="name">Store Purchases</field>
+            <field name="description">Receipts from your visits to our stores</field>
+            <field name="url">/my/pos_orders</field>
+            <field name="image" type="bytes" file="whatsapp_connector/static/src/img/store-bag.webp"/>
+            <field name="placeholder_count">pos_order_count</field>
+            <field name="category">client_category</field>
+            <field name="sequence" eval="55"/>
+        </record>
+    </data>
+</odoo>

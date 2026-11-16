@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="wise_pos_stock.LowStockDialog">
+        <Dialog title.translate="Low Stock" size="'lg'">
+            <div class="d-flex gap-2 mb-3">
+                <input type="text" class="form-control" placeholder="Search product or code..."
+                       t-model.proxy="this.state.search"/>
+                <button class="btn btn-secondary" t-on-click="() => this.refresh()" t-att-disabled="this.state.refreshing">
+                    <t t-if="this.state.refreshing">Refreshing...</t><t t-else="">Refresh</t>
+                </button>
+            </div>
+            <p class="text-muted small mb-2">
+                Products with <t t-out="this.threshold"/> or fewer in stock at this till's location.
+            </p>
+            <t t-set="rows" t-value="this.rows"/>
+            <div t-if="!rows.length" class="text-center text-muted py-4">No low stock products.</div>
+            <table t-else="" class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr><th>Product</th><th>Code</th><th class="text-end">In stock</th></tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="rows" t-as="row" t-key="row.id">
+                        <td t-out="row.name"/>
+                        <td class="text-muted" t-out="row.code"/>
+                        <td class="text-end fw-bold" t-att-class="row.qty &lt;= 0 ? 'text-danger' : ''" t-out="row.qty"/>
+                    </tr>
+                </tbody>
+            </table>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="() => this.props.close()">Close</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

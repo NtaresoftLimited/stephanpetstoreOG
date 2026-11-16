@@ -8,7 +8,7 @@ class SaleOrderInheritPayment(models.Model):
 
     def action_register_payment(self):
         self.ensure_one()
-        amount_due = getattr(self, 'techovers_amount_due', self.amount_total) or self.amount_total
+        amount_due = self.amount_total
         return {
             'name': _('Register Payment: %s') % self.name,
             'type': 'ir.actions.act_window',
@@ -181,19 +181,13 @@ class SaleOrderPaymentWizard(models.TransientModel):
                     lambda line: line.account_id == account and not line.reconciled
                 ).reconcile()
 
-        # 6. Recompute order payment summary & status
-        if hasattr(order, '_compute_techovers_payment_summary'):
-            order._compute_techovers_payment_summary()
-
-        # 7. Log payment details + reference in Chatter
+        # 6. Log payment details + reference in Chatter
         formatted_amount = f"{order.currency_id.symbol or 'TSh'} {self.amount:,.2f}"
         body = Markup(
             "<b>Payment Registered:</b> %s via <b>%s</b>"
         ) % (formatted_amount, self.pos_payment_method_id.name)
         if ref_clean:
             body += Markup(" (Ref: <code>%s</code>)") % ref_clean
-        if hasattr(order, 'techovers_payment_status'):
-            body += Markup(" &bull; Status: <b>%s</b>") % order.techovers_payment_status.upper()
         if self.note:
             body += Markup("<br/>Note: %s") % self.note
 

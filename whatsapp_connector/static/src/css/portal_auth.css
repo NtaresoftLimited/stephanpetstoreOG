@@ -1,0 +1,318 @@
+/* Customer login (/web/login, /web/login/whatsapp) and shared portal styling.
+ * Brand: brown #3e220f, caramel #c77e35, WhatsApp green #25D366. */
+
+/* Odoo 20 renders the login form with .d-none and only reveals it from the lazy JS bundle
+ * (web.user_switch), which can take several seconds. Keep it visible until that bundle runs;
+ * afterwards user_switch decides (it hides the form when several remembered users exist). */
+body.o_lazy_js_waiting .oe_login_form.d-none {
+    display: block !important;
+}
+
+.oe_login_form .o_wa_divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0 10px;
+    color: #8a8178;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+.oe_login_form .o_wa_divider::before,
+.oe_login_form .o_wa_divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e7e1da;
+}
+
+.o_wa_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: #25D366;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(37, 211, 102, .25);
+    transition: background .2s ease, transform .2s ease;
+}
+.o_wa_btn:hover,
+.o_wa_btn:focus-visible {
+    background: #1ebe5d;
+    color: #fff;
+    transform: translateY(-1px);
+}
+.o_wa_btn_dark {
+    background: #3e220f;
+    box-shadow: 0 6px 18px rgba(62, 34, 15, .22);
+}
+.o_wa_btn_dark:hover,
+.o_wa_btn_dark:focus-visible {
+    background: #5a3318;
+}
+.o_wa_btn .oi {
+    font-size: 20px;
+}
+.o_wa_btn_icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+}
+.o_wa_icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: -4px;
+}
+
+.o_wa_login {
+    width: 100%;
+    max-width: 420px;
+    margin: 28px auto;
+    padding: 32px 28px;
+    background: #fff;
+    border: 1px solid #efe7de;
+    border-radius: 20px;
+    box-shadow: 0 18px 50px rgba(62, 34, 15, .08);
+    color: #2b2622;
+}
+.o_wa_login_head {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.o_wa_login_head h2 {
+    margin: 12px 0 6px;
+    font-size: 24px;
+    font-weight: 800;
+    color: #3e220f;
+}
+.o_wa_login_head p {
+    margin: 0;
+    color: #6f655c;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.o_wa_login_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #e8f9ee;
+    color: #128C7E;
+    font-size: 13px;
+    font-weight: 700;
+}
+.o_wa_label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #3e220f;
+}
+.o_wa_optional {
+    font-weight: 400;
+    color: #8a8178;
+}
+.o_wa_login .form-control {
+    min-height: 46px;
+    border-radius: 12px;
+    border-color: #e2d9cf;
+}
+.o_wa_login .form-control:focus {
+    border-color: #c77e35;
+    box-shadow: 0 0 0 3px rgba(199, 126, 53, .18);
+}
+.o_wa_input_group {
+    display: flex;
+    align-items: stretch;
+}
+.o_wa_input_prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: #f6fbf8;
+    border: 1px solid #e2d9cf;
+    border-right: 0;
+    border-radius: 12px 0 0 12px;
+}
+.o_wa_input_group .form-control {
+    border-radius: 0 12px 12px 0;
+}
+.o_wa_otp_input {
+    text-align: center;
+    font-size: 26px !important;
+    font-weight: 800;
+    letter-spacing: .4em;
+}
+.o_wa_hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #8a8178;
+}
+.o_wa_hint .oi {
+    font-size: 14px;
+    vertical-align: -2px;
+}
+.o_wa_alert {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+.o_wa_alert .oi {
+    font-size: 18px;
+    line-height: 1.1;
+}
+.o_wa_alert_error {
+    background: #fdecec;
+    color: #9b1c1c;
+}
+.o_wa_alert_ok {
+    background: #e8f9ee;
+    color: #0f6b4f;
+}
+.o_wa_otp_actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #efe7de;
+}
+.o_wa_otp_actions form {
+    margin: 0;
+}
+.o_wa_link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    color: #8b4f22;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.o_wa_link:hover {
+    color: #3e220f;
+    text-decoration: underline;
+}
+.o_wa_link .oi {
+    font-size: 16px;
+}
+.o_wa_footer {
+    margin-top: 22px;
+    text-align: center;
+}
+.o_wa_footer p {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #8a8178;
+}
+
+/* Portal buttons in the store's brown instead of Odoo's default purple */
+#wrapwrap .o_portal_wrap .btn-primary {
+    /* Odoo 20 names (--btn-*) and Bootstrap names (--bs-btn-*) */
+    --btn-bg: #3e220f;
+    --btn-border-color: #3e220f;
+    --btn-hover-bg: #5a3318;
+    --btn-hover-border-color: #5a3318;
+    --btn-active-bg: #2c1709;
+    --btn-active-border-color: #2c1709;
+    --btn-color: #fff;
+    --btn-hover-color: #fff;
+    --btn-focus-shadow-rgb: 62, 34, 15;
+    --bs-btn-bg: #3e220f;
+    --bs-btn-border-color: #3e220f;
+    --bs-btn-hover-bg: #5a3318;
+    --bs-btn-hover-border-color: #5a3318;
+    --bs-btn-active-bg: #2c1709;
+    --bs-btn-active-border-color: #2c1709;
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+}
+
+/* Shared portal page header / empty states (used by Store Purchases and grooming pages) */
+.o_stephans_portal_title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 18px 0 14px;
+}
+.o_stephans_portal_title h4 {
+    margin: 0;
+    font-weight: 800;
+    color: #3e220f;
+}
+.o_stephans_portal_title p {
+    margin: 2px 0 0;
+    color: #6f655c;
+    font-size: 14px;
+}
+.o_stephans_portal_title_icon {
+    width: 52px;
+    height: 52px;
+    padding: 8px;
+    object-fit: contain;
+    border-radius: 14px;
+    background: #fbf3ea;
+}
+.o_stephans_portal_title .btn {
+    margin-left: auto;
+}
+.o_stephans_portal_inline_icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+.o_stephans_portal_empty {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 22px;
+    border: 1px dashed #e2d3c2;
+    border-radius: 16px;
+    background: #fdf9f5;
+}
+.o_stephans_portal_empty img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+.o_stephans_portal_empty div {
+    flex: 1 1 240px;
+}
+.o_stephans_portal_empty h5 {
+    margin: 0 0 4px;
+    font-weight: 800;
+    color: #3e220f;
+}
+.o_stephans_portal_empty p {
+    margin: 0;
+    color: #6f655c;
+}
+@media (max-width: 575.98px) {
+    .o_wa_login {
+        padding: 24px 18px;
+        border-radius: 16px;
+    }
+    .o_stephans_portal_title {
+        flex-wrap: wrap;
+    }
+    .o_stephans_portal_title .btn {
+        margin-left: 0;
+    }
+}

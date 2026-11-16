@@ -81,7 +81,10 @@ class GroomingController(http.Controller):
             
             # Find or create partner
             Partner = request.env['res.partner'].sudo()
-            partner = Partner.search(['|', ('phone', '=', phone), ('mobile', '=', phone)], limit=1)
+            partner_domain = [('phone', '=', phone)]
+            if 'mobile' in Partner._fields:
+                partner_domain = ['|', ('phone', '=', phone), ('mobile', '=', phone)]
+            partner = Partner.search(partner_domain, limit=1)
             
             if not partner:
                 partner = Partner.create({
@@ -116,7 +119,7 @@ class GroomingController(http.Controller):
             
             # Create appointment
             Appointment = request.env['grooming.appointment'].sudo()
-            appointment = Appointment.create({
+            appointment_values = {
                 'partner_id': partner.id,
                 'pet_name': post.get('pet_name'),
                 'pet_type': post.get('pet_type'),
@@ -130,7 +133,12 @@ class GroomingController(http.Controller):
                 'preferred_time': time_str,
                 'notes': post.get('notes'),
                 'state': 'pending',
-            })
+            }
+            if 'booking_source' in Appointment._fields:
+                appointment_values['booking_source'] = 'odoo_website'
+            if 'website_id' in Appointment._fields:
+                appointment_values['website_id'] = request.website.id
+            appointment = Appointment.create(appointment_values)
             
             return request.render('grooming.booking_success', {
                 'appointment': appointment,
@@ -148,9 +156,11 @@ class GroomingController(http.Controller):
         appointments = []
         
         if phone:
-            partner = request.env['res.partner'].sudo().search([
-                '|', ('phone', '=', phone), ('mobile', '=', phone)
-            ], limit=1)
+            Partner = request.env['res.partner'].sudo()
+            partner_domain = [('phone', '=', phone)]
+            if 'mobile' in Partner._fields:
+                partner_domain = ['|', ('phone', '=', phone), ('mobile', '=', phone)]
+            partner = Partner.search(partner_domain, limit=1)
             
             if partner:
                 appointments = request.env['grooming.appointment'].sudo().search([

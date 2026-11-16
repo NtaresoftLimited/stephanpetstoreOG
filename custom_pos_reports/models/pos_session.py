@@ -1,5 +1,34 @@
 from odoo import models, api, fields
 
+
+class IrConfigParameter(models.Model):
+    _inherit = 'ir.config_parameter'
+
+    @api.model
+    def get_param(self, key, default=False):
+        if hasattr(self, 'get_str'):
+            val = self.get_str(key)
+            return val if val else default
+        return super().get_param(key, default=default)
+
+    @api.model
+    def set_param(self, key, value):
+        if hasattr(self, 'set_str'):
+            return self.set_str(key, '' if value is False or value is None else str(value))
+        return super().set_param(key, value)
+
+
+class PosConfig(models.Model):
+    _inherit = 'pos.config'
+
+    basic_employee_ids = fields.Many2many(
+        'hr.employee', related='cashier_employee_ids', readonly=False,
+    )
+    advanced_employee_ids = fields.Many2many(
+        'hr.employee', related='manager_employee_ids', readonly=False,
+    )
+
+
 class PosSession(models.Model):
     _inherit = 'pos.session'
 

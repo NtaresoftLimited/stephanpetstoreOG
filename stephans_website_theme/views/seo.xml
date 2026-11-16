@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="stephans_seo_layout" inherit_id="website.layout" name="Stephan's SEO and Performance Hints">
+        <xpath expr="//head" position="inside">
+            <t t-set="stephans_page_descriptions" t-value="{
+                '/': 'Shop premium pet food, toys and accessories, and book professional pet grooming at Stephan\'s Pet Store in Dar es Salaam, Tanzania.',
+                '/shop': 'Browse premium pet food, toys, accessories and pet-care essentials from Stephan\'s Pet Store in Tanzania.',
+                '/grooming': 'Book gentle, professional dog, cat and small-animal grooming at Stephan\'s Pet Store in Dar es Salaam.',
+                '/contact': 'Contact Stephan\'s Pet Store for product help, grooming bookings, store directions and customer support in Dar es Salaam.',
+                '/stores': 'Find Stephan\'s Pet Store locations in Masaki and Mikocheni, Dar es Salaam.',
+                '/about': 'Learn about Stephan\'s Pet Store, our pet-care values and our stores in Dar es Salaam.',
+                '/allbrands': 'Explore trusted pet food, grooming and accessory brands available at Stephan\'s Pet Store.',
+                '/faq': 'Find answers about shopping, delivery, returns and grooming at Stephan\'s Pet Store.',
+                '/faqs': 'Find answers about shopping, delivery, returns and grooming at Stephan\'s Pet Store.',
+                '/delivery': 'Read Stephan\'s Pet Store delivery information for orders across Tanzania.',
+                '/return-policy': 'Read the Stephan\'s Pet Store return and exchange policy.',
+                '/terms': 'Read the terms and conditions for shopping with Stephan\'s Pet Store.',
+                '/blog': 'Pet care advice, product guides and news from Stephan\'s Pet Store.',
+                '/grooming-policy': 'Review the Stephan\'s Pet Store grooming policy before your appointment.'
+            }"/>
+            <meta t-if="not meta_description" name="description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
+            <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+            <link rel="alternate" hreflang="en-TZ" t-att-href="'https://stephanspetstore.co.tz' + request.httprequest.path"/>
+            <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"/>
+            <meta property="og:site_name" content="Stephan's Pet Store"/>
+            <meta property="og:locale" content="en_TZ"/>
+            <meta property="og:type" content="website"/>
+            <meta property="og:description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
+            <meta property="og:url" t-att-content="'https://stephanspetstore.co.tz' + request.httprequest.path"/>
+            <meta property="og:image" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp"/>
+            <meta property="og:image:alt" content="Stephan's Pet Store in Dar es Salaam"/>
+            <meta name="twitter:card" content="summary_large_image"/>
+            <meta name="twitter:description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
+            <meta name="twitter:image" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp"/>
+            <link t-if="request.httprequest.path in ('/', '/stephans-preview')" rel="preload" as="image" href="/stephans_website_theme/static/src/images/hero/hero-stephans.webp" type="image/webp" fetchpriority="high"/>
+            <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "PetStore",
+      "@id": "https://stephanspetstore.co.tz/#masaki-store",
+      "name": "Stephan's Pet Store Masaki",
+      "url": "https://stephanspetstore.co.tz/stores",
+      "image": "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp",
+      "logo": "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/branding/logo.png",
+      "telephone": "+255786627873",
+      "email": "info@stephanspetstore.co.tz",
+      "priceRange": "TZS",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "11 Slipway Road, Masaki",
+        "addressLocality": "Dar es Salaam",
+        "addressCountry": "TZ"
+      },
+      "openingHoursSpecification": [
+        {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "20:30"},
+        {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "20:30"}
+      ],
+      "sameAs": ["https://instagram.com/stephans_ps", "https://facebook.com/stephanspetstore"]
+    },
+    {
+      "@type": "PetStore",
+      "@id": "https://stephanspetstore.co.tz/#mikocheni-store",
+      "name": "Stephan's Pet Store Mikocheni",
+      "url": "https://stephanspetstore.co.tz/stores",
+      "telephone": "+255769324445",
+      "email": "info@stephanspetstore.co.tz",
+      "priceRange": "TZS",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "59 Mikocheni A",
+        "addressLocality": "Dar es Salaam",
+        "addressCountry": "TZ"
+      },
+      "openingHoursSpecification": [
+        {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "20:30"},
+        {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "20:30"}
+      ]
+    }
+  ]
+}
+            </script>
+        </xpath>
+    </template>
+</odoo>

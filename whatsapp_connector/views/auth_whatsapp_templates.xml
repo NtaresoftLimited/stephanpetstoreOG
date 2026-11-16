@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 1. Add "Login with WhatsApp" button to native Odoo /web/login -->
+    <!-- 1. Native Odoo /web/login: submit without waiting for the lazy JS bundle + "Continue with WhatsApp" -->
     <template id="web_login_whatsapp_button" name="Login with WhatsApp Button" inherit_id="web.login">
-        <xpath expr="//div[hasclass('o_login_auth')]" position="inside">
-            <a t-attf-href="/web/login/whatsapp{{ '?redirect=' + redirect if redirect else '' }}"
-               class="btn w-100 mt-2 d-flex align-items-center justify-content-center gap-2 fw-semibold"
-               style="background-color: #25D366; color: #ffffff; border: 1px solid #1ebe5d;">
-                <i class="fa fa-whatsapp fs-5" role="img" aria-label="WhatsApp" title="WhatsApp"/>
-                <span>Login with WhatsApp</span>
+        <xpath expr="//form[@data-captcha='login']" position="attributes">
+            <attribute name="t-attf-class">oe_login_form o_no_wait_lazy_js #{'' if login else 'd-none'}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('oe_login_buttons')]/button[@type='submit']" position="attributes">
+            <attribute name="class" add="o_no_wait_lazy_js" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('oe_login_buttons')]" position="inside">
+            <div class="o_wa_divider"><span>or</span></div>
+            <a t-attf-href="/web/login/whatsapp?#{keep_query('redirect')}" class="btn o_wa_btn">
+                <img src="/whatsapp_connector/static/src/img/whatsapp-white.svg" alt="" class="o_wa_btn_icon"/>
+                <span>Continue with WhatsApp</span>
             </a>
         </xpath>
     </template>
@@ -15,153 +20,143 @@
     <!-- 2. Dedicated WhatsApp OTP Login Page (/web/login/whatsapp) -->
     <template id="whatsapp_login" name="WhatsApp Customer Login">
         <t t-call="web.login_layout">
-            <div class="oe_login_form">
-                <div class="text-center mb-3">
-                    <span class="badge rounded-pill px-3 py-2 mb-2" style="background-color: #e8f9ee; color: #128C7E; font-size: 0.85rem;">
-                        <i class="fa fa-whatsapp me-1"/> WhatsApp Portal Access
+            <div class="o_wa_login">
+                <div class="o_wa_login_head">
+                    <span class="o_wa_login_badge">
+                        <img src="/whatsapp_connector/static/src/img/whatsapp.svg" alt="" class="o_wa_icon"/>
+                        WhatsApp Login
                     </span>
-                    <h5 class="fw-bold mb-1" t-if="step == 'phone'">Customer Portal Login</h5>
-                    <h5 class="fw-bold mb-1" t-if="step == 'otp'">Enter Verification Code</h5>
-                    <p class="text-muted small mb-0" t-if="step == 'phone'">
-                        Enter your WhatsApp phone number to receive a one-time login code.
+                    <h2 t-if="step == 'phone'">Sign in to your account</h2>
+                    <h2 t-if="step == 'otp'">Enter your code</h2>
+                    <p t-if="step == 'phone'">
+                        Enter your WhatsApp number and we'll send you a 6-digit login code.
+                        New customer? An account is created for you automatically.
                     </p>
-                    <p class="text-muted small mb-0" t-if="step == 'otp'">
-                        Enter the 6-digit code sent to <strong t-esc="phone"/>
+                    <p t-if="step == 'otp'">
+                        We sent a 6-digit code to <strong t-out="phone"/> on WhatsApp.
                     </p>
                 </div>
 
-                <p class="alert alert-danger py-2 small" t-if="error" role="alert">
-                    <i class="fa fa-exclamation-circle me-1"/>
-                    <t t-esc="error"/>
-                </p>
-                <p class="alert alert-success py-2 small" t-if="message" role="status">
-                    <i class="fa fa-check-circle me-1"/>
-                    <t t-esc="message"/>
-                </p>
+                <div class="o_wa_alert o_wa_alert_error" t-if="error" role="alert">
+                    <i class="oi" data-icon="error"/>
+                    <span t-out="error"/>
+                </div>
+                <div class="o_wa_alert o_wa_alert_ok" t-if="message" role="status">
+                    <i class="oi" data-icon="check_circle"/>
+                    <span t-out="message"/>
+                </div>
 
-                <!-- STEP 1: Enter WhatsApp Phone Number -->
-                <t t-if="step == 'phone'">
-                    <form action="/web/login/whatsapp" method="post" class="mt-3">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <input type="hidden" name="action" value="send_otp"/>
-                        <input type="hidden" name="redirect" t-att-value="redirect"/>
+                <!-- STEP 1: WhatsApp phone number -->
+                <form t-if="step == 'phone'" action="/web/login/whatsapp" method="post" class="o_no_wait_lazy_js">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="action" value="send_otp"/>
+                    <input type="hidden" name="redirect" t-att-value="redirect"/>
 
-                        <div class="mb-3">
-                            <label for="wa_phone" class="form-label fw-semibold">WhatsApp Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fa fa-whatsapp text-success"/>
-                                </span>
-                                <input type="tel"
-                                       name="phone"
-                                       id="wa_phone"
-                                       t-att-value="phone"
-                                       class="form-control"
-                                       placeholder="0769 324 445 or +255..."
-                                       required="required"
-                                       autofocus="autofocus"
-                                       autocomplete="tel"/>
-                            </div>
-                            <div class="form-text small text-muted">
-                                Use the phone number registered with Stephan's Pet Store.
-                            </div>
-                        </div>
+                    <label for="wa_phone" class="o_wa_label">WhatsApp number</label>
+                    <div class="o_wa_input_group">
+                        <span class="o_wa_input_prefix">
+                            <img src="/whatsapp_connector/static/src/img/whatsapp.svg" alt="" class="o_wa_icon"/>
+                        </span>
+                        <input type="tel" name="phone" id="wa_phone" t-att-value="phone"
+                               class="form-control" placeholder="0769 324 445 or +255..."
+                               required="required" autofocus="autofocus" autocomplete="tel" inputmode="tel"/>
+                    </div>
 
-                        <div class="d-grid gap-2 pt-2">
-                            <button type="submit"
-                                    class="btn fw-semibold py-2"
-                                    style="background-color: #25D366; color: #ffffff; border: 1px solid #1ebe5d;">
-                                <i class="fa fa-paper-plane me-1"/> Send Code via WhatsApp
-                            </button>
-                            <a t-attf-href="/web/login{{ '?redirect=' + redirect if redirect else '' }}"
-                               class="btn btn-link btn-sm text-muted">
-                                <i class="fa fa-envelope-o me-1"/> Sign in with Email &amp; Password instead
-                            </a>
-                        </div>
-                    </form>
-                </t>
+                    <label for="wa_name" class="o_wa_label mt-3">Your name <span class="o_wa_optional">(optional, for new customers)</span></label>
+                    <input type="text" name="customer_name" id="wa_name" t-att-value="customer_name"
+                           class="form-control" placeholder="e.g. Amina Juma" autocomplete="name" maxlength="120"/>
 
-                <!-- STEP 2: Verify 6-Digit OTP -->
+                    <button type="submit" class="btn o_wa_btn o_no_wait_lazy_js mt-4">
+                        <img src="/whatsapp_connector/static/src/img/whatsapp-white.svg" alt="" class="o_wa_btn_icon"/>
+                        <span>Send code via WhatsApp</span>
+                    </button>
+                </form>
+
+                <!-- STEP 2: 6-digit code -->
                 <t t-if="step == 'otp'">
-                    <form action="/web/login/whatsapp" method="post" class="mt-3">
+                    <form action="/web/login/whatsapp" method="post" class="o_no_wait_lazy_js">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                         <input type="hidden" name="action" value="verify_otp"/>
-                        <input type="hidden" name="phone" t-att-value="phone"/>
                         <input type="hidden" name="redirect" t-att-value="redirect"/>
 
-                        <div class="mb-3">
-                            <label for="wa_otp" class="form-label fw-semibold">6-Digit Code</label>
-                            <input type="text"
-                                   name="otp"
-                                   id="wa_otp"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   style="letter-spacing: 0.35em; font-size: 1.35rem;"
-                                   placeholder="••••••"
-                                   inputmode="numeric"
-                                   pattern="[0-9]{6}"
-                                   maxlength="6"
-                                   required="required"
-                                   autofocus="autofocus"
-                                   autocomplete="one-time-code"/>
-                        </div>
+                        <label for="wa_otp" class="o_wa_label">6-digit code</label>
+                        <input type="text" name="otp" id="wa_otp"
+                               class="form-control o_wa_otp_input"
+                               placeholder="••••••" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                               required="required" autofocus="autofocus" autocomplete="one-time-code"/>
+                        <p class="o_wa_hint"><i class="oi" data-icon="schedule"/> The code expires in 5 minutes.</p>
 
-                        <div class="d-grid gap-2 pt-1">
-                            <button type="submit"
-                                    class="btn fw-semibold py-2"
-                                    style="background-color: #25D366; color: #ffffff; border: 1px solid #1ebe5d;">
-                                <i class="fa fa-check me-1"/> Verify &amp; Sign In
-                            </button>
-                        </div>
+                        <button type="submit" class="btn o_wa_btn o_wa_btn_dark o_no_wait_lazy_js mt-3">
+                            <i class="oi" data-icon="lock_open"/>
+                            <span>Verify &amp; sign in</span>
+                        </button>
                     </form>
 
-                    <!-- Resend & Change Number Controls -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                        <form action="/web/login/whatsapp" method="post" class="d-inline">
+                    <div class="o_wa_otp_actions">
+                        <form action="/web/login/whatsapp" method="post" class="o_no_wait_lazy_js">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <input type="hidden" name="action" value="resend_otp"/>
-                            <input type="hidden" name="phone" t-att-value="phone"/>
                             <input type="hidden" name="redirect" t-att-value="redirect"/>
-                            <button type="submit" class="btn btn-link btn-sm p-0 text-decoration-none">
-                                <i class="fa fa-refresh me-1"/> Resend Code
+                            <button type="submit" class="btn btn-link o_wa_link o_no_wait_lazy_js" t-att-data-wait="resend_wait or None">
+                                <i class="oi" data-icon="refresh"/>
+                                <span class="o_wa_resend_label">Resend code</span>
                             </button>
                         </form>
-                        <a t-attf-href="/web/login/whatsapp?reset=1{{ '&amp;redirect=' + redirect if redirect else '' }}"
-                           class="btn btn-link btn-sm p-0 text-muted text-decoration-none">
-                            Change Number
+                        <a t-att-href="change_number_url" class="o_wa_link">
+                            <i class="oi" data-icon="edit"/> Change number
                         </a>
                     </div>
+                    <script t-if="resend_wait">
+                        (function () {
+                            var btn = document.querySelector("[data-wait]");
+                            if (!btn) { return; }
+                            var label = btn.querySelector(".o_wa_resend_label");
+                            var left = parseInt(btn.getAttribute("data-wait"), 10) || 0;
+                            btn.disabled = true;
+                            var tick = function () {
+                                if (left &lt;= 0) { btn.disabled = false; label.textContent = "Resend code"; return; }
+                                label.textContent = "Resend code in " + left + "s";
+                                left -= 1;
+                                setTimeout(tick, 1000);
+                            };
+                            tick();
+                        })();
+                    </script>
                 </t>
+
+                <div class="o_wa_footer">
+                    <a t-att-href="email_login_url" class="o_wa_link">
+                        <i class="oi" data-icon="mail"/> Sign in with email &amp; password instead
+                    </a>
+                    <p>Need help? WhatsApp us on <strong t-out="support_whatsapp"/></p>
+                </div>
             </div>
         </t>
     </template>
 
-    <!-- 3. Portal Home Card: Store Purchases (POS Receipts) -->
-    <template id="portal_my_home_pos_orders" name="Portal My Home : POS Orders" inherit_id="portal.portal_my_home" priority="25">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
-            <t t-set="portal_client_category_enable" t-value="True"/>
-        </xpath>
-        <div id="portal_client_category" position="inside">
-            <t t-call="portal.portal_docs_entry">
-                <t t-set="icon" t-value="'/point_of_sale/static/description/icon.png'"/>
-                <t t-set="title">Store Purchases (POS)</t>
-                <t t-set="text">View your in-store receipts and purchases</t>
-                <t t-set="url" t-value="'/my/pos_orders'"/>
-                <t t-set="placeholder_count" t-value="'pos_order_count'"/>
-            </t>
-        </div>
-    </template>
+    <!-- 3. Portal Home Card: Store Purchases handled via portal.entry in Odoo 20 -->
 
     <!-- 4. My POS Orders List -->
     <template id="portal_my_pos_orders" name="My Store Purchases">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs_searchbar" t-value="True"/>
-            <t t-call="portal.portal_searchbar">
-                <t t-set="title">Store Purchases (POS)</t>
-            </t>
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Store Purchases"/>
+
+            <div class="o_stephans_portal_title">
+                <img src="/whatsapp_connector/static/src/img/store-bag.webp" alt="" class="o_stephans_portal_title_icon"/>
+                <div>
+                    <h4>Store Purchases</h4>
+                    <p>Receipts from your visits to our Masaki and Mikocheni stores.</p>
+                </div>
+            </div>
 
             <t t-if="not pos_orders">
-                <div class="alert alert-info mt-3" role="alert">
-                    <p class="mb-0">No in-store POS receipts found for your account yet.</p>
+                <div class="o_stephans_portal_empty">
+                    <img src="/whatsapp_connector/static/src/img/store-bag.webp" alt=""/>
+                    <div>
+                        <h5>No store receipts yet</h5>
+                        <p>Purchases made in store with your phone number will appear here automatically.</p>
+                    </div>
+                    <a href="/shop" class="btn btn-primary rounded-pill px-4">Shop online</a>
                 </div>
             </t>
 
@@ -172,7 +167,7 @@
                             <tr>
                                 <th>Receipt Reference</th>
                                 <th>Date</th>
-                                <th>Store / Session</th>
+                                <th>Store</th>
                                 <th>Status</th>
                                 <th class="text-end">Total</th>
                             </tr>
@@ -215,8 +210,8 @@
         <t t-call="portal.portal_layout">
             <div class="card mt-3">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="fa fa-shopping-bag me-2"/>
+                    <h4 class="mb-0 d-flex align-items-center gap-2">
+                        <img src="/whatsapp_connector/static/src/img/store-bag.webp" alt="" class="o_stephans_portal_inline_icon"/>
                         <t t-out="pos_order.pos_reference or pos_order.name"/>
                     </h4>
                     <span class="badge rounded-pill text-bg-success fs-6">Paid</span>
@@ -228,7 +223,7 @@
                             <span t-field="pos_order.date_order" t-options='{"format": "dd MMM yyyy HH:mm"}'/>
                         </div>
                         <div class="col-md-6" t-if="pos_order.config_id">
-                            <strong>Branch:</strong>
+                            <strong>Store:</strong>
                             <t t-out="pos_order.config_id.name"/>
                         </div>
                     </div>
@@ -270,7 +265,7 @@
                 </div>
                 <div class="card-footer">
                     <a href="/my/pos_orders" class="btn btn-secondary">
-                        <i class="fa fa-arrow-left me-1"/> Back to Store Purchases
+                        <i class="oi" data-icon="arrow_back"/> Back to Store Purchases
                     </a>
                 </div>
             </div>

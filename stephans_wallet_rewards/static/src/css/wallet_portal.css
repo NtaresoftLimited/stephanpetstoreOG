@@ -1,0 +1,188 @@
+/* Sky Wallet & Paw Points (portal + checkout). Brand: brown #3e220f, caramel #c77e35. */
+
+.o_sky_wallet_grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 16px;
+    margin: 4px 0 24px;
+}
+.o_sky_wallet_hero {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 24px;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, #3e220f 0%, #6b3c1a 60%, #c77e35 140%);
+    box-shadow: 0 14px 36px rgba(62, 34, 15, .18);
+}
+.o_sky_wallet_hero_label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity: .8;
+}
+.o_sky_wallet_hero_amount {
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 800;
+    line-height: 1.1;
+}
+.o_sky_wallet_hero_ref {
+    font-size: 13px;
+    opacity: .75;
+}
+.o_sky_wallet_hero_actions {
+    margin-top: 14px;
+}
+.o_sky_wallet_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: #fff;
+    color: #3e220f !important;
+    font-weight: 700;
+    text-decoration: none;
+}
+.o_sky_wallet_btn:hover {
+    background: #fbf3ea;
+}
+.o_sky_wallet_hero_hint {
+    margin: 12px 0 0;
+    font-size: 13px;
+    opacity: .85;
+}
+.o_sky_wallet_hero .oi,
+.o_sky_points .oi {
+    font-size: 18px;
+    vertical-align: -4px;
+}
+
+.o_sky_points {
+    position: relative;
+    padding: 22px;
+    border: 1px solid #efe2d3;
+    border-radius: 20px;
+    background: #fdf9f5;
+}
+.o_sky_points_icon {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+}
+.o_sky_points_card + .o_sky_points_card {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #e2d3c2;
+}
+.o_sky_points_value {
+    display: block;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #3e220f;
+}
+.o_sky_points_name {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c77e35;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+.o_sky_points_hint {
+    margin: 10px 0 8px;
+    font-size: 13px;
+    color: #6f655c;
+}
+.o_sky_points_ready {
+    color: #0f6b4f;
+}
+
+.o_sky_wallet_section {
+    margin: 8px 0 12px;
+    font-weight: 800;
+    color: #3e220f;
+}
+.o_sky_tx_badge {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.o_sky_tx_in {
+    background: #e8f9ee;
+    color: #0f6b4f;
+}
+.o_sky_tx_out {
+    background: #fbf3ea;
+    color: #8b4f22;
+}
+.o_sky_tx_ref {
+    color: #6f655c;
+    font-size: 13px;
+}
+.o_sky_tx_amount_in {
+    color: #0f6b4f;
+}
+.o_sky_tx_amount_out {
+    color: #3e220f;
+}
+.o_sky_wallet_help {
+    margin-top: 18px;
+    font-size: 13px;
+    color: #8a8178;
+}
+
+/* Checkout: balance under the "Sky Wallet" option */
+.o_sky_wallet_balance {
+    align-self: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #fbf3ea;
+    color: #8b4f22;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Cart: Paw Points hint */
+.o_paw_points_hint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #fdf9f5;
+    border: 1px dashed #e2d3c2;
+    color: #6f655c;
+    font-size: 13px;
+    text-align: start;
+}
+.o_paw_points_hint img {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+}
+.o_paw_points_hint a {
+    color: #8b4f22;
+    font-weight: 700;
+}
+.o_paw_points_hint_ok {
+    background: #e8f9ee;
+    border-color: #bfe8cf;
+    color: #0f6b4f;
+}
+
+@media (max-width: 767.98px) {
+    .o_sky_wallet_grid {
+        grid-template-columns: 1fr;
+    }
+}

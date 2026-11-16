@@ -3,12 +3,11 @@
   <template id="content_page" name="Stephan's Content Page">
     <t t-call="website.layout">
       <t t-set="additional_title"><t t-out="page['title']"/></t>
+      <t t-set="meta_description" t-value="page['intro']"/>
       <t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
-      <link rel="stylesheet" href="/stephans_website_theme/static/src/css/preview.css"/>
       <link rel="stylesheet" href="/stephans_website_theme/static/src/css/pages.css"/>
       <main id="wrap" class="oe_structure stephans-theme stephans-content-page">
         <style>#wrapwrap &gt; header#top,#wrapwrap &gt; header.o_header_standard,#wrapwrap &gt; footer:not(.stephans-footer),#wrapwrap &gt; .o_footer{display:none!important}#wrapwrap{padding-top:0!important}</style>
-        <t t-call="stephans_website_theme.stephans_preview_header"/>
         <section class="content-hero" t-att-class="'content-hero content-hero--' + page_key">
           <div><p class="content-kicker"><t t-out="page['kicker']"/></p><h1><t t-out="page['title']"/></h1><p><t t-out="page['intro']"/></p></div>
           <img t-if="page.get('image')" t-att-src="page['image']" alt=""/>
@@ -18,7 +17,6 @@
           <div class="content-grid"><t t-foreach="page['sections']" t-as="section"><article><h2><t t-out="section[0]"/></h2><p class="preserve-lines"><t t-out="section[1]"/></p><t t-if="page_key == 'contact'"><a t-if="section[0] == 'Call us'" href="tel:+255786627873">Call Stephan's →</a><a t-if="section[0] == 'Email'" href="mailto:info@stephanspetstore.co.tz">Send email →</a></t></article></t></div>
           <div t-if="page_key == 'contact'" class="content-cta"><h2>Prefer WhatsApp?</h2><p>Message our team for quick help with products, orders or grooming.</p><a href="https://wa.me/255769324445">Talk to us on WhatsApp →</a></div>
         </section>
-        <t t-call="stephans_website_theme.stephans_preview_footer"/>
       </main>
     </t>
   </template>

@@ -1,0 +1,53 @@
+/* Customer portal: grooming appointments and pets (icons match the website's Grooming artwork) */
+.o_grooming_pet_icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+.o_grooming_pet_icon_sm {
+    width: 24px;
+    height: 24px;
+}
+.o_grooming_pet_icon_md {
+    width: 34px;
+    height: 34px;
+}
+.o_grooming_pet_photo {
+    border-radius: 50%;
+    object-fit: cover;
+}
+.o_grooming_pet_avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fbf3ea;
+    flex: 0 0 56px;
+    overflow: hidden;
+}
+.o_grooming_pet_avatar .o_grooming_pet_photo {
+    width: 56px;
+    height: 56px;
+}
+.o_grooming_btn_icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+.o_grooming_cta {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #fdf9f5;
+    border: 1px solid #f1e4d6;
+}
+.o_grooming_cta_icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex: 0 0 48px;
+}

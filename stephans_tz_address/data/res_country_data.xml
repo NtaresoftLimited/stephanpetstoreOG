@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- The 31 regions of Tanzania (ISO 3166-2:TZ codes) -->
+        <record id="state_tz_01" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Arusha</field>
+            <field name="code">01</field>
+        </record>
+        <record id="state_tz_02" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Dar es Salaam</field>
+            <field name="code">02</field>
+        </record>
+        <record id="state_tz_03" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Dodoma</field>
+            <field name="code">03</field>
+        </record>
+        <record id="state_tz_04" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Iringa</field>
+            <field name="code">04</field>
+        </record>
+        <record id="state_tz_05" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Kagera</field>
+            <field name="code">05</field>
+        </record>
+        <record id="state_tz_06" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Pemba North</field>
+            <field name="code">06</field>
+        </record>
+        <record id="state_tz_07" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Zanzibar North</field>
+            <field name="code">07</field>
+        </record>
+        <record id="state_tz_08" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Kigoma</field>
+            <field name="code">08</field>
+        </record>
+        <record id="state_tz_09" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Kilimanjaro</field>
+            <field name="code">09</field>
+        </record>
+        <record id="state_tz_10" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Pemba South</field>
+            <field name="code">10</field>
+        </record>
+        <record id="state_tz_11" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Zanzibar South</field>
+            <field name="code">11</field>
+        </record>
+        <record id="state_tz_12" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Lindi</field>
+            <field name="code">12</field>
+        </record>
+        <record id="state_tz_13" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Mara</field>
+            <field name="code">13</field>
+        </record>
+        <record id="state_tz_14" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Mbeya</field>
+            <field name="code">14</field>
+        </record>
+        <record id="state_tz_15" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Zanzibar Urban West</field>
+            <field name="code">15</field>
+        </record>
+        <record id="state_tz_16" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Morogoro</field>
+            <field name="code">16</field>
+        </record>
+        <record id="state_tz_17" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Mtwara</field>
+            <field name="code">17</field>
+        </record>
+        <record id="state_tz_18" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Mwanza</field>
+            <field name="code">18</field>
+        </record>
+        <record id="state_tz_19" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Pwani</field>
+            <field name="code">19</field>
+        </record>
+        <record id="state_tz_20" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Rukwa</field>
+            <field name="code">20</field>
+        </record>
+        <record id="state_tz_21" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Ruvuma</field>
+            <field name="code">21</field>
+        </record>
+        <record id="state_tz_22" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Shinyanga</field>
+            <field name="code">22</field>
+        </record>
+        <record id="state_tz_23" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Singida</field>
+            <field name="code">23</field>
+        </record>
+        <record id="state_tz_24" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Tabora</field>
+            <field name="code">24</field>
+        </record>
+        <record id="state_tz_25" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Tanga</field>
+            <field name="code">25</field>
+        </record>
+        <record id="state_tz_26" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Manyara</field>
+            <field name="code">26</field>
+        </record>
+        <record id="state_tz_27" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Geita</field>
+            <field name="code">27</field>
+        </record>
+        <record id="state_tz_28" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Katavi</field>
+            <field name="code">28</field>
+        </record>
+        <record id="state_tz_29" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Njombe</field>
+            <field name="code">29</field>
+        </record>
+        <record id="state_tz_30" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Simiyu</field>
+            <field name="code">30</field>
+        </record>
+        <record id="state_tz_31" model="res.country.state">
+            <field name="country_id" ref="base.tz"/>
+            <field name="name">Songwe</field>
+            <field name="code">31</field>
+        </record>
+
+        <!-- Dar es Salaam: the five districts, then their main areas named "Area, District" -->
+        <record id="city_tz_dsm_kinondoni" model="res.city">
+            <field name="name">Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo" model="res.city">
+            <field name="name">Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala" model="res.city">
+            <field name="name">Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke" model="res.city">
+            <field name="name">Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni" model="res.city">
+            <field name="name">Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_mikocheni" model="res.city">
+            <field name="name">Mikocheni, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_masaki" model="res.city">
+            <field name="name">Masaki, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_oysterbay" model="res.city">
+            <field name="name">Oysterbay, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_msasani" model="res.city">
+            <field name="name">Msasani, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_mbezi_beach" model="res.city">
+            <field name="name">Mbezi Beach, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_kawe" model="res.city">
+            <field name="name">Kawe, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_mwananyamala" model="res.city">
+            <field name="name">Mwananyamala, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_kijitonyama" model="res.city">
+            <field name="name">Kijitonyama, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_mwenge" model="res.city">
+            <field name="name">Mwenge, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_makumbusho" model="res.city">
+            <field name="name">Makumbusho, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_tegeta" model="res.city">
+            <field name="name">Tegeta, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_bunju" model="res.city">
+            <field name="name">Bunju, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_kunduchi" model="res.city">
+            <field name="name">Kunduchi, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_wazo" model="res.city">
+            <field name="name">Wazo, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_mabwepande" model="res.city">
+            <field name="name">Mabwepande, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_magomeni" model="res.city">
+            <field name="name">Magomeni, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_hananasif" model="res.city">
+            <field name="name">Hananasif, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_mzimuni" model="res.city">
+            <field name="name">Mzimuni, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_tandale" model="res.city">
+            <field name="name">Tandale, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_ndugumbi" model="res.city">
+            <field name="name">Ndugumbi, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kinondoni_kigogo" model="res.city">
+            <field name="name">Kigogo, Kinondoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_sinza" model="res.city">
+            <field name="name">Sinza, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_manzese" model="res.city">
+            <field name="name">Manzese, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_mabibo" model="res.city">
+            <field name="name">Mabibo, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_kimara" model="res.city">
+            <field name="name">Kimara, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_mbezi" model="res.city">
+            <field name="name">Mbezi, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_goba" model="res.city">
+            <field name="name">Goba, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_kibamba" model="res.city">
+            <field name="name">Kibamba, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_saranga" model="res.city">
+            <field name="name">Saranga, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_makuburi" model="res.city">
+            <field name="name">Makuburi, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_msigani" model="res.city">
+            <field name="name">Msigani, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ubungo_makongo" model="res.city">
+            <field name="name">Makongo, Ubungo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_city_centre" model="res.city">
+            <field name="name">City Centre, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_kariakoo" model="res.city">
+            <field name="name">Kariakoo, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_upanga" model="res.city">
+            <field name="name">Upanga, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_kisutu" model="res.city">
+            <field name="name">Kisutu, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_kivukoni" model="res.city">
+            <field name="name">Kivukoni, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_mchikichini" model="res.city">
+            <field name="name">Mchikichini, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_buguruni" model="res.city">
+            <field name="name">Buguruni, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_tabata" model="res.city">
+            <field name="name">Tabata, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_segerea" model="res.city">
+            <field name="name">Segerea, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_ukonga" model="res.city">
+            <field name="name">Ukonga, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_kipawa" model="res.city">
+            <field name="name">Kipawa, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_kinyerezi" model="res.city">
+            <field name="name">Kinyerezi, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_gongo_la_mboto" model="res.city">
+            <field name="name">Gongo la Mboto, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_pugu" model="res.city">
+            <field name="name">Pugu, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_chanika" model="res.city">
+            <field name="name">Chanika, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_kitunda" model="res.city">
+            <field name="name">Kitunda, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_vingunguti" model="res.city">
+            <field name="name">Vingunguti, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_ilala_jangwani" model="res.city">
+            <field name="name">Jangwani, Ilala</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_chang_ombe" model="res.city">
+            <field name="name">Chang'ombe, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_kurasini" model="res.city">
+            <field name="name">Kurasini, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_mbagala" model="res.city">
+            <field name="name">Mbagala, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_keko" model="res.city">
+            <field name="name">Keko, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_mtoni" model="res.city">
+            <field name="name">Mtoni, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_yombo_vituka" model="res.city">
+            <field name="name">Yombo Vituka, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_tandika" model="res.city">
+            <field name="name">Tandika, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_kiburugwa" model="res.city">
+            <field name="name">Kiburugwa, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_toangoma" model="res.city">
+            <field name="name">Toangoma, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_temeke_charambe" model="res.city">
+            <field name="name">Charambe, Temeke</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_kibada" model="res.city">
+            <field name="name">Kibada, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_vijibweni" model="res.city">
+            <field name="name">Vijibweni, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_tungi" model="res.city">
+            <field name="name">Tungi, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_mjimwema" model="res.city">
+            <field name="name">Mjimwema, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_somangila" model="res.city">
+            <field name="name">Somangila, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_kisarawe_ii" model="res.city">
+            <field name="name">Kisarawe II, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+        <record id="city_tz_dsm_kigamboni_pemba_mnazi" model="res.city">
+            <field name="name">Pemba Mnazi, Kigamboni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_02"/>
+        </record>
+
+        <!-- Main towns of the other regions, so no region's city list is empty -->
+        <record id="city_tz_01_arusha" model="res.city">
+            <field name="name">Arusha</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_01"/>
+        </record>
+        <record id="city_tz_01_karatu" model="res.city">
+            <field name="name">Karatu</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_01"/>
+        </record>
+        <record id="city_tz_01_monduli" model="res.city">
+            <field name="name">Monduli</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_01"/>
+        </record>
+        <record id="city_tz_03_dodoma" model="res.city">
+            <field name="name">Dodoma</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_03"/>
+        </record>
+        <record id="city_tz_03_kondoa" model="res.city">
+            <field name="name">Kondoa</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_03"/>
+        </record>
+        <record id="city_tz_04_iringa" model="res.city">
+            <field name="name">Iringa</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_04"/>
+        </record>
+        <record id="city_tz_04_mafinga" model="res.city">
+            <field name="name">Mafinga</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_04"/>
+        </record>
+        <record id="city_tz_05_bukoba" model="res.city">
+            <field name="name">Bukoba</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_05"/>
+        </record>
+        <record id="city_tz_05_karagwe" model="res.city">
+            <field name="name">Karagwe</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_05"/>
+        </record>
+        <record id="city_tz_06_wete" model="res.city">
+            <field name="name">Wete</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_06"/>
+        </record>
+        <record id="city_tz_06_micheweni" model="res.city">
+            <field name="name">Micheweni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_06"/>
+        </record>
+        <record id="city_tz_07_mkokotoni" model="res.city">
+            <field name="name">Mkokotoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_07"/>
+        </record>
+        <record id="city_tz_07_nungwi" model="res.city">
+            <field name="name">Nungwi</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_07"/>
+        </record>
+        <record id="city_tz_08_kigoma" model="res.city">
+            <field name="name">Kigoma</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_08"/>
+        </record>
+        <record id="city_tz_08_kasulu" model="res.city">
+            <field name="name">Kasulu</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_08"/>
+        </record>
+        <record id="city_tz_09_moshi" model="res.city">
+            <field name="name">Moshi</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_09"/>
+        </record>
+        <record id="city_tz_09_hai" model="res.city">
+            <field name="name">Hai</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_09"/>
+        </record>
+        <record id="city_tz_09_rombo" model="res.city">
+            <field name="name">Rombo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_09"/>
+        </record>
+        <record id="city_tz_10_chake_chake" model="res.city">
+            <field name="name">Chake Chake</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_10"/>
+        </record>
+        <record id="city_tz_10_mkoani" model="res.city">
+            <field name="name">Mkoani</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_10"/>
+        </record>
+        <record id="city_tz_11_koani" model="res.city">
+            <field name="name">Koani</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_11"/>
+        </record>
+        <record id="city_tz_11_paje" model="res.city">
+            <field name="name">Paje</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_11"/>
+        </record>
+        <record id="city_tz_11_jambiani" model="res.city">
+            <field name="name">Jambiani</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_11"/>
+        </record>
+        <record id="city_tz_12_lindi" model="res.city">
+            <field name="name">Lindi</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_12"/>
+        </record>
+        <record id="city_tz_12_nachingwea" model="res.city">
+            <field name="name">Nachingwea</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_12"/>
+        </record>
+        <record id="city_tz_13_musoma" model="res.city">
+            <field name="name">Musoma</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_13"/>
+        </record>
+        <record id="city_tz_13_tarime" model="res.city">
+            <field name="name">Tarime</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_13"/>
+        </record>
+        <record id="city_tz_14_mbeya" model="res.city">
+            <field name="name">Mbeya</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_14"/>
+        </record>
+        <record id="city_tz_14_tukuyu" model="res.city">
+            <field name="name">Tukuyu</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_14"/>
+        </record>
+        <record id="city_tz_15_zanzibar_city" model="res.city">
+            <field name="name">Zanzibar City</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_15"/>
+        </record>
+        <record id="city_tz_15_stone_town" model="res.city">
+            <field name="name">Stone Town</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_15"/>
+        </record>
+        <record id="city_tz_15_fumba" model="res.city">
+            <field name="name">Fumba</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_15"/>
+        </record>
+        <record id="city_tz_16_morogoro" model="res.city">
+            <field name="name">Morogoro</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_16"/>
+        </record>
+        <record id="city_tz_16_ifakara" model="res.city">
+            <field name="name">Ifakara</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_16"/>
+        </record>
+        <record id="city_tz_16_kilosa" model="res.city">
+            <field name="name">Kilosa</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_16"/>
+        </record>
+        <record id="city_tz_17_mtwara" model="res.city">
+            <field name="name">Mtwara</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_17"/>
+        </record>
+        <record id="city_tz_17_masasi" model="res.city">
+            <field name="name">Masasi</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_17"/>
+        </record>
+        <record id="city_tz_18_mwanza" model="res.city">
+            <field name="name">Mwanza</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_18"/>
+        </record>
+        <record id="city_tz_18_ilemela" model="res.city">
+            <field name="name">Ilemela</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_18"/>
+        </record>
+        <record id="city_tz_18_sengerema" model="res.city">
+            <field name="name">Sengerema</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_18"/>
+        </record>
+        <record id="city_tz_19_kibaha" model="res.city">
+            <field name="name">Kibaha</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_19"/>
+        </record>
+        <record id="city_tz_19_bagamoyo" model="res.city">
+            <field name="name">Bagamoyo</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_19"/>
+        </record>
+        <record id="city_tz_19_kisarawe" model="res.city">
+            <field name="name">Kisarawe</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_19"/>
+        </record>
+        <record id="city_tz_19_mkuranga" model="res.city">
+            <field name="name">Mkuranga</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_19"/>
+        </record>
+        <record id="city_tz_20_sumbawanga" model="res.city">
+            <field name="name">Sumbawanga</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_20"/>
+        </record>
+        <record id="city_tz_21_songea" model="res.city">
+            <field name="name">Songea</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_21"/>
+        </record>
+        <record id="city_tz_21_mbinga" model="res.city">
+            <field name="name">Mbinga</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_21"/>
+        </record>
+        <record id="city_tz_22_shinyanga" model="res.city">
+            <field name="name">Shinyanga</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_22"/>
+        </record>
+        <record id="city_tz_22_kahama" model="res.city">
+            <field name="name">Kahama</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_22"/>
+        </record>
+        <record id="city_tz_23_singida" model="res.city">
+            <field name="name">Singida</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_23"/>
+        </record>
+        <record id="city_tz_23_manyoni" model="res.city">
+            <field name="name">Manyoni</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_23"/>
+        </record>
+        <record id="city_tz_24_tabora" model="res.city">
+            <field name="name">Tabora</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_24"/>
+        </record>
+        <record id="city_tz_24_nzega" model="res.city">
+            <field name="name">Nzega</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_24"/>
+        </record>
+        <record id="city_tz_25_tanga" model="res.city">
+            <field name="name">Tanga</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_25"/>
+        </record>
+        <record id="city_tz_25_korogwe" model="res.city">
+            <field name="name">Korogwe</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_25"/>
+        </record>
+        <record id="city_tz_25_pangani" model="res.city">
+            <field name="name">Pangani</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_25"/>
+        </record>
+        <record id="city_tz_26_babati" model="res.city">
+            <field name="name">Babati</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_26"/>
+        </record>
+        <record id="city_tz_26_mbulu" model="res.city">
+            <field name="name">Mbulu</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_26"/>
+        </record>
+        <record id="city_tz_27_geita" model="res.city">
+            <field name="name">Geita</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_27"/>
+        </record>
+        <record id="city_tz_27_chato" model="res.city">
+            <field name="name">Chato</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_27"/>
+        </record>
+        <record id="city_tz_28_mpanda" model="res.city">
+            <field name="name">Mpanda</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_28"/>
+        </record>
+        <record id="city_tz_29_njombe" model="res.city">
+            <field name="name">Njombe</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_29"/>
+        </record>
+        <record id="city_tz_29_makambako" model="res.city">
+            <field name="name">Makambako</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_29"/>
+        </record>
+        <record id="city_tz_30_bariadi" model="res.city">
+            <field name="name">Bariadi</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_30"/>
+        </record>
+        <record id="city_tz_31_vwawa" model="res.city">
+            <field name="name">Vwawa</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_31"/>
+        </record>
+        <record id="city_tz_31_tunduma" model="res.city">
+            <field name="name">Tunduma</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="state_id" ref="state_tz_31"/>
+        </record>
+    </data>
+</odoo>

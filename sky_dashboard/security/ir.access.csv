@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+access_sky_stock_report_cashier,sky.daily.stock.report cashier,sky.daily.stock.report,sky_dashboard.group_sky_stock_cashier,r,
+access_sky_stock_report_pos_user,sky.daily.stock.report pos user,sky.daily.stock.report,point_of_sale.group_pos_user,r,
+access_sky_stock_report_manager,sky.daily.stock.report manager,sky.daily.stock.report,sky_dashboard.group_sky_stock_manager,crud,
+access_sky_stock_line_cashier,sky.daily.stock.report.line cashier,sky.daily.stock.report.line,sky_dashboard.group_sky_stock_cashier,r,
+access_sky_stock_line_pos_user,sky.daily.stock.report.line pos user,sky.daily.stock.report.line,point_of_sale.group_pos_user,r,
+access_sky_stock_line_manager,sky.daily.stock.report.line manager,sky.daily.stock.report.line,sky_dashboard.group_sky_stock_manager,crud,
+access_sky_stock_generate_wizard_manager,sky.stock.generate.wizard manager,sky.stock.generate.wizard,sky_dashboard.group_sky_stock_manager,crud,
+access_sky_stock_generate_wizard_user,sky.stock.generate.wizard user,sky.stock.generate.wizard,point_of_sale.group_pos_user,crud,

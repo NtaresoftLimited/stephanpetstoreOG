@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Shown on /my only when the customer has an active Sky Wallet (sky_wallet_count > 0). -->
+        <record id="portal_entry_sky_wallet" model="portal.entry">
+            <field name="name">Sky Wallet &amp; Paw Points</field>
+            <field name="description">Your wallet balance, Paw Points and history</field>
+            <field name="url">/my/wallet</field>
+            <field name="image" type="bytes" file="stephans_wallet_rewards/static/src/img/sky-wallet.webp"/>
+            <field name="placeholder_count">sky_wallet_count</field>
+            <field name="category">client_category</field>
+            <field name="sequence" eval="15"/>
+        </record>
+    </data>
+</odoo>
