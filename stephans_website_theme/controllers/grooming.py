@@ -209,6 +209,78 @@ class StephansGroomingWebsite(http.Controller):
             "meta_description": "Book gentle professional grooming for dogs, cats and small animals at Stephan's Pet Store in Dar es Salaam.",
         })
 
+    @http.route("/grooming/slots", type="http", auth="public", website=True, methods=["GET"], csrf=False)
+    def available_slots(self, date=None, branch="masaki", pet_type="dog", pet_category="medium", service_key="standard", **kw):
+        """Returns slot availability and scarcity per time slot for a given date and branch."""
+        if not date:
+            date = datetime.now(NAIROBI_TZ).strftime("%Y-%m-%d")
+        branch = branch if branch in ("masaki", "mikocheni") else "masaki"
+
+        # Calculate expected duration based on pet size & package
+        duration = 1.0
+        if pet_type == "dog":
+            if pet_category in ("mini", "small"):
+                duration = 1.0 if service_key == "standard" else 1.5
+            elif pet_category == "medium":
+                duration = 1.5 if service_key == "standard" else 2.0
+            elif pet_category == "large":
+                duration = 2.0 if service_key == "standard" else 2.5
+        elif pet_type in ("cat", "small_animal"):
+            duration = 1.0
+
+        Station = request.env["grooming.station"].sudo()
+        Appointment = request.env["grooming.appointment"].sudo()
+
+        stations = Station.search([("branch", "=", branch), ("active", "=", True)])
+        total_tables = len(stations) or 2
+
+        slot_results = []
+        for slot in VALID_TIMES:
+            time_val = slot["value"]
+            try:
+                start_local = datetime.strptime(f"{date} {time_val}", "%Y-%m-%d %H:%M").replace(tzinfo=NAIROBI_TZ)
+                end_local = start_local + timedelta(hours=duration)
+                start_utc = start_local.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
+                end_utc = end_local.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
+
+                # Check busy stations during this window
+                busy_stations = Appointment.search([
+                    ("station_id", "in", stations.ids),
+                    ("state", "not in", ("cancelled", "completed")),
+                    ("appointment_date", "<", fields.Datetime.to_string(end_utc)),
+                    ("appointment_end_date", ">", fields.Datetime.to_string(start_utc)),
+                ]).mapped("station_id")
+
+                free_count = total_tables - len(set(busy_stations.ids))
+
+                if free_count <= 0:
+                    status = "full"
+                    label = f"{slot['label']} (Full)"
+                elif free_count == 1:
+                    status = "scarce"
+                    label = f"{slot['label']} (Only 1 slot left!)"
+                else:
+                    status = "available"
+                    label = slot["label"]
+
+                slot_results.append({
+                    "value": time_val,
+                    "label": label,
+                    "free_slots": max(0, free_count),
+                    "status": status,
+                    "available": free_count > 0,
+                })
+            except Exception:
+                slot_results.append({
+                    "value": time_val,
+                    "label": slot["label"],
+                    "free_slots": total_tables,
+                    "status": "available",
+                    "available": True,
+                })
+
+        return request.make_json_response({"ok": True, "date": date, "branch": branch, "duration_hours": duration, "slots": slot_results})
+
     @http.route("/grooming/book", type="http", auth="public", website=True, methods=["POST"], csrf=True)
     def book(self, **post):
         required = (
@@ -300,6 +372,10 @@ class StephansGroomingWebsite(http.Controller):
                 det_label = "Intensive (+150,000/=)" if det_type == "intensive" else "Moderate (+100,000/=)"
                 raw_notes = f"{raw_notes} [Detangling: {det_label}]".strip()
 
+            branch = (post.get("branch") or "masaki").strip().lower()
+            if branch not in ("masaki", "mikocheni"):
+                branch = "masaki"
+
             appointment_values = {
                 "partner_id": partner.id,
                 "pet_name": post["pet_name"].strip(),
@@ -307,6 +383,7 @@ class StephansGroomingWebsite(http.Controller):
                 "pet_category": pet_category,
                 "service_type": "full_grooming",
                 "service_id": service.id,
+                "branch": branch,
                 "appointment_date": fields.Datetime.to_string(appointment_utc),
                 "preferred_time": preferred_time,
                 "has_detangling": has_det,
@@ -327,13 +404,17 @@ class StephansGroomingWebsite(http.Controller):
                     subtype_xmlid="mail.mt_note",
                 )
 
+            stop_utc = appointment.appointment_end_date or (appointment_utc + timedelta(hours=2))
+            st_name = appointment.station_id.name if appointment.station_id else "Auto-Assigned Table"
             request.env["calendar.event"].sudo().create({
-                "name": f"Grooming: {appointment.pet_name} — {appointment.name}",
+                "name": f"[{st_name}] {appointment.pet_name} — {appointment.name}",
                 "start": fields.Datetime.to_string(appointment_utc),
-                "stop": fields.Datetime.to_string(appointment_utc + timedelta(hours=2)),
+                "stop": fields.Datetime.to_string(stop_utc),
                 "partner_ids": [(6, 0, [partner.id])],
                 "description": (
                     f"Odoo appointment: {appointment.name}<br/>"
+                    f"Station: {st_name}<br/>"
+                    f"Branch: {appointment.branch.title()}<br/>"
                     f"Package: {service.name}<br/>"
                     f"Phone: {phone}"
                 ),

@@ -149,6 +149,14 @@
                   </select>
                 </div>
 
+                <!-- Salon Branch -->
+                <div>
+                  <select name="branch" id="field-branch" class="grooming-select" required="required">
+                    <option value="masaki" selected="selected">Masaki Salon (Slipway)</option>
+                    <option value="mikocheni">Mikocheni Salon</option>
+                  </select>
+                </div>
+
                 <!-- Preferred Date -->
                 <div class="grooming-date-wrapper">
                   <input type="date" name="preferred_date" id="field-date" required="required" t-att-min="min_date" class="grooming-input"/>

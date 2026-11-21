@@ -113,6 +113,12 @@
               action="action_grooming_services"
               sequence="10"/>
               
+    <menuitem id="menu_stations"
+              name="Stations &amp; Tables"
+              parent="menu_grooming_config"
+              action="action_grooming_stations"
+              sequence="15"/>
+
     <menuitem id="menu_breeds"
               name="Breeds"
               parent="menu_grooming_config"

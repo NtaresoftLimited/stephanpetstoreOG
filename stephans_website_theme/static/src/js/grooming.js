@@ -166,12 +166,16 @@
 
         const date = $("#field-date", root);
         const timeField = $("#field-time", root);
-        const refreshTimeAvailability = () => {
+        const branchField = $("#field-branch", root);
+
+        const refreshTimeAvailability = async () => {
             if (!date.value) return;
             const selectedDate = new Date(date.value + "T00:00:00");
             const now = new Date();
             const cutoff = new Date(now.getTime() + 15 * 60 * 1000);
             const isToday = selectedDate.toDateString() === now.toDateString();
+
+            // Client-side quick filter for past slots
             Array.from(timeField.options).forEach((option) => {
                 if (!option.value) return;
                 const [hour, minute] = option.value.split(":").map(Number);
@@ -179,8 +183,38 @@
                 slot.setHours(hour, minute, 0, 0);
                 option.disabled = selectedDate < new Date(now.getFullYear(), now.getMonth(), now.getDate()) || (isToday && slot < cutoff);
             });
+
+            // Live server-side table scarcity check
+            try {
+                const b = branchField ? branchField.value : "masaki";
+                const p = petType ? petType.value : "dog";
+                const s = breed ? breed.value : "medium";
+                const pkg = packageField ? packageField.value : "standard";
+                const url = `/grooming/slots?date=${encodeURIComponent(date.value)}&branch=${encodeURIComponent(b)}&pet_type=${encodeURIComponent(p)}&pet_category=${encodeURIComponent(s)}&service_key=${encodeURIComponent(pkg)}`;
+                const res = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" } });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.ok && Array.isArray(data.slots)) {
+                        const slotMap = new Map(data.slots.map(item => [item.value, item]));
+                        Array.from(timeField.options).forEach((option) => {
+                            if (!option.value) return;
+                            const info = slotMap.get(option.value);
+                            if (info) {
+                                option.textContent = info.label;
+                                if (!info.available) {
+                                    option.disabled = true;
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch live table scarcity:", err);
+            }
+
             if (timeField.selectedOptions[0]?.disabled) timeField.value = "";
         };
+
         date.addEventListener("change", () => {
             if (date.value && new Date(date.value + "T12:00:00").getDay() === 0) {
                 window.alert("We are closed on Sundays. Please select another day for your pet's grooming.");
@@ -188,6 +222,10 @@
             }
             refreshTimeAvailability();
         });
+        branchField?.addEventListener("change", refreshTimeAvailability);
+        petType.addEventListener("change", refreshTimeAvailability);
+        breed.addEventListener("change", refreshTimeAvailability);
+        packageField.addEventListener("change", refreshTimeAvailability);
 
         form.addEventListener("submit", async (event) => {
             event.preventDefault();

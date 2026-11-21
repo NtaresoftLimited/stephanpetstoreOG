@@ -1,6 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_grooming_service_user,grooming.service.user,model_grooming_service,base.group_user,1,0,0,0
 access_grooming_service_manager,grooming.service.manager,model_grooming_service,base.group_system,1,1,1,1
+access_grooming_station_user,grooming.station.user,model_grooming_station,base.group_user,1,1,1,0
+access_grooming_station_manager,grooming.station.manager,model_grooming_station,base.group_system,1,1,1,1
 access_grooming_appointment_user,grooming.appointment.user,model_grooming_appointment,base.group_user,1,1,1,0
 access_grooming_appointment_manager,grooming.appointment.manager,model_grooming_appointment,base.group_system,1,1,1,1
 access_grooming_appointment_portal,grooming.appointment.portal,model_grooming_appointment,base.group_portal,1,0,0,0

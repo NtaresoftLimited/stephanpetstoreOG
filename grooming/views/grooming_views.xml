@@ -127,8 +127,14 @@
                             <field name="customer_phone"/>
                             <field name="customer_email"/>
                         </group>
-                        <group string="Appointment">
+                        <group string="Appointment &amp; Table Scheduling">
+                            <field name="branch"/>
+                            <field name="station_id" domain="[('branch', '=', branch)]"/>
                             <field name="appointment_date"/>
+                            <field name="duration_hours" widget="float_time"/>
+                            <field name="appointment_end_date" readonly="1"/>
+                            <field name="is_walkin_reserved"/>
+                            <field name="is_walkin"/>
                             <field name="preferred_time"/>
                             <field name="create_date" readonly="1"/>
                         </group>
@@ -187,12 +193,16 @@
                   decoration-success="state == 'completed'"
                   decoration-muted="state == 'cancelled'">
                 <field name="appointment_date"/>
+                <field name="branch"/>
+                <field name="station_id"/>
+                <field name="duration_hours" widget="float_time"/>
                 <field name="pet_name"/>
                 <field name="partner_id"/>
                 <field name="pet_type"/>
                 <field name="pet_category"/>
                 <field name="service_id"/>
                 <field name="total_price" widget="monetary"/>
+                <field name="is_walkin" widget="boolean_toggle" optional="hide"/>
                 <field name="appt_payment_status" widget="badge" 
                        decoration-success="appt_payment_status == 'paid'" 
                        decoration-danger="appt_payment_status == 'not_paid'"/>
@@ -211,10 +221,19 @@
         <field name="name">grooming.appointment.calendar</field>
         <field name="model">grooming.appointment</field>
         <field name="arch" type="xml">
-            <calendar string="Appointments" date_start="appointment_date" 
-                      color="state" quick_create="0" event_open_popup="1">
+            <calendar string="Grooming Appointments" 
+                      date_start="appointment_date" 
+                      date_stop="appointment_end_date"
+                      color="station_id" 
+                      mode="week" 
+                      quick_create="1" 
+                      event_open_popup="1">
                 <field name="pet_name"/>
                 <field name="partner_id"/>
+                <field name="station_id" filters="1"/>
+                <field name="branch"/>
+                <field name="service_id"/>
+                <field name="state"/>
                 <field name="total_price"/>
             </calendar>
         </field>
@@ -259,6 +278,7 @@
                 <field name="pet_name"/>
                 <field name="partner_id"/>
                 <field name="customer_phone"/>
+                <field name="station_id"/>
                 <filter name="today" string="Today" 
                         domain="[('appointment_date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), 
                                  ('appointment_date', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=1), datetime.time(0,0,0)))]"/>
@@ -266,9 +286,78 @@
                 <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter name="in_progress" string="In Progress" domain="[('state', '=', 'in_progress')]"/>
                 <separator/>
+                <filter name="branch_masaki" string="Masaki Branch" domain="[('branch', '=', 'masaki')]"/>
+                <filter name="branch_mikocheni" string="Mikocheni Branch" domain="[('branch', '=', 'mikocheni')]"/>
+                <filter name="filter_walkin" string="Walk-Ins" domain="[('is_walkin', '=', True)]"/>
+                <separator/>
+                <filter name="group_by_station" string="Station / Table" context="{'group_by': 'station_id'}"/>
+                <filter name="group_by_branch" string="Branch" context="{'group_by': 'branch'}"/>
                 <filter name="group_by_date" string="Date" context="{'group_by': 'appointment_date:day'}"/>
                 <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
             </search>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- GROOMING STATION / TABLE VIEWS             -->
+    <!-- ========================================== -->
+    <record id="grooming_station_view_tree" model="ir.ui.view">
+        <field name="name">grooming.station.tree</field>
+        <field name="model">grooming.station</field>
+        <field name="arch" type="xml">
+            <list string="Grooming Stations &amp; Tables">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="branch"/>
+                <field name="station_type"/>
+                <field name="capacity"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="grooming_station_view_form" model="ir.ui.view">
+        <field name="name">grooming.station.form</field>
+        <field name="model">grooming.station</field>
+        <field name="arch" type="xml">
+            <form string="Grooming Station / Table">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Station Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Masaki — Grooming Table 1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="code" placeholder="e.g. MSK-T1"/>
+                            <field name="branch"/>
+                            <field name="station_type"/>
+                        </group>
+                        <group string="Scheduling Rules">
+                            <field name="capacity"/>
+                            <field name="color"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" placeholder="Special equipment, dog size limits, etc..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_grooming_stations" model="ir.actions.act_window">
+        <field name="name">Stations &amp; Tables</field>
+        <field name="res_model">grooming.station</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create physical grooming tables and bath stations.
+            </p>
         </field>
     </record>
     </data>
