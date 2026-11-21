@@ -172,8 +172,8 @@
                             <span class="stephans-dash-card__title">Sky Wallet</span>
                         </div>
                         <div class="stephans-dash-card__metric">
-                            <span class="stephans-dash-card__num" t-out="wallet_amount_only or '0'">0</span>
                             <span class="stephans-dash-card__unit">TZS</span>
+                            <span class="stephans-dash-card__num" t-out="wallet_amount_only or '0'">0</span>
                         </div>
                         <div class="stephans-dash-card__sub">
                             Available Balance
@@ -197,14 +197,14 @@
                         </div>
                         <div class="stephans-dash-card__metric">
                             <span class="stephans-dash-card__num" t-out="pets_count or 0">0</span>
-                            <span class="stephans-dash-card__unit">Registered</span>
+                            <span class="stephans-dash-card__unit">Pets</span>
                         </div>
                         <div class="stephans-dash-card__sub">
                             <t t-if="upcoming_appointment">
                                 Next: <strong t-out="upcoming_appointment.pet_name"/> (<t t-out="upcoming_appointment.appointment_date.strftime('%d %b')"/>)
                             </t>
                             <t t-else="">
-                                No upcoming appointments
+                                Schedule your next grooming
                             </t>
                         </div>
                         <div class="stephans-dash-card__footer">

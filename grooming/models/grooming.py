@@ -88,6 +88,19 @@ class GroomingStation(models.Model):
     capacity = fields.Integer(string='Capacity', default=1)
     notes = fields.Text(string='Notes')
 
+    def is_available(self, start_dt, end_dt, exclude_appointment_id=None):
+        """Check if station has any active overlapping appointment"""
+        self.ensure_one()
+        domain = [
+            ('station_id', '=', self.id),
+            ('state', 'not in', ('cancelled', 'completed')),
+            ('appointment_date', '<', end_dt),
+            ('appointment_end_date', '>', start_dt),
+        ]
+        if exclude_appointment_id:
+            domain.append(('id', '!=', exclude_appointment_id))
+        return self.env['grooming.appointment'].sudo().search_count(domain) == 0
+
 
 class GroomingPrice(models.Model):
     """Pricing Matrix for Grooming Packages"""
@@ -555,6 +568,32 @@ class GroomingAppointment(models.Model):
 
     def action_complete(self):
         self.write({'state': 'completed'})
+
+    def action_send_review_prompt(self):
+        """One-click WhatsApp Google Review prompt to customer upon service completion"""
+        self.ensure_one()
+        phone = self.customer_phone or self.partner_id.phone or self.partner_id.mobile
+        if not phone:
+            raise ValidationError("No customer phone number found to send review prompt.")
+        import re
+        from urllib.parse import quote
+        clean_phone = re.sub(r'[^0-9]', '', str(phone))
+        if clean_phone.startswith('0'):
+            clean_phone = '255' + clean_phone[1:]
+        elif not clean_phone.startswith('255') and len(clean_phone) == 9:
+            clean_phone = '255' + clean_phone
+
+        pet = self.pet_name or "your pet"
+        review_url = "https://g.page/r/stephans-pet-store/review"
+        msg = f"Hi {self.partner_id.name or 'there'}! Thank you for bringing {pet} to Stephan's Pet Store today for grooming. We hope {pet} looks and feels amazing! If you enjoyed our service, please leave us a 5-star review: {review_url}"
+        whatsapp_url = f"https://wa.me/{clean_phone}?text={quote(msg)}"
+
+        self.message_post(body=f"Sent Google Review prompt to {clean_phone} via WhatsApp.")
+        return {
+            'type': 'ir.actions.act_url',
+            'url': whatsapp_url,
+            'target': 'new',
+        }
 
     @api.model
     def _cron_check_reminders(self):

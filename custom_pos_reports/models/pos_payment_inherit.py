@@ -37,5 +37,5 @@ class AccountPaymentInherit(models.Model):
         'pos.payment.method',
         string="POS Payment Method",
         index=True,
-        help="POS payment method used for this payment (e.g. CRDB Bank, NMB Bank, M-Pesa, Tigo Pesa, Cash)."
+        help="POS payment method used for this payment (e.g. CRDB Bank, NMB Bank, M-Pesa, Mixx by Yas, Cash)."
     )

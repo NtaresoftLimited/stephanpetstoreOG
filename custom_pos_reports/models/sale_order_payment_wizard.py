@@ -50,12 +50,12 @@ class SaleOrderPaymentWizard(models.TransientModel):
         string='Payment Method',
         required=True,
         domain="[('active', '=', True), ('journal_id', '!=', False)]",
-        help="Select an active payment method (CRDB Bank, NMB Bank, M-Pesa, Tigo Pesa, or Cash)."
+        help="Select an active payment method (CRDB Bank, NMB Bank, M-Pesa, Mixx by Yas, or Cash)."
     )
     payment_method_type = fields.Selection(related='pos_payment_method_id.type', string='Method Type')
     reference = fields.Char(
         string='Payment Reference / Ref',
-        help="Required for CRDB Bank, NMB Bank, M-Pesa, and Tigo Pesa payments (e.g. Transaction ID or Bank Slip)."
+        help="Required for CRDB Bank, NMB Bank, M-Pesa, and Mixx by Yas payments (e.g. Transaction ID or Bank Slip)."
     )
     note = fields.Text(string="Internal Note")
 

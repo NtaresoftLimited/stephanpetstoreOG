@@ -53,7 +53,7 @@ PAGES = {
         'sections': [
             ('Do you deliver in Dar es Salaam?', 'Yes! We deliver across all Dar es Salaam districts (Masaki, Mikocheni, Oysterbay, Kinondoni, Upanga, etc.) with free delivery on orders over 100,000 TZS.'),
             ('How can I book grooming?', 'Use our online Grooming page or contact us on WhatsApp (+255 769 324 445) to select your pet, preferred package, branch, date and time.'),
-            ('Which payment methods do you accept?', 'We accept Selcom Mobile Money (M-Pesa, Tigo Pesa, Airtel Money, Halopesa), Visa/Mastercard, and Cash on delivery/store pickup.'),
+            ('Which payment methods do you accept?', 'We accept Selcom Mobile Money (M-Pesa, Mixx by Yas, Airtel Money, Halopesa), Visa/Mastercard, Sky Wallet store credit, and Cash on delivery/store pickup.'),
             ('Can I return an item?', 'Eligible defective or incorrect items in original packaging may be returned under our Returns policy within 7 days.'),
         ],
     },

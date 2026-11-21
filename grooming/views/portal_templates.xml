@@ -126,6 +126,18 @@
     <!-- 3. Appointment Detail -->
     <template id="portal_appointment_detail" name="Appointment Details">
         <t t-call="portal.portal_layout">
+            <t t-if="msg == 'rescheduled'">
+                <div class="alert alert-success d-flex align-items-center mt-3 mb-0" role="alert">
+                    <i class="oi oi-check me-2"/>
+                    Your appointment has been successfully rescheduled to the new time slot!
+                </div>
+            </t>
+            <t t-if="error == 'cutoff'">
+                <div class="alert alert-warning d-flex align-items-center mt-3 mb-0" role="alert">
+                    <i class="oi oi-warning me-2"/>
+                    Appointments scheduled to start within 3 hours cannot be modified online. Please contact our salon team directly via WhatsApp.
+                </div>
+            </t>
             <div class="card mt-3 shadow-sm border-0">
                 <div class="card-header bg-light py-3">
                     <div class="row align-items-center">
@@ -235,13 +247,109 @@
                     </t>
                 </div>
 
-                <div class="card-footer bg-white py-3 d-flex flex-wrap gap-2 justify-content-between">
-                    <a href="/my/grooming" class="btn btn-secondary">
-                        <i class="oi" data-icon="arrow_back"/> Back to Appointments
-                    </a>
-                    <a href="/grooming" class="btn btn-primary">
-                        <i class="oi" data-icon="add"/> Book Another Appointment
-                    </a>
+                <div class="card-footer bg-white py-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <div>
+                        <a href="/my/grooming" class="btn btn-secondary">
+                            <i class="oi" data-icon="arrow_back"/> Back to Appointments
+                        </a>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <t t-if="can_reschedule">
+                            <a t-attf-href="/my/grooming/#{appointment.id}/reschedule" class="btn btn-outline-primary rounded-pill px-3">
+                                <i class="oi" data-icon="calendar"/> Reschedule Appointment
+                            </a>
+                        </t>
+                        <t t-if="reschedule_cutoff and appointment.state in ('pending', 'confirmed')">
+                            <a href="https://wa.me/255769324445?text=Hello%20Stephan's%20Team,%20I'd%20like%20to%20reschedule%20my%20grooming%20appointment" class="btn btn-outline-success rounded-pill px-3" target="_blank">
+                                <i class="fa fa-whatsapp me-1"/> WhatsApp Salon to Reschedule
+                            </a>
+                        </t>
+                        <a href="/grooming" class="btn btn-primary rounded-pill px-3">
+                            <i class="oi" data-icon="add"/> Book Another Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- 3b. Reschedule Appointment Form -->
+    <template id="portal_appointment_reschedule" name="Reschedule Grooming Appointment">
+        <t t-call="portal.portal_layout">
+            <div class="card mt-3 shadow-sm border-0">
+                <div class="card-header bg-light py-3">
+                    <h4 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                        <i class="oi oi-calendar text-primary"/>
+                        Reschedule Appointment — <t t-out="appointment.name"/>
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <t t-if="error == 'missing'">
+                        <div class="alert alert-danger">Please choose both a new date and time slot.</div>
+                    </t>
+                    <t t-if="error == 'past'">
+                        <div class="alert alert-danger">The selected appointment time must be in the future.</div>
+                    </t>
+                    <t t-if="error == 'conflict'">
+                        <div class="alert alert-danger">All grooming stations are currently booked for the selected slot. Please select a different time or date.</div>
+                    </t>
+                    <t t-if="error == 'generic'">
+                        <div class="alert alert-danger">Could not reschedule. Please try again or WhatsApp our salon team.</div>
+                    </t>
+
+                    <div class="alert alert-info py-2 px-3 mb-4">
+                        <small>
+                            <strong>Rescheduling Policy:</strong> You may reschedule online up to 3 hours before your scheduled appointment. Within 3 hours, please contact our salon team directly on WhatsApp (+255 769 324 445).
+                        </small>
+                    </div>
+
+                    <!-- Current appointment snapshot -->
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="row g-2">
+                            <div class="col-sm-4">
+                                <span class="text-muted d-block small">Pet</span>
+                                <strong><t t-out="appointment.pet_name"/></strong>
+                            </div>
+                            <div class="col-sm-4">
+                                <span class="text-muted d-block small">Salon Branch</span>
+                                <strong><t t-out="'Masaki (Slipway)' if appointment.branch == 'masaki' else 'Mikocheni'"/></strong>
+                            </div>
+                            <div class="col-sm-4">
+                                <span class="text-muted d-block small">Current Slot</span>
+                                <strong><span t-field="appointment.appointment_date" t-options='{"format": "dd MMM yyyy HH:mm"}'/></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form t-attf-action="/my/grooming/#{appointment.id}/do_reschedule" method="POST">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="appointment_date" class="form-label fw-bold">Select New Date</label>
+                                <input type="date" class="form-control" id="appointment_date" name="appointment_date" t-att-min="today" required="required"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="appointment_time" class="form-label fw-bold">Select New Time Slot</label>
+                                <select class="form-select" id="appointment_time" name="appointment_time" required="required">
+                                    <option value="">-- Choose Time Slot --</option>
+                                    <option value="09:00">09:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">01:00 PM</option>
+                                    <option value="14:00">02:00 PM</option>
+                                    <option value="15:00">03:00 PM</option>
+                                    <option value="16:00">04:00 PM</option>
+                                    <option value="17:00">05:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                            <a t-attf-href="/my/grooming/#{appointment.id}" class="btn btn-secondary rounded-pill px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">Confirm New Date &amp; Time</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </t>

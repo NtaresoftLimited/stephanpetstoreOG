@@ -97,10 +97,127 @@ class GroomingPortal(CustomerPortal):
         if not appointment:
             return request.redirect('/my/grooming')
 
+        now_utc = fields.Datetime.now()
+        diff_hours = (appointment.appointment_date - now_utc).total_seconds() / 3600.0 if appointment.appointment_date else 0
+        can_reschedule = appointment.state in ('pending', 'confirmed') and diff_hours > 3.0
+        reschedule_cutoff = appointment.state in ('pending', 'confirmed') and diff_hours <= 3.0
+
         return request.render('grooming.portal_appointment_detail', {
             'appointment': appointment,
             'page_name': 'grooming_appointment',
+            'can_reschedule': can_reschedule,
+            'reschedule_cutoff': reschedule_cutoff,
+            'msg': kw.get('msg'),
+            'error': kw.get('error'),
         })
+
+    @http.route('/my/grooming/<int:appointment_id>/reschedule',
+                type='http', auth='user', website=True)
+    def portal_grooming_appointment_reschedule(self, appointment_id, **kw):
+        """Form to self-reschedule appointment with 3-hour cutoff rule"""
+        partner_ids = self._get_grooming_partner_ids()
+        appointment = request.env['grooming.appointment'].sudo().search([
+            ('id', '=', appointment_id),
+            ('partner_id', 'in', partner_ids)
+        ], limit=1)
+
+        if not appointment:
+            return request.redirect('/my/grooming')
+
+        now_utc = fields.Datetime.now()
+        diff_hours = (appointment.appointment_date - now_utc).total_seconds() / 3600.0 if appointment.appointment_date else 0
+        if appointment.state not in ('pending', 'confirmed') or diff_hours <= 3.0:
+            return request.redirect(f'/my/grooming/{appointment_id}?error=cutoff')
+
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo("Africa/Nairobi")
+        today_local = datetime.now(tz).strftime('%Y-%m-%d')
+
+        return request.render('grooming.portal_appointment_reschedule', {
+            'appointment': appointment,
+            'page_name': 'grooming_reschedule',
+            'today': today_local,
+            'error': kw.get('error'),
+        })
+
+    @http.route('/my/grooming/<int:appointment_id>/do_reschedule',
+                type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    def portal_grooming_do_reschedule(self, appointment_id, **post):
+        """Handle reschedule submission with table collision check"""
+        partner_ids = self._get_grooming_partner_ids()
+        appointment = request.env['grooming.appointment'].sudo().search([
+            ('id', '=', appointment_id),
+            ('partner_id', 'in', partner_ids)
+        ], limit=1)
+
+        if not appointment:
+            return request.redirect('/my/grooming')
+
+        now_utc = fields.Datetime.now()
+        diff_hours = (appointment.appointment_date - now_utc).total_seconds() / 3600.0 if appointment.appointment_date else 0
+        if appointment.state not in ('pending', 'confirmed') or diff_hours <= 3.0:
+            return request.redirect(f'/my/grooming/{appointment_id}?error=cutoff')
+
+        new_date = post.get('appointment_date')
+        new_time = post.get('appointment_time')
+        if not new_date or not new_time:
+            return request.redirect(f'/my/grooming/{appointment_id}/reschedule?error=missing')
+
+        try:
+            from datetime import datetime, timezone, timedelta
+            from zoneinfo import ZoneInfo
+            tz = ZoneInfo("Africa/Nairobi")
+            dt_naive = datetime.strptime(f"{new_date} {new_time}", "%Y-%m-%d %H:%M")
+            dt_tz = dt_naive.replace(tzinfo=tz)
+            new_dt_utc = dt_tz.astimezone(timezone.utc).replace(tzinfo=None)
+
+            if new_dt_utc <= now_utc:
+                return request.redirect(f'/my/grooming/{appointment_id}/reschedule?error=past')
+
+            duration_hours = appointment.duration_hours or 1.5
+            new_end_utc = new_dt_utc + timedelta(hours=duration_hours)
+
+            # Check station availability
+            branch = appointment.branch or 'masaki'
+            compatible_type = 'table'
+            all_stations = request.env['grooming.station'].sudo().search([
+                ('branch', '=', branch),
+                ('station_type', '=', compatible_type),
+                ('active', '=', True),
+            ], order='sequence, id')
+
+            free_station = None
+            for st in all_stations:
+                if st.is_available(new_dt_utc, new_end_utc, exclude_appointment_id=appointment.id):
+                    free_station = st
+                    break
+
+            if not free_station:
+                return request.redirect(f'/my/grooming/{appointment_id}/reschedule?error=conflict')
+
+            # Update appointment
+            old_date_str = appointment.appointment_date.strftime('%Y-%m-%d %H:%M') if appointment.appointment_date else ''
+            appointment.sudo().write({
+                'appointment_date': new_dt_utc,
+                'station_id': free_station.id,
+            })
+
+            # Update calendar event if linked
+            if appointment.calendar_event_id:
+                appointment.calendar_event_id.sudo().write({
+                    'start': new_dt_utc,
+                    'stop': new_end_utc,
+                    'name': f"[{free_station.name}] {appointment.pet_name} — {appointment.name}",
+                })
+
+            appointment.sudo().message_post(
+                body=f"Customer rescheduled appointment online from {old_date_str} to {new_date} {new_time} (Station: {free_station.name})."
+            )
+
+            return request.redirect(f'/my/grooming/{appointment_id}?msg=rescheduled')
+        except Exception:
+            return request.redirect(f'/my/grooming/{appointment_id}/reschedule?error=generic')
 
     # -------------------------------------------------------------------------
     # My Pets (Pet Management)

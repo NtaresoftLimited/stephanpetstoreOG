@@ -13,11 +13,11 @@ class AccountPaymentRegister(models.TransientModel):
         store=True,
         readonly=False,
         domain="[('journal_id', '!=', False), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
-        help="Select the payment method (CRDB Bank, NMB Bank, M-Pesa, Tigo Pesa, or Cash)."
+        help="Select the payment method (CRDB Bank, NMB Bank, M-Pesa, Mixx by Yas, or Cash)."
     )
     reference_number = fields.Char(
         string="Ref Number",
-        help="Enter the Bank or Mobile Money Reference Number (e.g. M-Pesa, Tigo Pesa, CRDB, or NMB Ref)."
+        help="Enter the Bank or Mobile Money Reference Number (e.g. M-Pesa, Mixx by Yas, CRDB, or NMB Ref)."
     )
     ref_number_required = fields.Boolean(
         compute='_compute_ref_number_required',
