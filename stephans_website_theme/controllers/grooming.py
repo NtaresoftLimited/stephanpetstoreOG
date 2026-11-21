@@ -352,13 +352,34 @@ class StephansGroomingWebsite(http.Controller):
                     return request.make_json_response(result)
                 return request.render("stephans_website_theme.booking_success", {"appointment": existing_booking})
 
-            # Check for appointment slot conflict with other customers
-            conflict = Appointment.search_count([
-                ("appointment_date", "=", fields.Datetime.to_string(appointment_utc)),
-                ("state", "!=", "cancelled"),
-            ])
-            if conflict:
-                raise ValidationError("That appointment time is already booked. Please choose another slot.")
+            branch = (post.get("branch") or "masaki").strip().lower()
+            if branch not in ("masaki", "mikocheni"):
+                branch = "masaki"
+
+            # Check if all stations at this salon branch are booked for this window
+            duration_hours = 1.5
+            if pet_type == "dog":
+                if pet_category in ("mini", "small"):
+                    duration_hours = 1.0 if service_key == "standard" else 1.5
+                elif pet_category == "medium":
+                    duration_hours = 1.5 if service_key == "standard" else 2.0
+                elif pet_category == "large":
+                    duration_hours = 2.0 if service_key == "standard" else 2.5
+            elif pet_type in ("cat", "small_animal"):
+                duration_hours = 1.0
+
+            stop_utc_calc = appointment_utc + timedelta(hours=duration_hours)
+            Station = request.env["grooming.station"].sudo()
+            branch_stations = Station.search([("branch", "=", branch), ("active", "=", True)])
+            if branch_stations:
+                busy_stations = Appointment.search([
+                    ("station_id", "in", branch_stations.ids),
+                    ("state", "not in", ("cancelled", "completed")),
+                    ("appointment_date", "<", fields.Datetime.to_string(stop_utc_calc)),
+                    ("appointment_end_date", ">", fields.Datetime.to_string(appointment_utc)),
+                ]).mapped("station_id")
+                if len(set(busy_stations.ids)) >= len(branch_stations):
+                    raise ValidationError("All grooming stations at this salon are fully booked for this time. Please choose another slot.")
 
             service = request.env.ref(SERVICE_XMLIDS[service_key], raise_if_not_found=False)
             if not service:
@@ -371,10 +392,6 @@ class StephansGroomingWebsite(http.Controller):
             if det_type in ("moderate", "intensive"):
                 det_label = "Intensive (+150,000/=)" if det_type == "intensive" else "Moderate (+100,000/=)"
                 raw_notes = f"{raw_notes} [Detangling: {det_label}]".strip()
-
-            branch = (post.get("branch") or "masaki").strip().lower()
-            if branch not in ("masaki", "mikocheni"):
-                branch = "masaki"
 
             appointment_values = {
                 "partner_id": partner.id,
