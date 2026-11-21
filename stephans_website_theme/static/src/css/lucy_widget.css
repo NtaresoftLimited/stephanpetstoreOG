@@ -1,0 +1,384 @@
+/* Stephan's Lucy AI Assistant Widget Styles */
+:root {
+  --lucy-brand-primary: #3e220f;
+  --lucy-brand-accent: #c77e35;
+  --lucy-brand-orange: #d35122;
+}
+
+/* Floating Action Button */
+.stephans-lucy-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #c77e35;
+  box-shadow: 0 8px 24px rgba(199, 126, 53, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9990;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  user-select: none;
+}
+
+.stephans-lucy-fab:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 30px rgba(199, 126, 53, 0.45);
+}
+
+.stephans-lucy-fab__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.stephans-lucy-fab__img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.stephans-lucy-fab:hover .stephans-lucy-fab__img {
+  transform: scale(1.08);
+}
+
+.stephans-lucy-fab__pulse {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: lucy-pulse 2s infinite;
+}
+
+@keyframes lucy-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.stephans-lucy-fab__tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  background: #18181b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: 'Geist', sans-serif;
+}
+
+.stephans-lucy-fab:hover .stephans-lucy-fab__tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Lucy Panel / Drawer */
+.stephans-lucy-panel {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  width: 380px;
+  height: 520px;
+  max-height: calc(100vh - 120px);
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  z-index: 9991;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.98);
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.stephans-lucy-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Header */
+.stephans-lucy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.stephans-lucy-header__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stephans-lucy-avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff8f3;
+  border: 1px solid #fed7aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.stephans-lucy-avatar__img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.stephans-lucy-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+}
+
+.stephans-lucy-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--lucy-brand-primary);
+  line-height: 1.2;
+}
+
+.stephans-lucy-subtitle {
+  font-size: 11px;
+  color: #71717a;
+}
+
+.stephans-lucy-btn-close {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: #a1a1aa;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.stephans-lucy-btn-close:hover {
+  color: #18181b;
+  background: #f4f4f5;
+}
+
+/* Messages */
+.stephans-lucy-messages {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fafaf9;
+}
+
+.stephans-lucy-bubble {
+  display: flex;
+  max-width: 85%;
+}
+
+.stephans-lucy-bubble--bot {
+  align-self: flex-start;
+}
+
+.stephans-lucy-bubble--user {
+  align-self: flex-end;
+}
+
+.stephans-lucy-bubble__content {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.stephans-lucy-bubble--bot .stephans-lucy-bubble__content {
+  background: #ffffff;
+  color: #18181b;
+  border: 1px solid #e4e4e7;
+  border-radius: 14px 14px 14px 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.stephans-lucy-bubble--user .stephans-lucy-bubble__content {
+  background: var(--lucy-brand-orange);
+  color: #ffffff;
+  border-radius: 14px 14px 4px 14px;
+}
+
+.stephans-lucy-bubble__content p {
+  margin: 0 0 6px;
+}
+
+.stephans-lucy-bubble__content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Suggestion Chips */
+.stephans-lucy-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.stephans-lucy-chip {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #3f3f46;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.stephans-lucy-chip:hover {
+  background: #3e220f;
+  color: #ffffff;
+  border-color: #3e220f;
+}
+
+/* WhatsApp Card */
+.stephans-lucy-whatsapp-card {
+  padding: 10px 16px;
+  background: #f0fdf4;
+  border-top: 1px solid #bbf7d0;
+  border-bottom: 1px solid #bbf7d0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stephans-lucy-whatsapp-text strong {
+  display: block;
+  font-size: 11px;
+  color: #15803d;
+  font-weight: 700;
+}
+
+.stephans-lucy-whatsapp-text small {
+  font-size: 10px;
+  color: #166534;
+}
+
+.stephans-lucy-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #25d366;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.stephans-lucy-whatsapp-btn:hover {
+  background: #1eb954;
+  color: #ffffff;
+}
+
+/* Footer / Input */
+.stephans-lucy-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-top: 1px solid #e4e4e7;
+}
+
+.stephans-lucy-input {
+  flex: 1;
+  border: 1px solid #e4e4e7;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.stephans-lucy-input:focus {
+  border-color: var(--lucy-brand-orange);
+}
+
+.stephans-lucy-send {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--lucy-brand-orange);
+  color: #ffffff;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.stephans-lucy-send:hover {
+  background: #b54218;
+}
+
+@media (max-width: 640px) {
+  .stephans-lucy-panel {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 75vh;
+    border-radius: 20px 20px 0 0;
+  }
+  .stephans-lucy-fab {
+    bottom: 16px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+  }
+}

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import json
 from odoo import http
 from odoo.http import request
 from markupsafe import Markup, escape
@@ -25,7 +27,7 @@ PAGES = {
     },
     'stores': {
         'kicker': 'Store locator', 'title': 'Visit Stephan’s.',
-        'intro': 'Find premium pet products and friendly help at our Dar es Salaam locations.',
+        'intro': 'Find premium pet products and friendly help at our Dar es Salaam locations in Masaki and Mikocheni.',
         'image': '/stephans_website_theme/static/src/images/pages/stores-banner.png',
         'sections': [
             ('Masaki', '11 Slipway Road, Masaki, Dar es Salaam\n+255 786 627 873'),
@@ -35,17 +37,24 @@ PAGES = {
     'allbrands': {
         'kicker': 'Our brands', 'title': 'Exceptional brands, thoughtfully selected.',
         'intro': 'Explore trusted pet-care and nutrition brands selected for quality, safety and everyday wellbeing.',
-        'brands': [('Bioline', 'Bioline.webp'), ('Summit 10', 'Summit-10.svg'), ('TropiCat', 'TropiCat_logo.svg'), ('TropiDog', 'TropiDog_logo.svg')],
+        'brands': [
+            ('Bioline', 'Bioline.webp', '/brands/bioline'),
+            ('Summit 10', 'Summit-10.svg', '/brands/summit-10'),
+            ('TropiCat', 'TropiCat_logo.svg', '/brands/tropicat'),
+            ('TropiDog', 'TropiDog_logo.svg', '/brands/tropidog'),
+            ('Josera', None, '/brands/josera'),
+            ('Bravecto', None, '/brands/bravecto'),
+        ],
         'sections': [],
     },
     'faq': {
         'kicker': 'Help centre', 'title': 'Frequently asked questions.',
         'intro': 'Answers to common questions about shopping, delivery, returns and grooming.',
         'sections': [
-            ('Do you deliver?', 'Yes. Contact our team with your location and order details to confirm delivery availability and charges.'),
-            ('How can I book grooming?', 'Use our online Grooming page to select your pet, package, preferred date and time.'),
-            ('Which payment methods do you accept?', 'Available payment methods are shown during checkout and at our stores.'),
-            ('Can I return an item?', 'Eligible defective or incorrect items may be returned under our Returns policy.'),
+            ('Do you deliver in Dar es Salaam?', 'Yes! We deliver across all Dar es Salaam districts (Masaki, Mikocheni, Oysterbay, Kinondoni, Upanga, etc.) with free delivery on orders over 100,000 TZS.'),
+            ('How can I book grooming?', 'Use our online Grooming page or contact us on WhatsApp (+255 769 324 445) to select your pet, preferred package, branch, date and time.'),
+            ('Which payment methods do you accept?', 'We accept Selcom Mobile Money (M-Pesa, Tigo Pesa, Airtel Money, Halopesa), Visa/Mastercard, and Cash on delivery/store pickup.'),
+            ('Can I return an item?', 'Eligible defective or incorrect items in original packaging may be returned under our Returns policy within 7 days.'),
         ],
     },
     'grooming-policy': {
@@ -72,7 +81,7 @@ PAGES = {
         'intro': 'These terms apply when using Stephan’s Pet Store services and purchasing products from us.',
         'sections': [
             ('Orders and availability', 'Orders remain subject to product availability and confirmation. We may contact you if an item or price requires correction.'),
-            ('Payments', 'Payment must be completed using an accepted method. Prices are displayed in Tanzanian shillings unless stated otherwise.'),
+            ('Payments', 'Payment must be completed using an accepted method. Prices are displayed in Tanzanian shillings (TZS).'),
             ('Delivery and collection', 'Delivery times are estimates and depend on location and availability. Please provide accurate contact and address details.'),
             ('Privacy', 'Customer information is used to process orders, appointments and support requests in accordance with applicable requirements.'),
         ],
@@ -93,10 +102,83 @@ PAGES = {
         'kicker': 'Delivery', 'title': 'Pet essentials, brought to you.',
         'intro': 'We arrange delivery across Dar es Salaam and can advise on options for other locations in Tanzania.',
         'sections': [
-            ('Dar es Salaam delivery', 'Delivery timing and charges depend on your location, order size and product availability.'),
+            ('Dar es Salaam delivery', 'Fast delivery across Dar es Salaam. Free delivery on orders over 100,000 TZS. Standard orders delivered within 2-4 hours.'),
             ('Before dispatch', 'Our team may contact you to confirm your address, phone number, items and payment details.'),
-            ('Need an update?', 'Contact us by phone or WhatsApp with your order reference and we will help you track its progress.'),
+            ('Need an update?', 'Contact us by phone (+255 786 627 873) or WhatsApp (+255 769 324 445) with your order reference for instant tracking.'),
         ],
+    },
+}
+
+BRANDS_DATA = {
+    'bioline': {
+        'name': 'Bioline',
+        'kicker': 'Natural Pet Care',
+        'description': 'Natural and eco-friendly pet care, hygiene, and grooming solutions crafted for pets of all life stages.',
+        'logo': '/stephans_website_theme/static/src/images/brands/Bioline.webp',
+        'keywords': ['bioline'],
+    },
+    'summit-10': {
+        'name': 'Summit 10',
+        'kicker': 'Premium Nutrition',
+        'description': 'High-performance holistic nutrition formulated with fresh meats, natural superfoods, and balanced nutrients.',
+        'logo': '/stephans_website_theme/static/src/images/brands/Summit-10.svg',
+        'keywords': ['summit 10', 'summit10'],
+    },
+    'summit10': {
+        'name': 'Summit 10',
+        'kicker': 'Premium Nutrition',
+        'description': 'High-performance holistic nutrition formulated with fresh meats, natural superfoods, and balanced nutrients.',
+        'logo': '/stephans_website_theme/static/src/images/brands/Summit-10.svg',
+        'keywords': ['summit 10', 'summit10'],
+    },
+    'tropidog': {
+        'name': 'TropiDog',
+        'kicker': 'Complete Dog Nutrition',
+        'description': 'Super premium and premium nutrition tailored for puppies, adult, and senior dogs across all breeds.',
+        'logo': '/stephans_website_theme/static/src/images/brands/TropiDog_logo.svg',
+        'keywords': ['tropidog'],
+    },
+    'tropicat': {
+        'name': 'TropiCat',
+        'kicker': 'Balanced Feline Care',
+        'description': 'Scientifically formulated nutrition to support urinary health, shiny coats, and vitality in cats and kittens.',
+        'logo': '/stephans_website_theme/static/src/images/brands/TropiCat_logo.svg',
+        'keywords': ['tropicat'],
+    },
+    'josera': {
+        'name': 'Josera',
+        'kicker': 'German Super Premium',
+        'description': 'Certified German pet food crafted with sustainable, climate-neutral ingredients and zero artificial preservatives.',
+        'logo': None,
+        'keywords': ['josera'],
+    },
+    'bravecto': {
+        'name': 'Bravecto',
+        'kicker': 'Veterinary Protection',
+        'description': 'Long-lasting veterinary tick and flea protection chewables and spot-ons for dogs and cats.',
+        'logo': None,
+        'keywords': ['bravecto'],
+    },
+    'whiskas': {
+        'name': 'Whiskas',
+        'kicker': 'Delicious Feline Meals',
+        'description': 'Nutritious wet and dry meals specially designed to bring happiness and energy to cats.',
+        'logo': None,
+        'keywords': ['whiskas'],
+    },
+    'beeno': {
+        'name': 'Beeno',
+        'kicker': 'Tasty Dog Treats',
+        'description': 'Delicious, nutritious reward biscuits and treats to support dental health and positive training.',
+        'logo': None,
+        'keywords': ['beeno'],
+    },
+    'ownat': {
+        'name': 'Ownat',
+        'kicker': 'Fresh Meat Nutrition',
+        'description': 'Natural ingredients and fresh meat recipes designed for dogs and cats with high nutritional standards.',
+        'logo': None,
+        'keywords': ['ownat'],
     },
 }
 
@@ -105,12 +187,60 @@ class StephansWebsitePages(http.Controller):
     @http.route(['/about', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True, sitemap=True)
     def content_page(self, **kw):
         key = request.httprequest.path.strip('/') or 'about'
-        if key == 'faqs': key = 'faq'
+        if key == 'faqs':
+            key = 'faq'
         return request.render('stephans_website_theme.content_page', {
             'page': PAGES[key],
             'page_key': key,
             'additional_title': PAGES[key]['title'],
             'meta_description': PAGES[key]['intro'],
+        })
+
+    @http.route(['/brands/<string:slug>', '/brand/<string:slug>'], type='http', auth='public', website=True, sitemap=True)
+    def brand_page(self, slug, **kw):
+        slug_key = slug.lower().strip()
+        brand_info = BRANDS_DATA.get(slug_key)
+        if not brand_info:
+            brand_name = slug_key.replace('-', ' ').title()
+            brand_info = {
+                'name': brand_name,
+                'kicker': 'Featured Brand',
+                'description': f'Discover authentic pet products from {brand_name} at Stephan’s Pet Store Tanzania.',
+                'logo': None,
+                'keywords': [slug_key.replace('-', ' ')],
+            }
+
+        # Query products matching this brand
+        domain = [('active', '=', True), ('is_published', '=', True)]
+        kw_domains = []
+        for term in brand_info['keywords']:
+            kw_domains.append(('name', 'ilike', term))
+            kw_domains.append(('default_code', 'ilike', term))
+        
+        if kw_domains:
+            combined_domain = ['|'] * (len(kw_domains) - 1) + kw_domains
+            domain.extend(combined_domain)
+
+        products = request.env['product.template'].sudo().search(domain, order='list_price desc, name asc', limit=48)
+        currency = request.env.company.currency_id
+
+        product_cards = []
+        for p in products:
+            product_cards.append({
+                'id': p.id,
+                'name': p.name,
+                'price_formatted': currency.format(p.list_price) if currency else f"{p.list_price:,.0f} TZS",
+                'url': p.website_url or f"/shop/product/{p.id}",
+                'image_url': f"/web/image/product.template/{p.id}/image_512",
+                'category': p.categ_id.name if p.categ_id else '',
+            })
+
+        return request.render('stephans_website_theme.brand_page', {
+            'brand': brand_info,
+            'slug': slug_key,
+            'products': product_cards,
+            'additional_title': f"{brand_info['name']} Pet Products & Food Tanzania",
+            'meta_description': brand_info['description'],
         })
 
     @http.route('/stores', type='http', auth='public', website=True, sitemap=True)
@@ -152,6 +282,170 @@ class StephansWebsitePages(http.Controller):
             'email_to': recipient,
         })
         return request.redirect('/contact?sent=1')
+
+    # Instant Search API (JSON for Predictive SearchModal)
+    @http.route('/stephans/api/search', type='http', auth='public', website=True, csrf=False, methods=['GET', 'POST'])
+    def api_search(self, **kw):
+        clean_q = (kw.get('q') or kw.get('query') or '').strip()
+        if not clean_q and request.httprequest.data:
+            try:
+                body = json.loads(request.httprequest.data.decode('utf-8'))
+                clean_q = (body.get('q') or body.get('query') or '').strip()
+            except Exception:
+                pass
+
+        if not clean_q or len(clean_q) < 2:
+            return request.make_json_response({'results': [], 'count': 0})
+
+        domain = [
+            ('active', '=', True),
+            ('is_published', '=', True),
+            '|', '|',
+            ('name', 'ilike', clean_q),
+            ('default_code', 'ilike', clean_q),
+            ('description_sale', 'ilike', clean_q),
+        ]
+        products = request.env['product.template'].sudo().search(domain, order='list_price desc', limit=int(kw.get('limit', 8)))
+        currency = request.env.company.currency_id
+
+        results = []
+        for p in products:
+            results.append({
+                'id': p.id,
+                'name': p.name,
+                'price': p.list_price,
+                'price_formatted': currency.format(p.list_price) if currency else f"{p.list_price:,.0f} TZS",
+                'url': p.website_url or f"/shop/product/{p.id}",
+                'image_url': f"/web/image/product.template/{p.id}/image_128",
+                'category': p.categ_id.name if p.categ_id else '',
+            })
+        return request.make_json_response({'results': results, 'count': len(results)})
+
+    # Slide-over Cart Drawer Status API
+    @http.route('/stephans/api/cart_status', type='http', auth='public', website=True, csrf=False, methods=['GET', 'POST'])
+    def api_cart_status(self, **kw):
+        website = getattr(request, 'website', None)
+        if not website and hasattr(request, 'env') and 'website' in request.env:
+            try:
+                website = request.env['website'].get_current_website()
+            except Exception:
+                website = None
+
+        order = None
+        if website and hasattr(website, 'sale_get_order'):
+            try:
+                order = website.sale_get_order()
+            except Exception:
+                order = None
+
+        if not order and hasattr(request, 'session') and request.session.get('sale_order_id'):
+            try:
+                so = request.env['sale.order'].sudo().browse(request.session['sale_order_id'])
+                if so.exists() and so.state == 'draft':
+                    order = so
+            except Exception:
+                order = None
+
+        if not order:
+            return request.make_json_response({
+                'lines': [],
+                'items': [],
+                'cart_quantity': 0,
+                'item_count': 0,
+                'amount_total': 0.0,
+                'amount_formatted': '0 TZS',
+                'free_delivery_threshold': 100000.0,
+                'free_delivery_remaining': 100000.0,
+                'has_free_delivery': False,
+            })
+
+        currency = order.currency_id
+        lines = []
+        for line in order.order_line:
+            if line.product_uom_qty <= 0:
+                continue
+            lines.append({
+                'id': line.id,
+                'line_id': line.id,
+                'product_id': line.product_id.id,
+                'name': line.product_id.name or line.name,
+                'quantity': int(line.product_uom_qty),
+                'qty': int(line.product_uom_qty),
+                'price_unit': line.price_unit,
+                'price_subtotal': line.price_subtotal,
+                'price_unit_formatted': currency.format(line.price_unit) if currency else f"{line.price_unit:,.0f} TZS",
+                'price_formatted': currency.format(line.price_subtotal) if currency else f"{line.price_subtotal:,.0f} TZS",
+                'image_url': f"/web/image/product.product/{line.product_id.id}/image_128",
+                'url': line.product_id.product_tmpl_id.website_url or f"/shop/product/{line.product_id.product_tmpl_id.id}",
+            })
+
+        total = order.amount_total or 0.0
+        free_thresh = 100000.0
+        remaining = max(0.0, free_thresh - total)
+        qty_count = int(sum(i['quantity'] for i in lines))
+
+        return request.make_json_response({
+            'lines': lines,
+            'items': lines,
+            'cart_quantity': qty_count,
+            'item_count': qty_count,
+            'amount_total': total,
+            'amount_formatted': currency.format(total) if currency else f"{total:,.0f} TZS",
+            'free_delivery_threshold': free_thresh,
+            'free_delivery_remaining': remaining,
+            'has_free_delivery': remaining <= 0,
+        })
+
+    # Cart Drawer Quantity Update API
+    @http.route('/stephans/api/cart_update', type='http', auth='public', website=True, csrf=False, methods=['POST'])
+    def api_cart_update(self, **kw):
+        line_id = kw.get('line_id')
+        quantity = kw.get('quantity')
+        if (line_id is None or quantity is None) and request.httprequest.data:
+            try:
+                body = json.loads(request.httprequest.data.decode('utf-8'))
+                line_id = body.get('line_id')
+                quantity = body.get('quantity')
+            except Exception:
+                pass
+
+        try:
+            line_id = int(line_id) if line_id is not None else None
+            quantity = int(quantity) if quantity is not None else None
+        except (ValueError, TypeError):
+            pass
+
+        website = getattr(request, 'website', None)
+        if not website and hasattr(request, 'env') and 'website' in request.env:
+            try:
+                website = request.env['website'].get_current_website()
+            except Exception:
+                website = None
+
+        order = None
+        if website and hasattr(website, 'sale_get_order'):
+            try:
+                order = website.sale_get_order(force_create=False)
+            except Exception:
+                order = None
+
+        if not order and hasattr(request, 'session') and request.session.get('sale_order_id'):
+            try:
+                so = request.env['sale.order'].sudo().browse(request.session['sale_order_id'])
+                if so.exists() and so.state == 'draft':
+                    order = so
+            except Exception:
+                order = None
+
+        if order and line_id is not None:
+            line = order.order_line.filtered(lambda l: l.id == line_id)
+            if line:
+                if quantity is not None and quantity <= 0:
+                    line.unlink()
+                elif quantity is not None:
+                    line.product_uom_qty = quantity
+
+        return self.api_cart_status()
 
     @http.route(['/shop/dogs', '/shop/cats', '/shop/small-pets', '/shop/pet-food', '/shop/accessories'], type='http', auth='public', website=True)
     def shop_alias(self, **kw):

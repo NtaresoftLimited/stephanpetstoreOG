@@ -60,7 +60,6 @@ SERVICE_XMLIDS = {
     "standard": "grooming.grooming_service_standard",
     "super_premium": "grooming.grooming_service_super",
 }
-PHONE_RE = re.compile(r"^(?:\+255|0)([67]\d{8})$")
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 
@@ -78,11 +77,109 @@ class StephansGroomingWebsite(http.Controller):
 
     @staticmethod
     def _normalise_phone(phone):
-        compact = re.sub(r"[\s()\-]", "", phone or "")
-        match = PHONE_RE.fullmatch(compact)
-        if not match:
-            raise ValidationError("Enter a valid Tanzanian mobile number, for example 0712 345 678.")
-        return "+255" + match.group(1)
+        """
+        Accept and normalize mobile / phone numbers worldwide.
+        - Local Tanzanian (07..., 06..., 7..., 6...) -> +255...
+        - Tanzanian with country code (255...) -> +255...
+        - Worldwide international numbers (E.164: +1, +44, +254, +971, etc.) -> +<digits>
+        - Leading 00 international prefix -> +<digits>
+        """
+        if not phone:
+            raise ValidationError("Please enter your phone number.")
+        compact = re.sub(r"[\s()\-]", "", str(phone).strip())
+        digits = re.sub(r"\D", "", compact)
+        if not digits:
+            raise ValidationError("Please enter a valid phone number.")
+
+        # 00 international dial prefix (e.g., 001..., 00254...)
+        if digits.startswith("00") and len(digits) > 8:
+            digits = digits[2:]
+
+        # Local Tanzanian 10-digit (07XXXXXXXX, 06XXXXXXXX) or 9-digit (7XXXXXXXX, 6XXXXXXXX)
+        if (len(digits) == 10 and digits.startswith("0") and digits[1] in ("6", "7")):
+            digits = "255" + digits[1:]
+        elif (len(digits) == 9 and digits[0] in ("6", "7")):
+            digits = "255" + digits
+        elif digits.startswith("255") and len(digits) == 12:
+            pass  # Already Tanzanian E.164 digits
+        elif len(digits) < 7 or len(digits) > 15:
+            raise ValidationError("Please enter a valid phone number (7 to 15 digits with country code).")
+
+        return "+" + digits
+
+    @staticmethod
+    def _find_or_track_partner(phone, customer_name, email=None):
+        """
+        Find existing partner across phone, mobile, and email to avoid duplicates.
+        Tracks and detects duplicates in res.partner.
+        Returns (partner, is_duplicate, duplicate_partners).
+        """
+        Partner = request.env["res.partner"].sudo()
+        digits = re.sub(r"\D", "", phone)
+        last9 = digits[-9:] if len(digits) >= 9 else digits
+        last7 = digits[-7:] if len(digits) >= 7 else digits
+
+        phone_fields = ["phone"]
+        if "mobile" in Partner._fields:
+            phone_fields.append("mobile")
+
+        phone_conditions = []
+        for pf in phone_fields:
+            phone_conditions.extend([
+                (pf, "=", phone),
+                (pf, "ilike", last9 if len(last9) >= 7 else digits),
+            ])
+
+        or_conds = ["|"] * (len(phone_conditions) - 1) + phone_conditions if len(phone_conditions) > 1 else phone_conditions
+        phone_candidates = Partner.search(or_conds + [("active", "=", True), ("id", "!=", 1)], limit=30)
+
+        # Match by digits comparison
+        matching = phone_candidates.filtered(
+            lambda p: any(re.sub(r"\D", "", getattr(p, f, "") or "").endswith(last7) for f in phone_fields)
+        )
+
+        email_matching = Partner.browse()
+        if email:
+            email_matching = Partner.search([
+                ("email", "=ilike", email.strip()),
+                ("active", "=", True),
+                ("id", "!=", 1),
+            ], limit=10)
+
+        all_matches = (matching | email_matching)
+        duplicate_partners = all_matches[1:] if len(all_matches) > 1 else Partner.browse()
+        is_duplicate = len(all_matches) > 1
+
+        if is_duplicate:
+            _logger.info(
+                "Duplicate partner records tracked for customer '%s' (%s, %s): %s",
+                customer_name, phone, email, all_matches.ids
+            )
+
+        if all_matches:
+            primary_partner = all_matches.sorted(
+                key=lambda p: (-(getattr(p, "customer_rank", 0) or 0), p.id)
+            )[0]
+            vals = {}
+            if not primary_partner.phone:
+                vals["phone"] = phone
+            if "mobile" in Partner._fields and not primary_partner.mobile:
+                vals["mobile"] = phone
+            if email and not primary_partner.email:
+                vals["email"] = email
+            if vals:
+                primary_partner.write(vals)
+            return primary_partner, is_duplicate, duplicate_partners
+
+        partner_vals = {
+            "name": customer_name.strip(),
+            "phone": phone,
+            "email": email or False,
+        }
+        if "mobile" in Partner._fields:
+            partner_vals["mobile"] = phone
+        new_partner = Partner.create(partner_vals)
+        return new_partner, False, Partner.browse()
 
     @staticmethod
     def _is_ajax():
@@ -145,48 +242,51 @@ class StephansGroomingWebsite(http.Controller):
             if appointment_local < now_local + timedelta(minutes=15):
                 raise ValidationError("Please choose a time at least 15 minutes from now.")
 
+            phone = self._normalise_phone(post["customer_phone"])
+            email = (post.get("customer_email") or "").strip().lower()
+            if email and not EMAIL_RE.fullmatch(email):
+                raise ValidationError("Enter a valid email address or leave it blank.")
+
+            # Deduplicate and track partner records
+            partner, is_dup_partner, dup_partners = self._find_or_track_partner(phone, post["customer_name"], email)
+
             appointment_utc = appointment_local.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
             Appointment = request.env["grooming.appointment"].sudo()
+
+            # Check for duplicate appointment (same partner + same pet + same slot)
+            existing_booking = Appointment.search([
+                ("partner_id", "=", partner.id),
+                ("pet_name", "=ilike", post["pet_name"].strip()),
+                ("appointment_date", "=", fields.Datetime.to_string(appointment_utc)),
+                ("state", "!=", "cancelled"),
+            ], limit=1)
+
+            if existing_booking:
+                _logger.info("Duplicate grooming appointment detected for partner %s (ID %s): reusing existing booking %s",
+                             partner.id, existing_booking.id, existing_booking.name)
+                existing_booking.message_post(
+                    body=f"🔁 Duplicate booking submission received from website for {post['pet_name'].strip()} on {appointment_local.strftime('%d %b %Y %H:%M')}. Request acknowledged without creating duplicate.",
+                    subtype_xmlid="mail.mt_note",
+                )
+                result = {
+                    "ok": True,
+                    "reference": existing_booking.name,
+                    "total": existing_booking.total_price,
+                    "total_formatted": f"TZS {existing_booking.total_price:,.0f}",
+                    "date_label": appointment_local.strftime("%A, %d %B %Y"),
+                    "time_label": appointment_local.strftime("%-I:%M %p"),
+                }
+                if self._is_ajax():
+                    return request.make_json_response(result)
+                return request.render("stephans_website_theme.booking_success", {"appointment": existing_booking})
+
+            # Check for appointment slot conflict with other customers
             conflict = Appointment.search_count([
                 ("appointment_date", "=", fields.Datetime.to_string(appointment_utc)),
                 ("state", "!=", "cancelled"),
             ])
             if conflict:
                 raise ValidationError("That appointment time is already booked. Please choose another slot.")
-
-            phone = self._normalise_phone(post["customer_phone"])
-            email = (post.get("customer_email") or "").strip().lower()
-            if email and not EMAIL_RE.fullmatch(email):
-                raise ValidationError("Enter a valid email address or leave it blank.")
-
-            Partner = request.env["res.partner"].sudo()
-            local_phone = "0" + phone[4:]
-            phone_domain = [("phone", "in", [phone, local_phone, post["customer_phone"]])]
-            if "mobile" in Partner._fields:
-                phone_domain = [
-                    "|",
-                    ("phone", "in", [phone, local_phone, post["customer_phone"]]),
-                    ("mobile", "in", [phone, local_phone, post["customer_phone"]]),
-                ]
-            partner = Partner.search(phone_domain, limit=1)
-            partner_values = {
-                "name": post["customer_name"].strip(),
-                "phone": phone,
-                "email": email or False,
-            }
-            if "mobile" in Partner._fields:
-                partner_values["mobile"] = phone
-            if partner:
-                # Never overwrite an existing customer's name or email from an unauthenticated booking form.
-                backfill = {}
-                if not partner.phone and phone:
-                    backfill["phone"] = phone
-                if "mobile" in Partner._fields and not partner.mobile and phone:
-                    backfill["mobile"] = phone
-                if backfill:
-                    partner.write(backfill)
-            else:
-                partner = Partner.create(partner_values)
 
             service = request.env.ref(SERVICE_XMLIDS[service_key], raise_if_not_found=False)
             if not service:
@@ -215,8 +315,17 @@ class StephansGroomingWebsite(http.Controller):
             if "booking_source" in Appointment._fields:
                 appointment_values["booking_source"] = "odoo_website"
             if "website_id" in Appointment._fields:
-                appointment_values["website_id"] = request.website.id
+                website = getattr(request, "website", None) or (request.env["website"].search([], limit=1) if "website" in request.env else None)
+                if website:
+                    appointment_values["website_id"] = website.id
             appointment = Appointment.create(appointment_values)
+
+            # Track duplicate partners in appointment chatter for staff audit
+            if is_dup_partner:
+                appointment.message_post(
+                    body=f"⚠️ <b>Duplicate Contact Warning</b>: Customer '{partner.name}' shares phone/email with existing partner records (IDs: {dup_partners.ids}). Please review contacts to merge duplicates.",
+                    subtype_xmlid="mail.mt_note",
+                )
 
             request.env["calendar.event"].sudo().create({
                 "name": f"Grooming: {appointment.pet_name} — {appointment.name}",

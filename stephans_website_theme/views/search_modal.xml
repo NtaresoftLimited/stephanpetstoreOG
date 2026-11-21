@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="stephans_search_modal" name="Stephan's Predictive Search Autocomplete Modal">
+        <!-- Backdrop Overlay -->
+        <div id="stephans-search-backdrop" class="stephans-search-backdrop" aria-hidden="true"></div>
+
+        <!-- Search Command Palette Modal -->
+        <div id="stephans-search-modal" class="stephans-search-modal" role="dialog" aria-modal="true" aria-label="Search Stephan's Pet Store" aria-hidden="true">
+            <div class="stephans-search-modal__inner">
+                <!-- Top Input Bar -->
+                <div class="stephans-search-modal__header">
+                    <svg class="stephans-search-modal__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="search" id="stephans-search-modal-input" class="stephans-search-modal__input" placeholder="Search products, brands, pet essentials..." autocomplete="off"/>
+                    <button type="button" id="stephans-search-clear" class="stephans-search-modal__clear" aria-label="Clear search" style="display: none;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                    <button type="button" id="stephans-search-close" class="stephans-search-modal__close" aria-label="Close search">
+                        <kbd>ESC</kbd>
+                    </button>
+                </div>
+
+                <!-- Suggestions / Initial State (when query is short/empty) -->
+                <div id="stephans-search-initial" class="stephans-search-modal__section">
+                    <div class="stephans-search-pills-wrap">
+                        <span class="stephans-search-section-label">Popular Searches</span>
+                        <div class="stephans-search-pills">
+                            <button type="button" class="stephans-search-pill" data-query="Dry Food">Dry Food</button>
+                            <button type="button" class="stephans-search-pill" data-query="Puppy Treats">Puppy Treats</button>
+                            <button type="button" class="stephans-search-pill" data-query="Flea &amp; Tick">Flea &amp; Tick</button>
+                            <button type="button" class="stephans-search-pill" data-query="Nexgard">Nexgard</button>
+                            <button type="button" class="stephans-search-pill" data-query="Cat Litter">Cat Litter</button>
+                            <button type="button" class="stephans-search-pill" data-query="Royal Canin">Royal Canin</button>
+                            <button type="button" class="stephans-search-pill" data-query="TropiDog">TropiDog</button>
+                            <button type="button" class="stephans-search-pill" data-query="Bioline">Bioline</button>
+                            <button type="button" class="stephans-search-pill" data-query="Dog Toys">Dog Toys</button>
+                        </div>
+                    </div>
+
+                    <div class="stephans-search-brands-wrap">
+                        <span class="stephans-search-section-label">Featured Brands</span>
+                        <div class="stephans-search-brands-grid">
+                            <a href="/brands/tropidog" class="stephans-search-brand-link">TropiDog</a>
+                            <a href="/brands/bioline" class="stephans-search-brand-link">Bioline</a>
+                            <a href="/brands/josera" class="stephans-search-brand-link">Josera</a>
+                            <a href="/brands/bravecto" class="stephans-search-brand-link">Bravecto</a>
+                            <a href="/brands/ownat" class="stephans-search-brand-link">Ownat</a>
+                            <a href="/allbrands" class="stephans-search-brand-link stephans-search-brand-link--all">All Brands →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Results Area -->
+                <div id="stephans-search-results-area" class="stephans-search-modal__results" style="display: none;">
+                    <div id="stephans-search-loading" class="stephans-search-loading" style="display: none;">
+                        <div class="stephans-search-spinner"></div>
+                        <span>Searching catalog...</span>
+                    </div>
+
+                    <div id="stephans-search-results-list" class="stephans-search-results-list">
+                        <!-- Populated dynamically via JavaScript -->
+                    </div>
+
+                    <div id="stephans-search-no-results" class="stephans-search-no-results" style="display: none;">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#a1a1aa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                        <p>No pet products found matching your search.</p>
+                        <small>Try searching with another keyword or browse our main shop.</small>
+                    </div>
+                </div>
+
+                <!-- Footer Hint -->
+                <div class="stephans-search-modal__footer">
+                    <span>Press <kbd>↵ Enter</kbd> to view all results</span>
+                    <a href="/shop" class="stephans-search-view-all">Open Full Shop →</a>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

@@ -172,7 +172,7 @@
 
                 <!-- Phone Number -->
                 <div>
-                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number" class="grooming-input" t-att-value="default_customer_phone" inputmode="tel"/>
+                  <input type="tel" name="customer_phone" id="field-customer-phone" required="required" placeholder="Phone Number (e.g. +255 769 324 445 or international)" class="grooming-input" t-att-value="default_customer_phone" inputmode="tel"/>
                 </div>
 
                 <!-- Optional confirmation email -->

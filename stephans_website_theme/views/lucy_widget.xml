@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="stephans_lucy_widget" name="Stephan's Ask Sky AI Assistant Widget">
+        <!-- Floating Action Button (FAB) -->
+        <div id="stephans-lucy-fab" class="stephans-lucy-fab" aria-label="Open Ask Sky AI Assistant" role="button" tabindex="0">
+            <div class="stephans-lucy-fab__icon-wrap">
+                <!-- Stephan's Brand Favicon -->
+                <img src="/stephans_website_theme/static/src/images/branding/favicon.png" alt="Ask Sky" class="stephans-lucy-fab__img"/>
+            </div>
+            <span class="stephans-lucy-fab__pulse" aria-hidden="true"></span>
+            <div class="stephans-lucy-fab__tooltip">Ask Sky • Pet Assistant</div>
+        </div>
+
+        <!-- Sky Chat Drawer / Dialog -->
+        <div id="stephans-lucy-panel" class="stephans-lucy-panel" role="dialog" aria-modal="false" aria-label="Ask Sky Assistant Chat" aria-hidden="true">
+            <!-- Header -->
+            <div class="stephans-lucy-header">
+                <div class="stephans-lucy-header__info">
+                    <div class="stephans-lucy-avatar">
+                        <img src="/stephans_website_theme/static/src/images/branding/favicon.png" alt="Sky" class="stephans-lucy-avatar__img"/>
+                        <span class="stephans-lucy-status-dot"></span>
+                    </div>
+                    <div>
+                        <h3 class="stephans-lucy-title">Ask Sky</h3>
+                        <span class="stephans-lucy-subtitle">Stephan's Pet Care AI</span>
+                    </div>
+                </div>
+                <div class="stephans-lucy-header__actions">
+                    <button type="button" id="stephans-lucy-close" class="stephans-lucy-btn-close" aria-label="Close assistant">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="stephans-lucy-messages" class="stephans-lucy-messages">
+                <!-- Welcome Bot Bubble -->
+                <div class="stephans-lucy-bubble stephans-lucy-bubble--bot">
+                    <div class="stephans-lucy-bubble__content">
+                        <p>👋 Hello! I'm <strong>Sky</strong>, your Stephan's Pet Care Assistant.</p>
+                        <p>How can I help you and your furry friend today?</p>
+                    </div>
+                </div>
+
+                <!-- Prompt Suggestion Chips -->
+                <div id="stephans-lucy-chips" class="stephans-lucy-chips">
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Find premium dog food">🐕 Premium Dog Food</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Book a pet grooming appointment">✂️ Book Grooming</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Where are your stores located?">📍 Store Locations</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="How does delivery work in Dar?">🚚 Delivery Info</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Best flea and tick treatments">🛡️ Flea &amp; Tick Care</button>
+                </div>
+            </div>
+
+            <!-- Direct Human Handoff / WhatsApp Strip -->
+            <div class="stephans-lucy-whatsapp-card">
+                <div class="stephans-lucy-whatsapp-text">
+                    <strong>Need immediate specialist support?</strong>
+                    <small>Chat directly with our pet care team</small>
+                </div>
+                <a href="https://wa.me/255769324445?text=Hello%20Stephan's%20Pet%20Store%2C%20I%20have%20a%20question%20for%20Sky%20about" target="_blank" rel="noopener" class="stephans-lucy-whatsapp-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M12.01 2.01c-5.52 0-9.99 4.47-9.99 9.99 0 1.77.46 3.44 1.28 4.9L2 22l5.24-1.28c1.42.78 3.05 1.22 4.77 1.22 5.52 0 9.99-4.47 9.99-9.99 0-5.52-4.47-9.99-9.99-9.99zm5.46 12.69c-.27-.14-1.61-.8-1.86-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.07-.15.18-.31.2-.58.06-.27-.14-1.15-.43-2.19-1.35-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.42.12-.55.12-.12.27-.32.41-.48.14-.16.18-.28.27-.47.1-.18.05-.35-.02-.48-.06-.14-.61-1.47-.83-2.02-.22-.53-.44-.46-.61-.47-.16-.01-.34-.01-.52-.01-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29 0 1.35.98 2.65 1.12 2.84.14.18 1.93 2.95 4.68 4.14 2.75 1.19 2.75.8 3.25.75.5-.05 1.61-.66 1.84-1.3.23-.64.23-1.19.16-1.3-.06-.11-.25-.18-.52-.32z"/>
+                    </svg>
+                    WhatsApp
+                </a>
+            </div>
+
+            <!-- Chat Input Footer -->
+            <form id="stephans-lucy-form" class="stephans-lucy-footer">
+                <input type="text" id="stephans-lucy-input" class="stephans-lucy-input" placeholder="Ask Sky a question..." autocomplete="off"/>
+                <button type="submit" class="stephans-lucy-send" aria-label="Send message">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </template>
+</odoo>

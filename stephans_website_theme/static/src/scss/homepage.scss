@@ -32,7 +32,7 @@ body, #wrapwrap {
 .stephans-button--outline { color: #fff; border: 2px solid #fff; }
 .stephans-button--outline:hover { color: #111; background: #fff; }
 .stephans-button--plain { color: $stephans-dark; border: 1px solid #ddd; }
-.stephans-hero { position: relative; height: 700px; min-height: 700px; display: flex; align-items: flex-end; justify-content: center; padding: 0 24px 88px; background: #111 url('/stephans_website_theme/static/src/images/hero/hero-stephans.webp') center bottom / cover no-repeat; }
+.stephans-hero { position: relative; height: 700px; min-height: 700px; display: flex; align-items: flex-end; justify-content: center; padding: 0 24px 88px; background: #111 url('/stephans_website_theme/static/src/images/hero/hero-stephans.webp') center bottom / cover no-repeat; background: #111 image-set(url('/stephans_website_theme/static/src/images/hero/hero-stephans.avif') type('image/avif'), url('/stephans_website_theme/static/src/images/hero/hero-stephans.webp') type('image/webp')) center bottom / cover no-repeat; }
 .stephans-hero__shade { position: absolute; inset: 0; background: rgba(17,17,17,.38); }
 .stephans-hero__content { position: relative; z-index: 1; max-width: 950px; text-align: center; }
 .stephans-hero h1 { margin: 0 0 26px; color: #fff; font-size: clamp(36px, 4.2vw, 56px); line-height: 1.1; text-shadow: 0 2px 20px rgba(0,0,0,.25); }
@@ -146,7 +146,7 @@ body, #wrapwrap {
 .stephans-newsletter__image { width: 100%; height: 300px; object-fit: contain; mix-blend-mode: multiply; }
 @media (max-width: 767px) {
   .stephans-container { width: calc(100% - 32px); max-width: 1240px; }
-  .stephans-hero { height: 620px; min-height: 620px; padding-bottom: 56px; }
+  .stephans-hero { height: 580px; min-height: 540px; padding-bottom: 56px; background-position: 48% bottom !important; }
   .stephans-hero__actions { width: 100%; gap: 8px; }
   .stephans-hero__actions .stephans-button { flex: 1; padding-inline: 10px; }
   .stephans-pets { grid-template-columns: repeat(2,1fr); }

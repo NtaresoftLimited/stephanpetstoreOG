@@ -133,4 +133,93 @@
             </p>
         </t>
     </template>
+
+    <!-- 2. Customer Portal Dashboard with Paw Points (Minimalist & Plain Native) -->
+    <template id="portal_my_home_stephans_dashboard" name="Stephan's Customer Portal Dashboard" inherit_id="portal.portal_my_home" priority="5">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <div class="stephans-portal-dashboard mb-3">
+                <div class="stephans-dashboard-grid">
+                    <!-- CARD 1: PAW POINTS -->
+                    <div class="stephans-dash-card">
+                        <div class="stephans-dash-card__top">
+                            <img src="/stephans_wallet_rewards/static/src/img/paw-points.webp" alt="" class="stephans-dash-card__icon"/>
+                            <span class="stephans-dash-card__title">Paw Points</span>
+                        </div>
+                        <div class="stephans-dash-card__metric">
+                            <span class="stephans-dash-card__num" t-out="paw_points_formatted or '0'">0</span>
+                            <span class="stephans-dash-card__unit">Points</span>
+                        </div>
+                        <div class="stephans-dash-card__sub">
+                            Worth <strong>TZS <t t-out="paw_points_value or '0'"/></strong> in vouchers
+                        </div>
+                        <div class="stephans-dash-card__progress-wrap">
+                            <div class="stephans-dash-bar">
+                                <div class="stephans-dash-bar__fill" t-attf-style="width: #{paw_points_progress or 0}%;"></div>
+                            </div>
+                        </div>
+                        <div class="stephans-dash-card__footer">
+                            <a href="/my/wallet" class="stephans-dash-card__btn">
+                                <span>Points History</span>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: SKY WALLET -->
+                    <div class="stephans-dash-card">
+                        <div class="stephans-dash-card__top">
+                            <img src="/stephans_wallet_rewards/static/src/img/sky-wallet.webp" alt="" class="stephans-dash-card__icon"/>
+                            <span class="stephans-dash-card__title">Sky Wallet</span>
+                        </div>
+                        <div class="stephans-dash-card__metric">
+                            <span class="stephans-dash-card__num" t-out="wallet_amount_only or '0'">0</span>
+                            <span class="stephans-dash-card__unit">TZS</span>
+                        </div>
+                        <div class="stephans-dash-card__sub">
+                            Available Balance
+                        </div>
+                        <div class="stephans-dash-card__note">
+                            Top up in store or via WhatsApp
+                        </div>
+                        <div class="stephans-dash-card__footer">
+                            <a href="/my/wallet" class="stephans-dash-card__btn stephans-dash-card__btn--dark">
+                                <span>Wallet Activity</span>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: PET CARE & GROOMING -->
+                    <div class="stephans-dash-card">
+                        <div class="stephans-dash-card__top">
+                            <img src="/grooming/static/src/img/pet-dog.webp" alt="" class="stephans-dash-card__icon"/>
+                            <span class="stephans-dash-card__title">My Pets &amp; Care</span>
+                        </div>
+                        <div class="stephans-dash-card__metric">
+                            <span class="stephans-dash-card__num" t-out="pets_count or 0">0</span>
+                            <span class="stephans-dash-card__unit">Registered</span>
+                        </div>
+                        <div class="stephans-dash-card__sub">
+                            <t t-if="upcoming_appointment">
+                                Next: <strong t-out="upcoming_appointment.pet_name"/> (<t t-out="upcoming_appointment.appointment_date.strftime('%d %b')"/>)
+                            </t>
+                            <t t-else="">
+                                No upcoming appointments
+                            </t>
+                        </div>
+                        <div class="stephans-dash-card__footer">
+                            <a t-if="upcoming_appointment" href="/my/grooming" class="stephans-dash-card__btn">
+                                <span>View Appointment</span>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </a>
+                            <a t-else="" href="/grooming" class="stephans-dash-card__btn">
+                                <span>Book Grooming</span>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
 </odoo>

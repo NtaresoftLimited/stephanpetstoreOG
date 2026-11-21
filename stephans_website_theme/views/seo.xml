@@ -23,16 +23,29 @@
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
             <link rel="alternate" hreflang="en-TZ" t-att-href="'https://stephanspetstore.co.tz' + request.httprequest.path"/>
             <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"/>
+            <!-- Geo Targeting & Local SEO -->
+            <meta name="geo.region" content="TZ-02"/>
+            <meta name="geo.placename" content="Dar es Salaam, Masaki, Mikocheni"/>
+            <meta name="geo.position" content="-6.749;39.278"/>
+            <meta name="ICBM" content="-6.749, 39.278"/>
+            <!-- Open Graph -->
             <meta property="og:site_name" content="Stephan's Pet Store"/>
             <meta property="og:locale" content="en_TZ"/>
             <meta property="og:type" content="website"/>
             <meta property="og:description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
             <meta property="og:url" t-att-content="'https://stephanspetstore.co.tz' + request.httprequest.path"/>
-            <meta property="og:image" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp"/>
-            <meta property="og:image:alt" content="Stephan's Pet Store in Dar es Salaam"/>
+            <meta property="og:image" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"/>
+            <meta property="og:image:secure_url" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"/>
+            <meta property="og:image:width" content="1200"/>
+            <meta property="og:image:height" content="675"/>
+            <meta property="og:image:type" content="image/jpeg"/>
+            <meta property="og:image:alt" content="Stephan's Pet Store Dar es Salaam Tanzania - Sky the pug and Ocean the cat resting on luxury pet bed"/>
+            <!-- Twitter Card -->
             <meta name="twitter:card" content="summary_large_image"/>
+            <meta name="twitter:title" content="Stephan's Pet Store | Premier Pet Shop in Dar es Salaam"/>
             <meta name="twitter:description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
-            <meta name="twitter:image" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp"/>
+            <meta name="twitter:image" content="https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"/>
+            <meta name="twitter:image:alt" content="Stephan's Pet Store Dar es Salaam Tanzania - Sky the pug and Ocean the cat"/>
             <link t-if="request.httprequest.path in ('/', '/stephans-preview')" rel="preload" as="image" href="/stephans_website_theme/static/src/images/hero/hero-stephans.webp" type="image/webp" fetchpriority="high"/>
             <script type="application/ld+json">
 {
@@ -43,7 +56,10 @@
       "@id": "https://stephanspetstore.co.tz/#masaki-store",
       "name": "Stephan's Pet Store Masaki",
       "url": "https://stephanspetstore.co.tz/stores",
-      "image": "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp",
+      "image": [
+        "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp",
+        "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"
+      ],
       "logo": "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/branding/logo.png",
       "telephone": "+255786627873",
       "email": "info@stephanspetstore.co.tz",
@@ -53,6 +69,11 @@
         "streetAddress": "11 Slipway Road, Masaki",
         "addressLocality": "Dar es Salaam",
         "addressCountry": "TZ"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -6.749,
+        "longitude": 39.278
       },
       "openingHoursSpecification": [
         {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "20:30"},
@@ -65,6 +86,11 @@
       "@id": "https://stephanspetstore.co.tz/#mikocheni-store",
       "name": "Stephan's Pet Store Mikocheni",
       "url": "https://stephanspetstore.co.tz/stores",
+      "image": [
+        "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp",
+        "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"
+      ],
+      "logo": "https://stephanspetstore.co.tz/stephans_website_theme/static/src/images/branding/logo.png",
       "telephone": "+255769324445",
       "email": "info@stephanspetstore.co.tz",
       "priceRange": "TZS",
@@ -73,6 +99,11 @@
         "streetAddress": "59 Mikocheni A",
         "addressLocality": "Dar es Salaam",
         "addressCountry": "TZ"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -6.768,
+        "longitude": 39.256
       },
       "openingHoursSpecification": [
         {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "20:30"},

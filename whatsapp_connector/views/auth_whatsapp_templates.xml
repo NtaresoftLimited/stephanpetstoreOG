@@ -28,10 +28,6 @@
                     </span>
                     <h2 t-if="step == 'phone'">Sign in to your account</h2>
                     <h2 t-if="step == 'otp'">Enter your code</h2>
-                    <p t-if="step == 'phone'">
-                        Enter your WhatsApp number and we'll send you a 6-digit login code.
-                        New customer? An account is created for you automatically.
-                    </p>
                     <p t-if="step == 'otp'">
                         We sent a 6-digit code to <strong t-out="phone"/> on WhatsApp.
                     </p>
@@ -128,7 +124,6 @@
                     <a t-att-href="email_login_url" class="o_wa_link">
                         <i class="oi" data-icon="mail"/> Sign in with email &amp; password instead
                     </a>
-                    <p>Need help? WhatsApp us on <strong t-out="support_whatsapp"/></p>
                 </div>
             </div>
         </t>

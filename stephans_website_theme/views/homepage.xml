@@ -20,7 +20,7 @@
                     }
                 </style>
 
-                <section class="stephans-hero">
+                <section class="stephans-hero" role="banner" aria-label="Stephan's Pet Store - Sky the pug and Ocean the cat welcoming pet lovers in Dar es Salaam, Tanzania">
                     <div class="stephans-hero__shade"></div>
                     <div class="stephans-hero__content">
                         <p class="stephans-kicker stephans-kicker--light">Happy Pet. Happy Home.</p>
