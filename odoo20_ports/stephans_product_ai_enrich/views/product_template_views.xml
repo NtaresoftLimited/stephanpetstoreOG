@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_only_form_view_ai_enrich" model="ir.ui.view">
+        <field name="name">product.template.form.ai.enrich</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add Regenerate & Seed Buttons to the Header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_regenerate_ai_details"
+                        string="⚡ Regenerate Details (AI)"
+                        type="object"
+                        class="btn-primary"
+                        confirm="This will fetch data and watermark-free pictures from the official seed links, analyze them with your active AI engine (Gemini / ChatGPT), and format this product using the official Stephan's Pet Store catalog formula. Do you want to proceed?"/>
+                <button name="action_seed_official_brand_urls"
+                        string="🌱 Seed Official Brand Links"
+                        type="object"
+                        class="btn-secondary"/>
+            </xpath>
+
+            <!-- Add AI Catalog Seeds Tab to Notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="AI Catalog Seeds &amp; Keywords" name="ai_catalog_seeds">
+                    <group>
+                        <group string="Source Reference URLs (Official Brand Brain)">
+                            <field name="x_source_urls" widget="text"
+                                   placeholder="Paste official manufacturer or catalog links (one per line)..."/>
+                        </group>
+                        <group string="Keywords, Highlights &amp; Automation Status">
+                            <field name="x_keywords"
+                                   placeholder="Add custom keywords, features, or highlights to emphasize..."/>
+                            <field name="x_packaging_form" readonly="1"/>
+                            <field name="x_key_ingredients" readonly="1"/>
+                            <field name="x_ai_enriched"/>
+                            <field name="x_ai_last_enriched" readonly="1"/>
+                            <field name="x_ai_last_error" readonly="1" invisible="not x_ai_last_error"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
