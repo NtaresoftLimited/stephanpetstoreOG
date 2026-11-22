@@ -23,6 +23,27 @@
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
             <link rel="alternate" hreflang="en-TZ" t-att-href="'https://stephanspetstore.co.tz' + request.httprequest.path"/>
             <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"/>
+
+            <!-- Google Search Console Site Verification -->
+            <t t-set="stephans_gsc" t-value="website.google_search_console or request.env['ir.config_parameter'].sudo().get_param('website.google_search_console')"/>
+            <meta t-if="stephans_gsc" name="google-site-verification" t-att-content="stephans_gsc"/>
+
+            <!-- Google Analytics 4 (GA4) / Tag Manager Tracking -->
+            <t t-set="stephans_ga" t-value="website.google_analytics_key or request.env['ir.config_parameter'].sudo().get_param('website.google_analytics_key')"/>
+            <t t-if="stephans_ga and not editable and not website.google_analytics_key">
+                <script async="async" t-attf-src="https://www.googletagmanager.com/gtag/js?id={{ stephans_ga }}"/>
+                <script>
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '<t t-esc="stephans_ga"/>');
+                </script>
+            </t>
+
+            <!-- Cloudflare Web Analytics Beacon -->
+            <t t-set="stephans_cf_token" t-value="request.env['ir.config_parameter'].sudo().get_param('website.cloudflare_analytics_token')"/>
+            <script t-if="stephans_cf_token and not editable" defer="defer" src="https://static.cloudflareinsights.com/beacon.min.js" t-attf-data-cf-beacon='{"token": "{{ stephans_cf_token }}"}'/>
+
             <!-- Geo Targeting & Local SEO -->
             <meta name="geo.region" content="TZ-02"/>
             <meta name="geo.placename" content="Dar es Salaam, Masaki, Mikocheni"/>
@@ -79,7 +100,12 @@
         {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "20:30"},
         {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "20:30"}
       ],
-      "sameAs": ["https://instagram.com/stephans_ps", "https://facebook.com/stephanspetstore"]
+      "hasMap": "https://maps.google.com/?q=Stephan%27s+Pet+Store+Masaki+11+Slipway+Rd+Dar+es+Salaam",
+      "sameAs": [
+        "https://maps.google.com/?q=Stephan%27s+Pet+Store+Masaki+11+Slipway+Rd+Dar+es+Salaam",
+        "https://instagram.com/stephans_ps",
+        "https://facebook.com/stephanspetstore"
+      ]
     },
     {
       "@type": "PetStore",
@@ -108,6 +134,12 @@
       "openingHoursSpecification": [
         {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "20:30"},
         {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "20:30"}
+      ],
+      "hasMap": "https://maps.google.com/?q=Stephan%27s+Pet+Store+Mikocheni+59+Mikocheni+A+Dar+es+Salaam",
+      "sameAs": [
+        "https://maps.google.com/?q=Stephan%27s+Pet+Store+Mikocheni+59+Mikocheni+A+Dar+es+Salaam",
+        "https://instagram.com/stephans_ps",
+        "https://facebook.com/stephanspetstore"
       ]
     }
   ]

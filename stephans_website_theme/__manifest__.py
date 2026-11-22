@@ -1,6 +1,6 @@
 {
     "name": "Stephan's Pet Store Website Theme",
-    "version": "20.0.2.16.0",
+    "version": "20.0.2.17.0",
     "category": "Theme/eCommerce",
     "summary": "Next.js parity theme for Stephan's Pet Store Odoo 20",
     "author": "Stephan's Pet Store",

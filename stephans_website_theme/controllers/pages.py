@@ -455,3 +455,94 @@ class StephansWebsitePages(http.Controller):
     @http.route('/cart', type='http', auth='public', website=True)
     def cart_alias(self, **kw):
         return request.redirect('/shop/cart')
+
+    @http.route(['/google-merchant-feed.xml', '/merchant-feed.xml'], type='http', auth='public', website=True, csrf=False)
+    def google_merchant_feed(self, **kw):
+        """Official Google Merchant Center RSS 2.0 Product Feed."""
+        base_url = "https://www.stephanspetstore.co.tz"
+        try:
+            website = getattr(request, 'website', None)
+            if not website and hasattr(request, 'env') and 'website' in request.env:
+                website = request.env['website'].get_current_website()
+            if website and website.domain:
+                d = website.domain.strip().rstrip('/')
+                if not d.startswith('http'):
+                    base_url = f"https://{d}"
+                elif d.startswith('http://'):
+                    base_url = f"https://{d[7:]}"
+                else:
+                    base_url = d
+        except Exception:
+            base_url = "https://www.stephanspetstore.co.tz"
+        domain = [
+            ('sale_ok', '=', True),
+            ('active', '=', True),
+            ('is_published', '=', True),
+            ('list_price', '>', 0),
+        ]
+        products = request.env['product.template'].sudo().search(domain, order='name asc', limit=2500)
+
+        items_xml = []
+        for p in products:
+            p_name = escape((p.name or '').strip())
+            raw_desc = (p.description_sale or '').strip()
+            if not raw_desc:
+                raw_desc = f"Buy {(p.name or '').strip()} at Stephan's Pet Store in Dar es Salaam, Tanzania. Premium pet food, accessories, and supplies available at Slipway Masaki and Mikocheni branches with fast local delivery across Dar es Salaam."
+            desc = escape(raw_desc[:4900])
+
+            p_link = f"{base_url}{p.website_url}" if p.website_url else f"{base_url}/shop/product/{p.id}"
+            img_link = f"{base_url}/web/image/product.template/{p.id}/image_1024"
+
+            brand = "Stephan's Pet Store"
+            if hasattr(p, 'product_brand_id') and p.product_brand_id and p.product_brand_id.name:
+                brand = p.product_brand_id.name.strip()
+            elif hasattr(p, 'brand_id') and p.brand_id and p.brand_id.name:
+                brand = p.brand_id.name.strip()
+            brand = escape(brand)
+
+            availability = "in_stock" if getattr(p, 'qty_available', 1.0) > 0 else "out_of_stock"
+            price_str = f"{p.list_price:.2f} TZS"
+
+            cat_name = p.categ_id.name.strip() if p.categ_id and p.categ_id.name else "Pet Supplies"
+            google_cat = "Animals &amp; Pet Supplies &gt; Pet Supplies"
+            upper_cat = cat_name.upper()
+            if "DOG" in upper_cat:
+                google_cat = "Animals &amp; Pet Supplies &gt; Pet Supplies &gt; Dog Supplies"
+            elif "CAT" in upper_cat:
+                google_cat = "Animals &amp; Pet Supplies &gt; Pet Supplies &gt; Cat Supplies"
+            elif "BIRD" in upper_cat:
+                google_cat = "Animals &amp; Pet Supplies &gt; Pet Supplies &gt; Bird Supplies"
+
+            sku = escape(str(p.default_code or f"PROD-{p.id}"))
+
+            item = f"""    <item>
+      <g:id>{sku}</g:id>
+      <g:title>{p_name}</g:title>
+      <g:description>{desc}</g:description>
+      <g:link>{p_link}</g:link>
+      <g:image_link>{img_link}</g:image_link>
+      <g:availability>{availability}</g:availability>
+      <g:price>{price_str}</g:price>
+      <g:brand>{brand}</g:brand>
+      <g:condition>new</g:condition>
+      <g:google_product_category>{google_cat}</g:google_product_category>
+    </item>"""
+            items_xml.append(item)
+
+        xml_body = "\n".join(items_xml)
+        xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+  <channel>
+    <title>Stephan's Pet Store - Google Merchant Feed</title>
+    <link>{base_url}</link>
+    <description>Official Google Merchant Center Product Feed for Stephan's Pet Store Dar es Salaam (Slipway Masaki and Mikocheni branches)</description>
+{xml_body}
+  </channel>
+</rss>"""
+        return request.make_response(
+            xml_content,
+            headers=[
+                ('Content-Type', 'application/xml; charset=utf-8'),
+                ('Cache-Control', 'public, max-age=3600'),
+            ]
+        )
