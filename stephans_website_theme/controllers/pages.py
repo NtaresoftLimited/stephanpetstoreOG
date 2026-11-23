@@ -198,7 +198,21 @@ class StephansWebsitePages(http.Controller):
 
     @http.route(['/brands/<string:slug>', '/brand/<string:slug>'], type='http', auth='public', website=True, sitemap=True)
     def brand_page(self, slug, **kw):
-        slug_key = slug.lower().strip()
+        slug_raw = slug.lower().strip()
+        CANONICAL_SLUG_MAP = {
+            'summit10': 'summit-10',
+            'summit-10': 'summit-10',
+            'tropi-dog': 'tropidog',
+            'tropi-cat': 'tropicat',
+        }
+        canonical_slug = CANONICAL_SLUG_MAP.get(slug_raw, slug_raw)
+        canonical_path = f"/brands/{canonical_slug}"
+
+        # 301 Permanent Redirect to canonical URL if accessed via alias or singular /brand/
+        if request.httprequest.path != canonical_path:
+            return request.redirect(canonical_path, code=301)
+
+        slug_key = canonical_slug
         brand_info = BRANDS_DATA.get(slug_key)
         if not brand_info:
             brand_name = slug_key.replace('-', ' ').title()
@@ -393,7 +407,7 @@ class StephansWebsitePages(http.Controller):
 
         # 3. Smart Brand Matching & Fallback
         KNOWN_BRANDS = [
-            {'name': 'Summit 10', 'url': '/brands/summit10', 'aliases': ['summit10', 'summit 10', 'summit']},
+            {'name': 'Summit 10', 'url': '/brands/summit-10', 'aliases': ['summit10', 'summit-10', 'summit 10', 'summit']},
             {'name': 'Bioline', 'url': '/brands/bioline', 'aliases': ['bioline']},
             {'name': 'TropiDog', 'url': '/brands/tropidog', 'aliases': ['tropidog', 'tropi dog']},
             {'name': 'TropiCat', 'url': '/brands/tropicat', 'aliases': ['tropicat', 'tropi cat']},
