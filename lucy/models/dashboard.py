@@ -302,4 +302,127 @@ class LucyDashboard(models.AbstractModel):
                 "low_only": low_only,
             },
             "catalog": catalog_groups,
+            "ai_enrichment": self._get_ai_enrichment_data(),
         }
+
+    def _get_ai_enrichment_data(self):
+        ir_config = self.env["ir.config_parameter"].sudo()
+        ai_provider = ir_config.get_param("stephans_product_ai_enrich.ai_provider") or "gemini"
+        gemini_model = ir_config.get_param("stephans_product_ai_enrich.gemini_model") or "gemini-3.5-flash"
+        openai_model = ir_config.get_param("stephans_product_ai_enrich.openai_model") or "gpt-4o-mini"
+        active_model = gemini_model if ai_provider == "gemini" else openai_model
+
+        cron = self.env["ir.cron"].sudo().search([
+            "|",
+            ("name", "ilike", "enrich"),
+            ("code", "ilike", "cron_auto_enrich_products"),
+        ], limit=1)
+
+        nextcall_str = "Scheduled"
+        if cron and cron.nextcall:
+            try:
+                nextcall_str = fields.Datetime.context_timestamp(self, cron.nextcall).strftime("%H:%M, %d %b")
+            except Exception:
+                nextcall_str = fields.Datetime.to_string(cron.nextcall)
+
+        cron_info = {
+            "active": cron.active if cron else False,
+            "nextcall": nextcall_str,
+            "interval": f"{cron.interval_number} {cron.interval_type}" if cron else "30 minutes",
+            "provider": "Google Gemini" if ai_provider == "gemini" else "OpenAI",
+            "model": active_model,
+        }
+
+        # Track Tier 1 Flagship Brands
+        track_brands = [
+            {"key": "bioline", "label": "Bioline", "tier": "Tier 1 Flagship"},
+            {"key": "summit", "label": "Summit 10", "tier": "Tier 1 Flagship"},
+            {"key": "tropidog", "label": "TropiDog", "tier": "Tier 1 Flagship"},
+            {"key": "tropicat", "label": "TropiCat", "tier": "Tier 1 Flagship"},
+        ]
+
+        enrichment_rows = []
+        total_flagship_prods = 0
+        total_flagship_enriched = 0
+        total_flagship_pending = 0
+
+        for b in track_brands:
+            prods = self.env["product.template"].sudo().search([
+                ("active", "=", True),
+                ("name", "ilike", b["key"]),
+            ])
+            total = len(prods)
+            enriched = len(prods.filtered(lambda p: getattr(p, "x_ai_enriched", False)))
+            pending = total - enriched
+            total_flagship_prods += total
+            total_flagship_enriched += enriched
+            total_flagship_pending += pending
+
+            if total == 0:
+                advice = "No products loaded in catalog yet."
+                status_color = "secondary"
+            elif pending == 0:
+                advice = "100% Complete. Rich specs and feeding guides generated."
+                status_color = "success"
+            elif enriched > 0:
+                advice = f"Processing. Active auto-enrich batch running via {cron_info['provider']}."
+                status_color = "primary"
+            else:
+                advice = f"Queued for processing. Scheduled at {cron_info['nextcall']}."
+                status_color = "warning"
+
+            enrichment_rows.append({
+                "brand": b["label"],
+                "key": b["key"],
+                "tier": b["tier"],
+                "total": total,
+                "enriched": enriched,
+                "pending": pending,
+                "pct": round((enriched / total * 100)) if total else 0,
+                "advice": advice,
+                "status_color": status_color,
+            })
+
+        # Tier 2 Remaining Catalog Products
+        all_prods = self.env["product.template"].sudo().search([("active", "=", True)])
+        other_prods = all_prods.filtered(
+            lambda p: not any(b["key"] in (p.name or "").lower() for b in track_brands)
+        )
+        other_total = len(other_prods)
+        other_enriched = len(other_prods.filtered(lambda p: getattr(p, "x_ai_enriched", False)))
+        other_pending = other_total - other_enriched
+
+        enrichment_rows.append({
+            "brand": "Other Brands & Essentials",
+            "key": "others",
+            "tier": "Tier 2 Standard",
+            "total": other_total,
+            "enriched": other_enriched,
+            "pending": other_pending,
+            "pct": round((other_enriched / other_total * 100)) if other_total else 0,
+            "advice": "Auto-enriches following Tier 1 completion." if other_pending else "Fully up to date.",
+            "status_color": "info" if other_pending else "success",
+        })
+
+        grand_total = total_flagship_prods + other_total
+        grand_enriched = total_flagship_enriched + other_enriched
+        grand_pending = total_flagship_pending + other_pending
+
+        return {
+            "cron": cron_info,
+            "brands": enrichment_rows,
+            "summary": {
+                "total": grand_total,
+                "enriched": grand_enriched,
+                "pending": grand_pending,
+                "pct": round((grand_enriched / grand_total * 100)) if grand_total else 0,
+            }
+        }
+
+    @api.model
+    def trigger_ai_enrich_batch(self, limit=10):
+        self._require_admin()
+        product_template = self.env["product.template"]
+        if hasattr(product_template, "cron_auto_enrich_products"):
+            product_template.cron_auto_enrich_products(limit=limit)
+        return True

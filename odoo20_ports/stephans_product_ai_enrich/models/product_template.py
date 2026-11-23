@@ -487,7 +487,7 @@ class ProductTemplate(models.Model):
         return f"""
 You are the master e-commerce catalog director for Stephan's Pet Store (Tanzania).
 Your task is to analyze the official source catalogue texts, user-supplied keywords, and candidate image URLs below,
-and output standardized, factual, healthy, high-converting product data in valid JSON.
+and output standardized, factual, healthy, high-converting product data as a single root JSON object (not a list).
 {brand_block}{vet_safety_block}
 STRICT ACCURACY & HEALTH RULE:
 - Ground all ingredients, protein/fat percentages, sizes, and usage instructions strictly in real official brand facts and the reference content below.
@@ -536,9 +536,9 @@ Return strictly a valid JSON object matching this structure.
         openai_key = (ir_config.get_param('stephans_product_ai_enrich.openai_api_key') or '').strip()
         openai_model = ir_config.get_param('stephans_product_ai_enrich.openai_model') or 'gpt-4o'
         gemini_key = (ir_config.get_param('stephans_product_ai_enrich.gemini_api_key') or '').strip()
-        gemini_model = ir_config.get_param('stephans_product_ai_enrich.gemini_model') or 'gemini-2.0-flash'
-        if gemini_model == 'gemini-2.5-flash':
-            gemini_model = 'gemini-2.0-flash'
+        gemini_model = ir_config.get_param('stephans_product_ai_enrich.gemini_model') or 'gemini-3.5-flash'
+        if gemini_model in ('gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'):
+            gemini_model = 'gemini-3.5-flash'
 
         # Check preferred provider and fallback
         if provider == 'gemini':
@@ -570,7 +570,10 @@ Return strictly a valid JSON object matching this structure.
         if text.startswith('```'):
             text = re.sub(r'^```(?:json)?\s*', '', text)
             text = re.sub(r'\s*```$', '', text)
-        return json.loads(text.strip())
+        res = json.loads(text.strip())
+        if isinstance(res, list) and res and isinstance(res[0], dict):
+            return res[0]
+        return res
 
     def _call_gemini(self, api_key, model, context_text, image_candidates):
         """Call Google Gemini API using native Python urllib with clean error handling"""
@@ -592,7 +595,10 @@ Return strictly a valid JSON object matching this structure.
         req = urllib.request.Request(
             endpoint,
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "X-goog-api-key": api_key,
+            },
             method="POST"
         )
 

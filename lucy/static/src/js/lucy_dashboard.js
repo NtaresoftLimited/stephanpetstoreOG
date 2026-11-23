@@ -294,6 +294,30 @@ export class LucyDashboard extends Component {
             views: [[false, "form"]],
         });
     }
+
+    async triggerEnrichNow() {
+        this.state.enriching = true;
+        try {
+            await this.orm.call("lucy.dashboard", "trigger_ai_enrich_batch", [10]);
+            await this.load();
+        } finally {
+            this.state.enriching = false;
+        }
+    }
+
+    openBrandProducts(brandKey) {
+        const domain = [["active", "=", true]];
+        if (brandKey !== "others") {
+            domain.push(["name", "ilike", brandKey]);
+        }
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: `${(brandKey || "").toUpperCase()} Products`,
+            res_model: "product.template",
+            views: [[false, "list"], [false, "kanban"], [false, "form"]],
+            domain,
+        });
+    }
 }
 
 registry.category("actions").add("lucy.dashboard", LucyDashboard);
