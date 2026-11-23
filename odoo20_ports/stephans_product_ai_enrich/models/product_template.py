@@ -918,12 +918,12 @@ class ProductTemplate(models.Model):
         return True
 
     @api.model
-    def cron_auto_enrich_products(self, limit=5):
+    def cron_auto_enrich_products(self, limit=10):
         """
-        Controlled Batch Enrich (Default limit=5 products per batch).
-        Prepares and stages up to 5 products into the review queue. Never auto-publishes.
+        Controlled Batch Enrich (Default limit=10 products per batch).
+        Auto-enriches and publishes up to 10 products (text + 3 official images) per batch.
         """
-        limit = min(int(limit or 5), 5)
+        limit = min(int(limit or 10), 20)
         ir_config = self.env['ir.config_parameter'].sudo()
         gemini_key = (ir_config.get_param('stephans_product_ai_enrich.gemini_api_key') or '').strip()
         openai_key = (ir_config.get_param('stephans_product_ai_enrich.openai_api_key') or '').strip()
