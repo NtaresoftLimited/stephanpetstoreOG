@@ -19,17 +19,35 @@ class PosOrder(models.Model):
         first_name = (self.partner_id.name or "").split(" ")[0] if self.partner_id else ""
         greeting = _("Hi %s,", first_name) if first_name else _("Hello,")
         amount = self.currency_id.format(self.amount_total) if self.currency_id else self.amount_total
-        return _(
-            "%(greeting)s thank you for shopping at %(shop)s.\nReceipt %(ref)s · Total %(amount)s",
-            greeting=greeting,
-            shop=self.config_id.name or self.company_id.name,
-            ref=self.pos_reference or self.name,
-            amount=amount,
-        )
+        shop_name = self.config_id.name or self.company_id.name
+        ref = self.pos_reference or self.name
 
-    def action_send_whatsapp_receipt(self, phone):
-        """Send the receipt image to a WhatsApp number (called from the POS Send Receipt popup)."""
+        caption = f"🐾 {greeting} thank you for shopping at {shop_name}!\n"
+        caption += f"🧾 Receipt: {ref} · Total: {amount}\n"
+
+        if self.partner_id:
+            try:
+                card = self.env["loyalty.card"].sudo().search([
+                    ("partner_id", "=", self.partner_id.id),
+                    ("program_id.program_type", "=", "loyalty"),
+                ], limit=1)
+                if card and card.points:
+                    pts = int(card.points)
+                    val = (pts // 100) * 5000 if pts >= 100 else int((pts / 100.0) * 5000)
+                    caption += f"⭐ Paw Points Balance: {pts} pts (~{val:,.0f} TZS value)\n"
+            except Exception:
+                pass
+
+        caption += "View your account: https://www.stephanspetstore.co.tz/my/home"
+        return caption
+
+    def action_send_whatsapp_receipt(self, phone=None):
+        """Send the receipt image to a WhatsApp number (called from POS popup or backend order view)."""
         self.ensure_one()
+        if not phone:
+            phone = self.partner_id.phone or getattr(self.partner_id, "mobile", False)
+        if not phone:
+            raise UserError(_("No phone number found for this customer. Enter a valid WhatsApp number, e.g. +254114882341."))
         e164, digits, _last9 = normalize_whatsapp_phone(phone)
         if len(digits) < 10:
             raise UserError(_("Enter a valid WhatsApp number, e.g. 0769 324 445 or +255769324445."))
