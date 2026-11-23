@@ -17,21 +17,27 @@
                     <section class="sp-store-grid" aria-label="Our stores">
                         <article class="sp-store-card">
                             <div class="sp-store-pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-                            <h2>MASAKI</h2><p class="sp-store-kind">Main Store</p>
+                            <h2>MASAKI</h2><p class="sp-store-kind">Flagship &amp; Grooming Studio</p>
                             <address>11 Slipway Rd, Masaki<br/>Dar es Salaam</address>
                             <div class="sp-store-divider"></div>
-                            <a class="sp-store-directions" href="https://www.google.com/maps/dir/?api=1&amp;destination=-6.7452,39.2825" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <a class="sp-store-directions" href="https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Masaki/@-6.7452,39.2825,17z" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                                <a href="/stores/masaki" style="font-size:13px; font-weight:600; color:#d97706; text-decoration:none;">View Masaki Store Details &amp; Grooming →</a>
+                            </div>
                             <button class="sp-store-details-toggle" type="button" aria-expanded="false">Store details <span>＋</span></button>
                             <div class="sp-store-details" hidden="hidden"><a href="tel:+255786627873">+255 786 627 873</a><p>Mon–Sat: 9:00 AM–8:30 PM</p></div>
                         </article>
                         <article class="sp-store-card">
                             <div class="sp-store-pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-                            <h2>MIKOCHENI</h2><p class="sp-store-kind">Branch</p>
+                            <h2>MIKOCHENI</h2><p class="sp-store-kind">Retail &amp; Pickup Branch</p>
                             <address>59 Mikocheni A<br/>Dar es Salaam</address>
                             <div class="sp-store-divider"></div>
-                            <a class="sp-store-directions" href="https://www.google.com/maps/dir/?api=1&amp;destination=-6.7733,39.2699" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <a class="sp-store-directions" href="https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Mikocheni/@-6.7733,39.2699,17z" target="_blank" rel="noopener">Get Directions <span>→</span></a>
+                                <a href="/stores/mikocheni" style="font-size:13px; font-weight:600; color:#d97706; text-decoration:none;">View Mikocheni Store Details →</a>
+                            </div>
                             <button class="sp-store-details-toggle" type="button" aria-expanded="false">Store details <span>＋</span></button>
-                            <div class="sp-store-details" hidden="hidden"><a href="tel:+255786627873">+255 786 627 873</a><p>Mon–Sat: 9:00 AM–6:00 PM</p></div>
+                            <div class="sp-store-details" hidden="hidden"><a href="tel:+255769324445">+255 769 324 445</a><p>Mon–Sat: 9:00 AM–6:00 PM</p></div>
                         </article>
                     </section>
 

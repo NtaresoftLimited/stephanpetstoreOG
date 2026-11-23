@@ -9,14 +9,28 @@
             <div class="stephans-search-modal__inner">
                 <!-- Top Input Bar -->
                 <div class="stephans-search-modal__header">
-                    <svg class="stephans-search-modal__icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#8d4314" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="stephans-search-modal__icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#8d4314" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="11" cy="11" r="8"/>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
-                    <input type="text" id="stephans-search-modal-input" class="stephans-search-modal__input" placeholder="Search products, brands, categories..." autocomplete="off"/>
+
+                    <!-- Input with clear-icon positioned inside -->
+                    <div class="stephans-search-input-wrapper">
+                        <input type="text" id="stephans-search-modal-input" class="stephans-search-modal__input" 
+                               placeholder="Search products, brands, categories..." autocomplete="off"
+                               role="combobox" aria-autocomplete="list" aria-expanded="false"
+                               aria-controls="stephans-search-results-area" aria-label="Search products, brands and categories"/>
+                        <button type="button" id="stephans-search-input-clear" class="stephans-search-input-clear" 
+                                aria-label="Clear search input" title="Clear search" style="display: none;">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
                     
+                    <!-- Actions: Singular clean close button -->
                     <div class="stephans-search-modal__actions">
-                        <button type="button" id="stephans-search-clear" class="stephans-search-modal__clear" aria-label="Clear search" style="display: none;">Clear</button>
                         <button type="button" id="stephans-search-close" class="stephans-search-modal__close" aria-label="Close search" title="Close (ESC)">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#331c0e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"/>
@@ -31,7 +45,7 @@
                     <div class="stephans-search-pills-wrap">
                         <span class="stephans-search-section-label">Popular Searches</span>
                         <div class="stephans-search-pills">
-                            <button type="button" class="stephans-search-pill" data-query="Summit10">Summit10</button>
+                            <button type="button" class="stephans-search-pill" data-query="Summit 10">Summit 10</button>
                             <button type="button" class="stephans-search-pill" data-query="Cat Litter">Cat Litter</button>
                             <button type="button" class="stephans-search-pill" data-query="Dry Food">Dry Food</button>
                             <button type="button" class="stephans-search-pill" data-query="Wet Food">Wet Food</button>
@@ -46,9 +60,10 @@
                     <div class="stephans-search-brands-wrap">
                         <span class="stephans-search-section-label">Featured Brands</span>
                         <div class="stephans-search-brands-grid">
-                            <a href="/brands/summit10" class="stephans-search-brand-link">Summit10</a>
+                            <a href="/brands/summit10" class="stephans-search-brand-link">Summit 10</a>
                             <a href="/brands/bioline" class="stephans-search-brand-link">Bioline</a>
                             <a href="/brands/tropidog" class="stephans-search-brand-link">TropiDog</a>
+                            <a href="/brands/tropicat" class="stephans-search-brand-link">TropiCat</a>
                             <a href="/brands/bravecto" class="stephans-search-brand-link">Bravecto</a>
                             <a href="/brands/ownat" class="stephans-search-brand-link">Ownat</a>
                             <a href="/allbrands" class="stephans-search-brand-link stephans-search-brand-link--all">All Brands →</a>
@@ -57,41 +72,63 @@
                 </div>
 
                 <!-- Live Results Area -->
-                <div id="stephans-search-results-area" class="stephans-search-modal__results" style="display: none;">
+                <div id="stephans-search-results-area" class="stephans-search-modal__results" style="display: none;" aria-live="polite">
                     <div id="stephans-search-loading" class="stephans-search-loading" style="display: none;">
-                        <div class="stephans-search-spinner"></div>
+                        <div class="stephans-search-spinner" aria-hidden="true"></div>
                         <span>Searching catalog...</span>
                     </div>
 
                     <!-- Products Section -->
                     <div id="stephans-search-products-group" class="stephans-search-group" style="display: none;">
                         <div class="stephans-search-group-title">PRODUCTS</div>
-                        <div id="stephans-search-products-list" class="stephans-search-products-list"></div>
+                        <div id="stephans-search-products-list" class="stephans-search-products-list" role="listbox"></div>
                     </div>
 
                     <!-- Categories & Brands Section -->
                     <div id="stephans-search-tax-group" class="stephans-search-group" style="display: none;">
                         <div class="stephans-search-group-title">CATEGORIES, BRANDS &amp; PAGES</div>
-                        <div id="stephans-search-tax-list" class="stephans-search-tax-list"></div>
+                        <div id="stephans-search-tax-list" class="stephans-search-tax-list" role="listbox"></div>
                     </div>
 
-                    <div id="stephans-search-no-results" class="stephans-search-no-results" style="display: none;">
-                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#a1a1aa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"/>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                            <line x1="8" y1="11" x2="14" y2="11"/>
-                        </svg>
-                        <p>No pet products found matching your search.</p>
-                        <small>Try searching with another keyword or browse our main shop.</small>
+                    <!-- Empty State with Recovery Actions -->
+                    <div id="stephans-search-no-results" class="stephans-search-no-results" style="display: none;" role="status">
+                        <div class="stephans-search-no-results__title">We couldn&rsquo;t find &ldquo;<span id="stephans-search-failed-query"></span>&rdquo;</div>
+                        <p class="stephans-search-no-results__subtitle">Check the spelling or try another search.</p>
+                        
+                        <div class="stephans-search-no-results__actions">
+                            <a href="/shop" class="stephans-search-btn stephans-search-btn--primary">Browse all products</a>
+                            <button type="button" id="stephans-search-view-brands" class="stephans-search-btn stephans-search-btn--secondary">Popular brands</button>
+                        </div>
+
+                        <div class="stephans-search-no-results__suggestions">
+                            <span class="stephans-search-no-results__suggestions-label">Try searching for:</span>
+                            <div class="stephans-search-pills stephans-search-pills--center">
+                                <button type="button" class="stephans-search-pill" data-query="Summit 10">Summit 10</button>
+                                <button type="button" class="stephans-search-pill" data-query="Dog Food">Dog Food</button>
+                                <button type="button" class="stephans-search-pill" data-query="Cat Food">Cat Food</button>
+                                <button type="button" class="stephans-search-pill" data-query="Grain Free">Grain Free</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Error State with Retry -->
+                    <div id="stephans-search-error-state" class="stephans-search-error-state" style="display: none;" role="alert">
+                        <div class="stephans-search-no-results__title">Search is temporarily unavailable.</div>
+                        <p class="stephans-search-no-results__subtitle">Please check your connection and try again.</p>
+                        <div class="stephans-search-no-results__actions">
+                            <button type="button" id="stephans-search-retry-btn" class="stephans-search-btn stephans-search-btn--primary">Try again</button>
+                            <a href="/shop" class="stephans-search-btn stephans-search-btn--secondary">Browse shop</a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Footer -->
+                <!-- Footer with Context-Aware Shortcuts -->
                 <div class="stephans-search-modal__footer">
-                    <div class="stephans-search-shortcuts">
-                        <kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close
+                    <div id="stephans-search-shortcuts" class="stephans-search-shortcuts" aria-hidden="true">
+                        <span id="stephans-shortcut-empty" class="stephans-shortcut-msg"><kbd>Esc</kbd> to close</span>
+                        <span id="stephans-shortcut-results" class="stephans-shortcut-msg" style="display: none;"><kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close</span>
                     </div>
-                    <a href="/shop" id="stephans-search-see-all" class="stephans-search-see-all">See all <span id="stephans-results-count">0</span> results</a>
+                    <a href="/shop" id="stephans-search-see-all" class="stephans-search-see-all" style="display: none;">View all <span id="stephans-results-count">0</span> results →</a>
                 </div>
             </div>
         </div>

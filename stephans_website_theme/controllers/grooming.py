@@ -190,7 +190,7 @@ class StephansGroomingWebsite(http.Controller):
             return request.make_json_response({"ok": False, "error": message}, status=status)
         return request.render("stephans_website_theme.booking_error", {"error": message}, status=status)
 
-    @http.route(["/grooming", "/stephans-grooming"], type="http", auth="public", website=True)
+    @http.route("/grooming", type="http", auth="public", website=True)
     def grooming(self, **kw):
         partner = request.env.user.partner_id if not request.env.user._is_public() else request.env["res.partner"]
         now_local = datetime.now(NAIROBI_TZ)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="stephans_preview_page" name="Stephan's Website Preview">
+    <template id="stephans_preview_page" name="Stephan's Pet Store - Home">
         <t t-call="website.layout">
             <t t-set="additional_title">Premium Pet Store &amp; Grooming in Tanzania</t>
             <t t-set="meta_description">Shop premium pet food, accessories and toys, or book professional pet grooming at Stephan's Pet Store in Masaki and Mikocheni, Dar es Salaam.</t>

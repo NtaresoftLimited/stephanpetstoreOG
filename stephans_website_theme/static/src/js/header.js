@@ -315,6 +315,33 @@ const initializeProductRotator = () => {
             if (!document.hidden) scheduleNext();
         });
 
+        // Touch swipe support for mobile and tablets
+        let touchStartX = 0;
+        let touchStartY = 0;
+        rotator.addEventListener("touchstart", (e) => {
+            if (e.touches && e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isPointerPaused = true;
+            }
+        }, { passive: true });
+
+        rotator.addEventListener("touchend", (e) => {
+            isPointerPaused = false;
+            scheduleNext();
+            if (e.changedTouches && e.changedTouches.length === 1) {
+                const deltaX = e.changedTouches[0].clientX - touchStartX;
+                const deltaY = e.changedTouches[0].clientY - touchStartY;
+                if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+                    if (deltaX < 0) {
+                        showSlide(currentIndex + 1);
+                    } else {
+                        showSlide(currentIndex - 1);
+                    }
+                }
+            }
+        }, { passive: true });
+
         // Capture-phase delegation, for the same Odoo 20 click-swallowing reason as the header.
         rotator.addEventListener("click", (event) => {
             const dot = event.target instanceof Element ? event.target.closest(".stephans-rotator-dot") : null;

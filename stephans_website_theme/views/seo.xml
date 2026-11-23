@@ -1,30 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="stephans_seo_layout" inherit_id="website.layout" name="Stephan's SEO and Performance Hints">
-        <xpath expr="//head" position="inside">
+        <xpath expr="//head/meta[@name='viewport']" position="after">
+            <t t-set="disable_opengraph" t-value="True"/>
             <t t-set="stephans_page_descriptions" t-value="{
                 '/': 'Shop premium pet food, toys and accessories, and book professional pet grooming at Stephan\'s Pet Store in Dar es Salaam, Tanzania. Same-day delivery available.',
                 '/shop': 'Browse premium pet food, toys, accessories and pet-care essentials from Stephan\'s Pet Store in Tanzania. Fast nationwide delivery.',
                 '/grooming': 'Book gentle, professional dog, cat and small-animal grooming at Stephan\'s Pet Store in Dar es Salaam.',
                 '/contact': 'Contact Stephan\'s Pet Store for product help, grooming bookings, store directions and customer support in Dar es Salaam.',
-                '/stores': 'Find Stephan\'s Pet Store locations in Masaki and Mikocheni, Dar es Salaam.',
+                '/stores': 'Find Stephan\'s Pet Store locations in Masaki (11 Slipway Rd) and Mikocheni (59 Mikocheni A), Dar es Salaam.',
+                '/stores/masaki': 'Visit Stephan\'s Pet Store in Masaki at 11 Slipway Road. Premium pet supplies and full-service dog and cat grooming studio.',
+                '/stores/mikocheni': 'Visit Stephan\'s Pet Store in Mikocheni at 59 Mikocheni A. Premium pet food, veterinary hygiene, accessories and easy pickup.',
                 '/about': 'Learn about Stephan\'s Pet Store, our pet-care values and our stores in Dar es Salaam.',
                 '/allbrands': 'Explore trusted pet food, grooming and accessory brands available at Stephan\'s Pet Store.',
-                '/faq': 'Find answers about shopping, delivery, returns and grooming at Stephan\'s Pet Store.',
-                '/faqs': 'Find answers about shopping, delivery, returns and grooming at Stephan\'s Pet Store.',
-                '/delivery': 'Read Stephan\'s Pet Store delivery information for orders across Tanzania.',
-                '/return-policy': 'Read the Stephan\'s Pet Store return and exchange policy.',
+                '/faq': 'Find authoritative answers about pet supplies, delivery across Tanzania, return policies and grooming bookings at Stephan\'s Pet Store.',
+                '/delivery': 'Read Stephan\'s Pet Store delivery options: same-day delivery in Dar es Salaam and courier parcel dispatch across Tanzania.',
+                '/return-policy': 'Read the Stephan\'s Pet Store 7-day return and exchange policy for pet supplies.',
                 '/terms': 'Read the terms and conditions for shopping with Stephan\'s Pet Store.',
                 '/blog': 'Pet care advice, product guides and news from Stephan\'s Pet Store.',
-                '/grooming-policy': 'Review the Stephan\'s Pet Store grooming policy before your appointment.'
+                '/grooming-policy': 'Review the Stephan\'s Pet Store grooming safety and health policy before your appointment.'
             }"/>
-            <meta t-if="not meta_description" name="description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania. Fast delivery across Tanzania.')"/>
-            
-            <!-- Canonical and Alternate Language Links -->
-            <link rel="canonical" t-att-href="'https://www.stephanspetstore.co.tz' + request.httprequest.path"/>
-            <link rel="alternate" hreflang="en-TZ" t-att-href="'https://www.stephanspetstore.co.tz' + request.httprequest.path"/>
-            <link rel="alternate" hreflang="x-default" t-att-href="'https://www.stephanspetstore.co.tz' + request.httprequest.path"/>
+
+            <t t-set="current_path" t-value="request.httprequest.path"/>
+            <t t-set="canonical_path" t-value="'/' if current_path == '/stephans-preview' else current_path"/>
+            <t t-set="is_product_page" t-value="bool(product or (main_object and main_object._name == 'product.template'))"/>
+
+            <!-- Canonical & Language Links -->
+            <link rel="canonical" t-att-href="'https://www.stephanspetstore.co.tz' + canonical_path"/>
+            <link rel="alternate" hreflang="en-TZ" t-att-href="'https://www.stephanspetstore.co.tz' + canonical_path"/>
+            <link rel="alternate" hreflang="x-default" t-att-href="'https://www.stephanspetstore.co.tz' + canonical_path"/>
             <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"/>
+
+            <!-- Meta Description -->
+            <t t-if="not meta_description">
+                <meta name="description" t-att-content="stephans_page_descriptions.get(current_path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania. Fast delivery across Tanzania.')"/>
+            </t>
 
             <!-- Favicons & Touch Icons (White Background Optimized) -->
             <link rel="icon" type="image/x-icon" href="/stephans_website_theme/static/src/images/branding/favicon-white.ico?v=20.0.3"/>
@@ -66,40 +76,104 @@
             <meta name="coverage" content="Tanzania, Dar es Salaam, Arusha, Dodoma, Mwanza, Zanzibar"/>
             <meta name="distribution" content="Global"/>
 
-            <!-- Open Graph -->
+            <!-- Singular Open Graph Metadata Calculation -->
+            <t t-if="is_product_page">
+                <t t-set="og_title" t-value="(main_object.name or 'Product') + ' | Stephan\'s Pet Store'"/>
+                <t t-set="og_type" t-value="'product'"/>
+                <t t-set="og_desc" t-value="main_object.website_meta_description or main_object.description_sale or stephans_page_descriptions.get(current_path, 'Premium pet supplies at Stephan\'s Pet Store.')"/>
+                <t t-set="og_image_url" t-value="'https://www.stephanspetstore.co.tz/web/image/product.template/%s/image_1024' % main_object.id"/>
+                <t t-set="og_image_w" t-value="'1024'"/>
+                <t t-set="og_image_h" t-value="'1024'"/>
+                <t t-set="og_image_alt" t-value="(main_object.name or 'Product') + ' - Stephan\'s Pet Store Tanzania'"/>
+            </t>
+            <t t-elif="current_path in ('/', '/stephans-preview')">
+                <t t-set="og_title" t-value="'Stephan\'s Pet Store | Premier Pet Shop &amp; Grooming in Tanzania'"/>
+                <t t-set="og_type" t-value="'website'"/>
+                <t t-set="og_desc" t-value="'Shop premium pet food, toys and accessories, or book professional grooming at Stephan\'s Pet Store in Masaki and Mikocheni, Dar es Salaam.'"/>
+                <t t-set="og_image_url" t-value="'https://www.stephanspetstore.co.tz/og-image.jpg'"/>
+                <t t-set="og_image_w" t-value="'1200'"/>
+                <t t-set="og_image_h" t-value="'630'"/>
+                <t t-set="og_image_alt" t-value="'Stephan\'s Pet Store Dar es Salaam Tanzania - Premier Pet Store &amp; Grooming'"/>
+            </t>
+            <t t-else="">
+                <t t-set="og_title" t-value="(additional_title or title or 'Stephan\'s Pet Store') + (' | Stephan\'s Pet Store' if 'Stephan' not in (additional_title or title or '') else '')"/>
+                <t t-set="og_type" t-value="'website'"/>
+                <t t-set="og_desc" t-value="stephans_page_descriptions.get(current_path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
+                <t t-set="og_image_url" t-value="'https://www.stephanspetstore.co.tz/og-image.jpg'"/>
+                <t t-set="og_image_w" t-value="'1200'"/>
+                <t t-set="og_image_h" t-value="'630'"/>
+                <t t-set="og_image_alt" t-value="'Stephan\'s Pet Store Dar es Salaam Tanzania'"/>
+            </t>
+
+            <!-- Single Open Graph Output -->
             <meta property="og:site_name" content="Stephan's Pet Store"/>
             <meta property="og:locale" content="en_TZ"/>
-            <meta property="og:type" content="website"/>
-            <meta property="og:description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
-            <meta property="og:url" t-att-content="'https://www.stephanspetstore.co.tz' + request.httprequest.path"/>
-            <meta property="og:image" content="https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"/>
-            <meta property="og:image:secure_url" content="https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"/>
-            <meta property="og:image:width" content="1200"/>
-            <meta property="og:image:height" content="675"/>
+            <meta property="og:type" t-att-content="og_type"/>
+            <meta property="og:title" t-att-content="og_title"/>
+            <meta property="og:description" t-att-content="og_desc"/>
+            <meta property="og:url" t-att-content="'https://www.stephanspetstore.co.tz' + canonical_path"/>
+            <meta property="og:image" t-att-content="og_image_url"/>
+            <meta property="og:image:secure_url" t-att-content="og_image_url"/>
+            <meta property="og:image:width" t-att-content="og_image_w"/>
+            <meta property="og:image:height" t-att-content="og_image_h"/>
             <meta property="og:image:type" content="image/jpeg"/>
-            <meta property="og:image:alt" content="Stephan's Pet Store Dar es Salaam Tanzania - Sky the pug and Ocean the cat resting on luxury pet bed"/>
+            <meta property="og:image:alt" t-att-content="og_image_alt"/>
 
-            <!-- Twitter Card -->
+            <!-- Single Twitter Card Output -->
             <meta name="twitter:card" content="summary_large_image"/>
-            <meta name="twitter:title" content="Stephan's Pet Store | Premier Pet Shop &amp; Grooming in Tanzania"/>
-            <meta name="twitter:description" t-att-content="stephans_page_descriptions.get(request.httprequest.path, 'Premium pet food, accessories and professional grooming from Stephan\'s Pet Store in Dar es Salaam, Tanzania.')"/>
-            <meta name="twitter:image" content="https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"/>
-            <meta name="twitter:image:alt" content="Stephan's Pet Store Dar es Salaam Tanzania - Sky the pug and Ocean the cat"/>
-            
-            <link t-if="request.httprequest.path in ('/', '/stephans-preview')" rel="preload" as="image" href="/stephans_website_theme/static/src/images/hero/hero-stephans.webp" type="image/webp" fetchpriority="high"/>
+            <meta name="twitter:title" t-att-content="og_title"/>
+            <meta name="twitter:description" t-att-content="og_desc"/>
+            <meta name="twitter:image" t-att-content="og_image_url"/>
+            <meta name="twitter:image:alt" t-att-content="og_image_alt"/>
 
-            <!-- Structured Data (JSON-LD LocalBusiness & PetStore Schema) -->
+            <link t-if="current_path in ('/', '/stephans-preview')" rel="preload" as="image" href="/stephans_website_theme/static/src/images/hero/hero-stephans.webp" type="image/webp" fetchpriority="high"/>
+
+            <!-- Structured Data (JSON-LD: Organization, PetStore Locations & GEO) -->
             <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "PetStore",
+      "@id": "https://www.stephanspetstore.co.tz/#organization",
+      "name": "Stephan's Pet Store",
+      "url": "https://www.stephanspetstore.co.tz/",
+      "logo": "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/branding/logo.png",
+      "image": "https://www.stephanspetstore.co.tz/og-image.jpg",
+      "description": "Tanzania's premier pet food, accessories and professional grooming studio with locations in Masaki and Mikocheni, Dar es Salaam.",
+      "telephone": "+255786627873",
+      "email": "info@stephanspetstore.co.tz",
+      "priceRange": "TZS",
+      "currenciesAccepted": "TZS",
+      "paymentAccepted": "Cash, Mobile Money (M-Pesa, Airtel Money, Mixx by Yas, Halopesa), Credit Card",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+255786627873",
+          "contactType": "customer service",
+          "areaServed": "TZ",
+          "availableLanguage": ["en", "sw"]
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+255769324445",
+          "contactType": "sales",
+          "areaServed": "TZ",
+          "availableLanguage": ["en", "sw"]
+        }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/stephanspetstore",
+        "https://instagram.com/stephans_ps"
+      ]
+    },
+    {
+      "@type": "PetStore",
       "@id": "https://www.stephanspetstore.co.tz/#masaki-store",
-      "name": "Stephan's Pet Store Masaki",
-      "url": "https://www.stephanspetstore.co.tz/stores",
+      "name": "Stephan's Pet Store Masaki (Flagship &amp; Grooming Studio)",
+      "url": "https://www.stephanspetstore.co.tz/stores/masaki",
       "image": [
-        "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp",
+        "https://www.stephanspetstore.co.tz/og-image.jpg",
         "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"
       ],
       "logo": "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/branding/logo.png",
@@ -107,7 +181,7 @@
       "email": "info@stephanspetstore.co.tz",
       "priceRange": "TZS",
       "currenciesAccepted": "TZS",
-      "paymentAccepted": "Cash, Mobile Money (M-Pesa, Airtel Money, Tigo Pesa), Credit Card",
+      "paymentAccepted": "Cash, Mobile Money (M-Pesa, Airtel Money, Mixx by Yas), Credit Card",
       "areaServed": [
         {"@type": "Country", "name": "Tanzania"},
         {"@type": "City", "name": "Dar es Salaam"}
@@ -124,11 +198,16 @@
         "longitude": 39.2825
       },
       "openingHoursSpecification": [
-        {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "09:00", "closes": "20:30"}
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "opens": "09:00",
+          "closes": "20:30"
+        }
       ],
-      "hasMap": "https://maps.google.com/?q=Stephan%27s+Pet+Store+Masaki+11+Slipway+Rd+Dar+es+Salaam",
+      "hasMap": "https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Masaki/@-6.7452,39.2825,17z",
       "sameAs": [
-        "https://maps.google.com/?q=Stephan%27s+Pet+Store+Masaki+11+Slipway+Rd+Dar+es+Salaam",
+        "https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Masaki/@-6.7452,39.2825,17z",
         "https://instagram.com/stephans_ps",
         "https://facebook.com/stephanspetstore"
       ]
@@ -137,9 +216,9 @@
       "@type": "PetStore",
       "@id": "https://www.stephanspetstore.co.tz/#mikocheni-store",
       "name": "Stephan's Pet Store Mikocheni",
-      "url": "https://www.stephanspetstore.co.tz/stores",
+      "url": "https://www.stephanspetstore.co.tz/stores/mikocheni",
       "image": [
-        "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.webp",
+        "https://www.stephanspetstore.co.tz/og-image.jpg",
         "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/hero/hero-stephans.jpg"
       ],
       "logo": "https://www.stephanspetstore.co.tz/stephans_website_theme/static/src/images/branding/logo.png",
@@ -147,7 +226,7 @@
       "email": "info@stephanspetstore.co.tz",
       "priceRange": "TZS",
       "currenciesAccepted": "TZS",
-      "paymentAccepted": "Cash, Mobile Money (M-Pesa, Airtel Money, Tigo Pesa), Credit Card",
+      "paymentAccepted": "Cash, Mobile Money (M-Pesa, Airtel Money, Mixx by Yas), Credit Card",
       "areaServed": [
         {"@type": "Country", "name": "Tanzania"},
         {"@type": "City", "name": "Dar es Salaam"}
@@ -164,11 +243,16 @@
         "longitude": 39.2699
       },
       "openingHoursSpecification": [
-        {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "09:00", "closes": "18:00"}
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "opens": "09:00",
+          "closes": "18:00"
+        }
       ],
-      "hasMap": "https://maps.google.com/?q=Stephan%27s+Pet+Store+Mikocheni+59+Mikocheni+A+Dar+es+Salaam",
+      "hasMap": "https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Mikocheni/@-6.7733,39.2699,17z",
       "sameAs": [
-        "https://maps.google.com/?q=Stephan%27s+Pet+Store+Mikocheni+59+Mikocheni+A+Dar+es+Salaam",
+        "https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Mikocheni/@-6.7733,39.2699,17z",
         "https://instagram.com/stephans_ps",
         "https://facebook.com/stephanspetstore"
       ]
@@ -176,6 +260,90 @@
   ]
 }
             </script>
+
+            <!-- FAQPage Schema for Generative AI and Rich Results -->
+            <t t-if="current_path in ('/faq', '/faqs')">
+                <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Do you deliver pet supplies across Dar es Salaam?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Stephan's Pet Store delivers across all Dar es Salaam neighborhoods including Masaki, Mikocheni, Oysterbay, Kinondoni, Upanga, City Centre, and Mbezi. Free delivery is provided on orders over TSh 100,000."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you deliver pet products upcountry outside Dar es Salaam?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we dispatch pet food, accessories and hygiene products across Tanzania (Arusha, Dodoma, Mwanza, Morogoro, Mtwara, Zanzibar) via reliable regional parcel and bus courier services within 24 to 48 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I book a pet grooming appointment?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can book directly through our online Grooming page (https://www.stephanspetstore.co.tz/grooming) by choosing your pet type, coat size, package and time slot, or contact our grooming studio on WhatsApp at +255 786 627 873."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which payment methods are accepted at Stephan's Pet Store?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We accept Selcom Mobile Money (Vodacom M-Pesa, Airtel Money, Mixx by Yas / Tigo Pesa, Halopesa), Visa and Mastercard, Sky Wallet rewards points, and Cash on Delivery / Store Pickup."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is your return and exchange policy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unopened pet supplies in original manufacturer packaging with security seals intact can be returned or exchanged within 7 days of purchase. Perishable pet food and opened grooming supplies cannot be returned for biosecurity and hygiene reasons."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where are Stephan's Pet Store physical locations in Dar es Salaam?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We have two locations in Dar es Salaam: 1) Masaki Flagship Store &amp; Grooming Studio at 11 Slipway Road (open Mon–Sat 9:00 AM – 8:30 PM); 2) Mikocheni Store at 59 Mikocheni A (open Mon–Sat 9:00 AM – 6:00 PM)."
+      }
+    }
+  ]
+}
+                </script>
+            </t>
+
+            <!-- Breadcrumb Schema for Stores, Grooming, Shop and FAQ -->
+            <t t-if="current_path in ('/stores', '/stores/masaki', '/stores/mikocheni', '/grooming', '/contact', '/faq', '/delivery', '/return-policy', '/shop')">
+                <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.stephanspetstore.co.tz/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "<t t-esc="(additional_title or title or 'Stephan\'s Pet Store').split('|')[0].strip()"/>",
+      "item": "<t t-esc="'https://www.stephanspetstore.co.tz' + current_path"/>"
+    }
+  ]
+}
+                </script>
+            </t>
         </xpath>
     </template>
 </odoo>

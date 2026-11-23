@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_corporate_crm" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.corporate.crm</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Corporate Key-Account CRM" string="Key Account CRM" name="stephans_corporate_crm">
+                    <block title="Customer Boxes &amp; Inactivity Thresholds" id="block_crm_boxes">
+                        <setting string="Q2 Inactivity Threshold" help="Number of days without sales or grooming before slipping into Q2 (Default: 30 days / 1 month).">
+                            <div class="content-group">
+                                <div class="mt8">
+                                    <field name="crm_q2_inactivity_days" class="oe_inline"/> days
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting string="Q3 Dormant Threshold" help="Number of days without activity before shifting to Q3 (Default: 60 days / 2 months).">
+                            <div class="content-group">
+                                <div class="mt8">
+                                    <field name="crm_q3_inactivity_days" class="oe_inline"/> days
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting string="Q4 Churned Threshold" help="Number of days before an account is marked as Q4 Churned (Default: 90 days / 3 months).">
+                            <div class="content-group">
+                                <div class="mt8">
+                                    <field name="crm_q4_inactivity_days" class="oe_inline"/> days
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Automated Actions &amp; Re-engagement" id="block_crm_automation">
+                        <setting string="Auto-Schedule KAM Activities" help="Create an alert activity for the Key Account Manager whenever an account slips into Q2, Q3, or Q4.">
+                            <field name="crm_auto_create_activity"/>
+                        </setting>
+
+                        <setting string="One-Click WhatsApp Re-engagement" help="Enable WhatsApp quick outreach buttons on customer cards and form views.">
+                            <field name="crm_auto_whatsapp_prompt"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_corporate_crm_config_settings" model="ir.actions.act_window">
+        <field name="name">Key Account CRM Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'stephans_corporate_crm', 'bin_size': False}</field>
+    </record>
+</odoo>

@@ -184,7 +184,7 @@ BRANDS_DATA = {
 
 
 class StephansWebsitePages(http.Controller):
-    @http.route(['/about', '/allbrands', '/faq', '/faqs', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True, sitemap=True)
+    @http.route(['/about', '/allbrands', '/faq', '/grooming-policy', '/return-policy', '/terms', '/blog', '/delivery'], type='http', auth='public', website=True, sitemap=True)
     def content_page(self, **kw):
         key = request.httprequest.path.strip('/') or 'about'
         if key == 'faqs':

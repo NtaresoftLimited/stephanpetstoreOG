@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Masaki Flagship Store & Grooming Studio -->
+    <template id="store_masaki_page" name="Stephan's Pet Store Masaki">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Stephan's Pet Store Masaki (Slipway) | Pet Shop &amp; Grooming Dar es Salaam</t>
+            <main id="wrap" class="sp-store-detail-page">
+                <style>
+                    .sp-store-hero { background: #faf7f2; border-bottom: 1px solid #eae3d9; padding: 48px 20px 40px; text-align: center; }
+                    .sp-store-breadcrumb { font-size: 13px; color: #8C7B6D; margin-bottom: 16px; }
+                    .sp-store-breadcrumb a { color: #8C7B6D; text-decoration: none; }
+                    .sp-store-breadcrumb a:hover { color: #1c1917; }
+                    .sp-store-hero h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 38px; color: #1c1917; margin: 0 0 12px; }
+                    .sp-store-tagline { font-size: 16px; color: #57534e; max-width: 680px; margin: 0 auto 20px; line-height: 1.6; }
+                    .sp-store-badge { display: inline-block; background: #22c55e1a; color: #166534; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+                    .sp-store-container { max-width: 1140px; margin: 0 auto; padding: 48px 20px 64px; }
+                    .sp-store-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+                    @media (max-width: 860px) { .sp-store-columns { grid-template-columns: 1fr; } }
+
+                    .sp-store-card { background: #ffffff; border: 1px solid #e7e5e4; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
+                    .sp-store-card h2 { font-size: 20px; font-weight: 700; color: #1c1917; margin-top: 0; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f5f5f4; }
+                    
+                    .sp-info-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; font-size: 15px; color: #44403c; line-height: 1.5; }
+                    .sp-info-icon { flex-shrink: 0; width: 20px; height: 20px; color: #d97706; margin-top: 2px; }
+                    .sp-info-content strong { display: block; color: #1c1917; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+
+                    .sp-hours-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+                    .sp-hours-table tr { border-bottom: 1px solid #f5f5f4; }
+                    .sp-hours-table td { padding: 8px 0; color: #57534e; }
+                    .sp-hours-table td:last-child { text-align: right; font-weight: 600; color: #1c1917; }
+                    .sp-hours-table .sp-closed { color: #dc2626 !important; }
+
+                    .sp-services-list { list-style: none; padding: 0; margin: 0; }
+                    .sp-services-list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f4; font-size: 15px; color: #292524; }
+                    .sp-services-list li svg { width: 18px; height: 18px; color: #16a34a; flex-shrink: 0; }
+
+                    .sp-cta-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+                    .sp-btn-primary { background: #d97706; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+                    .sp-btn-primary:hover { background: #b45309; color: #fff; }
+                    .sp-btn-whatsapp { background: #25d366; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+                    .sp-btn-whatsapp:hover { background: #1ebc59; color: #fff; }
+                    .sp-btn-outline { background: transparent; border: 1px solid #d6d3d1; color: #44403c; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+                    .sp-btn-outline:hover { background: #f5f5f4; }
+                </style>
+
+                <header class="sp-store-hero">
+                    <div class="sp-store-breadcrumb">
+                        <a href="/">Home</a> / <a href="/stores">Stores</a> / <span>Masaki Flagship</span>
+                    </div>
+                    <span class="sp-store-badge">Flagship Store &amp; Grooming Studio</span>
+                    <h1>Stephan's Pet Store Masaki</h1>
+                    <p class="sp-store-tagline">Our flagship pet shop and professional grooming salon located along Slipway Road in Masaki, Dar es Salaam. Stocking super-premium pet food, imported accessories, and gentle grooming care.</p>
+                </header>
+
+                <div class="sp-store-container">
+                    <div class="sp-store-columns">
+                        <!-- Left Column: Location, Directions, Hours -->
+                        <div>
+                            <div class="sp-store-card">
+                                <h2>Location &amp; Landmark Directions</h2>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                                    <div class="sp-info-content">
+                                        <strong>Address</strong>
+                                        11 Slipway Road, Masaki, Dar es Salaam, Tanzania
+                                    </div>
+                                </div>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    <div class="sp-info-content">
+                                        <strong>Nearby Landmarks</strong>
+                                        Located along Slipway Road, walking distance from The Slipway Waterfront Shopping Centre on the Msasani Peninsula. Dedicated customer parking is available on-site.
+                                    </div>
+                                </div>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    <div class="sp-info-content">
+                                        <strong>Phone &amp; Orders</strong>
+                                        <a href="tel:+255786627873" style="color:#d97706; font-weight:600; text-decoration:none;">+255 786 627 873</a>
+                                    </div>
+                                </div>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <div class="sp-info-content" style="width:100%;">
+                                        <strong>Store &amp; Grooming Hours</strong>
+                                        <table class="sp-hours-table">
+                                            <tr><td>Monday</td><td>9:00 AM – 8:30 PM</td></tr>
+                                            <tr><td>Tuesday</td><td>9:00 AM – 8:30 PM</td></tr>
+                                            <tr><td>Wednesday</td><td>9:00 AM – 8:30 PM</td></tr>
+                                            <tr><td>Thursday</td><td>9:00 AM – 8:30 PM</td></tr>
+                                            <tr><td>Friday</td><td>9:00 AM – 8:30 PM</td></tr>
+                                            <tr><td>Saturday</td><td>9:00 AM – 8:30 PM</td></tr>
+                                            <tr><td>Sunday</td><td class="sp-closed">Closed (Online Orders Dispatched)</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="sp-cta-buttons">
+                                    <a class="sp-btn-primary" href="https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Masaki/@-6.7452,39.2825,17z" target="_blank" rel="noopener">
+                                        Open in Google Maps <span>→</span>
+                                    </a>
+                                    <a class="sp-btn-whatsapp" href="https://wa.me/255786627873?text=Hello%20Stephan's%20Pet%20Store%20Masaki!" target="_blank" rel="noopener">
+                                        Chat on WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Services & Grooming -->
+                        <div>
+                            <div class="sp-store-card">
+                                <h2>Services Available at Masaki</h2>
+                                <ul class="sp-services-list">
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Professional Grooming Studio</strong> — Full haircuts, deep conditioning, detangling, sanitary trimming and ear cleaning.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Super-Premium Pet Food</strong> — Summit 10, Bioline, Josera, Bravecto, Royal Canin for dogs, cats and small animals.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Luxury Beds, Collars &amp; Toys</strong> — Orthopedic beds, durable nylon harnesses, interactive scratchers.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Fast Click &amp; Collect</strong> — Order online and pick up at the Masaki counter in as little as 30 minutes.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Same-Day Dar es Salaam Delivery</strong> — Free delivery directly to your door on orders over TSh 100,000.
+                                    </li>
+                                </ul>
+
+                                <div style="margin-top:28px; padding:20px; background:#faf7f2; border-radius:12px; border:1px solid #eae3d9;">
+                                    <h3 style="font-size:16px; margin:0 0 8px; color:#1c1917;">Need Pet Grooming?</h3>
+                                    <p style="font-size:14px; color:#57534e; margin:0 0 16px; line-height:1.5;">Our Masaki stylists provide gentle, patient grooming tailored to your dog or cat's breed and coat type.</p>
+                                    <a href="/grooming" class="sp-btn-primary" style="font-size:13px; padding:10px 20px;">Book Masaki Grooming Online <span>→</span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </t>
+    </template>
+
+    <!-- Mikocheni Store -->
+    <template id="store_mikocheni_page" name="Stephan's Pet Store Mikocheni">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Stephan's Pet Store Mikocheni | Pet Supplies &amp; Food Dar es Salaam</t>
+            <main id="wrap" class="sp-store-detail-page">
+                <style>
+                    .sp-store-hero { background: #faf7f2; border-bottom: 1px solid #eae3d9; padding: 48px 20px 40px; text-align: center; }
+                    .sp-store-breadcrumb { font-size: 13px; color: #8C7B6D; margin-bottom: 16px; }
+                    .sp-store-breadcrumb a { color: #8C7B6D; text-decoration: none; }
+                    .sp-store-breadcrumb a:hover { color: #1c1917; }
+                    .sp-store-hero h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 38px; color: #1c1917; margin: 0 0 12px; }
+                    .sp-store-tagline { font-size: 16px; color: #57534e; max-width: 680px; margin: 0 auto 20px; line-height: 1.6; }
+                    .sp-store-badge { display: inline-block; background: #3b82f61a; color: #1d4ed8; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+                    .sp-store-container { max-width: 1140px; margin: 0 auto; padding: 48px 20px 64px; }
+                    .sp-store-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+                    @media (max-width: 860px) { .sp-store-columns { grid-template-columns: 1fr; } }
+
+                    .sp-store-card { background: #ffffff; border: 1px solid #e7e5e4; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
+                    .sp-store-card h2 { font-size: 20px; font-weight: 700; color: #1c1917; margin-top: 0; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f5f5f4; }
+                    
+                    .sp-info-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; font-size: 15px; color: #44403c; line-height: 1.5; }
+                    .sp-info-icon { flex-shrink: 0; width: 20px; height: 20px; color: #d97706; margin-top: 2px; }
+                    .sp-info-content strong { display: block; color: #1c1917; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+
+                    .sp-hours-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+                    .sp-hours-table tr { border-bottom: 1px solid #f5f5f4; }
+                    .sp-hours-table td { padding: 8px 0; color: #57534e; }
+                    .sp-hours-table td:last-child { text-align: right; font-weight: 600; color: #1c1917; }
+                    .sp-hours-table .sp-closed { color: #dc2626 !important; }
+
+                    .sp-services-list { list-style: none; padding: 0; margin: 0; }
+                    .sp-services-list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f4; font-size: 15px; color: #292524; }
+                    .sp-services-list li svg { width: 18px; height: 18px; color: #16a34a; flex-shrink: 0; }
+
+                    .sp-cta-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+                    .sp-btn-primary { background: #d97706; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+                    .sp-btn-primary:hover { background: #b45309; color: #fff; }
+                    .sp-btn-whatsapp { background: #25d366; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+                    .sp-btn-whatsapp:hover { background: #1ebc59; color: #fff; }
+                </style>
+
+                <header class="sp-store-hero">
+                    <div class="sp-store-breadcrumb">
+                        <a href="/">Home</a> / <a href="/stores">Stores</a> / <span>Mikocheni Branch</span>
+                    </div>
+                    <span class="sp-store-badge">Retail &amp; Express Pickup Branch</span>
+                    <h1>Stephan's Pet Store Mikocheni</h1>
+                    <p class="sp-store-tagline">Conveniently situated in Mikocheni A to serve pet owners with premium dry and wet pet foods, tick and flea veterinary care, and rapid order collection.</p>
+                </header>
+
+                <div class="sp-store-container">
+                    <div class="sp-store-columns">
+                        <!-- Left Column: Location, Directions, Hours -->
+                        <div>
+                            <div class="sp-store-card">
+                                <h2>Location &amp; Landmark Directions</h2>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                                    <div class="sp-info-content">
+                                        <strong>Address</strong>
+                                        59 Mikocheni A, Dar es Salaam, Tanzania
+                                    </div>
+                                </div>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    <div class="sp-info-content">
+                                        <strong>Nearby Landmarks</strong>
+                                        Located in Mikocheni A, with seamless access from Old Bagamoyo Road. Convenient roadside drive-in access for quick product loading and collection.
+                                    </div>
+                                </div>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    <div class="sp-info-content">
+                                        <strong>Phone &amp; Orders</strong>
+                                        <a href="tel:+255769324445" style="color:#d97706; font-weight:600; text-decoration:none;">+255 769 324 445</a>
+                                    </div>
+                                </div>
+                                <div class="sp-info-row">
+                                    <svg class="sp-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <div class="sp-info-content" style="width:100%;">
+                                        <strong>Store Operating Hours</strong>
+                                        <table class="sp-hours-table">
+                                            <tr><td>Monday</td><td>9:00 AM – 6:00 PM</td></tr>
+                                            <tr><td>Tuesday</td><td>9:00 AM – 6:00 PM</td></tr>
+                                            <tr><td>Wednesday</td><td>9:00 AM – 6:00 PM</td></tr>
+                                            <tr><td>Thursday</td><td>9:00 AM – 6:00 PM</td></tr>
+                                            <tr><td>Friday</td><td>9:00 AM – 6:00 PM</td></tr>
+                                            <tr><td>Saturday</td><td>9:00 AM – 6:00 PM</td></tr>
+                                            <tr><td>Sunday</td><td class="sp-closed">Closed (Online Orders Dispatched)</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="sp-cta-buttons">
+                                    <a class="sp-btn-primary" href="https://www.google.com/maps/place/Stephan%27s+Pet+Store+-+Mikocheni/@-6.7733,39.2699,17z" target="_blank" rel="noopener">
+                                        Open in Google Maps <span>→</span>
+                                    </a>
+                                    <a class="sp-btn-whatsapp" href="https://wa.me/255769324445?text=Hello%20Stephan's%20Pet%20Store%20Mikocheni!" target="_blank" rel="noopener">
+                                        Chat on WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Products & Services -->
+                        <div>
+                            <div class="sp-store-card">
+                                <h2>Supplies &amp; Services at Mikocheni</h2>
+                                <ul class="sp-services-list">
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Premium Dog &amp; Cat Nutrition</strong> — Summit 10, Bioline, Josera, Bravecto, Royal Canin in puppy, adult, senior and special diet sizes.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Tick, Flea &amp; Veterinary Hygiene</strong> — Shampoos, sprays, chews, dewormers, and dental hygiene essentials.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Cat Litter &amp; Sanitation</strong> — Clumping and crystal litter, hooded litter boxes, deodorizers and scoops.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Drive-up Pickup Counter</strong> — Order online and pick up curbside within minutes on your commute.
+                                    </li>
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <strong>Upcountry Courier Dispatch</strong> — Direct parcel handling for dispatch to Arusha, Dodoma, Mwanza and Zanzibar.
+                                    </li>
+                                </ul>
+
+                                <div style="margin-top:28px; padding:20px; background:#faf7f2; border-radius:12px; border:1px solid #eae3d9;">
+                                    <h3 style="font-size:16px; margin:0 0 8px; color:#1c1917;">Browse Our Catalog Online</h3>
+                                    <p style="font-size:14px; color:#57534e; margin:0 0 16px; line-height:1.5;">Select products online for rapid pickup at Mikocheni or same-day Dar es Salaam delivery.</p>
+                                    <a href="/shop" class="sp-btn-primary" style="font-size:13px; padding:10px 20px;">Shop Online Now <span>→</span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </t>
+    </template>
+</odoo>

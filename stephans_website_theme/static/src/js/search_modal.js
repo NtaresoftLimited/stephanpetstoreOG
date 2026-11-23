@@ -5,11 +5,33 @@
 (function () {
   'use strict';
 
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function escapeAttr(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   var SearchModal = {
     isOpen: false,
     debounceTimer: null,
     selectedIndex: -1,
     currentResults: [],
+    abortController: null,
+    querySeq: 0,
+    currentQuery: '',
+    lastFocusedElement: null,
 
     init: function () {
       this.bindEvents();
@@ -24,16 +46,18 @@
         if (openTrigger) {
           e.preventDefault();
           self.open();
+          return;
         }
 
         // Close triggers
         if (e.target.closest('#stephans-search-close, #stephans-search-backdrop')) {
           e.preventDefault();
           self.close();
+          return;
         }
 
-        // Clear input
-        if (e.target.closest('#stephans-search-clear')) {
+        // Clear input icon inside input field
+        if (e.target.closest('#stephans-search-input-clear')) {
           e.preventDefault();
           var input = document.getElementById('stephans-search-modal-input');
           if (input) {
@@ -41,9 +65,37 @@
             input.focus();
             self.handleInputChange('');
           }
+          return;
         }
 
-        // Popular search pill click
+        // Empty state: View popular brands action
+        if (e.target.closest('#stephans-search-view-brands')) {
+          e.preventDefault();
+          var input = document.getElementById('stephans-search-modal-input');
+          if (input) {
+            input.value = '';
+            self.handleInputChange('');
+            var initialSec = document.getElementById('stephans-search-initial');
+            if (initialSec) {
+              var brandsGrid = initialSec.querySelector('.stephans-search-brands-wrap');
+              if (brandsGrid) {
+                brandsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }
+          return;
+        }
+
+        // Search Error state: Retry button
+        if (e.target.closest('#stephans-search-retry-btn')) {
+          e.preventDefault();
+          if (self.currentQuery) {
+            self.performSearch(self.currentQuery);
+          }
+          return;
+        }
+
+        // Suggestion / Popular search pill click
         var pill = e.target.closest('.stephans-search-pill');
         if (pill) {
           e.preventDefault();
@@ -54,10 +106,11 @@
             input.focus();
             self.handleInputChange(query);
           }
+          return;
         }
       });
 
-      // Global keyboard shortcuts (Ctrl+K, Cmd+K, Esc)
+      // Global keyboard shortcuts (Ctrl+K, Cmd+K, Esc, Tab trapping)
       document.addEventListener('keydown', function (e) {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
           e.preventDefault();
@@ -69,6 +122,8 @@
         } else if (e.key === 'Escape' && self.isOpen) {
           e.preventDefault();
           self.close();
+        } else if (e.key === 'Tab' && self.isOpen) {
+          self.handleTabTrapping(e);
         }
       });
 
@@ -96,54 +151,130 @@
 
     open: function () {
       this.isOpen = true;
+      this.lastFocusedElement = document.activeElement;
       var modal = document.getElementById('stephans-search-modal');
       var backdrop = document.getElementById('stephans-search-backdrop');
       var input = document.getElementById('stephans-search-modal-input');
 
-      if (modal) modal.classList.add('is-open');
-      if (backdrop) backdrop.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
-
+      if (modal) {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      if (backdrop) {
+        backdrop.classList.add('is-open');
+        backdrop.setAttribute('aria-hidden', 'false');
+      }
       if (input) {
+        input.setAttribute('aria-expanded', 'true');
         setTimeout(function () {
           input.focus();
-        }, 100);
+        }, 80);
       }
+      document.body.style.overflow = 'hidden';
     },
 
     close: function () {
       this.isOpen = false;
       var modal = document.getElementById('stephans-search-modal');
       var backdrop = document.getElementById('stephans-search-backdrop');
-      if (modal) modal.classList.remove('is-open');
-      if (backdrop) backdrop.classList.remove('is-open');
+      var input = document.getElementById('stephans-search-modal-input');
+
+      if (this.abortController) {
+        this.abortController.abort();
+        this.abortController = null;
+      }
+
+      if (modal) {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+      if (backdrop) {
+        backdrop.classList.remove('is-open');
+        backdrop.setAttribute('aria-hidden', 'true');
+      }
+      if (input) {
+        input.setAttribute('aria-expanded', 'false');
+        input.removeAttribute('aria-activedescendant');
+      }
       document.body.style.overflow = '';
       this.selectedIndex = -1;
+
+      if (this.lastFocusedElement && typeof this.lastFocusedElement.focus === 'function') {
+        try {
+          this.lastFocusedElement.focus();
+        } catch (e) {}
+      }
+    },
+
+    handleTabTrapping: function (e) {
+      var modal = document.getElementById('stephans-search-modal');
+      if (!modal) return;
+
+      var focusables = modal.querySelectorAll('input:not([disabled]), button:not([disabled]), a[href]:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      var visibleFocusables = Array.prototype.filter.call(focusables, function (el) {
+        return el.offsetParent !== null;
+      });
+
+      if (visibleFocusables.length === 0) return;
+
+      var firstEl = visibleFocusables[0];
+      var lastEl = visibleFocusables[visibleFocusables.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
+    },
+
+    updateKeyboardShortcuts: function (hasResults) {
+      var emptyMsg = document.getElementById('stephans-shortcut-empty');
+      var resultsMsg = document.getElementById('stephans-shortcut-results');
+      if (emptyMsg) emptyMsg.style.display = hasResults ? 'none' : 'inline-flex';
+      if (resultsMsg) resultsMsg.style.display = hasResults ? 'inline-flex' : 'none';
     },
 
     handleInputChange: function (value) {
       var self = this;
       var q = value.trim();
-      var clearBtn = document.getElementById('stephans-search-clear');
+      self.currentQuery = q;
+
+      var clearBtn = document.getElementById('stephans-search-input-clear');
       var initialSec = document.getElementById('stephans-search-initial');
       var resultsSec = document.getElementById('stephans-search-results-area');
       var loadingEl = document.getElementById('stephans-search-loading');
       var prodsGroup = document.getElementById('stephans-search-products-group');
       var taxGroup = document.getElementById('stephans-search-tax-group');
       var noResultsEl = document.getElementById('stephans-search-no-results');
+      var errorEl = document.getElementById('stephans-search-error-state');
+      var seeAllEl = document.getElementById('stephans-search-see-all');
 
       if (clearBtn) {
-        clearBtn.style.display = q.length > 0 ? 'inline-block' : 'none';
+        clearBtn.style.display = q.length > 0 ? 'flex' : 'none';
       }
 
       if (q.length < 2) {
+        if (self.abortController) {
+          self.abortController.abort();
+          self.abortController = null;
+        }
         if (initialSec) initialSec.style.display = 'block';
         if (resultsSec) resultsSec.style.display = 'none';
         if (prodsGroup) prodsGroup.style.display = 'none';
         if (taxGroup) taxGroup.style.display = 'none';
         if (noResultsEl) noResultsEl.style.display = 'none';
+        if (errorEl) errorEl.style.display = 'none';
+        if (seeAllEl) seeAllEl.style.display = 'none';
+
         self.selectedIndex = -1;
         self.currentResults = [];
+        self.updateKeyboardShortcuts(false);
         return;
       }
 
@@ -154,11 +285,15 @@
       if (prodsGroup) prodsGroup.style.display = 'none';
       if (taxGroup) taxGroup.style.display = 'none';
       if (noResultsEl) noResultsEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+      if (seeAllEl) seeAllEl.style.display = 'none';
+
+      self.updateKeyboardShortcuts(false);
 
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(function () {
         self.performSearch(q);
-      }, 220);
+      }, 200);
     },
 
     performSearch: function (query) {
@@ -169,32 +304,75 @@
       var taxGroup = document.getElementById('stephans-search-tax-group');
       var taxList = document.getElementById('stephans-search-tax-list');
       var noResultsEl = document.getElementById('stephans-search-no-results');
+      var failedQueryEl = document.getElementById('stephans-search-failed-query');
+      var errorEl = document.getElementById('stephans-search-error-state');
       var countEl = document.getElementById('stephans-results-count');
       var seeAllEl = document.getElementById('stephans-search-see-all');
 
+      // Abort any existing in-flight request
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+      this.abortController = new AbortController();
+      var thisSeq = ++this.querySeq;
+
       fetch('/stephans/api/search?q=' + encodeURIComponent(query), {
-        headers: { 'Accept': 'application/json' }
+        headers: { 'Accept': 'application/json' },
+        signal: this.abortController.signal
       })
-        .then(function (res) { return res.json(); })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Search network error: ' + res.status);
+          return res.json();
+        })
         .then(function (data) {
+          // Stale response guard
+          if (thisSeq !== self.querySeq) return;
+
           if (loadingEl) loadingEl.style.display = 'none';
+          if (errorEl) errorEl.style.display = 'none';
+
           var products = data.products || data.results || [];
           var categories = data.categories || [];
           var brands = data.brands || [];
-          var totalCount = data.count || products.length;
+          var totalCount = data.count !== undefined ? data.count : products.length;
 
           self.currentResults = [];
-          self.selectedIndex = 0;
-
-          // Update footer See All link
-          if (countEl) countEl.textContent = totalCount;
-          if (seeAllEl) seeAllEl.href = '/shop?search=' + encodeURIComponent(query);
+          // Index starts at -1 so first item is NOT auto-skipped on first arrow press
+          self.selectedIndex = -1;
 
           var hasProducts = products.length > 0;
           var hasTax = categories.length > 0 || brands.length > 0;
 
+          // 1. Result Count / Footer Link Rules
+          if (hasProducts) {
+            if (countEl) countEl.textContent = totalCount;
+            if (seeAllEl) {
+              seeAllEl.style.display = 'inline-flex';
+              seeAllEl.href = '/shop?search=' + encodeURIComponent(query);
+              seeAllEl.innerHTML = 'View all <span id="stephans-results-count">' + escapeHtml(totalCount) + '</span> results &rarr;';
+            }
+            self.updateKeyboardShortcuts(true);
+          } else if (brands.length > 0) {
+            // No product results but brand matches
+            var matchedBrand = brands[0];
+            if (seeAllEl) {
+              seeAllEl.style.display = 'inline-flex';
+              seeAllEl.href = matchedBrand.url || ('/shop?search=' + encodeURIComponent(matchedBrand.name));
+              seeAllEl.innerHTML = 'View ' + escapeHtml(matchedBrand.name) + ' products &rarr;';
+            }
+            self.updateKeyboardShortcuts(true);
+          } else {
+            // Nothing matches: Hide result-count link completely
+            if (seeAllEl) seeAllEl.style.display = 'none';
+            self.updateKeyboardShortcuts(false);
+          }
+
+          // 2. Empty State Handling
           if (!hasProducts && !hasTax) {
-            if (noResultsEl) noResultsEl.style.display = 'block';
+            if (noResultsEl) {
+              noResultsEl.style.display = 'block';
+              if (failedQueryEl) failedQueryEl.textContent = query;
+            }
             if (prodsGroup) prodsGroup.style.display = 'none';
             if (taxGroup) taxGroup.style.display = 'none';
             return;
@@ -202,39 +380,44 @@
 
           if (noResultsEl) noResultsEl.style.display = 'none';
 
-          // 1. Render Products
+          // 3. Render Products Securely
           if (hasProducts && prodsGroup && prodsList) {
             prodsGroup.style.display = 'block';
-            prodsList.innerHTML = products.map(function (item, idx) {
-              self.currentResults.push({ type: 'product', url: item.url || ('/shop/product/' + item.id) });
+            var prodsHtml = products.map(function (item) {
+              var targetUrl = item.url || ('/shop/product/' + item.id);
+              self.currentResults.push({ type: 'product', url: targetUrl });
+              var itemIdx = self.currentResults.length - 1;
               var brandCat = (item.brand ? item.brand + ' · ' : '') + (item.category || 'Pet Food');
+
               return (
-                '<a href="' + (item.url || ('/shop/product/' + item.id)) + '" class="stephans-search-product-item ' + (idx === 0 ? 'is-selected' : '') + '" data-idx="' + (self.currentResults.length - 1) + '">' +
+                '<a href="' + escapeAttr(targetUrl) + '" class="stephans-search-product-item" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
                   '<div class="stephans-search-product-thumb">' +
-                    '<img src="' + item.image_url + '" alt="' + item.name + '" loading="lazy"/>' +
+                    '<img src="' + escapeAttr(item.image_url) + '" alt="' + escapeAttr(item.name) + '" loading="lazy"/>' +
                   '</div>' +
                   '<div class="stephans-search-product-meta">' +
-                    '<h4 class="stephans-search-product-title">' + item.name + '</h4>' +
-                    '<div class="stephans-search-product-sub">' + brandCat + '</div>' +
+                    '<h4 class="stephans-search-product-title">' + escapeHtml(item.name) + '</h4>' +
+                    '<div class="stephans-search-product-sub">' + escapeHtml(brandCat) + '</div>' +
                   '</div>' +
-                  '<div class="stephans-search-product-price">' + item.price_formatted + '</div>' +
+                  '<div class="stephans-search-product-price">' + escapeHtml(item.price_formatted) + '</div>' +
                 '</a>'
               );
             }).join('');
+            prodsList.innerHTML = prodsHtml;
           } else if (prodsGroup) {
             prodsGroup.style.display = 'none';
           }
 
-          // 2. Render Categories & Brands
+          // 4. Render Categories & Brands Securely
           if (hasTax && taxGroup && taxList) {
             taxGroup.style.display = 'block';
             var taxHtml = '';
 
             categories.forEach(function (cat) {
               self.currentResults.push({ type: 'category', url: cat.url });
+              var itemIdx = self.currentResults.length - 1;
               taxHtml += (
-                '<a href="' + cat.url + '" class="stephans-search-tax-item" data-idx="' + (self.currentResults.length - 1) + '">' +
-                  '<span class="stephans-search-tax-name">' + cat.name + '</span>' +
+                '<a href="' + escapeAttr(cat.url) + '" class="stephans-search-tax-item" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
+                  '<span class="stephans-search-tax-name">' + escapeHtml(cat.name) + '</span>' +
                   '<span class="stephans-search-tax-badge">Category</span>' +
                 '</a>'
               );
@@ -242,9 +425,10 @@
 
             brands.forEach(function (brand) {
               self.currentResults.push({ type: 'brand', url: brand.url });
+              var itemIdx = self.currentResults.length - 1;
               taxHtml += (
-                '<a href="' + brand.url + '" class="stephans-search-tax-item stephans-search-tax-item--brand" data-idx="' + (self.currentResults.length - 1) + '">' +
-                  '<span class="stephans-search-tax-name stephans-search-tax-name--brand">' + brand.name + '</span>' +
+                '<a href="' + escapeAttr(brand.url) + '" class="stephans-search-tax-item stephans-search-tax-item--brand" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
+                  '<span class="stephans-search-tax-name stephans-search-tax-name--brand">' + escapeHtml(brand.name) + '</span>' +
                   '<span class="stephans-search-tax-badge">Brand</span>' +
                 '</a>'
               );
@@ -256,7 +440,17 @@
           }
         })
         .catch(function (err) {
+          if (err.name === 'AbortError') return; // Expected cancellation
+
+          if (thisSeq !== self.querySeq) return;
           if (loadingEl) loadingEl.style.display = 'none';
+          if (prodsGroup) prodsGroup.style.display = 'none';
+          if (taxGroup) taxGroup.style.display = 'none';
+          if (noResultsEl) noResultsEl.style.display = 'none';
+          if (seeAllEl) seeAllEl.style.display = 'none';
+
+          if (errorEl) errorEl.style.display = 'block';
+          self.updateKeyboardShortcuts(false);
           console.error('Stephan\'s search error:', err);
         });
     },
@@ -267,19 +461,32 @@
       var items = document.querySelectorAll('.stephans-search-product-item, .stephans-search-tax-item');
       if (items.length === 0) return;
 
-      items.forEach(function (el) { el.classList.remove('is-selected'); });
+      items.forEach(function (el) {
+        el.classList.remove('is-selected');
+        el.setAttribute('aria-selected', 'false');
+      });
 
-      this.selectedIndex += dir;
-      if (this.selectedIndex < 0) {
-        this.selectedIndex = items.length - 1;
-      } else if (this.selectedIndex >= items.length) {
-        this.selectedIndex = 0;
+      // Initial press of ArrowDown starts at 0, ArrowUp starts at last
+      if (this.selectedIndex === -1) {
+        this.selectedIndex = dir > 0 ? 0 : (items.length - 1);
+      } else {
+        this.selectedIndex += dir;
+        if (this.selectedIndex < 0) {
+          this.selectedIndex = items.length - 1;
+        } else if (this.selectedIndex >= items.length) {
+          this.selectedIndex = 0;
+        }
       }
 
       var activeItem = items[this.selectedIndex];
+      var input = document.getElementById('stephans-search-modal-input');
       if (activeItem) {
         activeItem.classList.add('is-selected');
+        activeItem.setAttribute('aria-selected', 'true');
         activeItem.scrollIntoView({ block: 'nearest' });
+        if (input && activeItem.id) {
+          input.setAttribute('aria-activedescendant', activeItem.id);
+        }
       }
     },
 

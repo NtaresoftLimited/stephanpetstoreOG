@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_activity_type_crm_q2_checkin" model="mail.activity.type">
+        <field name="name">Key Account Q2 Check-in (1 Month Inactive)</field>
+        <field name="icon">fa-phone</field>
+        <field name="delay_count">2</field>
+        <field name="delay_unit">days</field>
+        <field name="delay_from">current_date</field>
+        <field name="summary">Customer inactive for 1 month: call to check pet needs and schedule grooming</field>
+    </record>
+
+    <record id="mail_activity_type_crm_q3_winback" model="mail.activity.type">
+        <field name="name">Key Account Q3 Win-Back (2-3 Months Inactive)</field>
+        <field name="icon">fa-exclamation-triangle</field>
+        <field name="delay_count">1</field>
+        <field name="delay_unit">days</field>
+        <field name="delay_from">current_date</field>
+        <field name="summary">URGENT: Customer is dormant! Offer key-account incentive to prevent churn</field>
+    </record>
+</odoo>

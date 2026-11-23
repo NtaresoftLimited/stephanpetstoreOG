@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================================= -->
+    <!-- KANBAN VIEW: 4 CUSTOMER BOXES (Q1, Q2, Q3, Q4)            -->
+    <!-- ========================================================= -->
+    <record id="view_partner_corporate_crm_kanban" model="ir.ui.view">
+        <field name="name">res.partner.corporate.crm.kanban</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="crm_box" class="o_corporate_crm_kanban" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="display_name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="crm_box"/>
+                <field name="crm_box_movement"/>
+                <field name="corporate_tier"/>
+                <field name="corporate_segment"/>
+                <field name="days_since_last_activity"/>
+                <field name="last_sale_date"/>
+                <field name="last_grooming_date"/>
+                <field name="total_spent_corporate"/>
+                <field name="corporate_health_score"/>
+                <field name="corporate_pet_count"/>
+                <field name="key_account_manager_id"/>
+                <field name="currency_id"/>
+                <field name="avatar_128"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_kanban_record_has_image_fill o_corporate_box_card o_box_#{record.crm_box.raw_value}">
+                            <div class="o_kanban_image d-none d-md-block" t-attf-style="background-image:url('#{kanban_image('res.partner', 'avatar_128', record.id.raw_value)}')"/>
+                            <div class="oe_kanban_details d-flex flex-column justify-content-between">
+                                <div>
+                                    <!-- Header: Name & Tier Badge -->
+                                    <div class="o_kanban_record_top mb-1">
+                                        <div class="o_kanban_record_headings">
+                                            <strong class="o_kanban_record_title fs-6">
+                                                <field name="name"/>
+                                            </strong>
+                                            <div class="text-muted small">
+                                                <field name="corporate_segment"/>
+                                            </div>
+                                        </div>
+                                        <!-- Tier Pill -->
+                                        <div>
+                                            <span t-if="record.corporate_tier.raw_value == 'platinum'" class="badge rounded-pill text-bg-dark border border-warning">Platinum VIP</span>
+                                            <span t-if="record.corporate_tier.raw_value == 'gold'" class="badge rounded-pill text-bg-warning">Gold</span>
+                                            <span t-if="record.corporate_tier.raw_value == 'silver'" class="badge rounded-pill text-bg-secondary">Silver</span>
+                                            <span t-if="record.corporate_tier.raw_value == 'bronze'" class="badge rounded-pill text-bg-light border">Bronze</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Movement & Inactivity Status -->
+                                    <div class="d-flex align-items-center gap-1 mb-2">
+                                        <span t-if="record.crm_box.raw_value == 'q1'" class="badge bg-success-subtle text-success border border-success">
+                                            🟢 Active (<field name="days_since_last_activity"/>d ago)
+                                        </span>
+                                        <span t-if="record.crm_box.raw_value == 'q2'" class="badge bg-warning-subtle text-warning-emphasis border border-warning">
+                                            🟡 1 Mo Inactive (<field name="days_since_last_activity"/>d)
+                                        </span>
+                                        <span t-if="record.crm_box.raw_value == 'q3'" class="badge bg-danger-subtle text-danger border border-danger">
+                                            🟠 Dormant (<field name="days_since_last_activity"/>d)
+                                        </span>
+                                        <span t-if="record.crm_box.raw_value == 'q4'" class="badge bg-dark-subtle text-dark border">
+                                            🔴 Churned (&gt;90d)
+                                        </span>
+
+                                        <span t-if="record.crm_box_movement.raw_value == 'promoted'" class="badge bg-success text-white small" title="Promoted recently">
+                                            ▲ Up
+                                        </span>
+                                        <span t-if="record.crm_box_movement.raw_value == 'demoted'" class="badge bg-danger text-white small" title="Demoted recently">
+                                            ▼ Down
+                                        </span>
+                                    </div>
+
+                                    <!-- Key Metrics Row -->
+                                    <div class="row g-1 text-muted small mb-2">
+                                        <div class="col-7">
+                                            <i class="fa fa-money text-success me-1"/>
+                                            <field name="total_spent_corporate" widget="monetary"/>
+                                        </div>
+                                        <div class="col-5 text-end">
+                                            <i class="fa fa-paw text-primary me-1"/>
+                                            <span><field name="corporate_pet_count"/> pets</span>
+                                        </div>
+                                        <div class="col-12" t-if="record.last_grooming_date.raw_value">
+                                            <i class="fa fa-scissors text-info me-1"/> Groom: <field name="last_grooming_date" widget="date"/>
+                                        </div>
+                                        <div class="col-12" t-if="record.last_sale_date.raw_value">
+                                            <i class="fa fa-shopping-cart text-warning me-1"/> Sale: <field name="last_sale_date" widget="date"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Footer: Quick Actions & KAM Avatar -->
+                                <div class="o_kanban_record_bottom border-top pt-2 mt-auto">
+                                    <div class="oe_kanban_bottom_left">
+                                        <!-- WhatsApp Quick Action -->
+                                        <button name="action_open_reengagement_wizard" type="object"
+                                                class="btn btn-sm btn-outline-success py-0 px-2 me-1"
+                                                title="Re-engage Customer via WhatsApp">
+                                            <i class="fa fa-whatsapp"/> Re-engage
+                                        </button>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="key_account_manager_id" widget="many2one_avatar_user"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- LIST VIEW: CORPORATE ACCOUNTS WITH BOXES                  -->
+    <!-- ========================================================= -->
+    <record id="view_partner_corporate_crm_tree" model="ir.ui.view">
+        <field name="name">res.partner.corporate.crm.list</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Corporate Key Accounts"
+                  decoration-success="crm_box == 'q1'"
+                  decoration-warning="crm_box == 'q2'"
+                  decoration-danger="crm_box in ('q3', 'q4')"
+                  sample="1">
+                <field name="display_name" string="Corporate Account"/>
+                <field name="corporate_tier" widget="badge"
+                       decoration-primary="corporate_tier == 'platinum'"
+                       decoration-warning="corporate_tier == 'gold'"
+                       decoration-info="corporate_tier == 'silver'"
+                       decoration-muted="corporate_tier == 'bronze'"/>
+                <field name="corporate_segment"/>
+                <field name="key_account_manager_id" widget="many2one_avatar_user"/>
+                <field name="crm_box" widget="badge"
+                       decoration-success="crm_box == 'q1'"
+                       decoration-warning="crm_box == 'q2'"
+                       decoration-danger="crm_box == 'q3'"
+                       decoration-muted="crm_box == 'q4'"/>
+                <field name="crm_box_movement" widget="badge"
+                       decoration-success="crm_box_movement == 'promoted'"
+                       decoration-danger="crm_box_movement == 'demoted'"/>
+                <field name="days_since_last_activity" string="Days Inactive"/>
+                <field name="last_sale_date" widget="date"/>
+                <field name="last_grooming_date" widget="date"/>
+                <field name="corporate_pet_count" string="Pets"/>
+                <field name="total_spent_corporate" widget="monetary" sum="Total Revenue"/>
+                <field name="corporate_health_score" widget="progressbar" string="Health"/>
+                <field name="phone"/>
+                <field name="currency_id" column_invisible="True"/>
+                <button name="action_open_reengagement_wizard" string="Re-engage" type="object" icon="fa-whatsapp" class="btn-outline-success btn-sm"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- FORM VIEW EXTENSION: CORPORATE KEY ACCOUNT WORKFLOW       -->
+    <!-- ========================================================= -->
+    <record id="view_partner_corporate_crm_form" model="ir.ui.view">
+        <field name="name">res.partner.corporate.crm.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Header Statusbar & Action Buttons -->
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_open_reengagement_wizard" string="Re-engage (WhatsApp / Email)"
+                            type="object" class="btn-primary" icon="fa-whatsapp"
+                            invisible="not is_corporate_account"/>
+                    <button name="action_force_recalculate_box" string="Recalculate CRM Box"
+                            type="object" class="btn-secondary" icon="fa-refresh"
+                            invisible="not is_corporate_account"/>
+                    <field name="crm_box" widget="statusbar" statusbar_visible="q1,q2,q3,q4"
+                           invisible="not is_corporate_account"/>
+                </header>
+            </xpath>
+
+            <!-- Smart Buttons in Statinfo Area -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_corporate_deals" type="object" class="oe_stat_button" icon="fa-handshake-o"
+                        invisible="not is_corporate_account">
+                    <field name="corporate_deal_count" widget="statinfo" string="Deals"/>
+                </button>
+                <button name="action_view_corporate_sales" type="object" class="oe_stat_button" icon="fa-shopping-cart"
+                        invisible="not is_corporate_account">
+                    <field name="corporate_sale_orders_count" widget="statinfo" string="Sales"/>
+                </button>
+                <button name="action_view_corporate_groomings" type="object" class="oe_stat_button" icon="fa-scissors"
+                        invisible="not is_corporate_account">
+                    <field name="corporate_grooming_count" widget="statinfo" string="Groomings"/>
+                </button>
+                <button name="action_view_corporate_pets" type="object" class="oe_stat_button" icon="fa-paw"
+                        invisible="not is_corporate_account">
+                    <field name="corporate_pet_count" widget="statinfo" string="Pets"/>
+                </button>
+                <button name="action_view_corporate_shift_logs" type="object" class="oe_stat_button" icon="fa-history"
+                        invisible="not is_corporate_account">
+                    <span class="o_stat_text">Box Shifts</span>
+                </button>
+            </xpath>
+
+            <!-- Dynamic Alert Box Banner right above notebook -->
+            <xpath expr="//notebook" position="before">
+                <div class="alert alert-success d-flex align-items-center justify-content-between p-2 my-2"
+                     role="alert" invisible="not is_corporate_account or crm_box != 'q1'">
+                    <div>
+                        <strong>🟢 Q1 Active Key Account:</strong> Recent activity within 30 days. High engagement!
+                        <span class="ms-2">Days inactive: <field name="days_since_last_activity" class="fw-bold"/> days.</span>
+                    </div>
+                    <span class="badge bg-success">Movement: <field name="crm_box_movement"/></span>
+                </div>
+
+                <div class="alert alert-warning d-flex align-items-center justify-content-between p-2 my-2"
+                     role="alert" invisible="not is_corporate_account or crm_box != 'q2'">
+                    <div>
+                        <strong>🟡 Q2 Slipping Account Warning:</strong> 1 month with NO sales and NO groomings!
+                        <span class="ms-2">Days inactive: <field name="days_since_last_activity" class="fw-bold"/> days. Action required!</span>
+                    </div>
+                    <span class="badge bg-warning text-dark">Movement: <field name="crm_box_movement"/></span>
+                </div>
+
+                <div class="alert alert-danger d-flex align-items-center justify-content-between p-2 my-2"
+                     role="alert" invisible="not is_corporate_account or crm_box != 'q3'">
+                    <div>
+                        <strong>🟠 Q3 Critical Dormant Account:</strong> 2-3 months inactive! Severe churn risk.
+                        <span class="ms-2">Days inactive: <field name="days_since_last_activity" class="fw-bold"/> days. Execute win-back!</span>
+                    </div>
+                    <span class="badge bg-danger">Movement: <field name="crm_box_movement"/></span>
+                </div>
+
+                <div class="alert alert-dark d-flex align-items-center justify-content-between p-2 my-2"
+                     role="alert" invisible="not is_corporate_account or crm_box != 'q4'">
+                    <div>
+                        <strong>🔴 Q4 Churned / Lost Account:</strong> Inactive for &gt; 90 days.
+                        <span class="ms-2">Days inactive: <field name="days_since_last_activity" class="fw-bold"/> days.</span>
+                    </div>
+                    <span class="badge bg-dark">Movement: <field name="crm_box_movement"/></span>
+                </div>
+            </xpath>
+
+            <!-- Dedicated Notebook Page for Corporate CRM -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Key-Account CRM &amp; Boxes" name="page_corporate_crm">
+                    <group>
+                        <group string="Corporate Classification">
+                            <field name="is_corporate_account"/>
+                            <field name="corporate_tier" invisible="not is_corporate_account"/>
+                            <field name="corporate_segment" invisible="not is_corporate_account"/>
+                            <field name="corporate_reg_no" invisible="not is_corporate_account"/>
+                            <field name="key_account_manager_id" invisible="not is_corporate_account"/>
+                            <field name="contract_expiry_date" invisible="not is_corporate_account"/>
+                        </group>
+                        <group string="Box Metrics &amp; Dynamic Status" invisible="not is_corporate_account">
+                            <field name="crm_box" readonly="1"/>
+                            <field name="crm_box_movement" readonly="1"/>
+                            <field name="crm_box_shift_date"/>
+                            <field name="crm_box_reason"/>
+                            <field name="corporate_health_score" widget="progressbar"/>
+                        </group>
+                    </group>
+
+                    <group string="Recency &amp; Revenue Analytics" invisible="not is_corporate_account">
+                        <group>
+                            <field name="days_since_last_activity"/>
+                            <field name="last_activity_date"/>
+                            <field name="total_spent_corporate" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="days_since_last_sale"/>
+                            <field name="last_sale_date"/>
+                            <field name="days_since_last_grooming"/>
+                            <field name="last_grooming_date"/>
+                        </group>
+                    </group>
+
+                    <group string="Shift Audit Trail" invisible="not is_corporate_account">
+                        <field name="shift_log_ids" nolabel="1">
+                            <list default_order="shift_date desc" limit="10">
+                                <field name="shift_date"/>
+                                <field name="from_box"/>
+                                <field name="to_box"/>
+                                <field name="movement_type" widget="badge"
+                                       decoration-success="movement_type == 'promoted'"
+                                       decoration-danger="movement_type == 'demoted'"/>
+                                <field name="trigger_source"/>
+                                <field name="days_inactive"/>
+                                <field name="notes"/>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- SEARCH & FILTER EXTENSION FOR CORPORATE CRM               -->
+    <!-- ========================================================= -->
+    <record id="view_res_partner_filter_corporate_crm" model="ir.ui.view">
+        <field name="name">res.partner.select.corporate.crm</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="corporate_segment"/>
+                <field name="key_account_manager_id"/>
+                <separator/>
+                <filter string="Corporate Accounts Only" name="filter_corporate_only" domain="[('is_corporate_account', '=', True)]"/>
+                <separator/>
+                <filter string="Q1: Active (&lt;30d)" name="filter_q1" domain="[('crm_box', '=', 'q1')]"/>
+                <filter string="Q2: Slipping (1 Mo Inactive)" name="filter_q2" domain="[('crm_box', '=', 'q2')]"/>
+                <filter string="Q3: Dormant (2-3 Mo Inactive)" name="filter_q3" domain="[('crm_box', '=', 'q3')]"/>
+                <filter string="Q4: Churned (&gt;3 Mo Inactive)" name="filter_q4" domain="[('crm_box', '=', 'q4')]"/>
+                <separator/>
+                <filter string="Demoted Recently 🔻" name="filter_demoted" domain="[('crm_box_movement', '=', 'demoted')]"/>
+                <filter string="Promoted Recently 🔺" name="filter_promoted" domain="[('crm_box_movement', '=', 'promoted')]"/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Customer Box (Q1-Q4)" name="group_crm_box" context="{'group_by': 'crm_box'}"/>
+                <filter string="Corporate Tier" name="group_tier" context="{'group_by': 'corporate_tier'}"/>
+                <filter string="Business Segment" name="group_segment" context="{'group_by': 'corporate_segment'}"/>
+                <filter string="Key Account Manager" name="group_kam" context="{'group_by': 'key_account_manager_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTIONS: BOX KANBAN & LIST VIEWS                          -->
+    <!-- ========================================================= -->
+    <record id="action_corporate_crm_boxes" model="ir.actions.act_window">
+        <field name="name">Customer Boxes (Q1 - Q4)</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('is_corporate_account', '=', True)]</field>
+        <field name="context">{
+            'default_is_corporate_account': True,
+            'search_default_group_crm_box': 1,
+            'search_default_filter_corporate_only': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Corporate Key Accounts Across Dynamic Q1-Q4 Customer Boxes!
+            </p>
+            <p>
+                - <strong>Q1 Active:</strong> Customers active within 30 days.<br/>
+                - <strong>Q2 Slipping:</strong> 1 month with no sales or grooming.<br/>
+                - <strong>Q3 Dormant:</strong> 2-3 months inactive (critical churn danger).<br/>
+                - <strong>Q4 Churned:</strong> &gt;3 months inactive without transactions.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_corporate_crm_boxes_kanban_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_partner_corporate_crm_kanban"/>
+        <field name="act_window_id" ref="action_corporate_crm_boxes"/>
+    </record>
+
+    <record id="action_corporate_crm_boxes_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_partner_corporate_crm_tree"/>
+        <field name="act_window_id" ref="action_corporate_crm_boxes"/>
+    </record>
+
+    <!-- ACTION: ALL CORPORATE ACCOUNTS (LIST DEFAULT) -->
+    <record id="action_corporate_crm_accounts_list" model="ir.actions.act_window">
+        <field name="name">Corporate Key Accounts</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('is_corporate_account', '=', True)]</field>
+        <field name="context">{'default_is_corporate_account': True, 'search_default_filter_corporate_only': 1}</field>
+    </record>
+
+    <!-- SERVER ACTION: BULK RECALCULATE CRM BOXES -->
+    <record id="action_server_recalculate_crm_boxes" model="ir.actions.server">
+        <field name="name">Recalculate CRM Boxes</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+records.action_force_recalculate_box()
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,44 @@
+# Stephan's Pet Store & Grooming Studio
+
+> Tanzania's premier pet care destination with physical stores in Dar es Salaam and nationwide delivery across Tanzania.
+
+## Overview
+Stephan's Pet Store is a premier pet retail, nutrition, and professional grooming company based in Dar es Salaam, Tanzania. We specialize in high-grade veterinary and premium dog and cat food, hygiene essentials, accessories, and stress-free grooming care.
+
+## Physical Stores & Contact Information
+### 1. Masaki Flagship Store & Grooming Studio
+- **Address**: 11 Slipway Road, Masaki, Dar es Salaam, Tanzania (near The Slipway Waterfront)
+- **Coordinates**: -6.7452, 39.2825
+- **Phone**: +255 786 627 873
+- **WhatsApp**: https://wa.me/255786627873
+- **Opening Hours**: Monday – Saturday: 9:00 AM – 8:30 PM | Sunday: Closed
+- **Services**: Full Pet Shop, Professional Dog & Cat Grooming Studio, Nutrition Consulting, Same-Day Dar Delivery
+- **URL**: https://www.stephanspetstore.co.tz/stores/masaki
+
+### 2. Mikocheni Branch & Express Pickup
+- **Address**: 59 Mikocheni A, Dar es Salaam, Tanzania (accessible via Old Bagamoyo Road)
+- **Coordinates**: -6.7733, 39.2699
+- **Phone**: +255 769 324 445
+- **WhatsApp**: https://wa.me/255769324445
+- **Opening Hours**: Monday – Saturday: 9:00 AM – 6:00 PM | Sunday: Closed
+- **Services**: Pet Food & Treats Depot, Flea & Tick Health, Cat Litter & Accessories, In-store Pickup
+- **URL**: https://www.stephanspetstore.co.tz/stores/mikocheni
+
+## Core Services & Products
+- **Professional Pet Grooming**: Full wash, hypoallergenic bathing, styling, de-shedding, dematting, sanitary trim, nail clip, ear cleaning at our Masaki studio. Online slot booking: https://www.stephanspetstore.co.tz/grooming.
+- **Flagship Pet Food Brands**: Summit 10, Bioline, Josera, Bravecto, Royal Canin, TropiDog, TropiCat.
+- **Pet Accessories**: Beds, collars, leashes, harnesses, scratching posts, litter boxes, toys, bowls, travel crates.
+- **Delivery Service**: Same-day delivery across all Dar es Salaam neighborhoods (free for orders above TSh 100,000). Express parcel courier delivery across Tanzania (Arusha, Dodoma, Mwanza, Morogoro, Zanzibar).
+- **Payment Methods**: Selcom Mobile Money (M-Pesa, Airtel Money, Mixx by Yas, Halopesa), Visa/Mastercard, Sky Wallet store rewards, and Cash on Delivery.
+
+## Canonical URLs
+- Website: https://www.stephanspetstore.co.tz/
+- Online Shop: https://www.stephanspetstore.co.tz/shop
+- Grooming Studio: https://www.stephanspetstore.co.tz/grooming
+- All Stores: https://www.stephanspetstore.co.tz/stores
+- Masaki Store: https://www.stephanspetstore.co.tz/stores/masaki
+- Mikocheni Store: https://www.stephanspetstore.co.tz/stores/mikocheni
+- Contact & Support: https://www.stephanspetstore.co.tz/contact
+- Frequently Asked Questions: https://www.stephanspetstore.co.tz/faq
+- Delivery Policy: https://www.stephanspetstore.co.tz/delivery
+- Return Policy: https://www.stephanspetstore.co.tz/return-policy

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_corporate_crm_reengagement_wizard_form" model="ir.ui.view">
+        <field name="name">corporate.crm.reengagement.wizard.form</field>
+        <field name="model">corporate.crm.reengagement.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Re-engage Key Account">
+                <sheet>
+                    <div class="alert alert-info py-2" role="alert">
+                        <strong>Re-engage Customer:</strong> Select a campaign template to instantly generate a personalized outreach message. You can open WhatsApp Web/App directly or log a phone call.
+                    </div>
+                    <group>
+                        <group string="Customer Details">
+                            <field name="partner_id" readonly="1"/>
+                            <field name="crm_box" widget="badge"/>
+                            <field name="days_inactive"/>
+                        </group>
+                        <group string="Contact Info">
+                            <field name="phone" placeholder="+255 7XX XXX XXX"/>
+                            <field name="email"/>
+                        </group>
+                    </group>
+
+                    <group string="Campaign Message Template">
+                        <field name="template_type" widget="radio"/>
+                        <field name="message_body" widget="text" rows="6" placeholder="Message content..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_send_whatsapp" string="Open in WhatsApp" type="object" class="btn-success" icon="fa-whatsapp"/>
+                    <button name="action_log_activity_done" string="Log Outreach Call Done" type="object" class="btn-primary" icon="fa-check"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

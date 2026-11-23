@@ -1,0 +1,13 @@
+id,name,model_id,group_id/id,operation,domain
+access_corporate_crm_shift_log_user,corporate.crm.shift.log.user,corporate.crm.shift.log,stephans_corporate_crm.group_corporate_crm_user,cru,
+access_corporate_crm_shift_log_manager,corporate.crm.shift.log.manager,corporate.crm.shift.log,stephans_corporate_crm.group_corporate_crm_manager,crud,
+access_corporate_crm_shift_log_internal,corporate.crm.shift.log.internal,corporate.crm.shift.log,base.group_user,r,
+access_corporate_crm_reengagement_wizard,corporate.crm.reengagement.wizard,corporate.crm.reengagement.wizard,base.group_user,crud,
+access_corporate_crm_lost_wizard,corporate.crm.lost.wizard,corporate.crm.lost.wizard,base.group_user,crud,
+access_corporate_crm_stage_user,corporate.crm.stage.user,corporate.crm.stage,base.group_user,r,
+access_corporate_crm_stage_manager,corporate.crm.stage.manager,corporate.crm.stage,stephans_corporate_crm.group_corporate_crm_manager,crud,
+access_corporate_crm_lost_reason_user,corporate.crm.lost.reason.user,corporate.crm.lost.reason,base.group_user,r,
+access_corporate_crm_lost_reason_manager,corporate.crm.lost.reason.manager,corporate.crm.lost.reason,stephans_corporate_crm.group_corporate_crm_manager,crud,
+access_corporate_crm_deal_user,corporate.crm.deal.user,corporate.crm.deal,stephans_corporate_crm.group_corporate_crm_user,crud,
+access_corporate_crm_deal_manager,corporate.crm.deal.manager,corporate.crm.deal,stephans_corporate_crm.group_corporate_crm_manager,crud,
+access_corporate_crm_deal_internal,corporate.crm.deal.internal,corporate.crm.deal,base.group_user,r,
