@@ -92,7 +92,7 @@
 
                     <!-- Empty State with Recovery Actions -->
                     <div id="stephans-search-no-results" class="stephans-search-no-results" style="display: none;" role="status">
-                        <div class="stephans-search-no-results__title">We couldn&rsquo;t find &ldquo;<span id="stephans-search-failed-query"></span>&rdquo;</div>
+                        <div class="stephans-search-no-results__title">We couldn't find "<span id="stephans-search-failed-query"></span>"</div>
                         <p class="stephans-search-no-results__subtitle">Check the spelling or try another search.</p>
                         
                         <div class="stephans-search-no-results__actions">

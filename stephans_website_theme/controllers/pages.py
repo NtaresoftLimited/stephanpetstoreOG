@@ -3,6 +3,13 @@ import json
 from odoo import http
 from odoo.http import request
 from markupsafe import Markup, escape
+from ..models.shared_cache import (
+    get_cached,
+    set_cached,
+    is_anonymous_cacheable,
+    TTL_SEARCH_SECONDS,
+    TTL_BRAND_SECONDS,
+)
 
 
 PAGES = {
@@ -224,30 +231,51 @@ class StephansWebsitePages(http.Controller):
                 'keywords': [slug_key.replace('-', ' ')],
             }
 
-        # Query products matching this brand
-        domain = [('active', '=', True), ('is_published', '=', True)]
-        kw_domains = []
-        for term in brand_info['keywords']:
-            kw_domains.append(('name', 'ilike', term))
-            kw_domains.append(('default_code', 'ilike', term))
-        
-        if kw_domains:
-            combined_domain = ['|'] * (len(kw_domains) - 1) + kw_domains
-            domain.extend(combined_domain)
+        force_refresh = bool(kw.get('nocache') or kw.get('refresh_cache'))
+        cache_key = f"brand_cards_{slug_key}"
+        product_cards = None
+        if not force_refresh and is_anonymous_cacheable(request):
+            product_cards = get_cached("brand_pages", cache_key, env=request.env)
 
-        products = request.env['product.template'].sudo().search(domain, order='list_price desc, name asc', limit=48)
-        currency = request.env.company.currency_id
+        if product_cards is None:
+            pt_model = request.env['product.template'].sudo()
+            has_search_idx = 'x_search_index' in pt_model._fields
+            domain = [('active', '=', True), ('is_published', '=', True)]
+            kw_domains = []
+            for term in brand_info['keywords']:
+                if has_search_idx:
+                    kw_domains.append(('x_search_index', 'ilike', term))
+                else:
+                    kw_domains.append(('name', 'ilike', term))
+                    kw_domains.append(('default_code', 'ilike', term))
 
-        product_cards = []
-        for p in products:
-            product_cards.append({
-                'id': p.id,
-                'name': p.name,
-                'price_formatted': currency.format(p.list_price) if currency else f"{p.list_price:,.0f} TZS",
-                'url': p.website_url or f"/shop/product/{p.id}",
-                'image_url': f"/web/image/product.template/{p.id}/image_512",
-                'category': p.categ_id.name if p.categ_id else '',
-            })
+            if kw_domains:
+                combined_domain = ['|'] * (len(kw_domains) - 1) + kw_domains
+                domain.extend(combined_domain)
+
+            products = pt_model.search(domain, order='list_price desc, name asc', limit=48)
+            currency = request.env.company.currency_id
+
+            product_cards = []
+            for p in products:
+                product_cards.append({
+                    'id': p.id,
+                    'name': p.name,
+                    'price_formatted': currency.format(p.list_price) if currency else f"{p.list_price:,.0f} TZS",
+                    'url': p.website_url or f"/shop/product/{p.id}",
+                    'image_url': f"/web/image/product.template/{p.id}/image_512",
+                    'category': p.categ_id.name if p.categ_id else '',
+                })
+
+            if product_cards:
+                set_cached(
+                    "brand_pages",
+                    cache_key,
+                    product_cards,
+                    ttl=TTL_BRAND_SECONDS,
+                    product_ids=[c['id'] for c in product_cards],
+                    env=request.env,
+                )
 
         return request.render('stephans_website_theme.brand_page', {
             'brand': brand_info,
@@ -324,16 +352,24 @@ class StephansWebsitePages(http.Controller):
         if not clean_q or len(clean_q) < 2:
             return request.make_json_response({'results': [], 'products': [], 'categories': [], 'brands': [], 'count': 0})
 
-        pt_model = request.env['product.template'].sudo()
-        available_fields = pt_model._fields
-        limit_count = int(kw.get('limit', 10))
-
-        # 1. Multi-term Tokenization & Search Normalization
-        # Handles queries like 'Summit10', 'summit-10', 'SUMMIT 10', 'Summit 10 Cat 3kg'
+        limit_count = min(int(kw.get('limit', 10)), 20)
         clean_norm = strip_accents(clean_q)
         q_compact = normalize_compact(clean_q)
 
-        # Split alphanumeric transitions (e.g. Summit10 -> ['Summit', '10'])
+        # Check shared cross-worker RAM cache (10-minute TTL)
+        cache_key = f"q_{clean_norm.lower()}_{limit_count}"
+        force_refresh = bool(kw.get('nocache') or kw.get('refresh_cache'))
+        if not force_refresh:
+            cached_payload = get_cached("search_api", cache_key, env=request.env)
+            if cached_payload is not None:
+                return request.make_json_response(cached_payload)
+
+        pt_model = request.env['product.template'].sudo()
+        available_fields = pt_model._fields
+        has_search_idx = 'x_search_index' in available_fields
+
+        # 1. Multi-term Tokenization & Search Normalization
+        # Handles queries like 'Summit10', 'summit-10', 'SUMMIT 10', 'Summit 10 Cat 3kg'
         raw_words = [w.strip() for w in clean_norm.split() if w.strip()]
         expanded_tokens = []
         for w in raw_words:
@@ -357,53 +393,54 @@ class StephansWebsitePages(http.Controller):
         if not search_tokens:
             search_tokens = [clean_q]
 
-        # 2. Build multi-term AND domain
-        sub_domains = []
-        for tok in search_tokens:
-            tok_u = strip_accents(tok)
-            or_clauses = [
-                ('name', 'ilike', tok),
-                ('default_code', 'ilike', tok),
-                ('description_sale', 'ilike', tok),
-            ]
-            if tok_u.lower() != tok.lower():
-                or_clauses.extend([
-                    ('name', 'ilike', tok_u),
-                    ('description_sale', 'ilike', tok_u),
-                ])
-
-            # Brand field inclusion
-            if 'product_brand_id' in available_fields:
-                or_clauses.append(('product_brand_id.name', 'ilike', tok))
-            if 'brand_id' in available_fields:
-                or_clauses.append(('brand_id.name', 'ilike', tok))
-
-            # Extended fields
-            if 'barcode' in available_fields:
-                or_clauses.append(('barcode', 'ilike', tok))
-            if 'x_keywords' in available_fields:
-                or_clauses.append(('x_keywords', 'ilike', tok))
-                if tok_u.lower() != tok.lower():
-                    or_clauses.append(('x_keywords', 'ilike', tok_u))
-            if 'x_key_ingredients' in available_fields:
-                or_clauses.append(('x_key_ingredients', 'ilike', tok))
-            if 'x_packaging_form' in available_fields:
-                or_clauses.append(('x_packaging_form', 'ilike', tok))
-            if 'public_categ_ids' in available_fields:
-                or_clauses.append(('public_categ_ids.name', 'ilike', tok))
-
-            tok_domain = []
-            for _ in range(len(or_clauses) - 1):
-                tok_domain.append('|')
-            tok_domain.extend(or_clauses)
-            sub_domains.append(tok_domain)
-
-        # Strict full AND condition
+        # 2. Fast Indexed Query via x_search_index (GIN trigram index) with fallback
         full_domain = [('active', '=', True), ('is_published', '=', True)]
-        for sd in sub_domains:
-            full_domain.extend(sd)
+        if has_search_idx:
+            for tok in search_tokens:
+                full_domain.append(('x_search_index', 'ilike', tok))
+            products = list(pt_model.search(full_domain, order='list_price desc', limit=limit_count * 2))
+        else:
+            products = []
 
-        products = list(pt_model.search(full_domain, order='list_price desc', limit=limit_count * 2))
+        # Fallback if x_search_index is not yet computed on all rows
+        if not products:
+            sub_domains = []
+            for tok in search_tokens:
+                tok_u = strip_accents(tok)
+                or_clauses = [
+                    ('name', 'ilike', tok),
+                    ('default_code', 'ilike', tok),
+                    ('description_sale', 'ilike', tok),
+                ]
+                if tok_u.lower() != tok.lower():
+                    or_clauses.extend([
+                        ('name', 'ilike', tok_u),
+                        ('description_sale', 'ilike', tok_u),
+                    ])
+                if 'product_brand_id' in available_fields:
+                    or_clauses.append(('product_brand_id.name', 'ilike', tok))
+                if 'brand_id' in available_fields:
+                    or_clauses.append(('brand_id.name', 'ilike', tok))
+                if 'barcode' in available_fields:
+                    or_clauses.append(('barcode', 'ilike', tok))
+                if 'x_keywords' in available_fields:
+                    or_clauses.append(('x_keywords', 'ilike', tok))
+                if 'x_search_synonyms' in available_fields:
+                    or_clauses.append(('x_search_synonyms', 'ilike', tok))
+                if 'x_key_ingredients' in available_fields:
+                    or_clauses.append(('x_key_ingredients', 'ilike', tok))
+                if 'x_packaging_form' in available_fields:
+                    or_clauses.append(('x_packaging_form', 'ilike', tok))
+                if 'public_categ_ids' in available_fields:
+                    or_clauses.append(('public_categ_ids.name', 'ilike', tok))
+
+                tok_domain = ['|'] * (len(or_clauses) - 1) + or_clauses
+                sub_domains.append(tok_domain)
+
+            fb_domain = [('active', '=', True), ('is_published', '=', True)]
+            for sd in sub_domains:
+                fb_domain.extend(sd)
+            products = list(pt_model.search(fb_domain, order='list_price desc', limit=limit_count * 2))
 
         # 3. Smart Brand Matching & Fallback
         KNOWN_BRANDS = [
@@ -542,13 +579,22 @@ class StephansWebsitePages(http.Controller):
             elif 'dog' in q_lower or 'puppy' in q_lower:
                 matched_categories.append({'name': 'Dogs > Food', 'url': '/shop?search=Dog+Food', 'type': 'Category'})
 
-        return request.make_json_response({
+        payload = {
             'results': results,
             'products': results,
             'categories': matched_categories[:2],
             'brands': matched_brands[:2],
             'count': len(results)
-        })
+        }
+        set_cached(
+            "search_api",
+            cache_key,
+            payload,
+            ttl=TTL_SEARCH_SECONDS,
+            product_ids=[p.id for p in products],
+            env=request.env,
+        )
+        return request.make_json_response(payload)
 
     # Slide-over Cart Drawer Status API
     @http.route('/stephans/api/cart_status', type='http', auth='public', website=True, csrf=False, methods=['GET', 'POST'])

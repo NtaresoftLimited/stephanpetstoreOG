@@ -5,15 +5,25 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <!-- Add Regenerate & Seed Buttons to the Header -->
+            <!-- Add Regenerate, Approve & Seed Buttons to the Header -->
             <xpath expr="//header" position="inside">
                 <button name="action_regenerate_ai_details"
-                        string="⚡ Regenerate Details (AI)"
+                        string="Prepare AI Enrichment (Stage for Review)"
                         type="object"
                         class="btn-primary"
-                        confirm="This will fetch data and watermark-free pictures from the official seed links, analyze them with your active AI engine (Gemini / ChatGPT), and format this product using the official Stephan's Pet Store catalog formula. Do you want to proceed?"/>
+                        confirm="This will fetch manufacturer specifications and candidate packshots, validate brand/pack-size/species gates, and stage suggestions for your human review. Store prices, stock, POS, and live descriptions remain untouched until you approve. Proceed?"/>
+                <button name="action_approve_ai_enrichment"
+                        string="Approve &amp; Publish Staged Enrichment"
+                        type="object"
+                        class="btn-success"
+                        invisible="x_enrichment_status != 'pending_review'"/>
+                <button name="action_reject_ai_enrichment"
+                        string="Reject Staged Text"
+                        type="object"
+                        class="btn-outline-danger"
+                        invisible="x_enrichment_status != 'pending_review'"/>
                 <button name="action_seed_official_brand_urls"
-                        string="🌱 Seed Official Brand Links"
+                        string="Seed Official Brand Links &amp; Queries"
                         type="object"
                         class="btn-secondary"/>
             </xpath>
@@ -29,35 +39,55 @@
                 </button>
             </xpath>
 
-            <!-- Add AI Catalog Seeds Tab to Notebook -->
+            <!-- Add AI Catalog Seeds & Staged Review Tab to Notebook -->
             <xpath expr="//notebook" position="inside">
-                <page string="AI Catalog Seeds &amp; Keywords" name="ai_catalog_seeds">
+                <page string="AI Catalog Seeds &amp; Review Queue" name="ai_catalog_seeds">
                     <group>
-                        <group string="Source Reference URLs (Official Brand Brain)">
+                        <group string="Source Reference URLs &amp; Structured Queries">
                             <field name="x_source_urls" widget="text"
-                                   placeholder="Paste official manufacturer or catalog links (one per line)..."/>
+                                   placeholder="Official Tier-1 manufacturer &amp; Tier-2 cross-check links (one per line)..."/>
+                            <field name="x_structured_queries" widget="text"
+                                   placeholder="Structured enrichment search queries..."/>
                         </group>
-                        <group string="Keywords, Highlights &amp; Automation Status">
+                        <group string="Keywords, Synonyms &amp; Review Gates">
                             <field name="x_keywords"
-                                   placeholder="Add custom keywords, features, or highlights to emphasize..."/>
+                                   placeholder="Target keywords &amp; product highlights..."/>
+                            <field name="x_search_synonyms"
+                                   placeholder="Synonyms, pack size variations (2kg, 2 kg, 2000g), manufacturer codes..."/>
                             <field name="x_packaging_form" readonly="1"/>
                             <field name="x_key_ingredients" readonly="1"/>
+                            <field name="x_is_vet_medicine" readonly="1"/>
+                            <field name="x_enrichment_status" widget="badge"
+                                   decoration-warning="x_enrichment_status == 'pending_review'"
+                                   decoration-success="x_enrichment_status == 'approved'"
+                                   decoration-danger="x_enrichment_status == 'rejected'"/>
                             <field name="image_quality_status" widget="badge"
                                    decoration-warning="image_quality_status == 'pending_review'"
                                    decoration-success="image_quality_status == 'approved'"
                                    decoration-danger="image_quality_status == 'rejected'"/>
-                            <field name="x_ai_enriched"/>
+                            <field name="x_ai_enriched" readonly="1"/>
                             <field name="x_ai_last_enriched" readonly="1"/>
                             <field name="x_ai_last_error" readonly="1" invisible="not x_ai_last_error"/>
                         </group>
+                    </group>
+                    <group string="Staged Suggestions (Pending Human Review)" invisible="not x_suggested_description and not x_suggested_name">
+                        <field name="x_suggested_name"/>
+                        <field name="x_suggested_description_sale"/>
+                        <field name="x_suggested_description"/>
+                    </group>
+                    <group string="Normalized Search Index (Read-Only)">
+                        <field name="x_search_index" readonly="1"/>
                     </group>
                     <field name="image_review_ids" readonly="1">
                         <list string="Media Review Queue">
                             <field name="name"/>
                             <field name="image_role" widget="badge"/>
+                            <field name="source_type" widget="badge"/>
                             <field name="original_width"/>
                             <field name="original_height"/>
-                            <field name="webp_filesize_kb"/>
+                            <field name="webp_filesize_kb" string="Preview 1200px (KB)"/>
+                            <field name="webp_card_480_kb" string="Card 480px (KB)"/>
+                            <field name="webp_thumb_160_kb" string="Thumb 160px (KB)"/>
                             <field name="approval_status" widget="badge"
                                    decoration-warning="approval_status == 'pending_review'"
                                    decoration-success="approval_status == 'approved'"

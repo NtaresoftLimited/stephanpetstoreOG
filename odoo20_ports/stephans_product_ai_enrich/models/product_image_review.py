@@ -10,6 +10,14 @@ from odoo.exceptions import UserError, AccessError
 
 _logger = logging.getLogger(__name__)
 
+ELIGIBLE_APPROVAL_SOURCE_TYPES = frozenset({
+    "manufacturer",
+    "authorized_distributor",
+    "distributor",
+    "internal",
+    "licensed",
+})
+
 
 class ProductImageReview(models.Model):
     _name = "product.image.review"
@@ -50,14 +58,18 @@ class ProductImageReview(models.Model):
     )
     source_type = fields.Selection(
         [
-            ("manufacturer", "Official Manufacturer Catalogue"),
-            ("distributor", "Authorized Distributor"),
+            ("manufacturer", "Official Manufacturer Catalogue (Tier 1)"),
+            ("authorized_distributor", "Authorized Distributor (Tier 1)"),
+            ("trusted_retailer", "Trusted International Retailer (Tier 2 - Cross-Check Only)"),
+            ("external_unverified", "External / Unverified Source"),
+            # Legacy compatibility values
+            ("distributor", "Authorized Distributor (Legacy)"),
             ("internal", "Stephan's Internal Photography"),
             ("licensed", "Explicitly Licensed Reuse"),
-            ("unverified", "External / Unverified Source"),
+            ("unverified", "External / Unverified Source (Legacy)"),
         ],
         string="Source Provenance",
-        default="unverified",
+        default="external_unverified",
         required=True,
         index=True,
     )
@@ -142,15 +154,33 @@ class ProductImageReview(models.Model):
         readonly=True,
     )
     raw_image = fields.Binary(
-        string="Original Raw Image",
+        string="Original High-Res Source (Gallery Zoom)",
         attachment=True,
     )
     webp_image = fields.Binary(
-        string="Optimized WebP Derivative",
+        string="Product-Page Preview (1200px WebP)",
         attachment=True,
     )
     webp_filesize_kb = fields.Float(
-        string="WebP Size (KB)",
+        string="Preview WebP Size (KB)",
+        digits=(16, 1),
+        readonly=True,
+    )
+    webp_card_480 = fields.Binary(
+        string="Product-Card Derivative (480x480 WebP)",
+        attachment=True,
+    )
+    webp_card_480_kb = fields.Float(
+        string="Card 480px Size (KB)",
+        digits=(16, 1),
+        readonly=True,
+    )
+    webp_thumb_160 = fields.Binary(
+        string="Search Thumbnail Derivative (160x160 WebP)",
+        attachment=True,
+    )
+    webp_thumb_160_kb = fields.Float(
+        string="Thumb 160px Size (KB)",
         digits=(16, 1),
         readonly=True,
     )
@@ -175,22 +205,36 @@ class ProductImageReview(models.Model):
             raise AccessError(_("Permission Denied: Only authorized Media Quality Reviewers can approve or reject catalog images."))
 
     def action_approve_and_publish(self):
-        """Human approval action: publishes clean WebP derivative to storefront gallery with strict idempotency."""
+        """Human approval action: publishes clean WebP derivatives to storefront gallery with strict provenance & idempotency."""
         self._check_reviewer_rights()
         for review in self:
             if review.approval_status != "pending_review":
                 raise UserError(_("Cannot approve asset '%s': current status is '%s'. Only pending assets can be approved.") % (review.name, review.approval_status))
 
+            if review.source_type not in ELIGIBLE_APPROVAL_SOURCE_TYPES:
+                raise UserError(_(
+                    "Provenance Gate Blocked: Asset '%s' comes from source type '%s' (%s). "
+                    "Only 'manufacturer' or explicitly licensed 'authorized_distributor' images are eligible for storefront approval."
+                ) % (review.name, review.source_type, review.verified_domain or review.original_source_url))
+
             product = review.product_tmpl_id
-            img_data = review.webp_image or review.raw_image
-            if not img_data:
+            preview_data = review.webp_image or review.raw_image
+            if not preview_data:
                 raise UserError(_("No image binary available to publish for '%s'.") % review.name)
 
             now = fields.Datetime.now()
             if review.image_role == "front" or not product.image_1920:
-                product.sudo().write({"image_1920": img_data})
+                img_vals = {
+                    "image_1920": review.raw_image or preview_data,
+                    "image_1024": preview_data,
+                }
+                if review.webp_card_480:
+                    img_vals["image_512"] = review.webp_card_480
+                if review.webp_thumb_160:
+                    img_vals["image_256"] = review.webp_thumb_160
+                    img_vals["image_128"] = review.webp_thumb_160
+                product.sudo().write(img_vals)
             else:
-                # Idempotency check: prevent duplicate gallery images with the same checksum or phash
                 existing_gallery = self.env["product.image"].sudo().search([
                     ("product_tmpl_id", "=", product.id),
                     ("name", "=", review.name),
@@ -199,7 +243,7 @@ class ProductImageReview(models.Model):
                     self.env["product.image"].sudo().create({
                         "name": review.name,
                         "product_tmpl_id": product.id,
-                        "image_1920": img_data,
+                        "image_1920": preview_data,
                     })
 
             review.write({
@@ -209,13 +253,15 @@ class ProductImageReview(models.Model):
                 "rejection_reason": False,
             })
             product._recompute_image_quality_status()
+            if hasattr(product, "_invalidate_product_shared_cache"):
+                product._invalidate_product_shared_cache()
 
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": _("Image Approved & Published"),
-                "message": _("Selected image(s) published cleanly to product storefront."),
+                "message": _("Selected image(s) and responsive WebP derivatives published cleanly to product storefront."),
                 "type": "success",
                 "sticky": False,
             },
