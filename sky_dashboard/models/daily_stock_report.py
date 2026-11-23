@@ -11,6 +11,9 @@ from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 
+_PDF_IMAGE_CACHE = {}
+
+
 class SkyDailyStockReport(models.Model):
     _name = "sky.daily.stock.report"
     _description = "SKY Daily Stock Report"
@@ -404,20 +407,24 @@ class SkyDailyStockReportLine(models.Model):
     closing_qty = fields.Float(readonly=True, digits="Product Unit of Measure")
 
     def get_pdf_image_uri(self):
-        """Return a wkhtmltopdf-safe PNG data URI for the product photo (converts WebP to PNG)."""
+        """Return a wkhtmltopdf-safe PNG or JPEG data URI for the product photo (fast cached)."""
         self.ensure_one()
-        product = self.with_context(bin_size=False).sudo().product_id
+        product = self.product_id
         if not product:
             return False
-        tmpl = product.product_tmpl_id.with_context(bin_size=False)
+
+        cache_key = (product.id, str(product.write_date or ""))
+        if cache_key in _PDF_IMAGE_CACHE:
+            return _PDF_IMAGE_CACHE[cache_key]
+
+        product_sudo = product.with_context(bin_size=False).sudo()
+        tmpl = product_sudo.product_tmpl_id.with_context(bin_size=False)
         raw = None
         for candidate in (
-            product.image_128,
+            product_sudo.image_128,
             tmpl.image_128,
-            product.image_256,
+            product_sudo.image_256,
             tmpl.image_256,
-            product.image_1920,
-            tmpl.image_1920,
         ):
             if not candidate:
                 continue
@@ -430,13 +437,29 @@ class SkyDailyStockReportLine(models.Model):
             if c_bytes:
                 raw = c_bytes
                 break
+
         if not raw:
+            _PDF_IMAGE_CACHE[cache_key] = False
             return False
+
+        # Fast path 1: Already PNG (wkhtmltopdf native support)
+        if raw.startswith(b"\x89PNG"):
+            uri = "data:image/png;base64," + base64.b64encode(raw).decode("ascii")
+            _PDF_IMAGE_CACHE[cache_key] = uri
+            return uri
+
+        # Fast path 2: Already JPEG (wkhtmltopdf native support)
+        if raw.startswith(b"\xff\xd8\xff"):
+            uri = "data:image/jpeg;base64," + base64.b64encode(raw).decode("ascii")
+            _PDF_IMAGE_CACHE[cache_key] = uri
+            return uri
+
+        # WebP or other format -> convert to crisp 128x128 PNG via PIL
         try:
+            im = None
             try:
                 im = Image.open(io.BytesIO(raw))
             except Exception:
-                im = None
                 if raw[:4] == b"RIFF" and raw[8:12] == b"WEBP":
                     for tag in (b"VP8 ", b"VP8L"):
                         idx = raw.find(tag, 12)
@@ -449,10 +472,12 @@ class SkyDailyStockReportLine(models.Model):
                             )
                             im = Image.open(io.BytesIO(simple))
                             break
-                if im is None:
-                    return False
+            if im is None:
+                _PDF_IMAGE_CACHE[cache_key] = False
+                return False
+
             with im:
-                im.thumbnail((64, 64))
+                im.thumbnail((128, 128))
                 if im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info):
                     rgba = im.convert("RGBA")
                     bg = Image.new("RGB", rgba.size, (255, 255, 255))
@@ -461,7 +486,14 @@ class SkyDailyStockReportLine(models.Model):
                 elif im.mode != "RGB":
                     im = im.convert("RGB")
                 out = io.BytesIO()
-                im.save(out, format="PNG")
-                return "data:image/png;base64," + base64.b64encode(out.getvalue()).decode("ascii")
+                im.save(out, format="PNG", optimize=True)
+                uri = "data:image/png;base64," + base64.b64encode(out.getvalue()).decode("ascii")
+
+                if len(_PDF_IMAGE_CACHE) > 3000:
+                    _PDF_IMAGE_CACHE.clear()
+
+                _PDF_IMAGE_CACHE[cache_key] = uri
+                return uri
         except Exception:
+            _PDF_IMAGE_CACHE[cache_key] = False
             return False
