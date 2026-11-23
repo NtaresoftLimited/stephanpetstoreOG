@@ -55,7 +55,7 @@
                         box-sizing: border-box;
                     }
                 </style>
-                <t t-set="page_size" t-value="20"/>
+                <t t-set="page_size" t-value="12"/>
                 <t t-foreach="docs" t-as="o">
                     <t t-set="all_lines" t-value="o.line_ids"/>
                     <t t-set="total_pages" t-value="(len(all_lines) + page_size - 1) // page_size if all_lines else 1"/>
@@ -87,7 +87,7 @@
                             <table class="daily-stock-table" style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
                                 <thead>
                                     <tr style="background: #f7f4ee; color: #4e2a15; font-size: 11px;">
-                                        <th style="padding: 6px 4px; border: 1px solid #e5dfd5; width: 64px; text-align: center;">Photo</th>
+                                        <th style="padding: 6px 4px; border: 1px solid #e5dfd5; width: 84px; text-align: center;">Photo</th>
                                         <th style="padding: 6px 8px; border: 1px solid #e5dfd5; text-align: left;">Product</th>
                                         <th style="padding: 6px 4px; border: 1px solid #e5dfd5; width: 54px; text-align: center;">Open</th>
                                         <th style="padding: 6px 4px; border: 1px solid #e5dfd5; width: 54px; text-align: center;">Sold</th>
@@ -98,11 +98,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr t-foreach="page_lines" t-as="line" style="height: 52px; page-break-inside: avoid;">
-                                        <td style="padding: 2px; border: 1px solid #eee; text-align: center; vertical-align: middle; width: 64px;">
+                                    <tr t-foreach="page_lines" t-as="line" style="height: 76px; page-break-inside: avoid;">
+                                        <td style="padding: 2px 4px; border: 1px solid #eee; text-align: center; vertical-align: middle; width: 84px; background: transparent;">
                                             <t t-set="img_uri" t-value="line.get_pdf_image_uri()"/>
-                                            <img t-if="img_uri" t-att-src="img_uri" style="width: 48px; height: 48px; object-fit: contain; display: inline-block; border-radius: 3px;"/>
-                                            <div t-else="" style="width: 48px; height: 48px; line-height: 48px; background: #f8f6f2; color: #bbb; font-size: 8px; border: 1px solid #e5dfd5; border-radius: 3px; display: inline-block; text-align: center;">No photo</div>
+                                            <img t-if="img_uri" t-att-src="img_uri" style="width: 72px; height: 72px; object-fit: contain; display: inline-block; border: 0; border-radius: 0; background: transparent; box-shadow: none;"/>
+                                            <span t-else="" style="color: #bbb; font-size: 8px; background: transparent; border: 0;">No photo</span>
                                         </td>
                                         <td style="padding: 4px 8px; border: 1px solid #eee; vertical-align: middle; font-weight: 500; font-size: 11px; word-wrap: break-word;">
                                             <span t-field="line.product_id.display_name"/>
