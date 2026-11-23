@@ -1720,22 +1720,35 @@ Return strictly a valid JSON object matching this structure.
             if parsed_host:
                 base_domain = parsed_host.lower()
 
-        if active_reviews and active_reviews[0].raw_image:
-            base_b64 = active_reviews[0].raw_image
-            base_domain = active_reviews[0].verified_domain or base_domain
-        elif self.image_1920:
-            base_b64 = self.image_1920
+        if active_reviews:
+            rev0 = active_reviews.with_context(bin_size=False)[0]
+            base_b64 = rev0.raw_image or rev0.webp_image
+            base_domain = rev0.verified_domain or base_domain
+        if not base_b64:
+            self_bin = self.with_context(bin_size=False)
+            if self_bin.image_1920:
+                base_b64 = self_bin.image_1920
+            elif self_bin.product_template_image_ids:
+                base_b64 = self_bin.product_template_image_ids[0].image_1920
 
         if not base_b64:
             return
 
         try:
-            raw_source_bytes = base64.b64decode(base_b64)
+            if isinstance(base_b64, (bytes, str)):
+                raw_source_bytes = base64.b64decode(base_b64)
+            else:
+                raw_source_bytes = bytes(base_b64)
             src_img = Image.open(io.BytesIO(raw_source_bytes))
             src_img.load()
-        except Exception as e:
-            _logger.debug("Could not decode base image for 3-view generation on %s: %s", self.name, e)
-            return
+        except Exception:
+            try:
+                raw_source_bytes = bytes(base_b64)
+                src_img = Image.open(io.BytesIO(raw_source_bytes))
+                src_img.load()
+            except Exception as e:
+                _logger.warning("Could not decode base image for 3-view generation on %s: %s", self.name, e)
+                return
 
         orig_w, orig_h = src_img.size
         is_transparent = src_img.mode in ("RGBA", "LA") or (src_img.mode == "P" and "transparency" in src_img.info)
@@ -1776,12 +1789,9 @@ Return strictly a valid JSON object matching this structure.
             active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
             if len(active_reviews) >= 3:
                 break
-            if role_code in existing_roles and len(active_reviews) >= 1:
-                # Find any missing role slot
-                missing_roles = [r for r in ('front', 'back', 'detail') if r not in existing_roles]
-                role_to_assign = missing_roles[0] if missing_roles else role_code
-            else:
-                role_to_assign = role_code
+            if role_code in existing_roles:
+                continue
+            role_to_assign = role_code
 
             canvas_1200 = Image.new("RGB", (canvas_dim, canvas_dim), (255, 255, 255))
 
