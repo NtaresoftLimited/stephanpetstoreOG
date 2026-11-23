@@ -255,6 +255,10 @@ def invalidate_product_cache(product_ids, env=None):
 
     try:
         conn = _get_conn()
+        # Product tags cannot identify an old cached query that did not yet
+        # contain a newly matching product. Clear the small search namespace
+        # so search changes become visible across all workers immediately.
+        conn.execute("DELETE FROM cache_entries WHERE namespace = ?", ("search_api",))
         for pid in clean_ids:
             tag_pattern = f"%|{pid}|%"
             conn.execute("DELETE FROM cache_entries WHERE product_tags LIKE ?", (tag_pattern,))

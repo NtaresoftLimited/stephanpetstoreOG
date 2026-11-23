@@ -304,6 +304,25 @@ CACHE_INVALIDATION_TRIGGER_FIELDS = SEARCH_REBUILD_TRIGGER_FIELDS | frozenset({
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    def _auto_init(self):
+        """Install the search acceleration schema reproducibly on every database."""
+        result = super()._auto_init()
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+                self.env.cr.execute(
+                    """
+                    CREATE INDEX IF NOT EXISTS product_template_x_search_index_trgm_idx
+                    ON product_template USING gin (x_search_index gin_trgm_ops)
+                    WHERE x_search_index IS NOT NULL
+                    """
+                )
+        except Exception:
+            _logger.exception(
+                "Could not create the pg_trgm search index; catalogue search will continue without it"
+            )
+        return result
+
     x_source_urls = fields.Text(
         string="Reference URLs (Catalog Seeds)",
         default=DEFAULT_SEEDED_URLS,
