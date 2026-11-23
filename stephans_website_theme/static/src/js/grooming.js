@@ -79,6 +79,8 @@
             }
 
             const basePrice = prices[type] && prices[type][pkg] && prices[type][pkg][size];
+            const pawHint = $("#grooming-paw-points-hint", root);
+            const pawHintText = $("#grooming-paw-points-text", root);
             if (basePrice) {
                 const detVal = root.querySelector('input[name="detangling_type"]:checked')?.value;
                 const detFee = detVal === "intensive" ? 150000 : detVal === "moderate" ? 100000 : 0;
@@ -88,10 +90,42 @@
                 $("#total-summary", root).textContent = typeLabel + " • " + (sizeEntry ? sizeEntry[1] : size) + " • " + (pkg === "standard" ? "Essential" : "Signature") + " Package";
                 $("#total-amount", root).textContent = money(price);
                 total.style.display = "flex";
-            } else if (total) {
-                total.style.display = "none";
+
+                if (pawHint && pawHintText) {
+                    const estPts = Math.floor(price / 1000);
+                    const isAuth = pawHint.dataset.authenticated === "1";
+                    pawHint.classList.toggle("is-ok", isAuth);
+                    if (isAuth) {
+                        pawHintText.innerHTML =
+                            "You’ll earn <strong>" + estPts.toLocaleString("en-US") + " Paw Points</strong> when you pay for this grooming visit (100 pts = 5,000 TSh off).";
+                    } else {
+                        pawHintText.innerHTML =
+                            '<a href="/web/login/whatsapp?redirect=%2Fgrooming" data-paw-popup-trigger="1">Log in to earn ' +
+                            estPts.toLocaleString("en-US") +
+                            " Paw Points</a> on this grooming session (1 point per 1,000 TSh).";
+                    }
+                    pawHint.style.display = "flex";
+                }
+            } else {
+                if (total) total.style.display = "none";
+                if (pawHint) pawHint.style.display = "none";
             }
         }
+
+        window.addEventListener("stephans:paw_points_authenticated", function (ev) {
+            const detail = (ev && ev.detail) || {};
+            const pawHint = $("#grooming-paw-points-hint", root);
+            if (pawHint) pawHint.dataset.authenticated = "1";
+
+            const nameField = $("#field-customer-name", root);
+            const phoneField = $("#field-customer-phone", root);
+            const emailField = $("#field-customer-email", root);
+            if (nameField && !nameField.value && detail.partner_name) nameField.value = detail.partner_name;
+            if (phoneField && !phoneField.value && detail.partner_phone) phoneField.value = detail.partner_phone;
+            if (emailField && !emailField.value && detail.partner_email) emailField.value = detail.partner_email;
+
+            updateDetails();
+        });
 
         function rebuildOptions(type) {
             breed.replaceChildren(new Option("Breed Size", "", true, true));

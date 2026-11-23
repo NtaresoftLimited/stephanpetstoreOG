@@ -12,7 +12,7 @@
                         <div t-if="not website_sale_order._paw_points_allowed()" class="o_paw_points_hint">
                             <img src="/stephans_wallet_rewards/static/src/img/paw-points.webp" alt=""/>
                             <span>
-                                <a href="/web/login/whatsapp?redirect=%2Fshop%2Fcart">Log in to earn points</a>
+                                <a href="/web/login/whatsapp?redirect=%2Fshop%2Fcart" data-paw-popup-trigger="1">Log in to earn points</a>
                                 on this order: 1 <t t-out="paw_program.portal_point_name or 'point'"/> per 1,000 TSh.
                             </span>
                         </div>

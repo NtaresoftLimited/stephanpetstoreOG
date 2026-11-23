@@ -1,0 +1,599 @@
+/* =========================================================
+   STEPHAN'S PAW POINTS — NATIVE ODOO 20 INTERACTIVE MODAL & ASSETS
+   Apple Frosted Glass Surface + Stephan's Warm Brand Palette
+   ========================================================= */
+
+:root {
+  --stephans-espresso: #3e220f;
+  --stephans-gold: #c77e35;
+  --stephans-gold-hover: #b26d28;
+  --stephans-cream: #fbf8f5;
+  --stephans-sand: #f8f5f0;
+  --stephans-line: #eae3d9;
+  --stephans-muted: #6b5e54;
+  --wa-green: #25D366;
+}
+
+/* Header link indicator */
+.stephans-topbar__link--paw {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  color: #c77e35 !important;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.stephans-topbar__link--paw:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+.stephans-paw-dot {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* Apple-style frosted backdrop overlay */
+.stephans-paw-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(30, 22, 16, 0.42);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  box-sizing: border-box;
+}
+
+.stephans-paw-backdrop.stephans-paw-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Apple-style spring modal surface blended with Stephan's cream palette */
+.stephans-paw-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 26px;
+  background: rgba(251, 248, 245, 0.96);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 24px 60px -12px rgba(42, 24, 10, 0.28),
+    0 4px 18px -4px rgba(42, 24, 10, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 26px 28px;
+  color: var(--stephans-espresso);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Geist", "Inter", system-ui, sans-serif;
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+  box-sizing: border-box;
+}
+
+.stephans-paw-backdrop.stephans-paw-hidden .stephans-paw-modal {
+  transform: translateY(16px) scale(0.97);
+  opacity: 0;
+}
+
+/* Subtle Apple-style close button */
+.stephans-paw-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(62, 34, 15, 0.06);
+  color: #6b5e54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  z-index: 10;
+}
+.stephans-paw-close:hover {
+  background: rgba(62, 34, 15, 0.12);
+  color: #3e220f;
+  transform: scale(1.05);
+}
+
+/* Step containers */
+.stephans-paw-step {
+  display: block;
+  box-sizing: border-box;
+}
+.stephans-paw-step.stephans-paw-hidden {
+  display: none !important;
+}
+.stephans-paw-step--center {
+  text-align: center;
+}
+
+.stephans-paw-fade {
+  animation: stephansPawFadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes stephansPawFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pill badge: clean "🐾 Paw Points" */
+.stephans-paw-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(199, 126, 53, 0.12);
+  border: 1px solid rgba(199, 126, 53, 0.25);
+  color: #9a5c1d;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin-bottom: 14px;
+}
+.stephans-paw-pill--wa {
+  background: rgba(37, 211, 102, 0.12);
+  border-color: rgba(37, 211, 102, 0.3);
+  color: #1b6e3b;
+}
+
+/* Typography */
+.stephans-paw-heading {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #3e220f;
+  margin: 0 0 8px 0;
+}
+.stephans-paw-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #5c5047;
+  margin: 0 0 18px 0;
+}
+.stephans-paw-desc strong {
+  color: #3e220f;
+  font-weight: 600;
+}
+
+/* Field & Label */
+.stephans-paw-field {
+  position: relative;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.stephans-paw-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b5e54;
+  margin-bottom: 6px;
+}
+
+/* Phone input container */
+.stephans-paw-input-wrap {
+  display: flex;
+  align-items: center;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #dfd5c7;
+  padding: 8px 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.stephans-paw-input-wrap:focus-within {
+  border-color: var(--stephans-gold);
+  box-shadow: 0 0 0 3px rgba(199, 126, 53, 0.18);
+}
+
+/* Flag picker button */
+.stephans-paw-flag-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid #eae3d9;
+  padding: 2px 8px 2px 0;
+  margin-right: 8px;
+  cursor: pointer;
+  outline: none;
+}
+.stephans-paw-flag-btn:hover .stephans-paw-arrow {
+  color: #3e220f;
+}
+.stephans-paw-arrow {
+  color: #8b7d72;
+  transition: transform 0.2s ease;
+}
+.stephans-paw-flag-btn[aria-expanded="true"] .stephans-paw-arrow {
+  transform: rotate(180deg);
+}
+
+/* Flag SVGs */
+.stephans-flag-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  shrink: 0;
+}
+.stephans-flag-svg {
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.15);
+}
+
+.stephans-paw-dial {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3e220f;
+  margin-right: 8px;
+  user-select: none;
+}
+.stephans-paw-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #3e220f;
+  font-weight: 500;
+  outline: none;
+  padding: 0;
+  min-width: 0;
+}
+.stephans-paw-input::placeholder {
+  color: #b8ad9f;
+}
+
+/* SVG-Only Flag Dropdown Menu */
+.stephans-flag-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  width: 180px;
+  background: #ffffff;
+  border: 1px solid #e2d9cc;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px -4px rgba(42, 24, 10, 0.18);
+  padding: 6px 0;
+  z-index: 60;
+  animation: stephansMenuDrop 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.stephans-flag-menu.stephans-flag-hidden {
+  display: none !important;
+}
+@keyframes stephansMenuDrop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stephans-flag-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s ease;
+  text-align: left;
+}
+.stephans-flag-option:hover {
+  background: #f8f5f0;
+}
+.stephans-flag-option__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.stephans-flag-country {
+  font-weight: 500;
+  color: #3e220f;
+}
+.stephans-flag-dial {
+  font-size: 11px;
+  color: #7a6d62;
+  font-weight: 500;
+}
+
+.stephans-paw-hint {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #7a6d62;
+  margin: 6px 0 0 0;
+}
+
+/* Opt-in Checkbox */
+.stephans-paw-optin {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 18px 0;
+  cursor: pointer;
+  user-select: none;
+  text-align: left;
+}
+.stephans-paw-checkbox {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: #c77e35;
+  cursor: pointer;
+}
+.stephans-paw-optin__text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #5c5047;
+}
+
+/* Buttons */
+.stephans-paw-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.stephans-paw-btn:active {
+  transform: scale(0.99);
+}
+.stephans-paw-btn--primary {
+  background: #3e220f;
+  color: #fbf8f5;
+}
+.stephans-paw-btn--primary:hover {
+  background: #2b1709;
+}
+.stephans-paw-btn--gold {
+  background: #c77e35;
+  color: #ffffff;
+}
+.stephans-paw-btn--gold:hover {
+  background: #b26d28;
+}
+.stephans-paw-wa-icon {
+  color: #25D366;
+}
+
+/* Footer Link */
+.stephans-paw-footer-link {
+  margin-top: 14px;
+  text-align: center;
+}
+.stephans-paw-link-subtle {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  color: #7a6d62;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  text-decoration: none;
+}
+.stephans-paw-link-subtle:hover {
+  color: #3e220f;
+  text-decoration: underline;
+}
+
+/* Step 2: OTP Input */
+.stephans-paw-otp-input {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  letter-spacing: 0.55em;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #dfd5c7;
+  padding: 12px 16px;
+  color: #3e220f;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.stephans-paw-otp-input:focus {
+  border-color: var(--stephans-gold);
+  box-shadow: 0 0 0 3px rgba(199, 126, 53, 0.18);
+}
+.stephans-paw-otp-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #7a6d62;
+}
+.stephans-paw-autofill-btn {
+  background: transparent;
+  border: none;
+  color: #c77e35;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.stephans-paw-autofill-btn:hover {
+  text-decoration: underline;
+}
+
+.stephans-paw-resend-wrap {
+  font-size: 12px;
+  color: #6b5e54;
+  margin: 16px 0;
+  text-align: center;
+  line-height: 1.5;
+}
+.stephans-paw-resend-btn {
+  background: transparent;
+  border: none;
+  color: #c77e35;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.stephans-paw-resend-btn:disabled {
+  color: #a69a8f;
+  cursor: not-allowed;
+  text-decoration: none !important;
+}
+.stephans-paw-resend-btn:not(:disabled):hover {
+  text-decoration: underline;
+}
+.stephans-paw-change-btn {
+  background: transparent;
+  border: none;
+  color: #3e220f;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+.stephans-paw-change-btn:hover {
+  color: #c77e35;
+}
+.stephans-paw-sep {
+  margin: 0 4px;
+}
+
+/* Step 3: Confirmation */
+.stephans-paw-success-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px auto;
+  border-radius: 50%;
+  background: rgba(43, 122, 75, 0.12);
+  border: 1px solid rgba(43, 122, 75, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.stephans-paw-type-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f1ebe2;
+  border: 1px solid #e5dbcd;
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+.stephans-paw-type-btn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #6b5e54;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.stephans-paw-type-btn.is-active {
+  background: #ffffff;
+  color: #3e220f;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+/* Live Points Card */
+.stephans-paw-card {
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #eae3d9;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.stephans-paw-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.stephans-paw-card__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: #6b5e54;
+}
+.stephans-paw-card__pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(199, 126, 53, 0.14);
+  color: #9a5c1d;
+}
+.stephans-paw-card__score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stephans-paw-card__number {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #3e220f;
+  line-height: 1;
+}
+.stephans-paw-card__unit {
+  font-size: 12px;
+  color: #6b5e54;
+}
+.stephans-paw-progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: #f1ebe2;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.stephans-paw-progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  background: #c77e35;
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.stephans-paw-card__status {
+  font-size: 11px;
+  font-weight: 500;
+}
+.stephans-paw-card__status--green {
+  color: #2b7a4b;
+}
+.stephans-paw-card__status--muted {
+  color: #6b5e54;
+}
+
+@media (max-width: 480px) {
+  .stephans-paw-modal {
+    padding: 22px 20px;
+    border-radius: 22px;
+  }
+  .stephans-paw-heading {
+    font-size: 20px;
+  }
+}

@@ -337,9 +337,9 @@ class ProductTemplate(models.Model):
         }
 
     @api.model
-    def cron_auto_enrich_products(self, limit=5):
+    def cron_auto_enrich_products(self, limit=10):
         """
-        Scheduled Action: Automatically enrich `limit` (default 5) products every 30 minutes.
+        Scheduled Action: Automatically enrich `limit` (default 10) products every 30 minutes.
         Priority Order:
           1. Stephan's 4 Active Flagship Brands (Bioline, Summit 10, TropiCat, TropiDog / Tropifit / Tropical)
           2. Remaining published, in-stock catalog products
@@ -489,25 +489,26 @@ Available Image URLs:
 {json.dumps(image_candidates, indent=2)}
 
 CRITICAL FORMULA REQUIREMENTS:
-All products in Stephan's Pet Store MUST follow the exact same visual hierarchy and sections as seen in our flagship products:
+All products in Stephan's Pet Store MUST follow the exact same visual hierarchy and clean professional styling as seen in our flagship products:
+- STRICT NO-EMOJI RULE: Never output emojis, unicode icons, or cartoon symbols in any title, header, bullet, or description. Use clean, elegant typography.
 1. title: Clean, standardized format: [Brand] [Product Line / Feature] [Size or Weight] (e.g. 'Bioline Tofu with Bentonite Cat Litter 6L' or 'Summit 10 Cat Complete Chicken and Rice 3kg')
 2. barcode: Manufacturer EAN-13 or UPC barcode if detected (e.g. '6970117125535' or empty string).
 3. lead_summary: 1-2 compelling executive summary sentences explaining the core formula, technology, and primary benefit.
-4. key_highlights: Array of 4 to 6 highlights, each with an icon header and detailed explanation. E.g. [
-     {{"header": "⚡ 3-Second Rapid Clumping", "detail": "..."}},
-     {{"header": "💧 Ultra Absorbent", "detail": "..."}},
-     {{"header": "🌿 99% Dust-Free & Paw-Friendly", "detail": "..."}},
-     {{"header": "🛡️ Natural Odor Lock", "detail": "..."}},
-     {{"header": "📦 Vacuum-Sealed Freshness", "detail": "..."}}
+4. key_highlights: Array of 4 to 6 highlights, each with a clean bold header and detailed explanation (NO emojis/icons). E.g. [
+     {{"header": "3-Second Rapid Clumping", "detail": "..."}},
+     {{"header": "Ultra Absorbent", "detail": "..."}},
+     {{"header": "99% Dust-Free & Paw-Friendly", "detail": "..."}},
+     {{"header": "Natural Odor Lock", "detail": "..."}},
+     {{"header": "Vacuum-Sealed Freshness", "detail": "..."}}
    ]
-5. composition_title: '🧪 Composition & Ingredients' (or '🛠️ Materials & Specifications' for accessories/beds/crates)
+5. composition_title: 'Composition & Ingredients' (or 'Materials & Specifications' for accessories/beds/crates) - NO emojis
 6. composition_items: Array of 3 to 6 key components with their functional role. E.g. [
      {{"name": "Natural Bean Dregs (Okara)", "description": "Biodegradable, plant-based absorption base"}},
      {{"name": "Natural Bentonite Clay", "description": "Ultra-fast, hard clumping agent"}},
      {{"name": "Corn Starch", "description": "Natural binding agent"}},
      {{"name": "Guar Gum", "description": "Food-grade pellet stabilizer"}}
    ]
-7. instructions_title: '📋 Instructions for Use' (or '📋 Feeding Guide' for pet foods, or '📋 Sizing & Care' for accessories)
+7. instructions_title: 'Instructions for Use' (or 'Feeding Guide' for pet foods, or 'Sizing & Care' for accessories) - NO emojis
 8. instructions_steps: Array of 3 to 5 practical, numbered instructions (e.g. preparation, daily maintenance, replacement, cleaning).
 9. storage_text: Clear storage advice (e.g. 'Store unopened packs in a cool, dry, well-ventilated area away from direct sunlight and moisture.')
 10. key_ingredients_flat: Comma-separated list for backend filters (e.g. 'Natural Bean Dregs (Okara), Natural Bentonite Clay, Corn Starch, Guar Gum').
@@ -642,82 +643,90 @@ Return strictly a valid JSON object matching this structure.
         except Exception as e:
             raise UserError(f"OpenAI API call failed: {e}")
 
+    def _strip_emojis(self, text):
+        """Cleanly strip emojis and decorative symbols from text to maintain professional e-commerce typography"""
+        if not text:
+            return ""
+        # Remove emojis and miscellaneous decorative symbols
+        clean = re.sub(r'[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50\u200d\ufe0f\u2705\u2728\u2b50\u2714\u2716]', '', str(text))
+        # Clean extra leading spaces or punctuation from stripped icons
+        clean = re.sub(r'^\s*[-•·–]\s*', '', clean)
+        return clean.strip()
+
     def _render_stephans_catalog_html(self, data):
-        """Render the exact Stephan's Pet Store catalog HTML template formula"""
-        title = data.get('title') or self.name
-        lead = data.get('lead_summary') or ''
+        """Render the exact Stephan's Pet Store catalog HTML template formula without emojis"""
+        title = self._strip_emojis(data.get('title') or self.name)
+        lead = self._strip_emojis(data.get('lead_summary') or '')
         highlights = data.get('key_highlights') or []
-        comp_title = data.get('composition_title') or '🧪 Composition &amp; Ingredients'
+        comp_title = self._strip_emojis(data.get('composition_title') or 'Composition & Ingredients')
         comp_items = data.get('composition_items') or []
-        inst_title = data.get('instructions_title') or '📋 Instructions for Use'
+        inst_title = self._strip_emojis(data.get('instructions_title') or 'Instructions for Use')
         inst_steps = data.get('instructions_steps') or []
-        storage = data.get('storage_text') or 'Store in a cool, dry, well-ventilated area away from direct sunlight and humidity.'
+        storage = self._strip_emojis(data.get('storage_text') or 'Store in a cool, dry, well-ventilated area away from direct sunlight and humidity.')
 
         # Highlights items
         highlights_html = ""
         for hl in highlights:
             if isinstance(hl, dict):
-                h_header = hl.get('header', '')
-                h_detail = hl.get('detail', '')
-                highlights_html += f'<li class="py-1"><strong>{h_header}:</strong> {h_detail}</li>\n'
+                h_header = self._strip_emojis(hl.get('header', ''))
+                h_detail = self._strip_emojis(hl.get('detail', ''))
+                highlights_html += f'                    <li class="py-1"><strong>{h_header}:</strong> {h_detail}</li>\n'
             elif isinstance(hl, str):
-                highlights_html += f'<li class="py-1">{hl}</li>\n'
+                cleaned_hl = self._strip_emojis(hl)
+                highlights_html += f'                    <li class="py-1">{cleaned_hl}</li>\n'
 
         # Composition items
         comp_html = ""
         for c in comp_items:
             if isinstance(c, dict):
-                c_name = c.get('name', '')
-                c_desc = c.get('description', '')
+                c_name = self._strip_emojis(c.get('name', ''))
+                c_desc = self._strip_emojis(c.get('description', ''))
                 if c_desc:
-                    comp_html += f'<li><strong>{c_name}:</strong> {c_desc}</li>\n'
+                    comp_html += f'                            <li class="py-1"><strong>{c_name}:</strong> {c_desc}</li>\n'
                 else:
-                    comp_html += f'<li><strong>{c_name}</strong></li>\n'
+                    comp_html += f'                            <li class="py-1"><strong>{c_name}</strong></li>\n'
             elif isinstance(c, str):
-                comp_html += f'<li>{c}</li>\n'
+                cleaned_c = self._strip_emojis(c)
+                comp_html += f'                            <li class="py-1">{cleaned_c}</li>\n'
 
         # Instruction steps
         inst_html = ""
         for s in inst_steps:
-            inst_html += f'<li>{s}</li>\n'
+            cleaned_s = self._strip_emojis(s)
+            inst_html += f'                            <li class="py-1">{cleaned_s}</li>\n'
 
-        html = f"""<div class="container my-4">
+        html = f"""<div class="container my-4" style="background: #ffffff;">
     <div class="row">
         <div class="col-12">
-            <h3 class="text-primary mb-3">{title}</h3>
-            <p class="lead text-muted">
+            <h3 class="mb-3" style="color: #3e220f; font-weight: 700;">{title}</h3>
+            <p class="lead text-muted" style="font-size: 1.05rem; line-height: 1.6;">
                 {lead}
             </p>
             
-            <div class="card shadow-sm border-0 mb-4 bg-light">
-                <div class="card-body">
-                    <h5 class="card-title text-dark font-weight-bold">🌟 Key Product Highlights</h5>
-                    <ul class="list-unstyled mb-0">
-{highlights_html}
-                    </ul>
-                </div>
+            <div class="mb-4" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
+                <h5 class="mb-3" style="color: #3e220f; font-weight: 700; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">Key Product Highlights</h5>
+                <ul class="list-unstyled mb-0" style="color: #374151;">
+{highlights_html}                </ul>
             </div>
 
             <div class="row mb-4">
                 <div class="col-md-6 mb-3">
-                    <div class="border rounded p-3 h-100">
-                        <h5 class="text-dark">{comp_title}</h5>
-                        <ul class="mb-0">
-{comp_html}
-                        </ul>
+                    <div class="h-100" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
+                        <h5 class="mb-3" style="color: #3e220f; font-weight: 700; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">{comp_title}</h5>
+                        <ul class="mb-0" style="color: #374151; padding-left: 18px;">
+{comp_html}                        </ul>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <div class="border rounded p-3 h-100">
-                        <h5 class="text-dark">{inst_title}</h5>
-                        <ol class="mb-0 pl-3">
-{inst_html}
-                        </ol>
+                    <div class="h-100" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
+                        <h5 class="mb-3" style="color: #3e220f; font-weight: 700; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">{inst_title}</h5>
+                        <ol class="mb-0" style="color: #374151; padding-left: 18px;">
+{inst_html}                        </ol>
                     </div>
                 </div>
             </div>
 
-            <div class="alert alert-info border-0" role="alert">
+            <div class="mb-3" style="background-color: #f8fafc; border-left: 4px solid #634832; padding: 12px 16px; border-radius: 4px; color: #475569; font-size: 0.95rem;">
                 <strong>Storage:</strong> {storage}
             </div>
         </div>

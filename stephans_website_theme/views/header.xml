@@ -3,13 +3,14 @@
     <template id="stephans_preview_header" name="Stephan's Website Header">
         <t t-set="stephans_home" t-value="request.httprequest.path in ('/', '/stephans-preview')"/>
         <t t-set="stephans_is_public" t-value="request.env.user._is_public()"/>
-        <header t-attf-class="stephans-master-header #{'is-home' if stephans_home else 'is-inner'}" data-stephans-header="true">
+        <header class="stephans-master-header is-inner" data-stephans-header="true">
             <style>
                 .stephans-master-header{width:100%;position:sticky;top:0;z-index:1040;background:#fff;}
                 .stephans-homebar__logo img,.stephans-logo img{height:38px;width:auto;object-fit:contain;display:block;}
                 .stephans-topbar-icon{width:14px;height:14px;object-fit:contain;display:inline-block;vertical-align:middle;}
                 .stephans-searchbar__icon-img{width:16px;height:16px;object-fit:contain;}
-                .stephans-action-item__icon-wrap img,.stephans-action-icon{width:18px;height:18px;object-fit:contain;}
+                .stephans-action-item__icon-wrap{background:#f7f1e8 !important;}
+                .stephans-action-item__icon-wrap img,.stephans-action-icon{width:18px;height:18px;object-fit:contain;display:block;}
                 .stephans-nav-icon{width:18px;height:18px;object-fit:contain;display:inline-block;vertical-align:middle;}
                 .stephans-mega{display:none;}
                 .stephans-mega__group-icon{width:28px;height:28px;object-fit:contain;display:inline-block;vertical-align:middle;}
@@ -21,31 +22,12 @@
                 <nav class="stephans-homebar__nav" aria-label="Primary navigation"><span class="stephans-homebar__indicator" aria-hidden="true"></span><a href="/shop">Shop</a><a href="/grooming">Grooming</a><a href="/about">About</a><a href="/contact">Contact</a></nav>
                 <div class="stephans-homebar__actions">
                     <a href="/shop" aria-label="Search"><img src="/stephans_website_theme/static/src/images/icons/icon-search-glass.png" alt=""/></a>
-                    <a t-att-href="'/web/login/whatsapp?redirect=%2Fmy' if stephans_is_public else '/my'" t-att-aria-label="'Log in' if stephans_is_public else 'My account'"><img src="/stephans_website_theme/static/src/images/icons/icon-profile-user.png" alt=""/></a>
-                    <a href="/shop/cart" aria-label="Cart"><img src="/stephans_website_theme/static/src/images/icons/icon-shopping-bag.png" alt=""/></a>
+                    <a t-att-href="'javascript:void(0)' if stephans_is_public else '/my'" t-att-data-open-paw-points="'true' if stephans_is_public else None" t-att-aria-label="'Sign in to Paw Points' if stephans_is_public else 'My account'"><img src="/stephans_website_theme/static/src/images/icons/icon-login-header.svg" alt=""/></a>
+                    <a href="/shop/cart" aria-label="Cart"><img src="/stephans_website_theme/static/src/images/icons/icon-bag-header.svg" alt=""/></a>
                 </div>
             </div>
 
             <div class="stephans-retail-header">
-                <div class="stephans-topbar">
-                    <div class="stephans-topbar__inner">
-                        <div class="stephans-topbar__announcement">Now Delivering Across Tanzania</div>
-                        <div class="stephans-topbar__links">
-                            <a href="tel:+255786627873" class="stephans-topbar__link">
-                                <img src="/stephans_website_theme/static/src/images/icons/icon-phone.svg" alt="" class="stephans-topbar-icon"/>
-                                Call Us
-                            </a>
-                            <a href="mailto:info@stephanspetstore.co.tz" class="stephans-topbar__link">
-                                <img src="/stephans_website_theme/static/src/images/icons/icon-mail.svg" alt="" class="stephans-topbar-icon"/>
-                                Email Us
-                            </a>
-                            <a href="https://wa.me/255769324445" target="_blank" rel="noopener" class="stephans-topbar__link stephans-topbar__link--wa">
-                                <img src="/stephans_website_theme/static/src/images/icons/whatsapp-color.svg" alt="" class="stephans-topbar-icon"/>
-                                Chat With Us
-                            </a>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="stephans-mainbar">
                     <div class="stephans-mainbar__inner">
@@ -59,27 +41,27 @@
                             </div>
                         </form>
                         <div class="stephans-actions">
-                            <a t-att-href="'/web/login/whatsapp?redirect=%2Fmy' if stephans_is_public else '/my'" class="stephans-action-item">
+                            <a t-att-href="'javascript:void(0)' if stephans_is_public else '/my'" t-att-data-open-paw-points="'true' if stephans_is_public else None" class="stephans-action-item">
                                 <span class="stephans-action-item__icon-wrap">
-                                    <img src="/stephans_website_theme/static/src/images/icons/icon-profile-user.png" alt="" class="stephans-action-icon"/>
+                                    <img src="/stephans_website_theme/static/src/images/icons/icon-login-header.svg" alt="" class="stephans-action-icon"/>
                                 </span>
                                 <span class="stephans-action-item__label" t-out="'Log in' if stephans_is_public else 'Account'"/>
                             </a>
                             <a href="/stores" class="stephans-action-item">
                                 <span class="stephans-action-item__icon-wrap">
-                                    <img src="/stephans_website_theme/static/src/images/icons/icon-location-pin.svg" alt="Location" class="stephans-action-icon"/>
+                                    <img src="/stephans_website_theme/static/src/images/icons/icon-location-header.svg" alt="Location" class="stephans-action-icon"/>
                                 </span>
                                 <span class="stephans-action-item__label">Location</span>
                             </a>
                             <a href="/shop/wishlist" class="stephans-action-item">
                                 <span class="stephans-action-item__icon-wrap">
-                                    <img src="/stephans_website_theme/static/src/images/icons/icon-wishlist-heart.svg" alt="Wishlist" class="stephans-action-icon"/>
+                                    <img src="/stephans_website_theme/static/src/images/icons/icon-wishlist-header.svg" alt="Wishlist" class="stephans-action-icon"/>
                                 </span>
                                 <span class="stephans-action-item__label">Wishlist</span>
                             </a>
                             <a href="/shop/cart" class="stephans-action-item stephans-action-item--cart">
                                 <span class="stephans-action-item__icon-wrap">
-                                    <img src="/stephans_website_theme/static/src/images/icons/icon-shopping-bag.png" alt="Bag" class="stephans-action-icon"/>
+                                    <img src="/stephans_website_theme/static/src/images/icons/icon-bag-header.svg" alt="Bag" class="stephans-action-icon"/>
                                     <t t-set="website_sale_order" t-value="request.session.get('sale_order_id') and env['sale.order'].sudo().browse(request.session['sale_order_id'])"/>
                                     <t t-set="cart_qty" t-value="website_sale_order and website_sale_order.cart_quantity or 0"/>
                                     <span t-if="cart_qty &gt; 0" class="stephans-cart-badge" t-out="cart_qty"/>

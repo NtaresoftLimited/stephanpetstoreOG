@@ -1,7 +1,6 @@
 /**
- * Stephan's Predictive Search Autocomplete Modal Controller
- * Intercepts search triggers, debounces live queries against Odoo catalog,
- * and renders instant product cards and popular tags.
+ * Stephan's Predictive Global Search Autocomplete Modal Controller
+ * Pixel-perfect match to Stephan's Pet Store Design
  */
 (function () {
   'use strict';
@@ -9,6 +8,8 @@
   var SearchModal = {
     isOpen: false,
     debounceTimer: null,
+    selectedIndex: -1,
+    currentResults: [],
 
     init: function () {
       this.bindEvents();
@@ -56,7 +57,7 @@
         }
       });
 
-      // Global shortcut: Ctrl+K or Cmd+K or "/"
+      // Global keyboard shortcuts (Ctrl+K, Cmd+K, Esc)
       document.addEventListener('keydown', function (e) {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
           e.preventDefault();
@@ -71,7 +72,7 @@
         }
       });
 
-      // Live search input handling
+      // Live search input handling & Arrow key navigation
       var searchInput = document.getElementById('stephans-search-modal-input');
       if (searchInput) {
         searchInput.addEventListener('input', function (e) {
@@ -79,11 +80,15 @@
         });
 
         searchInput.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') {
-            var q = e.target.value.trim();
-            if (q) {
-              window.location.href = '/shop?search=' + encodeURIComponent(q);
-            }
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            self.moveSelection(1);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            self.moveSelection(-1);
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            self.handleEnter();
           }
         });
       }
@@ -113,6 +118,7 @@
       if (modal) modal.classList.remove('is-open');
       if (backdrop) backdrop.classList.remove('is-open');
       document.body.style.overflow = '';
+      this.selectedIndex = -1;
     },
 
     handleInputChange: function (value) {
@@ -122,18 +128,22 @@
       var initialSec = document.getElementById('stephans-search-initial');
       var resultsSec = document.getElementById('stephans-search-results-area');
       var loadingEl = document.getElementById('stephans-search-loading');
-      var listEl = document.getElementById('stephans-search-results-list');
+      var prodsGroup = document.getElementById('stephans-search-products-group');
+      var taxGroup = document.getElementById('stephans-search-tax-group');
       var noResultsEl = document.getElementById('stephans-search-no-results');
 
       if (clearBtn) {
-        clearBtn.style.display = q.length > 0 ? 'flex' : 'none';
+        clearBtn.style.display = q.length > 0 ? 'inline-block' : 'none';
       }
 
       if (q.length < 2) {
         if (initialSec) initialSec.style.display = 'block';
         if (resultsSec) resultsSec.style.display = 'none';
-        if (listEl) listEl.innerHTML = '';
+        if (prodsGroup) prodsGroup.style.display = 'none';
+        if (taxGroup) taxGroup.style.display = 'none';
         if (noResultsEl) noResultsEl.style.display = 'none';
+        self.selectedIndex = -1;
+        self.currentResults = [];
         return;
       }
 
@@ -141,18 +151,26 @@
       if (initialSec) initialSec.style.display = 'none';
       if (resultsSec) resultsSec.style.display = 'block';
       if (loadingEl) loadingEl.style.display = 'flex';
+      if (prodsGroup) prodsGroup.style.display = 'none';
+      if (taxGroup) taxGroup.style.display = 'none';
       if (noResultsEl) noResultsEl.style.display = 'none';
 
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(function () {
         self.performSearch(q);
-      }, 250);
+      }, 220);
     },
 
     performSearch: function (query) {
+      var self = this;
       var loadingEl = document.getElementById('stephans-search-loading');
-      var listEl = document.getElementById('stephans-search-results-list');
+      var prodsGroup = document.getElementById('stephans-search-products-group');
+      var prodsList = document.getElementById('stephans-search-products-list');
+      var taxGroup = document.getElementById('stephans-search-tax-group');
+      var taxList = document.getElementById('stephans-search-tax-list');
       var noResultsEl = document.getElementById('stephans-search-no-results');
+      var countEl = document.getElementById('stephans-results-count');
+      var seeAllEl = document.getElementById('stephans-search-see-all');
 
       fetch('/stephans/api/search?q=' + encodeURIComponent(query), {
         headers: { 'Accept': 'application/json' }
@@ -160,35 +178,121 @@
         .then(function (res) { return res.json(); })
         .then(function (data) {
           if (loadingEl) loadingEl.style.display = 'none';
-          var results = data.results || [];
+          var products = data.products || data.results || [];
+          var categories = data.categories || [];
+          var brands = data.brands || [];
+          var totalCount = data.count || products.length;
 
-          if (results.length === 0) {
+          self.currentResults = [];
+          self.selectedIndex = 0;
+
+          // Update footer See All link
+          if (countEl) countEl.textContent = totalCount;
+          if (seeAllEl) seeAllEl.href = '/shop?search=' + encodeURIComponent(query);
+
+          var hasProducts = products.length > 0;
+          var hasTax = categories.length > 0 || brands.length > 0;
+
+          if (!hasProducts && !hasTax) {
             if (noResultsEl) noResultsEl.style.display = 'block';
-            if (listEl) listEl.innerHTML = '';
-          } else {
-            if (noResultsEl) noResultsEl.style.display = 'none';
-            if (listEl) {
-              listEl.innerHTML = results.map(function (item) {
-                return (
-                  '<a href="/shop/product/' + item.id + '" class="stephans-search-result-item">' +
-                    '<div class="stephans-search-result-thumb">' +
-                      '<img src="' + item.image_url + '" alt="' + item.name + '" loading="lazy"/>' +
-                    '</div>' +
-                    '<div class="stephans-search-result-meta">' +
-                      '<h4 class="stephans-search-result-title">' + item.name + '</h4>' +
-                      '<span class="stephans-search-result-cat">' + (item.category || 'General') + '</span>' +
-                    '</div>' +
-                    '<div class="stephans-search-result-price">' + item.price_formatted + '</div>' +
-                  '</a>'
-                );
-              }).join('');
-            }
+            if (prodsGroup) prodsGroup.style.display = 'none';
+            if (taxGroup) taxGroup.style.display = 'none';
+            return;
+          }
+
+          if (noResultsEl) noResultsEl.style.display = 'none';
+
+          // 1. Render Products
+          if (hasProducts && prodsGroup && prodsList) {
+            prodsGroup.style.display = 'block';
+            prodsList.innerHTML = products.map(function (item, idx) {
+              self.currentResults.push({ type: 'product', url: item.url || ('/shop/product/' + item.id) });
+              var brandCat = (item.brand ? item.brand + ' · ' : '') + (item.category || 'Pet Food');
+              return (
+                '<a href="' + (item.url || ('/shop/product/' + item.id)) + '" class="stephans-search-product-item ' + (idx === 0 ? 'is-selected' : '') + '" data-idx="' + (self.currentResults.length - 1) + '">' +
+                  '<div class="stephans-search-product-thumb">' +
+                    '<img src="' + item.image_url + '" alt="' + item.name + '" loading="lazy"/>' +
+                  '</div>' +
+                  '<div class="stephans-search-product-meta">' +
+                    '<h4 class="stephans-search-product-title">' + item.name + '</h4>' +
+                    '<div class="stephans-search-product-sub">' + brandCat + '</div>' +
+                  '</div>' +
+                  '<div class="stephans-search-product-price">' + item.price_formatted + '</div>' +
+                '</a>'
+              );
+            }).join('');
+          } else if (prodsGroup) {
+            prodsGroup.style.display = 'none';
+          }
+
+          // 2. Render Categories & Brands
+          if (hasTax && taxGroup && taxList) {
+            taxGroup.style.display = 'block';
+            var taxHtml = '';
+
+            categories.forEach(function (cat) {
+              self.currentResults.push({ type: 'category', url: cat.url });
+              taxHtml += (
+                '<a href="' + cat.url + '" class="stephans-search-tax-item" data-idx="' + (self.currentResults.length - 1) + '">' +
+                  '<span class="stephans-search-tax-name">' + cat.name + '</span>' +
+                  '<span class="stephans-search-tax-badge">Category</span>' +
+                '</a>'
+              );
+            });
+
+            brands.forEach(function (brand) {
+              self.currentResults.push({ type: 'brand', url: brand.url });
+              taxHtml += (
+                '<a href="' + brand.url + '" class="stephans-search-tax-item stephans-search-tax-item--brand" data-idx="' + (self.currentResults.length - 1) + '">' +
+                  '<span class="stephans-search-tax-name stephans-search-tax-name--brand">' + brand.name + '</span>' +
+                  '<span class="stephans-search-tax-badge">Brand</span>' +
+                '</a>'
+              );
+            });
+
+            taxList.innerHTML = taxHtml;
+          } else if (taxGroup) {
+            taxGroup.style.display = 'none';
           }
         })
         .catch(function (err) {
           if (loadingEl) loadingEl.style.display = 'none';
           console.error('Stephan\'s search error:', err);
         });
+    },
+
+    moveSelection: function (dir) {
+      if (!this.currentResults || this.currentResults.length === 0) return;
+
+      var items = document.querySelectorAll('.stephans-search-product-item, .stephans-search-tax-item');
+      if (items.length === 0) return;
+
+      items.forEach(function (el) { el.classList.remove('is-selected'); });
+
+      this.selectedIndex += dir;
+      if (this.selectedIndex < 0) {
+        this.selectedIndex = items.length - 1;
+      } else if (this.selectedIndex >= items.length) {
+        this.selectedIndex = 0;
+      }
+
+      var activeItem = items[this.selectedIndex];
+      if (activeItem) {
+        activeItem.classList.add('is-selected');
+        activeItem.scrollIntoView({ block: 'nearest' });
+      }
+    },
+
+    handleEnter: function () {
+      if (this.selectedIndex >= 0 && this.currentResults[this.selectedIndex]) {
+        window.location.href = this.currentResults[this.selectedIndex].url;
+      } else {
+        var input = document.getElementById('stephans-search-modal-input');
+        var q = input ? input.value.trim() : '';
+        if (q) {
+          window.location.href = '/shop?search=' + encodeURIComponent(q);
+        }
+      }
     }
   };
 

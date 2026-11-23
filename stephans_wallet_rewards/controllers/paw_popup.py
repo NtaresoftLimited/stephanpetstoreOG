@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
 from odoo import _, fields, http
 from odoo.exceptions import AccessDenied, UserError
@@ -15,6 +16,27 @@ except ImportError:  # Odoo 18 fallback
 _logger = logging.getLogger(__name__)
 
 
+def _mask_phone(phone):
+    """Mask phone number for privacy in UI, network responses and logs."""
+    digits = re.sub(r'\D', '', str(phone or ''))
+    if len(digits) >= 9:
+        return f"+{digits[:3]} ••• ••{digits[-4:]}"
+    return phone or ''
+
+
+def _set_strict_security_headers():
+    """Ensure strict no-cache, no-store headers on sensitive auth endpoints."""
+    try:
+        if hasattr(request, 'future_response') and request.future_response:
+            request.future_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0, private'
+            request.future_response.headers['Pragma'] = 'no-cache'
+            request.future_response.headers['Expires'] = '0'
+            request.future_response.headers['X-Content-Type-Options'] = 'nosniff'
+            request.future_response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    except Exception:
+        pass
+
+
 class PawPointsPopupController(http.Controller):
     """JSON-RPC endpoints powering the inline Apple-frosted Paw Points WhatsApp pop-up."""
 
@@ -22,7 +44,7 @@ class PawPointsPopupController(http.Controller):
 
     @staticmethod
     def _clear_wa_session():
-        for key in ("wa_auth_user_id", "wa_auth_login", "wa_auth_phone"):
+        for key in ("wa_auth_user_id", "wa_auth_login", "wa_auth_phone", "wa_auth_opt_in"):
             request.session.pop(key, None)
 
     @staticmethod
@@ -45,6 +67,7 @@ class PawPointsPopupController(http.Controller):
 
     @http.route("/paw_points/popup/send_otp", type="jsonrpc", auth="public", website=True, sitemap=False)
     def send_otp(self, phone="", resend=False, marketing_opt_in=True, **_kw):
+        _set_strict_security_headers()
         ensure_db()
         Users = request.env["res.users"].sudo()
 
@@ -70,46 +93,37 @@ class PawPointsPopupController(http.Controller):
             request.session["wa_auth_phone"] = e164_phone
             request.session["wa_auth_opt_in"] = bool(marketing_opt_in)
 
+            masked_phone = _mask_phone(e164_phone)
+
             wait = user_sudo.whatsapp_otp_resend_wait()
             if wait:
                 return {
                     "ok": True,
-                    "phone": e164_phone,
+                    "phone": masked_phone,
                     "resend_wait": int(wait),
                     "message": _(
-                        "A code was already sent to %(phone)s. You can request a new one in %(sec)s seconds.",
-                        phone=e164_phone,
+                        "A verification code was sent to %(phone)s. You can request a new one in %(sec)s seconds.",
+                        phone=masked_phone,
                         sec=wait,
                     ),
                 }
 
-            sent_ok, otp_code, gateway_res = user_sudo.generate_and_send_whatsapp_otp(target_phone=e164_phone)
+            sent_ok, _raw_code, gateway_res = user_sudo.generate_and_send_whatsapp_otp(target_phone=e164_phone)
             if sent_ok:
                 return {
                     "ok": True,
-                    "phone": e164_phone,
-                    "resend_wait": int(user_sudo.whatsapp_otp_resend_wait() or 30),
-                    "message": _("We sent a 6-digit verification code via WhatsApp to %s.", e164_phone),
+                    "phone": masked_phone,
+                    "resend_wait": int(user_sudo.whatsapp_otp_resend_wait() or 60),
+                    "message": _("We sent a 6-digit verification code via WhatsApp to %s.", masked_phone),
                 }
 
-            allow_offline_demo = get_config_str(
-                request.env, "whatsapp_connector.demo_show_otp_when_gateway_offline", "False"
-            ) == "True"
-            if allow_offline_demo:
-                return {
-                    "ok": True,
-                    "phone": e164_phone,
-                    "resend_wait": 30,
-                    "message": _("WhatsApp gateway is offline (provider subscription renewal pending). Your verification code is: %s", otp_code),
-                    "demo_code": otp_code,
-                }
-
+            # Security: Never expose or return raw OTP in responses or frontend.
             self._clear_wa_session()
-            _logger.warning("Paw Points Popup: WhatsApp OTP not delivered to %s: %s", e164_phone, gateway_res)
+            _logger.warning("Paw Points Popup: WhatsApp OTP not delivered to %s: %s", masked_phone, gateway_res)
             return {
                 "ok": False,
                 "error": _(
-                    "We couldn't send the WhatsApp code right now. Please check the number and try again."
+                    "We couldn't deliver the WhatsApp verification code right now. Please check the number and try again."
                 ),
             }
         except UserError as e:
@@ -120,6 +134,7 @@ class PawPointsPopupController(http.Controller):
 
     @http.route("/paw_points/popup/verify_otp", type="jsonrpc", auth="public", website=True, sitemap=False)
     def verify_otp(self, otp="", **_kw):
+        _set_strict_security_headers()
         ensure_db()
         otp_code = (otp or "").strip()
         login = request.session.get("wa_auth_login")

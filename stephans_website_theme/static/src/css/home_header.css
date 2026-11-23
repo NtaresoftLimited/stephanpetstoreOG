@@ -147,3 +147,26 @@
     .stephans-homebar__indicator,
     .stephans-retail-header{transition:none!important}
 }
+
+/* Optimized GEO & Announcement Banner */
+.stephans-topbar__announcement {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    color: #ffffff !important;
+}
+.stephans-geo-flag {
+    font-size: 13px !important;
+    line-height: 1 !important;
+}
+.stephans-geo-primary {
+    color: #fde68a !important;
+    font-weight: 700 !important;
+}
+.stephans-geo-sep {
+    opacity: 0.6 !important;
+}
+

@@ -287,6 +287,17 @@
                 <div class="grooming-total-amount" id="total-amount">TZS 60,000</div>
               </div>
 
+              <!-- Paw Points Hint (Live estimate: 1 point per 1,000 TSh) -->
+              <div
+                id="grooming-paw-points-hint"
+                class="o_grooming_paw_hint"
+                t-att-data-authenticated="'1' if not request.env.user._is_public() else '0'"
+                style="display: none;"
+              >
+                <img src="/stephans_wallet_rewards/static/src/img/paw-points-coin.png" alt="Paw Points" class="o_grooming_paw_hint_icon"/>
+                <span id="grooming-paw-points-text"/>
+              </div>
+
               <!-- Submit Button -->
               <button type="submit" class="grooming-submit-btn" id="btn-submit">
                 <span>Book Appointment</span>

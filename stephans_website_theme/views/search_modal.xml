@@ -9,20 +9,21 @@
             <div class="stephans-search-modal__inner">
                 <!-- Top Input Bar -->
                 <div class="stephans-search-modal__header">
-                    <svg class="stephans-search-modal__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="stephans-search-modal__icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#8d4314" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"/>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
-                    <input type="search" id="stephans-search-modal-input" class="stephans-search-modal__input" placeholder="Search products, brands, pet essentials..." autocomplete="off"/>
-                    <button type="button" id="stephans-search-clear" class="stephans-search-modal__clear" aria-label="Clear search" style="display: none;">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                    <button type="button" id="stephans-search-close" class="stephans-search-modal__close" aria-label="Close search">
-                        <kbd>ESC</kbd>
-                    </button>
+                    <input type="text" id="stephans-search-modal-input" class="stephans-search-modal__input" placeholder="Search products, brands, categories..." autocomplete="off"/>
+                    
+                    <div class="stephans-search-modal__actions">
+                        <button type="button" id="stephans-search-clear" class="stephans-search-modal__clear" aria-label="Clear search" style="display: none;">Clear</button>
+                        <button type="button" id="stephans-search-close" class="stephans-search-modal__close" aria-label="Close search" title="Close (ESC)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#331c0e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Suggestions / Initial State (when query is short/empty) -->
@@ -30,24 +31,24 @@
                     <div class="stephans-search-pills-wrap">
                         <span class="stephans-search-section-label">Popular Searches</span>
                         <div class="stephans-search-pills">
-                            <button type="button" class="stephans-search-pill" data-query="Dry Food">Dry Food</button>
-                            <button type="button" class="stephans-search-pill" data-query="Puppy Treats">Puppy Treats</button>
-                            <button type="button" class="stephans-search-pill" data-query="Flea &amp; Tick">Flea &amp; Tick</button>
-                            <button type="button" class="stephans-search-pill" data-query="Nexgard">Nexgard</button>
+                            <button type="button" class="stephans-search-pill" data-query="Summit10">Summit10</button>
                             <button type="button" class="stephans-search-pill" data-query="Cat Litter">Cat Litter</button>
-                            <button type="button" class="stephans-search-pill" data-query="Royal Canin">Royal Canin</button>
-                            <button type="button" class="stephans-search-pill" data-query="TropiDog">TropiDog</button>
+                            <button type="button" class="stephans-search-pill" data-query="Dry Food">Dry Food</button>
+                            <button type="button" class="stephans-search-pill" data-query="Wet Food">Wet Food</button>
                             <button type="button" class="stephans-search-pill" data-query="Bioline">Bioline</button>
-                            <button type="button" class="stephans-search-pill" data-query="Dog Toys">Dog Toys</button>
+                            <button type="button" class="stephans-search-pill" data-query="Puppy Treats">Puppy Treats</button>
+                            <button type="button" class="stephans-search-pill" data-query="Nexgard">Nexgard</button>
+                            <button type="button" class="stephans-search-pill" data-query="Bravecto">Bravecto</button>
+                            <button type="button" class="stephans-search-pill" data-query="TropiDog">TropiDog</button>
                         </div>
                     </div>
 
                     <div class="stephans-search-brands-wrap">
                         <span class="stephans-search-section-label">Featured Brands</span>
                         <div class="stephans-search-brands-grid">
-                            <a href="/brands/tropidog" class="stephans-search-brand-link">TropiDog</a>
+                            <a href="/brands/summit10" class="stephans-search-brand-link">Summit10</a>
                             <a href="/brands/bioline" class="stephans-search-brand-link">Bioline</a>
-                            <a href="/brands/josera" class="stephans-search-brand-link">Josera</a>
+                            <a href="/brands/tropidog" class="stephans-search-brand-link">TropiDog</a>
                             <a href="/brands/bravecto" class="stephans-search-brand-link">Bravecto</a>
                             <a href="/brands/ownat" class="stephans-search-brand-link">Ownat</a>
                             <a href="/allbrands" class="stephans-search-brand-link stephans-search-brand-link--all">All Brands →</a>
@@ -62,8 +63,16 @@
                         <span>Searching catalog...</span>
                     </div>
 
-                    <div id="stephans-search-results-list" class="stephans-search-results-list">
-                        <!-- Populated dynamically via JavaScript -->
+                    <!-- Products Section -->
+                    <div id="stephans-search-products-group" class="stephans-search-group" style="display: none;">
+                        <div class="stephans-search-group-title">PRODUCTS</div>
+                        <div id="stephans-search-products-list" class="stephans-search-products-list"></div>
+                    </div>
+
+                    <!-- Categories & Brands Section -->
+                    <div id="stephans-search-tax-group" class="stephans-search-group" style="display: none;">
+                        <div class="stephans-search-group-title">CATEGORIES, BRANDS &amp; PAGES</div>
+                        <div id="stephans-search-tax-list" class="stephans-search-tax-list"></div>
                     </div>
 
                     <div id="stephans-search-no-results" class="stephans-search-no-results" style="display: none;">
@@ -77,10 +86,12 @@
                     </div>
                 </div>
 
-                <!-- Footer Hint -->
+                <!-- Footer -->
                 <div class="stephans-search-modal__footer">
-                    <span>Press <kbd>↵ Enter</kbd> to view all results</span>
-                    <a href="/shop" class="stephans-search-view-all">Open Full Shop →</a>
+                    <div class="stephans-search-shortcuts">
+                        <kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close
+                    </div>
+                    <a href="/shop" id="stephans-search-see-all" class="stephans-search-see-all">See all <span id="stephans-results-count">0</span> results</a>
                 </div>
             </div>
         </div>

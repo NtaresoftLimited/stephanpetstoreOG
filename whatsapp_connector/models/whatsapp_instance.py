@@ -1,5 +1,6 @@
 import requests
 import logging
+import re
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -31,24 +32,44 @@ class WhatsAppInstance(models.Model):
         return instance
 
     def _send_via_wasender(self, phone, body, api_key):
+        import time
         url = "https://wasenderapi.com/api/send-message"
-        formatted_phone = phone if str(phone).startswith('+') else f"+{phone}"
+        digits = re.sub(r'\D', '', str(phone or ''))
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {api_key}',
-            'User-Agent': 'Odoo/18.0',
+            'User-Agent': 'Odoo/20.0',
         }
         payload = {
-            'to': formatted_phone,
+            'to': digits,
             'text': body,
         }
         try:
+            _logger.info("WASender: dispatching message to %s (len=%s)", digits, len(body))
             response = requests.post(url, json=payload, headers=headers, timeout=12)
-            res_json = response.json()
-            if response.status_code in (200, 201) and res_json.get('success'):
+            try:
+                res_json = response.json()
+            except Exception:
+                res_json = {'status_code': response.status_code, 'text': response.text}
+
+            # Handle WASender rate limiting / Account Protection (1 msg every 5 sec)
+            if response.status_code == 429 or (isinstance(res_json, dict) and res_json.get('retry_after')):
+                retry_after = float(res_json.get('retry_after', 5))
+                _logger.warning("WASender rate limited for %s, waiting %s sec and retrying...", digits, retry_after)
+                time.sleep(retry_after + 0.5)
+                response = requests.post(url, json=payload, headers=headers, timeout=15)
+                try:
+                    res_json = response.json()
+                except Exception:
+                    res_json = {'status_code': response.status_code, 'text': response.text}
+
+            if response.status_code in (200, 201) and isinstance(res_json, dict) and res_json.get('success'):
+                _logger.info("WASender: successfully sent to %s (msgId=%s)", digits, res_json.get('data', {}).get('msgId'))
                 return True, res_json
+            _logger.warning("WASender failed for %s: %s (HTTP %s)", digits, res_json, response.status_code)
             return False, res_json
         except Exception as e:
+            _logger.exception("WASender exception for %s: %s", digits, e)
             return False, str(e)
 
     def send_message(self, phone, body):

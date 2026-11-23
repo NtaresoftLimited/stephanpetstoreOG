@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="paw_points_website_popup" inherit_id="website.layout" name="Paw Points Website Pop-Up">
+        <xpath expr="//body" position="inside">
+            <t t-if="request.env.user._is_public()">
+                <div id="o_paw_popup_overlay" class="o_paw_popup_overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="o_paw_popup_heading">
+                    <div class="o_paw_popup_modal">
+                        <button type="button" class="o_paw_popup_close" data-paw-popup-close="1" aria-label="Close">✕</button>
+
+                        <div id="o_paw_error_box" class="o_paw_popup_alert o_paw_popup_alert--error" hidden="hidden"/>
+                        <div id="o_paw_info_box" class="o_paw_popup_alert o_paw_popup_alert--info" hidden="hidden"/>
+
+                        <!-- Step 1: Phone Number -->
+                        <div id="o_paw_step_1" class="o_paw_popup_step">
+                            <img
+                                src="/stephans_wallet_rewards/static/src/img/paw-points-coin.png"
+                                alt="Paw Points"
+                                class="o_paw_popup_coin_icon"
+                            />
+
+                            <h2 id="o_paw_popup_heading" class="o_paw_popup_title">
+                                Earn rewards on every order
+                            </h2>
+                            <p class="o_paw_popup_desc">
+                                Verify your WhatsApp number to activate your Paw Points account.
+                            </p>
+
+                            <div class="o_paw_popup_field_wrap">
+                                <label for="o_paw_phone_input" class="o_paw_popup_label">Number</label>
+                                <div class="o_paw_popup_phone_group">
+                                    <button type="button" id="o_paw_flag_btn" class="o_paw_popup_flag_btn" aria-label="Select country">
+                                        <span id="o_paw_flag_svg" class="o_paw_popup_flag_svg"/>
+                                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                    <span id="o_paw_dial_code" class="o_paw_popup_dial">+255</span>
+                                    <input
+                                        id="o_paw_phone_input"
+                                        type="tel"
+                                        inputmode="tel"
+                                        autocomplete="tel-national"
+                                        placeholder="7XX XXX XXX"
+                                        class="o_paw_popup_input"
+                                    />
+                                </div>
+
+                                <div id="o_paw_flag_menu" class="o_paw_popup_flag_menu" hidden="hidden">
+                                    <button type="button" class="o_paw_popup_flag_opt" data-paw-country="TZ" data-paw-dial="+255">
+                                        <span class="o_paw_popup_flag_opt_left">
+                                            <span data-paw-flag-slot="TZ"/>
+                                            <span>Tanzania</span>
+                                        </span>
+                                        <span class="o_paw_popup_flag_opt_dial">+255</span>
+                                    </button>
+                                    <button type="button" class="o_paw_popup_flag_opt" data-paw-country="KE" data-paw-dial="+254">
+                                        <span class="o_paw_popup_flag_opt_left">
+                                            <span data-paw-flag-slot="KE"/>
+                                            <span>Kenya</span>
+                                        </span>
+                                        <span class="o_paw_popup_flag_opt_dial">+254</span>
+                                    </button>
+                                    <button type="button" class="o_paw_popup_flag_opt" data-paw-country="UG" data-paw-dial="+256">
+                                        <span class="o_paw_popup_flag_opt_left">
+                                            <span data-paw-flag-slot="UG"/>
+                                            <span>Uganda</span>
+                                        </span>
+                                        <span class="o_paw_popup_flag_opt_dial">+256</span>
+                                    </button>
+                                    <button type="button" class="o_paw_popup_flag_opt" data-paw-country="RW" data-paw-dial="+250">
+                                        <span class="o_paw_popup_flag_opt_left">
+                                            <span data-paw-flag-slot="RW"/>
+                                            <span>Rwanda</span>
+                                        </span>
+                                        <span class="o_paw_popup_flag_opt_dial">+250</span>
+                                    </button>
+                                </div>
+
+                                <p class="o_paw_popup_hint_text">
+                                    We’ll send a 6-digit verification code via WhatsApp.
+                                </p>
+                            </div>
+
+                            <label class="o_paw_popup_optin">
+                                <input id="o_paw_optin" type="checkbox" checked="checked"/>
+                                <span>Send me pet care tips, Paw Points updates, and exclusive offers on WhatsApp.</span>
+                            </label>
+
+                            <button type="button" id="o_paw_send_btn" class="o_paw_popup_btn o_paw_popup_btn--primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366">
+                                    <path d="M20.52 3.48A11.86 11.86 0 0 0 12.06 0C5.49 0 .16 5.33.16 11.9c0 2.1.55 4.15 1.59 5.95L0 24l6.33-1.66a11.85 11.85 0 0 0 5.73 1.46h.01c6.57 0 11.9-5.33 11.9-11.9 0-3.18-1.24-6.17-3.45-8.42zM12.07 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.76.99 1-3.66-.24-.38a9.84 9.84 0 0 1-1.51-5.26c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.13 1.03 7 2.9a9.82 9.82 0 0 1 2.9 7c0 5.46-4.44 9.89-9.89 9.89zm5.42-7.41c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/>
+                                </svg>
+                                <span>Send code via WhatsApp</span>
+                            </button>
+
+                            <button type="button" class="o_paw_popup_guest_link" data-paw-popup-close="1">
+                                Continue browsing as guest
+                            </button>
+                        </div>
+
+                        <!-- Step 2: 6-Digit WhatsApp Code -->
+                        <div id="o_paw_step_2" class="o_paw_popup_step" hidden="hidden">
+                            <!-- Original WhatsApp Icon SVG (Transparent Background) -->
+                            <div class="stephans-paw-wa-icon-wrap" style="margin:0 0 14px;display:inline-flex;align-items:center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="38" height="38">
+                                    <g transform="translate(-700.000000, -360.000000)" fill="#25D366" fill-rule="evenodd">
+                                        <path d="M723.993033,360 C710.762252,360 700,370.765287 700,383.999801 C700,389.248451 701.692661,394.116025 704.570026,398.066947 L701.579605,406.983798 L710.804449,404.035539 C714.598605,406.546975 719.126434,408 724.006967,408 C737.237748,408 748,397.234315 748,384.000199 C748,370.765685 737.237748,360.000398 724.006967,360.000398 L723.993033,360.000398 L723.993033,360 Z M717.29285,372.190836 C716.827488,371.07628 716.474784,371.034071 715.769774,371.005401 C715.529728,370.991464 715.262214,370.977527 714.96564,370.977527 C714.04845,370.977527 713.089462,371.245514 712.511043,371.838033 C711.806033,372.557577 710.056843,374.23638 710.056843,377.679202 C710.056843,381.122023 712.567571,384.451756 712.905944,384.917648 C713.258648,385.382743 717.800808,392.55031 724.853297,395.471492 C730.368379,397.757149 732.00491,397.545307 733.260074,397.27732 C735.093658,396.882308 737.393002,395.527239 737.971421,393.891043 C738.54984,392.25405 738.54984,390.857171 738.380255,390.560912 C738.211068,390.264652 737.745308,390.095816 737.040298,389.742615 C736.335288,389.389811 732.90737,387.696673 732.25849,387.470894 C731.623543,387.231179 731.017259,387.315995 730.537963,387.99333 C729.860819,388.938653 729.198006,389.89831 728.661785,390.476494 C728.238619,390.928051 727.547144,390.984595 726.969123,390.744481 C726.193254,390.420348 724.021298,389.657798 721.340985,387.273388 C719.267356,385.42535 717.856938,383.125756 717.448104,382.434484 C717.038871,381.729275 717.405907,381.319529 717.729948,380.938852 C718.082653,380.501232 718.421026,380.191036 718.77373,379.781688 C719.126434,379.372738 719.323884,379.160897 719.549599,378.681068 C719.789645,378.215575 719.62006,377.735746 719.450874,377.382942 C719.281687,377.030139 717.871269,373.587317 717.29285,372.190836 Z"/>
+                                    </g>
+                                </svg>
+                            </div>
+
+                            <h2 class="o_paw_popup_title">Verify your phone number</h2>
+                            <p class="o_paw_popup_desc">
+                                We just sent a 6-digit verification code via WhatsApp to
+                                <strong id="o_paw_display_phone"/>. Enter the code below.
+                            </p>
+
+                            <input
+                                id="o_paw_otp_input"
+                                type="password"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                spellcheck="false"
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
+                                data-form-type="other"
+                                maxlength="6"
+                                placeholder="• • • • • •"
+                                class="o_paw_popup_otp"
+                            />
+
+                            <div class="o_paw_popup_resend_row">
+                                Didn’t get the code?<br/>
+                                <button type="button" id="o_paw_resend_btn" class="o_paw_popup_inline_btn" disabled="disabled">
+                                    Resend the code (30s)
+                                </button>
+                                <span> or </span>
+                                <button type="button" id="o_paw_change_num_btn" class="o_paw_popup_inline_btn o_paw_popup_inline_btn--dark">
+                                    use a different number
+                                </button>
+                            </div>
+
+                            <button type="button" id="o_paw_verify_btn" class="o_paw_popup_btn o_paw_popup_btn--gold">
+                                Continue
+                            </button>
+                        </div>
+
+                        <!-- Step 3: Activated -->
+                        <div id="o_paw_step_3" class="o_paw_popup_step o_paw_popup_step--center" hidden="hidden">
+                            <img
+                                src="/stephans_wallet_rewards/static/src/img/paw-points-coin.png"
+                                alt="Paw Points"
+                                class="o_paw_popup_coin_icon o_paw_popup_coin_icon--center"
+                            />
+                            <h2 class="o_paw_popup_title">You’re in!</h2>
+                            <p class="o_paw_popup_desc">
+                                Your Paw Points account is now active for both online orders, Grooming Studio visits, and in-store shopping.
+                            </p>
+
+                            <div class="o_paw_popup_balance_card">
+                                <div class="o_paw_popup_balance_head">
+                                    <span>Paw Points Balance</span>
+                                    <span id="o_paw_balance_val" class="o_paw_popup_value_pill">Active Member</span>
+                                </div>
+                                <div class="o_paw_popup_balance_num">
+                                    <strong id="o_paw_balance_pts">0</strong>
+                                    <span>Paw Points</span>
+                                </div>
+                                <div class="o_paw_popup_progress_track">
+                                    <div id="o_paw_balance_bar" class="o_paw_popup_progress_fill" style="width: 8%;"/>
+                                </div>
+                                <div id="o_paw_balance_caption" class="o_paw_popup_progress_caption">
+                                    Earn 100 Paw Points to unlock 5,000 TSh off.
+                                </div>
+                            </div>
+
+                            <button type="button" id="o_paw_done_btn" class="o_paw_popup_btn o_paw_popup_btn--primary">
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

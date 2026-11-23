@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from . import main, portal
+from . import main, portal, paw_popup

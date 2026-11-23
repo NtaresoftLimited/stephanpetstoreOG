@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Abandoned Cart Log Tree View -->
+    <record id="view_abandoned_cart_log_tree" model="ir.ui.view">
+        <field name="name">abandoned.cart.log.tree</field>
+        <field name="model">abandoned.cart.log</field>
+        <field name="arch" type="xml">
+            <list string="Abandoned Carts" decoration-success="state == 'recovered'" decoration-warning="state == 'abandoned'" decoration-info="state == 'email_sent'" decoration-muted="state == 'cancelled'">
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="email"/>
+                <field name="cart_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="abandon_datetime"/>
+                <field name="last_email_sent"/>
+                <field name="emails_sent_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'recovered'" decoration-warning="state == 'abandoned'" decoration-info="state == 'email_sent'" decoration-muted="state == 'cancelled'"/>
+                <button name="action_send_reminder" string="Send Reminder" type="object" icon="fa-envelope" class="btn-sm btn-outline-primary" invisible="state == 'recovered'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Abandoned Cart Log Form View -->
+    <record id="view_abandoned_cart_log_form" model="ir.ui.view">
+        <field name="name">abandoned.cart.log.form</field>
+        <field name="model">abandoned.cart.log</field>
+        <field name="arch" type="xml">
+            <form string="Abandoned Cart Details">
+                <header>
+                    <button name="action_send_reminder" string="Send Reminder Email Now" type="object" class="btn-primary" invisible="state == 'recovered'"/>
+                    <button name="action_mark_recovered" string="Mark as Recovered" type="object" class="btn-secondary" invisible="state == 'recovered'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="abandoned,email_sent,recovered"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_order" type="object" class="oe_stat_button" icon="fa-shopping-cart">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">View Cart Order</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="order_id" string="Abandoned Cart"/>
+                        <h1>
+                            <field name="order_id" options="{'no_create': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Customer Details">
+                            <field name="partner_id"/>
+                            <field name="email" widget="email"/>
+                            <field name="cart_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Recovery Tracking">
+                            <field name="abandon_datetime"/>
+                            <field name="last_email_sent"/>
+                            <field name="emails_sent_count"/>
+                            <field name="recovery_datetime" invisible="state != 'recovered'"/>
+                            <field name="template_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Log &amp; Notes">
+                            <field name="notes" placeholder="Internal notes or automated history..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Abandoned Cart Log Search View -->
+    <record id="view_abandoned_cart_log_search" model="ir.ui.view">
+        <field name="name">abandoned.cart.log.search</field>
+        <field name="model">abandoned.cart.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Abandoned Carts">
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="email"/>
+                <filter name="filter_abandoned" string="Abandoned" domain="[('state', '=', 'abandoned')]"/>
+                <filter name="filter_email_sent" string="Reminder Sent" domain="[('state', '=', 'email_sent')]"/>
+                <filter name="filter_recovered" string="Recovered" domain="[('state', '=', 'recovered')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_by_abandon_date" string="Abandoned Month" context="{'group_by': 'abandon_datetime:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Abandoned Cart Log Graph View -->
+    <record id="view_abandoned_cart_log_graph" model="ir.ui.view">
+        <field name="name">abandoned.cart.log.graph</field>
+        <field name="model">abandoned.cart.log</field>
+        <field name="arch" type="xml">
+            <graph string="Abandoned Cart Analytics" type="bar" sample="1">
+                <field name="abandon_datetime" interval="day"/>
+                <field name="cart_total" type="measure"/>
+                <field name="state" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Abandoned Cart Log Pivot View -->
+    <record id="view_abandoned_cart_log_pivot" model="ir.ui.view">
+        <field name="name">abandoned.cart.log.pivot</field>
+        <field name="model">abandoned.cart.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Abandoned Cart Pivot" sample="1">
+                <field name="abandon_datetime" interval="month" type="row"/>
+                <field name="state" type="col"/>
+                <field name="cart_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Action for Abandoned Cart Logs -->
+    <record id="action_abandoned_cart_logs" model="ir.actions.act_window">
+        <field name="name">Abandoned Carts</field>
+        <field name="res_model">abandoned.cart.log</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_abandoned_cart_log_search"/>
+        <field name="context">{'search_default_filter_abandoned': 1, 'search_default_filter_email_sent': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No abandoned carts detected yet!
+            </p>
+            <p>
+                When online shoppers leave products in their cart without checking out, they will automatically appear here.
+                The automated scheduler will send reminder emails according to your configuration.
+            </p>
+        </field>
+    </record>
+</odoo>

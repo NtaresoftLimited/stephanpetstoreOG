@@ -95,39 +95,90 @@
       this.scrollToBottom();
     },
 
+    showTyping: function () {
+      var messagesContainer = document.getElementById('stephans-lucy-messages');
+      if (!messagesContainer) return;
+
+      var typingEl = document.getElementById('stephans-lucy-typing');
+      if (typingEl) typingEl.remove();
+
+      typingEl = document.createElement('div');
+      typingEl.id = 'stephans-lucy-typing';
+      typingEl.className = 'stephans-lucy-bubble stephans-lucy-bubble--bot stephans-lucy-bubble--typing';
+      typingEl.innerHTML = '<div class="stephans-lucy-bubble__content"><span class="stephans-lucy-dot"></span><span class="stephans-lucy-dot"></span><span class="stephans-lucy-dot"></span></div>';
+
+      messagesContainer.appendChild(typingEl);
+      this.scrollToBottom();
+    },
+
+    hideTyping: function () {
+      var typingEl = document.getElementById('stephans-lucy-typing');
+      if (typingEl) {
+        typingEl.remove();
+      }
+    },
+
     generateBotResponse: function (query) {
       var self = this;
+      self.showTyping();
+
+      // Check if backend ChatGPT endpoint is available
+      var useBackend = false; // Graceful fallback
+      if (window.fetch && useBackend) {
+        fetch('/sky/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: query })
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          self.hideTyping();
+          if (data && data.reply) {
+            self.appendMessage('bot', data.reply);
+          } else {
+            self.handleLocalResponse(query);
+          }
+        })
+        .catch(function () {
+          self.hideTyping();
+          self.handleLocalResponse(query);
+        });
+      } else {
+        setTimeout(function () {
+          self.hideTyping();
+          self.handleLocalResponse(query);
+        }, 450);
+      }
+    },
+
+    handleLocalResponse: function (query) {
       var q = query.toLowerCase();
+      var reply = '';
 
-      // Show typing simulation briefly
-      setTimeout(function () {
-        var reply = '';
+      if (q.indexOf('groom') !== -1 || q.indexOf('appointment') !== -1 || q.indexOf('cut') !== -1 || q.indexOf('bath') !== -1) {
+        reply = '<p>We offer professional pet grooming at both our <strong>Masaki</strong> and <strong>Mikocheni</strong> salons.</p>' +
+                '<p>Services include full baths, hair trims, nail clipping, and coat treatments. You can book directly using our <a href="/grooming" style="color:#d35122;font-weight:600;">Grooming Booking Tool</a> or call us at <a href="tel:+255769324445" style="color:#d35122;font-weight:600;">+255 769 324 445</a>.</p>';
+      } else if (q.indexOf('food') !== -1 || q.indexOf('dog') !== -1 || q.indexOf('cat') !== -1 || q.indexOf('eat') !== -1) {
+        reply = '<p>We stock premium veterinary-approved nutrition including <strong>TropiDog</strong>, <strong>Ownat</strong>, and <strong>Josera</strong> for all life stages, breeds, and dietary sensitivities.</p>' +
+                '<p>Explore our <a href="/brands/tropidog" style="color:#d35122;font-weight:600;">TropiDog Range</a> or browse all <a href="/shop" style="color:#d35122;font-weight:600;">Pet Foods in our Shop</a>.</p>';
+      } else if (q.indexOf('store') !== -1 || q.indexOf('locat') !== -1 || q.indexOf('where') !== -1 || q.indexOf('masaki') !== -1 || q.indexOf('mikocheni') !== -1) {
+        reply = '<p>We have two prime locations in Dar es Salaam:</p>' +
+                '<p>1. <strong>Masaki:</strong> 11 Slipway Road (Monday–Saturday, 9:00 AM – 8:30 PM)<br/>' +
+                '2. <strong>Mikocheni:</strong> 59 Mikocheni A (Monday–Saturday, 9:00 AM – 8:30 PM)</p>' +
+                '<p><a href="/stores" style="color:#d35122;font-weight:600;">View Store Map &amp; Directions</a></p>';
+      } else if (q.indexOf('deliver') !== -1 || q.indexOf('ship') !== -1 || q.indexOf('dar') !== -1 || q.indexOf('cost') !== -1) {
+        reply = '<p><strong>Express Delivery across Dar es Salaam &amp; Tanzania</strong></p>' +
+                '<p>Orders over <strong>TZS 100,000</strong> qualify for <strong>Free Delivery</strong> within Dar es Salaam. Same-day dispatch is available for orders placed before 3:00 PM.</p>';
+      } else if (q.indexOf('flea') !== -1 || q.indexOf('tick') !== -1 || q.indexOf('bravecto') !== -1 || q.indexOf('nexgard') !== -1) {
+        reply = '<p>For flea and tick prevention, we carry genuine <strong>Bravecto</strong> (chews offering 3 months of protection) and <strong>Bioline</strong> topical treatments.</p>' +
+                '<p>View <a href="/brands/bravecto" style="color:#d35122;font-weight:600;">Bravecto products</a> or speak to our team for weight-specific dosages.</p>';
+      } else {
+        reply = '<p>We have a wide range of genuine pet essentials in stock.</p>' +
+                '<p>You can search our catalog or connect directly with our pet care specialists on WhatsApp for personalized recommendations:</p>' +
+                '<p><a href="https://wa.me/255769324445?text=' + encodeURIComponent('Hi Sky, I have a question about: ' + query) + '" target="_blank" style="display:inline-flex;align-items:center;background:#25d366;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">Chat on WhatsApp</a></p>';
+      }
 
-        if (q.indexOf('groom') !== -1 || q.indexOf('appointment') !== -1 || q.indexOf('cut') !== -1 || q.indexOf('bath') !== -1) {
-          reply = '<p>🐾 We offer professional pet grooming at both our <strong>Masaki</strong> and <strong>Mikocheni</strong> salons!</p>' +
-                  '<p>Services include full baths, hair trims, nail clipping, and flea dips. You can book directly using our <a href="/grooming" style="color:#d35122;font-weight:700;">Grooming Booking Tool →</a> or call us at <a href="tel:+255769324445" style="color:#d35122;font-weight:700;">+255 769 324 445</a>.</p>';
-        } else if (q.indexOf('food') !== -1 || q.indexOf('dog') !== -1 || q.indexOf('cat') !== -1 || q.indexOf('eat') !== -1) {
-          reply = '<p>🍖 We stock premium vet-approved nutrition including <strong>TropiDog</strong>, <strong>Ownat</strong>, and <strong>Josera</strong> for all life stages (Puppy, Adult, Senior, and sensitive stomachs).</p>' +
-                  '<p>👉 Explore our <a href="/brands/tropidog" style="color:#d35122;font-weight:700;">TropiDog Range</a> or browse all <a href="/shop" style="color:#d35122;font-weight:700;">Pet Foods in our Shop</a>.</p>';
-        } else if (q.indexOf('store') !== -1 || q.indexOf('locat') !== -1 || q.indexOf('where') !== -1 || q.indexOf('masaki') !== -1 || q.indexOf('mikocheni') !== -1) {
-          reply = '<p>📍 We have two prime locations in Dar es Salaam:</p>' +
-                  '<p>1. <strong>Masaki:</strong> 11 Slipway Road (Mon–Sat 9AM–8:30PM)<br/>' +
-                  '2. <strong>Mikocheni:</strong> 59 Mikocheni A (Mon–Sat 9AM–8:30PM)</p>' +
-                  '<p><a href="/stores" style="color:#d35122;font-weight:700;">View Store Map &amp; Directions →</a></p>';
-        } else if (q.indexOf('deliver') !== -1 || q.indexOf('ship') !== -1 || q.indexOf('dar') !== -1 || q.indexOf('cost') !== -1) {
-          reply = '<p>🚚 <strong>Express Delivery across Dar es Salaam &amp; Tanzania!</strong></p>' +
-                  '<p>Orders over <strong>TZS 100,000</strong> qualify for <strong>FREE Delivery</strong> within Dar es Salaam. Orders are dispatched the same day for maximum convenience.</p>';
-        } else if (q.indexOf('flea') !== -1 || q.indexOf('tick') !== -1 || q.indexOf('bravecto') !== -1 || q.indexOf('nexgard') !== -1) {
-          reply = '<p>🛡️ For flea &amp; tick prevention, we carry genuine <strong>Bravecto</strong> (chews offering 3 months protection) and <strong>Bioline</strong> sprays/spot-ons.</p>' +
-                  '<p>👉 Check <a href="/brands/bravecto" style="color:#d35122;font-weight:700;">Bravecto products</a> or speak to our team to get the exact dosage for your pet\'s weight.</p>';
-        } else {
-          reply = '<p>Thanks for asking! We have hundreds of genuine pet essentials in stock.</p>' +
-                  '<p>You can search our catalog above, or click below to chat with a pet care specialist on WhatsApp for personalized recommendations:</p>' +
-                  '<p><a href="https://wa.me/255769324445?text=' + encodeURIComponent('Hi Sky, I have a question about: ' + query) + '" target="_blank" style="display:inline-block;background:#25d366;color:#fff;padding:6px 12px;border-radius:6px;font-weight:700;text-decoration:none;">Chat on WhatsApp →</a></p>';
-        }
-
-        self.appendMessage('bot', reply);
-      }, 400);
+      this.appendMessage('bot', reply);
     },
 
     scrollToBottom: function () {

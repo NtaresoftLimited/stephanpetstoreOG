@@ -360,18 +360,29 @@ class ProductTemplate(models.Model):
             ('x_ai_last_error', '=', False),
         ]
 
-        # Tier 1: Find un-enriched products from the 4 active flagship brands first
-        flagship_or = ['|'] * (len(FLAGSHIP_BRAND_KEYS) - 1)
-        for bk in FLAGSHIP_BRAND_KEYS:
-            flagship_or.append(('name', 'ilike', bk))
-
+        # Tier 0: Start automatically from Summit brand FIRST
         batch = self.search(
-            base_domain + flagship_or,
+            base_domain + [('name', 'ilike', 'summit')],
             order='is_published desc, list_price desc, id asc',
             limit=limit,
         )
 
-        # Tier 2: Once all 4 flagship brands are done, continue with the rest of the catalog
+        # Tier 1: Remaining flagship brands (Bioline, TropiCat, TropiDog, Tropifit, Tropical)
+        if len(batch) < limit:
+            remaining = limit - len(batch)
+            other_flagships = tuple(bk for bk in FLAGSHIP_BRAND_KEYS if bk != 'summit')
+            flagship_or = ['|'] * (len(other_flagships) - 1)
+            for bk in other_flagships:
+                flagship_or.append(('name', 'ilike', bk))
+
+            extra_flagship = self.search(
+                base_domain + [('id', 'not in', batch.ids)] + flagship_or,
+                order='is_published desc, list_price desc, id asc',
+                limit=remaining,
+            )
+            batch |= extra_flagship
+
+        # Tier 2: Once all flagship brands are done, continue with the rest of the catalog
         if len(batch) < limit:
             remaining = limit - len(batch)
             extra = self.search(

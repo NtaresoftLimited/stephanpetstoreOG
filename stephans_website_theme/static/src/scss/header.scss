@@ -209,22 +209,35 @@
         color: $stephans-gold;
 
         .stephans-action-item__icon-wrap {
-            background: #faf5ee;
-            border-color: #e5ded5;
+            background: transparent;
+            border-color: transparent;
+            transform: translateY(-1px);
+        }
+
+        .stephans-action-icon {
+            transform: scale(1.08);
         }
     }
 }
 
 .stephans-action-item__icon-wrap {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fafaf9;
-    border: 1px solid transparent;
-    transition: background 0.2s, border-color 0.2s;
+    background: transparent;
+    border: none;
+    transition: transform 0.2s;
+}
+
+.stephans-action-icon {
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+    display: block;
+    transition: transform 0.2s ease;
 }
 
 .stephans-action-item__label {

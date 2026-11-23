@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_abandoned_cart" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.abandoned.cart</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="70"/>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='website']" position="inside">
+                <block title="Abandoned Cart Recovery" id="abandoned_cart_recovery_setting">
+                    <setting id="abandoned_cart_enable_setting" string="Automated Recovery Reminders" help="Automatically detect abandoned eCommerce carts and dispatch recovery emails.">
+                        <field name="abandoned_cart_enabled"/>
+                        <div class="content-group mt-3" invisible="not abandoned_cart_enabled">
+                            <div class="row mt16">
+                                <label for="abandoned_cart_delay_minutes" class="col-lg-4 o_light_label"/>
+                                <field name="abandoned_cart_delay_minutes" class="col-lg-4"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="abandoned_cart_reminder_delay_minutes" class="col-lg-4 o_light_label"/>
+                                <field name="abandoned_cart_reminder_delay_minutes" class="col-lg-4"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="abandoned_cart_max_reminders" class="col-lg-4 o_light_label"/>
+                                <field name="abandoned_cart_max_reminders" class="col-lg-4"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="abandoned_cart_template_id" class="col-lg-4 o_light_label"/>
+                                <field name="abandoned_cart_template_id" class="col-lg-6" options="{'no_create': True}"/>
+                            </div>
+                            <div class="mt16">
+                                <button name="%(action_abandoned_cart_test_wizard)d"
+                                        string="Send Test Email"
+                                        type="action"
+                                        icon="fa-paper-plane"
+                                        class="btn-secondary me-2"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action to view/edit Email Templates for abandoned carts -->
+    <record id="action_abandoned_cart_templates" model="ir.actions.act_window">
+        <field name="name">Abandoned Cart Templates</field>
+        <field name="res_model">mail.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('model', '=', 'sale.order')]</field>
+        <field name="context">{'default_model': 'sale.order'}</field>
+    </record>
+
+    <!-- Main Abandoned Cart Menu under Website eCommerce Orders -->
+    <menuitem id="menu_abandoned_cart_logs"
+              name="Abandoned Carts"
+              parent="website_sale.menu_orders"
+              sequence="30"
+              action="action_abandoned_cart_logs"/>
+
+    <!-- Quick action in Sales Orders menu as well -->
+    <menuitem id="menu_sale_abandoned_cart_logs"
+              name="Abandoned Carts"
+              parent="sale.menu_sale_order"
+              sequence="35"
+              action="action_abandoned_cart_logs"/>
+</odoo>

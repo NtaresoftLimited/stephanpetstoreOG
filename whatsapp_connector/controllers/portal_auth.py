@@ -101,23 +101,19 @@ class WhatsAppPortalAuthController(http.Controller):
                             phone=e164_phone, sec=wait,
                         )
                     else:
-                        sent_ok, otp_code, gateway_res = user_sudo.generate_and_send_whatsapp_otp(target_phone=e164_phone)
+                        sent_ok, _raw_code, gateway_res = user_sudo.generate_and_send_whatsapp_otp(target_phone=e164_phone)
+                        digits = re.sub(r'\D', '', str(e164_phone or ''))
+                        masked_disp = f"+{digits[:3]} ••• ••{digits[-4:]}" if len(digits) >= 9 else e164_phone
                         if sent_ok:
-                            message = _("We sent a 6-digit code to your WhatsApp %s.", e164_phone)
+                            message = _("We sent a 6-digit code to your WhatsApp %s.", masked_disp)
                         else:
-                            allow_offline_demo = get_config_str(
-                                request.env, 'whatsapp_connector.demo_show_otp_when_gateway_offline', 'False'
-                            ) == 'True'
-                            if allow_offline_demo:
-                                message = _("WhatsApp gateway is offline. Your verification code is: %s", otp_code)
-                            else:
-                                self._clear_wa_session()
-                                step = 'phone'
-                                _logger.warning("WhatsApp OTP not delivered to %s: %s", e164_phone, gateway_res)
-                                error = _(
-                                    "We couldn't send the WhatsApp code right now. Please check the number "
-                                    "and try again, or sign in with your email."
-                                )
+                            self._clear_wa_session()
+                            step = 'phone'
+                            _logger.warning("WhatsApp OTP not delivered to %s: %s", masked_disp, gateway_res)
+                            error = _(
+                                "We couldn't deliver the WhatsApp code right now. Please check the number "
+                                "and try again, or sign in with your email."
+                            )
                 except UserError as e:
                     step = 'phone' if action == 'send_otp' else step
                     error = e.args[0] if e.args else str(e)

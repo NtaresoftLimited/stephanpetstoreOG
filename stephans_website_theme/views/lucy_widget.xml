@@ -40,18 +40,18 @@
                 <!-- Welcome Bot Bubble -->
                 <div class="stephans-lucy-bubble stephans-lucy-bubble--bot">
                     <div class="stephans-lucy-bubble__content">
-                        <p>👋 Hello! I'm <strong>Sky</strong>, your Stephan's Pet Care Assistant.</p>
-                        <p>How can I help you and your furry friend today?</p>
+                        <p>Hello! I'm <strong>Sky</strong>, your Stephan's Pet Care Assistant.</p>
+                        <p>How can I help you and your pet today?</p>
                     </div>
                 </div>
 
                 <!-- Prompt Suggestion Chips -->
                 <div id="stephans-lucy-chips" class="stephans-lucy-chips">
-                    <button type="button" class="stephans-lucy-chip" data-prompt="Find premium dog food">🐕 Premium Dog Food</button>
-                    <button type="button" class="stephans-lucy-chip" data-prompt="Book a pet grooming appointment">✂️ Book Grooming</button>
-                    <button type="button" class="stephans-lucy-chip" data-prompt="Where are your stores located?">📍 Store Locations</button>
-                    <button type="button" class="stephans-lucy-chip" data-prompt="How does delivery work in Dar?">🚚 Delivery Info</button>
-                    <button type="button" class="stephans-lucy-chip" data-prompt="Best flea and tick treatments">🛡️ Flea &amp; Tick Care</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Find premium dog food">Premium Dog Food</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Book a pet grooming appointment">Book Grooming</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Where are your stores located?">Store Locations</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="How does delivery work in Dar?">Delivery Info</button>
+                    <button type="button" class="stephans-lucy-chip" data-prompt="Best flea and tick treatments">Flea &amp; Tick Care</button>
                 </div>
             </div>
 

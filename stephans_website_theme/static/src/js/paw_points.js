@@ -289,20 +289,16 @@
       }
       setStep('step2');
 
-      if (res.demo_code) {
-        if (els.otpInput) {
-          els.otpInput.value = res.demo_code;
-        }
-        if (els.infoBox2) {
-          els.infoBox2.innerHTML = `<strong>Note:</strong> ${res.message || 'Verification code: ' + res.demo_code}`;
-          els.infoBox2.style.display = 'block';
-        }
-      } else if (res.message && res.message.includes('offline') && els.infoBox2) {
-        els.infoBox2.textContent = res.message;
-        els.infoBox2.style.display = 'block';
+      // Security: Never autofill or expose OTP in DOM or storage
+      if (els.otpInput) {
+        els.otpInput.value = '';
+      }
+      if (els.infoBox2) {
+        els.infoBox2.style.display = 'none';
+        els.infoBox2.textContent = '';
       }
 
-      startResendTimer(res.resend_wait || 30);
+      startResendTimer(res.resend_wait || 60);
     }).catch(() => {
       if (activeBtn && !isResend) {
         activeBtn.disabled = false;
@@ -347,6 +343,8 @@
       }
 
       clearInterval(timerInterval);
+      // Security: Clear OTP value from memory & DOM immediately
+      if (els.otpInput) els.otpInput.value = '';
       authenticatedUser = res;
 
       // Update real customer Paw Points in Step 3

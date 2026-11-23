@@ -17,6 +17,7 @@ Stephans_*.zip
 addons.zip
 bi_stock_block_quantity.zip
 bi_stock_block_quantity_clean.zip
+backups_odoo18/
 
 # IDE and Editor files
 .idea/
@@ -28,6 +29,11 @@ StephansEcomercewithAI/
 scratch/
 temp_db_check/
 tmp_unzip/
+tmp/
+.edge-audit-profile/
+
+# Vendor description screenshots
+**/static/description/**
 
 # Media / Documents
 Product Pictures/
@@ -36,3 +42,26 @@ Product Pictures/
 *.jpeg
 *.pdf
 *.docx
+*.webp
+*.ico
+*.html
+
+# Allow Stephan's custom module web assets
+!stephans_website_theme/static/**
+!stephans_wallet_rewards/static/**
+!grooming/static/**
+
+# Root-level one-off maintenance and diagnostic scripts
+/*.py
+!odoo*/**/*.py
+!stephans*/**/*.py
+!whatsapp*/**/*.py
+!bi_*/**/*.py
+!custom_*/**/*.py
+!sky_*/**/*.py
+!wise_*/**/*.py
+!setu_*/**/*.py
+!lucy*/**/*.py
+!grooming*/**/*.py
+!product_*/**/*.py
+!pos_*/**/*.py

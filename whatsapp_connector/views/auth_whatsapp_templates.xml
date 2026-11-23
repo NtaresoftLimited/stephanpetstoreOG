@@ -76,10 +76,12 @@
                         <input type="hidden" name="redirect" t-att-value="redirect"/>
 
                         <label for="wa_otp" class="o_wa_label">6-digit code</label>
-                        <input type="text" name="otp" id="wa_otp"
+                        <input type="password" name="otp" id="wa_otp"
                                class="form-control o_wa_otp_input"
                                placeholder="••••••" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
-                               required="required" autofocus="autofocus" autocomplete="one-time-code"/>
+                               required="required" autofocus="autofocus"
+                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                               data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other"/>
                         <p class="o_wa_hint"><i class="oi" data-icon="schedule"/> The code expires in 5 minutes.</p>
 
                         <button type="submit" class="btn o_wa_btn o_wa_btn_dark o_no_wait_lazy_js mt-3">

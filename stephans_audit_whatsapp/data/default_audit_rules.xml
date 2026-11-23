@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- 1. POS Refund & Void Alert -->
+    <record id="default_rule_pos_refund" model="audit.whatsapp.rule">
+        <field name="name">POS Refund / Negative Bill Alert</field>
+        <field name="code">pos_refund</field>
+        <field name="model_id" ref="point_of_sale.model_pos_order"/>
+        <field name="action_type">create</field>
+        <field name="severity">high</field>
+        <field name="send_whatsapp">True</field>
+        <field name="recipient_phones">+255769324445</field>
+        <field name="alert_template">🚨 *AUDIT ALERT: POS Refund Detected*
+━━━━━━━━━━━━━━━━━━━━
+• *Model:* {model}
+• *Record:* {record}
+• *Action:* {action}
+• *Cashier:* {user}
+• *Time:* {time}
+• *Severity:* {severity}
+━━━━━━━━━━━━━━━━━━━━
+📝 *Details:*
+{details}</field>
+    </record>
+
+    <!-- 2. POS High Discount Alert (>15%) -->
+    <record id="default_rule_pos_discount" model="audit.whatsapp.rule">
+        <field name="name">POS High Discount Alert (>15%)</field>
+        <field name="code">pos_discount</field>
+        <field name="model_id" ref="point_of_sale.model_pos_order"/>
+        <field name="action_type">create</field>
+        <field name="severity">medium</field>
+        <field name="send_whatsapp">True</field>
+        <field name="recipient_phones">+255769324445</field>
+        <field name="alert_template">⚠️ *AUDIT ALERT: High Discount Applied*
+━━━━━━━━━━━━━━━━━━━━
+• *Model:* {model}
+• *Record:* {record}
+• *Action:* {action}
+• *Cashier:* {user}
+• *Time:* {time}
+━━━━━━━━━━━━━━━━━━━━
+📝 *Discount Breakdown:*
+{details}</field>
+    </record>
+
+    <!-- 3. POS Order Deletion Alert -->
+    <record id="default_rule_pos_delete" model="audit.whatsapp.rule">
+        <field name="name">POS Order Deletion Alert</field>
+        <field name="code">pos_delete</field>
+        <field name="model_id" ref="point_of_sale.model_pos_order"/>
+        <field name="action_type">unlink</field>
+        <field name="severity">high</field>
+        <field name="send_whatsapp">True</field>
+        <field name="recipient_phones">+255769324445</field>
+        <field name="alert_template">🚨 *AUDIT ALERT: POS Order Deleted*
+━━━━━━━━━━━━━━━━━━━━
+• *Model:* {model}
+• *Record:* {record}
+• *User:* {user}
+• *Time:* {time}
+• *Severity:* {severity}
+━━━━━━━━━━━━━━━━━━━━
+📝 *Details:*
+{details}</field>
+    </record>
+
+    <!-- 4. Stock Inventory Adjustment Alert -->
+    <record id="default_rule_stock_inventory" model="audit.whatsapp.rule">
+        <field name="name">Inventory Quantity Adjustment / Discrepancy</field>
+        <field name="code">stock_inventory</field>
+        <field name="model_id" ref="stock.model_stock_quant"/>
+        <field name="action_type">write</field>
+        <field name="severity">high</field>
+        <field name="send_whatsapp">True</field>
+        <field name="recipient_phones">+255769324445</field>
+        <field name="alert_template">📦 *AUDIT ALERT: Inventory Adjusted*
+━━━━━━━━━━━━━━━━━━━━
+• *Product:* {record}
+• *User:* {user}
+• *Time:* {time}
+• *Severity:* {severity}
+━━━━━━━━━━━━━━━━━━━━
+📝 *Adjustment Details:*
+{details}</field>
+    </record>
+
+    <!-- 5. User Security Permissions Escalation Alert -->
+    <record id="default_rule_user_security" model="audit.whatsapp.rule">
+        <field name="name">User Security &amp; Group Permission Change</field>
+        <field name="code">user_security</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="action_type">write</field>
+        <field name="severity">high</field>
+        <field name="send_whatsapp">True</field>
+        <field name="recipient_phones">+255769324445</field>
+        <field name="alert_template">🔒 *SECURITY ALERT: User Permissions Modified*
+━━━━━━━━━━━━━━━━━━━━
+• *Target User:* {record}
+• *Admin:* {user}
+• *Time:* {time}
+• *Severity:* {severity}
+━━━━━━━━━━━━━━━━━━━━
+📝 *Security Changes:*
+{details}</field>
+    </record>
+
+    <!-- 6. Partner Bank Account Modified Alert -->
+    <record id="default_rule_partner_bank" model="audit.whatsapp.rule">
+        <field name="name">Customer/Vendor Bank Account Modified</field>
+        <field name="code">partner_bank</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="action_type">write</field>
+        <field name="severity">high</field>
+        <field name="send_whatsapp">True</field>
+        <field name="recipient_phones">+255769324445</field>
+        <field name="alert_template">💳 *FINANCIAL AUDIT ALERT: Bank Details Modified*
+━━━━━━━━━━━━━━━━━━━━
+• *Partner:* {record}
+• *User:* {user}
+• *Time:* {time}
+• *Severity:* {severity}
+━━━━━━━━━━━━━━━━━━━━
+📝 *Details:*
+{details}</field>
+    </record>
+</odoo>

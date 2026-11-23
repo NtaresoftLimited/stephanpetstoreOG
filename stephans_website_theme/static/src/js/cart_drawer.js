@@ -17,41 +17,50 @@
     bindEvents: function () {
       var self = this;
 
-      // Open drawer on cart bag click
       document.addEventListener('click', function (e) {
+        // 1. Close triggers (backdrop or close icon)
+        if (e.target.closest('#stephans-cart-close, #stephans-cart-backdrop')) {
+          e.preventDefault();
+          self.close();
+          return;
+        }
+
+        // 2. Actions inside the drawer
+        if (e.target.closest('#stephans-cart-drawer')) {
+          // Quantity controls inside drawer
+          var qtyBtn = e.target.closest('.stephans-qty-btn');
+          if (qtyBtn) {
+            e.preventDefault();
+            var lineId = parseInt(qtyBtn.getAttribute('data-line-id'), 10);
+            var action = qtyBtn.getAttribute('data-action');
+            var currentQty = parseInt(qtyBtn.getAttribute('data-qty'), 10);
+            var newQty = action === 'plus' ? currentQty + 1 : currentQty - 1;
+            self.updateCartItem(lineId, newQty);
+            return;
+          }
+
+          // Remove item button
+          var removeBtn = e.target.closest('.stephans-cart-item__remove');
+          if (removeBtn) {
+            e.preventDefault();
+            var lineId = parseInt(removeBtn.getAttribute('data-line-id'), 10);
+            self.updateCartItem(lineId, 0);
+            return;
+          }
+
+          // All links inside the drawer (Checkout, Cart, Products) must navigate natively
+          return;
+        }
+
+        // 3. Open triggers from header / navbar / page
         var cartTrigger = e.target.closest('.stephans-action-item--cart, [data-open-cart="true"], a[href="/shop/cart"]');
         if (cartTrigger) {
-          // If the user is on the cart page itself (/shop/cart), let default navigation work
-          if (window.location.pathname === '/shop/cart') {
+          // If the user is on the cart or checkout page itself, let default navigation work
+          if (window.location.pathname === '/shop/cart' || window.location.pathname.startsWith('/shop/checkout')) {
             return;
           }
           e.preventDefault();
           self.open();
-        }
-
-        // Close triggers
-        if (e.target.closest('#stephans-cart-close, #stephans-cart-backdrop')) {
-          e.preventDefault();
-          self.close();
-        }
-
-        // Quantity controls inside drawer
-        var qtyBtn = e.target.closest('.stephans-qty-btn');
-        if (qtyBtn) {
-          e.preventDefault();
-          var lineId = parseInt(qtyBtn.getAttribute('data-line-id'), 10);
-          var action = qtyBtn.getAttribute('data-action');
-          var currentQty = parseInt(qtyBtn.getAttribute('data-qty'), 10);
-          var newQty = action === 'plus' ? currentQty + 1 : currentQty - 1;
-          self.updateCartItem(lineId, newQty);
-        }
-
-        // Remove item button
-        var removeBtn = e.target.closest('.stephans-cart-item__remove');
-        if (removeBtn) {
-          e.preventDefault();
-          var lineId = parseInt(removeBtn.getAttribute('data-line-id'), 10);
-          self.updateCartItem(lineId, 0);
         }
       });
 
