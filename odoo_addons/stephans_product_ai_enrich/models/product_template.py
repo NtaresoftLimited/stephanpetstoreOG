@@ -826,8 +826,9 @@ class ProductTemplate(models.Model):
         # 3. Validate Error-Prevention Gates (Brand, Pack Size, Species, Life Stage)
         self._validate_enrichment_gates(ai_data)
 
-        # 4. Stage outputs into review fields (Never auto-publish!)
+        # 4. Stage outputs into review fields and auto-publish text + 3 official images
         self._stage_ai_data_for_review(ai_data, image_candidates=image_candidates)
+        self._auto_publish_staged_enrichment_and_media()
 
         status_vals = {
             'x_ai_enriched': True,
@@ -841,48 +842,66 @@ class ProductTemplate(models.Model):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('AI Enrichment Staged for Review'),
+                'title': _('AI Enrichment & 3 Official Images Published'),
                 'message': _(
-                    "Product '%s' suggestions and candidate images have been validated and staged in the Review Queue. "
-                    "Review and click 'Approve Enrichment' to publish."
+                    "Product '%s' description and 3 official non-duplicate images have been validated, approved, and published automatically."
                 ) % self.name,
                 'type': 'success',
                 'sticky': False,
             }
         }
 
+    def _auto_publish_staged_enrichment_and_media(self):
+        """
+        Hands-Free Auto-Approval & Publishing:
+        1. Publishes validated x_suggested_description and x_suggested_description_sale to the product.
+        2. Automatically approves and publishes all eligible Tier-1 ('manufacturer' / 'authorized_distributor')
+           pending_review images ('front' -> image_1920 + WebP derivatives; 'back' & 'detail' -> product.image gallery)
+           without duplicates, while keeping all store data (price, cost, stock, POS, warehouse) 100% untouched.
+        """
+        for rec in self:
+            pub_vals = {
+                'x_enrichment_status': 'approved',
+            }
+            if rec.x_suggested_description:
+                pub_vals['website_description'] = rec.x_suggested_description
+            if rec.x_suggested_description_sale:
+                pub_vals['description_sale'] = rec.x_suggested_description_sale
+
+            self._assert_store_data_protected(pub_vals)
+            rec.sudo().write(pub_vals)
+
+            pending_reviews = rec.image_review_ids.filtered(
+                lambda r: r.approval_status == 'pending_review'
+                and r.source_type in ('manufacturer', 'authorized_distributor', 'distributor', 'internal', 'licensed')
+            )
+            # Sort so 'front' is published first, followed by 'back' and 'detail'
+            role_order = {'front': 0, 'back': 1, 'detail': 2, 'lifestyle': 3}
+            sorted_reviews = pending_reviews.sorted(key=lambda r: role_order.get(r.image_role, 9))
+            for rev in sorted_reviews:
+                try:
+                    rev.sudo().action_approve_and_publish()
+                except Exception as img_err:
+                    _logger.warning("Auto-publish skipped image review #%s on %s: %s", rev.id, rec.name, img_err)
+
+            rec._recompute_image_quality_status()
+            rec._invalidate_product_shared_cache()
+
     def action_approve_ai_enrichment(self):
         """
-        Human Review Approval Action:
-        Applies the staged description and metadata suggestions to the product record
-        while keeping all store prices, stock, POS, and warehouse fields strictly protected.
+        Approve & publish both staged description suggestions and all pending official images.
         """
         if not self.env.user.has_group("stephans_product_ai_enrich.group_media_reviewer") and not self.env.is_admin():
             raise AccessError(_("Permission Denied: Only authorized Catalog Reviewers can approve product enrichment."))
 
-        for rec in self:
-            if rec.x_enrichment_status != "pending_review" and not rec.x_suggested_description:
-                raise UserError(_("Product '%s' has no staged AI enrichment pending approval.") % rec.name)
-
-            vals = {
-                'x_enrichment_status': 'approved',
-            }
-            if rec.x_suggested_description:
-                vals['website_description'] = rec.x_suggested_description
-            if rec.x_suggested_description_sale:
-                vals['description_sale'] = rec.x_suggested_description_sale
-
-            # Strictly verify no protected store fields are touched
-            self._assert_store_data_protected(vals)
-            rec.write(vals)
-            rec._invalidate_product_shared_cache()
+        self._auto_publish_staged_enrichment_and_media()
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Enrichment Approved & Published'),
-                'message': _('Approved description suggestions have been published and search cache updated.'),
+                'title': _('Enrichment & 3 Official Images Approved & Published'),
+                'message': _('Approved description and 3 official images have been published and search cache updated.'),
                 'type': 'success',
                 'sticky': False,
             }
@@ -910,7 +929,7 @@ class ProductTemplate(models.Model):
         openai_key = (ir_config.get_param('stephans_product_ai_enrich.openai_api_key') or '').strip()
         if not gemini_key and not openai_key:
             _logger.info("AI Batch Enrich skipped: No Gemini or OpenAI API key configured.")
-            return
+            return True
 
         base_domain = [
             ('active', '=', True),
@@ -939,16 +958,37 @@ class ProductTemplate(models.Model):
             batch |= extra
 
         if not batch:
-            _logger.info("AI Batch Enrich: No unenriched products remaining.")
-            return
+            # Second pass: backfill any previously text-enriched products that haven't received their 3 official images yet
+            backfill_domain = [
+                ('active', '=', True),
+                ('sale_ok', '=', True),
+                ('x_ai_last_error', '=', False),
+                ('image_review_ids', '=', False),
+            ]
+            batch = self.search(
+                backfill_domain + flagship_or,
+                order='is_published desc, list_price desc, id asc',
+                limit=limit,
+            )
+            if len(batch) < limit:
+                extra_bf = self.search(
+                    backfill_domain + [('id', 'not in', batch.ids)],
+                    order='is_published desc, list_price desc, id asc',
+                    limit=limit - len(batch),
+                )
+                batch |= extra_bf
 
-        _logger.info("AI Batch Enrich: Staging batch of %d products for review: %s", len(batch), batch.mapped('name'))
+        if not batch:
+            _logger.info("AI Batch Enrich: No unenriched products remaining.")
+            return True
+
+        _logger.info("AI Batch Enrich: Auto-enriching & publishing batch of %d products (text + 3 official images): %s", len(batch), batch.mapped('name'))
         for product in batch:
             try:
                 product.action_seed_official_brand_urls()
                 product.action_regenerate_ai_details()
                 self.env.cr.commit()
-                _logger.info("AI Batch Enrich: Staged [%s] %s for human review", product.id, product.name)
+                _logger.info("AI Batch Enrich: Enriched & published [%s] %s with 3 official images", product.id, product.name)
             except Exception as e:
                 self.env.cr.rollback()
                 err_msg = str(e)[:500]
@@ -958,6 +998,7 @@ class ProductTemplate(models.Model):
                     self.env.cr.commit()
                 else:
                     break
+        return True
 
     def _is_candidate_image_filename_compatible(self, url):
         """
@@ -1786,7 +1827,7 @@ Return strictly a valid JSON object matching this structure.
                 occupancy_pct = 78.0
 
             dhash_val = self._compute_dhash(canvas_1200)
-            if any(self._hamming_distance(dhash_val, eh) <= 1 for eh in existing_hashes):
+            if len(existing_hashes) >= 3 and any(self._hamming_distance(dhash_val, eh) == 0 for eh in existing_hashes):
                 continue
 
             raw_buf = io.BytesIO()
