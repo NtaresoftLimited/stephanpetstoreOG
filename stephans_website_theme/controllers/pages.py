@@ -286,12 +286,18 @@ class StephansWebsitePages(http.Controller):
     # Instant Global Predictive Search API (JSON for SearchModal)
     @http.route('/stephans/api/search', type='http', auth='public', website=True, csrf=False, methods=['GET', 'POST'])
     def api_search(self, **kw):
-        import unicodedata
+        import re, unicodedata
 
         def strip_accents(s):
             if not s:
                 return ''
             return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+
+        def normalize_compact(s):
+            if not s:
+                return ''
+            s = strip_accents(s).lower()
+            return re.sub(r"[\s\-_'\",.:;/!]", '', s)
 
         clean_q = (kw.get('q') or kw.get('query') or '').strip()
         if not clean_q and request.httprequest.data:
@@ -302,39 +308,69 @@ class StephansWebsitePages(http.Controller):
                 pass
 
         if not clean_q or len(clean_q) < 2:
-            return request.make_json_response({'results': [], 'count': 0})
+            return request.make_json_response({'results': [], 'products': [], 'categories': [], 'brands': [], 'count': 0})
 
         pt_model = request.env['product.template'].sudo()
         available_fields = pt_model._fields
         limit_count = int(kw.get('limit', 10))
 
-        # 1. Multi-term Tokenization (e.g. 'Summit 10 Paté Delish Chicken 400g')
-        raw_tokens = clean_q.split()
+        # 1. Multi-term Tokenization & Search Normalization
+        # Handles queries like 'Summit10', 'summit-10', 'SUMMIT 10', 'Summit 10 Cat 3kg'
+        clean_norm = strip_accents(clean_q)
+        q_compact = normalize_compact(clean_q)
 
+        # Split alphanumeric transitions (e.g. Summit10 -> ['Summit', '10'])
+        raw_words = [w.strip() for w in clean_norm.split() if w.strip()]
+        expanded_tokens = []
+        for w in raw_words:
+            sub_words = re.sub(r"['\"\-_.,;:/]", " ", w).split()
+            for sw in sub_words:
+                parts = re.findall(r'[a-zA-Z]+|\d+', sw)
+                if len(parts) > 1 and len(sw) >= 3:
+                    expanded_tokens.extend(parts)
+                else:
+                    expanded_tokens.append(sw)
+
+        # Deduplicate search tokens while preserving order
+        search_tokens = []
+        seen_toks = set()
+        for t in expanded_tokens:
+            tl = t.lower()
+            if tl not in seen_toks and len(tl) >= 1:
+                seen_toks.add(tl)
+                search_tokens.append(t)
+
+        if not search_tokens:
+            search_tokens = [clean_q]
+
+        # 2. Build multi-term AND domain
         sub_domains = []
-        for token in raw_tokens:
-            tok = token.strip()
-            if not tok:
-                continue
-            tok_unaccent = strip_accents(tok)
-
+        for tok in search_tokens:
+            tok_u = strip_accents(tok)
             or_clauses = [
                 ('name', 'ilike', tok),
                 ('default_code', 'ilike', tok),
                 ('description_sale', 'ilike', tok),
             ]
-            if tok_unaccent.lower() != tok.lower():
+            if tok_u.lower() != tok.lower():
                 or_clauses.extend([
-                    ('name', 'ilike', tok_unaccent),
-                    ('description_sale', 'ilike', tok_unaccent),
+                    ('name', 'ilike', tok_u),
+                    ('description_sale', 'ilike', tok_u),
                 ])
 
+            # Brand field inclusion
+            if 'product_brand_id' in available_fields:
+                or_clauses.append(('product_brand_id.name', 'ilike', tok))
+            if 'brand_id' in available_fields:
+                or_clauses.append(('brand_id.name', 'ilike', tok))
+
+            # Extended fields
             if 'barcode' in available_fields:
                 or_clauses.append(('barcode', 'ilike', tok))
             if 'x_keywords' in available_fields:
                 or_clauses.append(('x_keywords', 'ilike', tok))
-                if tok_unaccent.lower() != tok.lower():
-                    or_clauses.append(('x_keywords', 'ilike', tok_unaccent))
+                if tok_u.lower() != tok.lower():
+                    or_clauses.append(('x_keywords', 'ilike', tok_u))
             if 'x_key_ingredients' in available_fields:
                 or_clauses.append(('x_key_ingredients', 'ilike', tok))
             if 'x_packaging_form' in available_fields:
@@ -348,24 +384,59 @@ class StephansWebsitePages(http.Controller):
             tok_domain.extend(or_clauses)
             sub_domains.append(tok_domain)
 
-        # Full AND condition: every search term must be represented
+        # Strict full AND condition
         full_domain = [('active', '=', True), ('is_published', '=', True)]
         for sd in sub_domains:
             full_domain.extend(sd)
 
         products = list(pt_model.search(full_domain, order='list_price desc', limit=limit_count * 2))
 
-        # 2. Smart Fallback: if strict full-token match is empty, search ANY matching token
-        if not products and len(raw_tokens) > 1:
+        # 3. Smart Brand Matching & Fallback
+        KNOWN_BRANDS = [
+            {'name': 'Summit 10', 'url': '/brands/summit10', 'aliases': ['summit10', 'summit 10', 'summit']},
+            {'name': 'Bioline', 'url': '/brands/bioline', 'aliases': ['bioline']},
+            {'name': 'TropiDog', 'url': '/brands/tropidog', 'aliases': ['tropidog', 'tropi dog']},
+            {'name': 'TropiCat', 'url': '/brands/tropicat', 'aliases': ['tropicat', 'tropi cat']},
+            {'name': 'Josera', 'url': '/brands/josera', 'aliases': ['josera']},
+            {'name': 'Bravecto', 'url': '/brands/bravecto', 'aliases': ['bravecto']},
+            {'name': 'Ownat', 'url': '/brands/ownat', 'aliases': ['ownat']},
+            {'name': 'Whiskas', 'url': '/brands/whiskas', 'aliases': ['whiskas']},
+            {'name': 'NexGard', 'url': '/brands/nexgard', 'aliases': ['nexgard', 'nex gard']},
+        ]
+
+        matched_brands = []
+        brand_matched_name = None
+        for b in KNOWN_BRANDS:
+            b_norm = normalize_compact(b['name'])
+            aliases_norm = [normalize_compact(a) for a in b.get('aliases', [])]
+            if q_compact == b_norm or b_norm in q_compact or any(q_compact == a or a in q_compact for a in aliases_norm):
+                matched_brands.append({
+                    'name': b['name'],
+                    'url': b['url'],
+                    'type': 'Brand'
+                })
+                brand_matched_name = b['name']
+
+        # If strict search returned nothing or few items and query matched a brand (e.g. Summit10 / Summit 10)
+        if len(products) < limit_count and brand_matched_name:
+            brand_filter_term = brand_matched_name.split()[0] # e.g. 'Summit'
+            brand_domain = [
+                ('active', '=', True),
+                ('is_published', '=', True),
+                ('name', 'ilike', brand_filter_term),
+            ]
+            if products:
+                brand_domain.append(('id', 'not in', [p.id for p in products]))
+            extra_brand_prods = list(pt_model.search(brand_domain, order='list_price desc', limit=limit_count - len(products)))
+            products.extend(extra_brand_prods)
+
+        # 4. Smart Fallback for general queries: match ANY token
+        if not products and len(search_tokens) > 1:
             fallback_or = []
-            for token in raw_tokens:
-                tok = token.strip()
+            for tok in search_tokens:
                 if len(tok) < 2:
                     continue
                 fallback_or.append(('name', 'ilike', tok))
-                tok_u = strip_accents(tok)
-                if tok_u.lower() != tok.lower():
-                    fallback_or.append(('name', 'ilike', tok_u))
                 if 'default_code' in available_fields:
                     fallback_or.append(('default_code', 'ilike', tok))
 
@@ -376,17 +447,23 @@ class StephansWebsitePages(http.Controller):
                 any_domain.extend(fallback_or)
                 products = list(pt_model.search(any_domain, order='list_price desc', limit=limit_count * 2))
 
-        # 3. Sort by relevance to query (highest keyword overlap first)
+        # 5. Relevance Scoring
         def relevance_score(prod):
             score = 0
-            n = (prod.name or '').lower()
+            n = strip_accents(prod.name or '').lower()
+            n_compact = normalize_compact(prod.name or '')
             code = (prod.default_code or '').lower()
-            for tok in raw_tokens:
-                tl = tok.lower()
+
+            # Exact brand or compact phrase match boost
+            if q_compact and q_compact in n_compact:
+                score += 100
+
+            for tok in search_tokens:
+                tl = strip_accents(tok).lower()
                 if tl in n:
-                    score += 10
+                    score += 15
                 if tl in code:
-                    score += 5
+                    score += 10
             return score
 
         products = sorted(products, key=relevance_score, reverse=True)[:limit_count]
@@ -405,6 +482,14 @@ class StephansWebsitePages(http.Controller):
                 brand_name = p.product_brand_id.name
             elif hasattr(p, 'brand_id') and p.brand_id:
                 brand_name = p.brand_id.name
+            elif 'summit' in (p.name or '').lower():
+                brand_name = 'Summit 10'
+            elif 'bioline' in (p.name or '').lower():
+                brand_name = 'Bioline'
+            elif 'tropidog' in (p.name or '').lower():
+                brand_name = 'TropiDog'
+            elif 'tropicat' in (p.name or '').lower():
+                brand_name = 'TropiCat'
 
             results.append({
                 'id': p.id,
@@ -414,7 +499,7 @@ class StephansWebsitePages(http.Controller):
                 'url': p.website_url or f"/shop/product/{p.id}",
                 'image_url': f"/web/image/product.template/{p.id}/image_128",
                 'category': cat_name or 'Pet Food',
-                'brand': brand_name or 'Summit10' if 'summit' in p.name.lower() else (brand_name or ''),
+                'brand': brand_name or '',
                 'default_code': p.default_code or '',
             })
 
@@ -442,25 +527,6 @@ class StephansWebsitePages(http.Controller):
                 matched_categories.append({'name': 'Cats > Wet Food', 'url': '/shop?search=Cat+Food', 'type': 'Category'})
             elif 'dog' in q_lower or 'puppy' in q_lower:
                 matched_categories.append({'name': 'Dogs > Food', 'url': '/shop?search=Dog+Food', 'type': 'Category'})
-
-        # Collect matched brands
-        matched_brands = []
-        KNOWN_BRANDS = [
-            {'name': 'Summit10', 'url': '/brands/summit10'},
-            {'name': 'Bioline', 'url': '/brands/bioline'},
-            {'name': 'TropiDog', 'url': '/brands/tropidog'},
-            {'name': 'TropiCat', 'url': '/brands/tropicat'},
-            {'name': 'Josera', 'url': '/brands/josera'},
-            {'name': 'Bravecto', 'url': '/brands/bravecto'},
-            {'name': 'Ownat', 'url': '/brands/ownat'},
-            {'name': 'Whiskas', 'url': '/brands/whiskas'},
-            {'name': 'NexGard', 'url': '/brands/nexgard'},
-        ]
-        q_norm = strip_accents(clean_q).lower()
-        for b in KNOWN_BRANDS:
-            b_norm = strip_accents(b['name']).lower()
-            if b_norm in q_norm or any(tok.lower() in b_norm for tok in raw_tokens if len(tok) >= 3):
-                matched_brands.append(b)
 
         return request.make_json_response({
             'results': results,
