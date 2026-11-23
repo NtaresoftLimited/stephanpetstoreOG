@@ -48,9 +48,12 @@ MANUFACTURER_DOMAINS = (
     "ownat.com",
     "biolinepet.com",
     "tropicat.eu",
+    "tropicat.pl",
     "tropidog.eu",
+    "tropidog.pl",
     "tropical.pl",
     "tropifit.eu",
+    "tropifit.pl",
     "josera.com",
     "bravecto.com",
     "nexgard.com",
@@ -127,12 +130,12 @@ OFFICIAL_BRAND_CATALOG_BRAIN = {
         'label': 'TropiCat',
         'tier': 1,
         'official_urls': [
-            'https://tropicat.eu/',
+            'https://tropicat.pl/en/products/',
             'https://tropical.pl/en/',
         ],
         'trusted_retailer_urls': [],
         'search_templates': [
-            'https://tropicat.eu/?s={query}',
+            'https://tropicat.pl/en/?s={query}',
         ],
         'keywords': 'TropiCat, Tropical Poland, complete cat nutrition, taurine, healthy digestion, coat shine',
         'synonyms': 'TropiCat, Tropi Cat, Tropi-Cat, Tropical Poland, feline nutrition',
@@ -146,12 +149,12 @@ OFFICIAL_BRAND_CATALOG_BRAIN = {
         'label': 'TropiDog',
         'tier': 1,
         'official_urls': [
-            'https://tropidog.eu/',
+            'https://tropidog.pl/en/products/',
             'https://tropical.pl/en/',
         ],
         'trusted_retailer_urls': [],
         'search_templates': [
-            'https://tropidog.eu/?s={query}',
+            'https://tropidog.pl/en/?s={query}',
         ],
         'keywords': 'TropiDog, Tropical Poland, premium dog nutrition, omega fatty acids, dental & joint care',
         'synonyms': 'TropiDog, Tropi Dog, Tropi-Dog, Tropical Poland, canine nutrition',
@@ -165,12 +168,12 @@ OFFICIAL_BRAND_CATALOG_BRAIN = {
         'label': 'Tropifit',
         'tier': 1,
         'official_urls': [
-            'https://tropifit.eu/',
+            'https://tropifit.pl/en/products/',
             'https://tropical.pl/en/',
         ],
         'trusted_retailer_urls': [],
         'search_templates': [
-            'https://tropifit.eu/?s={query}',
+            'https://tropifit.pl/en/?s={query}',
         ],
         'keywords': 'Tropifit, Tropical Poland, small animal nutrition, rabbit, guinea pig, hamster, natural herbs & fiber',
         'synonyms': 'Tropifit, Tropi Fit, Tropical Poland, small animal food, rodent food',
@@ -728,6 +731,10 @@ class ProductTemplate(models.Model):
                 and 'noon.com/uae-en/bioline-tofu' not in u
                 and 'preview.stephanspetstore.co.tz' not in u
                 and 'summit10.com/en/product/' not in u
+                and 'tropidog.eu' not in u
+                and 'tropicat.eu' not in u
+                and 'tropifit.eu' not in u
+                and 'vetforest.com/products/bioline-tofu' not in u
             ]
             merged = []
             for u in official_urls + existing:
