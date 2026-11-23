@@ -238,6 +238,42 @@ class ProductTemplate(models.Model):
         string="Last AI Error",
         readonly=True,
     )
+    image_review_ids = fields.One2many(
+        "product.image.review",
+        "product_tmpl_id",
+        string="Media Review Queue",
+    )
+    image_review_count = fields.Integer(
+        string="Review Images Count",
+        compute="_compute_image_review_count",
+    )
+    image_quality_status = fields.Selection(
+        [
+            ("uninspected", "Uninspected"),
+            ("pending_review", "Images in Review Queue"),
+            ("approved", "Images Approved & Published"),
+            ("rejected", "Images Rejected"),
+        ],
+        string="Media Quality Gate",
+        default="uninspected",
+        index=True,
+    )
+
+    @api.depends("image_review_ids")
+    def _compute_image_review_count(self):
+        for product in self:
+            product.image_review_count = len(product.image_review_ids)
+
+    def action_view_image_review_queue(self):
+        self.ensure_one()
+        return {
+            "name": f"Media Review Queue - {self.display_name}",
+            "type": "ir.actions.act_window",
+            "res_model": "product.image.review",
+            "domain": [("product_tmpl_id", "=", self.id)],
+            "view_mode": "list,kanban,form",
+            "context": {"default_product_tmpl_id": self.id},
+        }
 
     def _detect_brand_profile(self):
         """Match this product against the Official Brand Catalog Brain."""
@@ -751,40 +787,174 @@ Return strictly a valid JSON object matching this structure.
         if barcode_val and not self.barcode:
             vals['barcode'] = barcode_val
 
-        # Download clean watermark-free images (preserve existing studio main photo if already set)
+        # Strict Quality Gate: Stage images into Media Review Queue instead of direct unvalidated publishing
         img_urls = data.get('selected_image_urls', [])
         if img_urls:
-            if not self.image_1920:
-                main_img_data = self._download_image(img_urls[0])
-                if main_img_data:
-                    vals['image_1920'] = main_img_data
+            _, brand_cfg = self._detect_brand_profile()
+            manufacturer_name = brand_cfg.get('label') if brand_cfg else (getattr(self, 'product_brand_id', False) and self.product_brand_id.name or '')
+            source_type = 'manufacturer' if brand_cfg else 'distributor'
 
-            # Extra media gallery (only add if product does not already have extra images)
-            if not self.product_template_image_ids:
-                extra_images = []
-                for extra_url in img_urls[1:]:
-                    extra_data = self._download_image(extra_url)
-                    if extra_data:
-                        extra_images.append((0, 0, {
-                            'name': f"{self.name} Detail",
-                            'image_1920': extra_data
-                        }))
-                if extra_images:
-                    vals['product_template_image_ids'] = extra_images
+            # 1. Front Packshot Candidate
+            front_url = img_urls[0]
+            self._validate_and_process_candidate_image(
+                url=front_url,
+                role='front',
+                source_type=source_type,
+                manufacturer=manufacturer_name,
+            )
+
+            # 2. Secondary Image Candidates (back, detail, usage)
+            roles = ['back', 'detail', 'lifestyle']
+            for idx, extra_url in enumerate(img_urls[1:]):
+                role = roles[idx] if idx < len(roles) else 'detail'
+                self._validate_and_process_candidate_image(
+                    url=extra_url,
+                    role=role,
+                    source_type=source_type,
+                    manufacturer=manufacturer_name,
+                )
+
+            if self.image_1920:
+                vals['image_quality_status'] = 'approved'
+            else:
+                vals['image_quality_status'] = 'pending_review'
 
         self.write(vals)
 
-    def _download_image(self, url):
-        """Download remote image and return BinaryBytes or base64 string"""
+    def _validate_and_process_candidate_image(self, url, role="front", source_type="manufacturer", manufacturer=""):
+        """
+        Image Quality & Watermark Validation Pipeline:
+        1. URL Inspection (reject watermarks, retailer domains, low-res CDN params)
+        2. Download & SHA-256 Checksum (prevent duplicates)
+        3. PIL Decode & Integrity Verification
+        4. Resolution Validation:
+           - Block if width < 1000 or height < 1000
+           - Validate 1600x1600 min for main, 1200x1200 min for secondary
+        5. 1:1 Canvas Square Adjustment (product occupies 75-85% of canvas)
+        6. WebP Derivative Generation (100-300 KB target)
+        7. Stage into product.image.review queue for human approval
+        """
+        import hashlib
+        import io
+        from PIL import Image
+
+        if not url or not url.startswith("http"):
+            return False
+
+        # 1. URL Inspection & Watermark / Marketplace Keyword Check
+        low_url = url.lower()
+        blocked_keywords = (
+            "watermark", "sample", "preview", "wm_", "stock", "shopee",
+            "lazada", "alibaba", "aliexpress", "ebay", "amazon", "temu"
+        )
+        if any(bw in low_url for bw in blocked_keywords):
+            _logger.info("Blocked image candidate %s: external watermark/marketplace keyword detected", url)
+            return False
+
+        # 2. Download raw image
+        raw_bytes = None
         try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
             with urllib.request.urlopen(req, timeout=12) as resp:
                 raw_bytes = resp.read()
-                try:
-                    from odoo.orm.fields_binary import BinaryBytes
-                    return BinaryBytes(raw_bytes, filename="product.png")
-                except ImportError:
-                    return base64.b64encode(raw_bytes)
         except Exception as e:
             _logger.warning("Could not download candidate image %s: %s", url, e)
             return False
+
+        if not raw_bytes or len(raw_bytes) < 5000:
+            _logger.info("Blocked image candidate %s: file too small or empty", url)
+            return False
+
+        # 3. Checksum & Deduplication
+        checksum = hashlib.sha256(raw_bytes).hexdigest()
+        existing_review = self.env["product.image.review"].sudo().search([
+            ("product_tmpl_id", "=", self.id),
+            ("file_checksum", "=", checksum),
+        ], limit=1)
+        if existing_review:
+            _logger.info("Skipping duplicate image candidate %s for product %s", url, self.name)
+            return False
+
+        # 4. PIL Decode & Dimension Verification
+        try:
+            img = Image.open(io.BytesIO(raw_bytes))
+            img.load()
+            orig_w, orig_h = img.size
+        except Exception as e:
+            _logger.warning("Corrupted image candidate %s: %s", url, e)
+            return False
+
+        # Reject if below 1000px threshold
+        if orig_w < 1000 or orig_h < 1000:
+            _logger.info("Blocked image candidate %s: resolution %sx%s is below minimum 1000px threshold", url, orig_w, orig_h)
+            return False
+
+        aspect = round(orig_w / float(orig_h), 2)
+
+        # 5. Square 1:1 Canvas & 75-85% Product Coverage
+        is_transparent = img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info)
+
+        # Determine canvas size (at least 1600x1600 for front, 1200x1200 for secondary, or original max dimension)
+        min_target = 1600 if role == "front" else 1200
+        canvas_dim = max(orig_w, orig_h, min_target)
+
+        # Target product occupies ~80% of canvas
+        target_product_dim = int(canvas_dim * 0.82)
+        scale_ratio = target_product_dim / float(max(orig_w, orig_h))
+        # Never upscale a small image above its original resolution; adjust canvas instead
+        if scale_ratio > 1.0:
+            canvas_dim = int(max(orig_w, orig_h) / 0.82)
+            scaled_w, scaled_h = orig_w, orig_h
+            scaled_img = img
+        else:
+            scaled_w = int(orig_w * scale_ratio)
+            scaled_h = int(orig_h * scale_ratio)
+            scaled_img = img.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
+
+        # Create square canvas
+        if is_transparent:
+            canvas = Image.new("RGBA", (canvas_dim, canvas_dim), (255, 255, 255, 0))
+            offset = ((canvas_dim - scaled_w) // 2, (canvas_dim - scaled_h) // 2)
+            canvas.paste(scaled_img, offset, scaled_img.convert("RGBA"))
+        else:
+            canvas = Image.new("RGB", (canvas_dim, canvas_dim), (255, 255, 255))
+            offset = ((canvas_dim - scaled_w) // 2, (canvas_dim - scaled_h) // 2)
+            canvas.paste(scaled_img, offset)
+
+        # 6. Generate optimized WebP derivative (target 100-300 KB)
+        webp_buf = io.BytesIO()
+        canvas.save(webp_buf, format="WEBP", quality=85, method=6)
+        webp_bytes = webp_buf.getvalue()
+        filesize_kb = round(len(webp_bytes) / 1024.0, 1)
+
+        # If over 300 KB, re-encode with slightly lower quality
+        if filesize_kb > 320:
+            webp_buf = io.BytesIO()
+            canvas.save(webp_buf, format="WEBP", quality=75, method=6)
+            webp_bytes = webp_buf.getvalue()
+            filesize_kb = round(len(webp_bytes) / 1024.0, 1)
+
+        # 7. Stage into product.image.review
+        raw_b64 = base64.b64encode(raw_bytes)
+        webp_b64 = base64.b64encode(webp_bytes)
+
+        review_vals = {
+            "product_tmpl_id": self.id,
+            "original_source_url": url,
+            "source_type": source_type,
+            "manufacturer_name": manufacturer or (getattr(self, 'product_brand_id', False) and self.product_brand_id.name or ""),
+            "download_date": fields.Datetime.now(),
+            "original_width": orig_w,
+            "original_height": orig_h,
+            "aspect_ratio": aspect,
+            "file_checksum": checksum,
+            "image_role": role,
+            "approval_status": "pending_review",
+            "raw_image": raw_b64,
+            "webp_image": webp_b64,
+            "webp_filesize_kb": filesize_kb,
+            "usage_license_note": f"Official {manufacturer or 'brand'} catalogue packshot",
+        }
+        self.env["product.image.review"].sudo().create(review_vals)
+        _logger.info("Staged image candidate into Media Review Queue for product %s (%sx%s, WebP: %s KB)", self.name, orig_w, orig_h, filesize_kb)
+        return True

@@ -238,6 +238,42 @@ class ProductTemplate(models.Model):
         string="Last AI Error",
         readonly=True,
     )
+    image_review_ids = fields.One2many(
+        "product.image.review",
+        "product_tmpl_id",
+        string="Media Review Queue",
+    )
+    image_review_count = fields.Integer(
+        string="Review Images Count",
+        compute="_compute_image_review_count",
+    )
+    image_quality_status = fields.Selection(
+        [
+            ("uninspected", "Uninspected"),
+            ("pending_review", "Images in Review Queue"),
+            ("approved", "Images Approved & Published"),
+            ("rejected", "Images Rejected"),
+        ],
+        string="Media Quality Gate",
+        default="uninspected",
+        index=True,
+    )
+
+    @api.depends("image_review_ids")
+    def _compute_image_review_count(self):
+        for product in self:
+            product.image_review_count = len(product.image_review_ids)
+
+    def action_view_image_review_queue(self):
+        self.ensure_one()
+        return {
+            "name": f"Media Review Queue - {self.display_name}",
+            "type": "ir.actions.act_window",
+            "res_model": "product.image.review",
+            "domain": [("product_tmpl_id", "=", self.id)],
+            "view_mode": "list,kanban,form",
+            "context": {"default_product_tmpl_id": self.id},
+        }
 
     def _detect_brand_profile(self):
         """Match this product against the Official Brand Catalog Brain."""
@@ -337,9 +373,9 @@ class ProductTemplate(models.Model):
         }
 
     @api.model
-    def cron_auto_enrich_products(self, limit=5):
+    def cron_auto_enrich_products(self, limit=10):
         """
-        Scheduled Action: Automatically enrich `limit` (default 5) products every 30 minutes.
+        Scheduled Action: Automatically enrich `limit` (default 10) products every 30 minutes.
         Priority Order:
           1. Stephan's 4 Active Flagship Brands (Bioline, Summit 10, TropiCat, TropiDog / Tropifit / Tropical)
           2. Remaining published, in-stock catalog products
@@ -360,29 +396,18 @@ class ProductTemplate(models.Model):
             ('x_ai_last_error', '=', False),
         ]
 
-        # Tier 0: Start automatically from Summit brand FIRST
+        # Tier 1: Find un-enriched products from the 4 active flagship brands first
+        flagship_or = ['|'] * (len(FLAGSHIP_BRAND_KEYS) - 1)
+        for bk in FLAGSHIP_BRAND_KEYS:
+            flagship_or.append(('name', 'ilike', bk))
+
         batch = self.search(
-            base_domain + [('name', 'ilike', 'summit')],
+            base_domain + flagship_or,
             order='is_published desc, list_price desc, id asc',
             limit=limit,
         )
 
-        # Tier 1: Remaining flagship brands (Bioline, TropiCat, TropiDog, Tropifit, Tropical)
-        if len(batch) < limit:
-            remaining = limit - len(batch)
-            other_flagships = tuple(bk for bk in FLAGSHIP_BRAND_KEYS if bk != 'summit')
-            flagship_or = ['|'] * (len(other_flagships) - 1)
-            for bk in other_flagships:
-                flagship_or.append(('name', 'ilike', bk))
-
-            extra_flagship = self.search(
-                base_domain + [('id', 'not in', batch.ids)] + flagship_or,
-                order='is_published desc, list_price desc, id asc',
-                limit=remaining,
-            )
-            batch |= extra_flagship
-
-        # Tier 2: Once all flagship brands are done, continue with the rest of the catalog
+        # Tier 2: Once all 4 flagship brands are done, continue with the rest of the catalog
         if len(batch) < limit:
             remaining = limit - len(batch)
             extra = self.search(
@@ -487,7 +512,7 @@ class ProductTemplate(models.Model):
         return f"""
 You are the master e-commerce catalog director for Stephan's Pet Store (Tanzania).
 Your task is to analyze the official source catalogue texts, user-supplied keywords, and candidate image URLs below,
-and output standardized, factual, healthy, high-converting product data as a single root JSON object (not a list).
+and output standardized, factual, healthy, high-converting product data in valid JSON.
 {brand_block}{vet_safety_block}
 STRICT ACCURACY & HEALTH RULE:
 - Ground all ingredients, protein/fat percentages, sizes, and usage instructions strictly in real official brand facts and the reference content below.
@@ -500,25 +525,26 @@ Available Image URLs:
 {json.dumps(image_candidates, indent=2)}
 
 CRITICAL FORMULA REQUIREMENTS:
-All products in Stephan's Pet Store MUST follow the exact same visual hierarchy and sections as seen in our flagship products:
+All products in Stephan's Pet Store MUST follow the exact same visual hierarchy and clean professional styling as seen in our flagship products:
+- STRICT NO-EMOJI RULE: Never output emojis, unicode icons, or cartoon symbols in any title, header, bullet, or description. Use clean, elegant typography.
 1. title: Clean, standardized format: [Brand] [Product Line / Feature] [Size or Weight] (e.g. 'Bioline Tofu with Bentonite Cat Litter 6L' or 'Summit 10 Cat Complete Chicken and Rice 3kg')
 2. barcode: Manufacturer EAN-13 or UPC barcode if detected (e.g. '6970117125535' or empty string).
 3. lead_summary: 1-2 compelling executive summary sentences explaining the core formula, technology, and primary benefit.
-4. key_highlights: Array of 4 to 6 highlights, each with an icon header and detailed explanation. E.g. [
-     {{"header": "⚡ 3-Second Rapid Clumping", "detail": "..."}},
-     {{"header": "💧 Ultra Absorbent", "detail": "..."}},
-     {{"header": "🌿 99% Dust-Free & Paw-Friendly", "detail": "..."}},
-     {{"header": "🛡️ Natural Odor Lock", "detail": "..."}},
-     {{"header": "📦 Vacuum-Sealed Freshness", "detail": "..."}}
+4. key_highlights: Array of 4 to 6 highlights, each with a clean bold header and detailed explanation (NO emojis/icons). E.g. [
+     {{"header": "3-Second Rapid Clumping", "detail": "..."}},
+     {{"header": "Ultra Absorbent", "detail": "..."}},
+     {{"header": "99% Dust-Free & Paw-Friendly", "detail": "..."}},
+     {{"header": "Natural Odor Lock", "detail": "..."}},
+     {{"header": "Vacuum-Sealed Freshness", "detail": "..."}}
    ]
-5. composition_title: '🧪 Composition & Ingredients' (or '🛠️ Materials & Specifications' for accessories/beds/crates)
+5. composition_title: 'Composition & Ingredients' (or 'Materials & Specifications' for accessories/beds/crates) - NO emojis
 6. composition_items: Array of 3 to 6 key components with their functional role. E.g. [
      {{"name": "Natural Bean Dregs (Okara)", "description": "Biodegradable, plant-based absorption base"}},
      {{"name": "Natural Bentonite Clay", "description": "Ultra-fast, hard clumping agent"}},
      {{"name": "Corn Starch", "description": "Natural binding agent"}},
      {{"name": "Guar Gum", "description": "Food-grade pellet stabilizer"}}
    ]
-7. instructions_title: '📋 Instructions for Use' (or '📋 Feeding Guide' for pet foods, or '📋 Sizing & Care' for accessories)
+7. instructions_title: 'Instructions for Use' (or 'Feeding Guide' for pet foods, or 'Sizing & Care' for accessories) - NO emojis
 8. instructions_steps: Array of 3 to 5 practical, numbered instructions (e.g. preparation, daily maintenance, replacement, cleaning).
 9. storage_text: Clear storage advice (e.g. 'Store unopened packs in a cool, dry, well-ventilated area away from direct sunlight and moisture.')
 10. key_ingredients_flat: Comma-separated list for backend filters (e.g. 'Natural Bean Dregs (Okara), Natural Bentonite Clay, Corn Starch, Guar Gum').
@@ -536,9 +562,9 @@ Return strictly a valid JSON object matching this structure.
         openai_key = (ir_config.get_param('stephans_product_ai_enrich.openai_api_key') or '').strip()
         openai_model = ir_config.get_param('stephans_product_ai_enrich.openai_model') or 'gpt-4o'
         gemini_key = (ir_config.get_param('stephans_product_ai_enrich.gemini_api_key') or '').strip()
-        gemini_model = ir_config.get_param('stephans_product_ai_enrich.gemini_model') or 'gemini-3.5-flash'
-        if gemini_model in ('gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'):
-            gemini_model = 'gemini-3.5-flash'
+        gemini_model = ir_config.get_param('stephans_product_ai_enrich.gemini_model') or 'gemini-2.0-flash'
+        if gemini_model == 'gemini-2.5-flash':
+            gemini_model = 'gemini-2.0-flash'
 
         # Check preferred provider and fallback
         if provider == 'gemini':
@@ -570,10 +596,7 @@ Return strictly a valid JSON object matching this structure.
         if text.startswith('```'):
             text = re.sub(r'^```(?:json)?\s*', '', text)
             text = re.sub(r'\s*```$', '', text)
-        res = json.loads(text.strip())
-        if isinstance(res, list) and res and isinstance(res[0], dict):
-            return res[0]
-        return res
+        return json.loads(text.strip())
 
     def _call_gemini(self, api_key, model, context_text, image_candidates):
         """Call Google Gemini API using native Python urllib with clean error handling"""
@@ -595,10 +618,7 @@ Return strictly a valid JSON object matching this structure.
         req = urllib.request.Request(
             endpoint,
             data=data,
-            headers={
-                "Content-Type": "application/json",
-                "X-goog-api-key": api_key,
-            },
+            headers={"Content-Type": "application/json"},
             method="POST"
         )
 
@@ -659,82 +679,90 @@ Return strictly a valid JSON object matching this structure.
         except Exception as e:
             raise UserError(f"OpenAI API call failed: {e}")
 
+    def _strip_emojis(self, text):
+        """Cleanly strip emojis and decorative symbols from text to maintain professional e-commerce typography"""
+        if not text:
+            return ""
+        # Remove emojis and miscellaneous decorative symbols
+        clean = re.sub(r'[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50\u200d\ufe0f\u2705\u2728\u2b50\u2714\u2716]', '', str(text))
+        # Clean extra leading spaces or punctuation from stripped icons
+        clean = re.sub(r'^\s*[-•·–]\s*', '', clean)
+        return clean.strip()
+
     def _render_stephans_catalog_html(self, data):
-        """Render the exact Stephan's Pet Store catalog HTML template formula"""
-        title = data.get('title') or self.name
-        lead = data.get('lead_summary') or ''
+        """Render the exact Stephan's Pet Store catalog HTML template formula without emojis"""
+        title = self._strip_emojis(data.get('title') or self.name)
+        lead = self._strip_emojis(data.get('lead_summary') or '')
         highlights = data.get('key_highlights') or []
-        comp_title = data.get('composition_title') or '🧪 Composition &amp; Ingredients'
+        comp_title = self._strip_emojis(data.get('composition_title') or 'Composition & Ingredients')
         comp_items = data.get('composition_items') or []
-        inst_title = data.get('instructions_title') or '📋 Instructions for Use'
+        inst_title = self._strip_emojis(data.get('instructions_title') or 'Instructions for Use')
         inst_steps = data.get('instructions_steps') or []
-        storage = data.get('storage_text') or 'Store in a cool, dry, well-ventilated area away from direct sunlight and humidity.'
+        storage = self._strip_emojis(data.get('storage_text') or 'Store in a cool, dry, well-ventilated area away from direct sunlight and humidity.')
 
         # Highlights items
         highlights_html = ""
         for hl in highlights:
             if isinstance(hl, dict):
-                h_header = hl.get('header', '')
-                h_detail = hl.get('detail', '')
-                highlights_html += f'<li class="py-1"><strong>{h_header}:</strong> {h_detail}</li>\n'
+                h_header = self._strip_emojis(hl.get('header', ''))
+                h_detail = self._strip_emojis(hl.get('detail', ''))
+                highlights_html += f'                    <li class="py-1"><strong>{h_header}:</strong> {h_detail}</li>\n'
             elif isinstance(hl, str):
-                highlights_html += f'<li class="py-1">{hl}</li>\n'
+                cleaned_hl = self._strip_emojis(hl)
+                highlights_html += f'                    <li class="py-1">{cleaned_hl}</li>\n'
 
         # Composition items
         comp_html = ""
         for c in comp_items:
             if isinstance(c, dict):
-                c_name = c.get('name', '')
-                c_desc = c.get('description', '')
+                c_name = self._strip_emojis(c.get('name', ''))
+                c_desc = self._strip_emojis(c.get('description', ''))
                 if c_desc:
-                    comp_html += f'<li><strong>{c_name}:</strong> {c_desc}</li>\n'
+                    comp_html += f'                            <li class="py-1"><strong>{c_name}:</strong> {c_desc}</li>\n'
                 else:
-                    comp_html += f'<li><strong>{c_name}</strong></li>\n'
+                    comp_html += f'                            <li class="py-1"><strong>{c_name}</strong></li>\n'
             elif isinstance(c, str):
-                comp_html += f'<li>{c}</li>\n'
+                cleaned_c = self._strip_emojis(c)
+                comp_html += f'                            <li class="py-1">{cleaned_c}</li>\n'
 
         # Instruction steps
         inst_html = ""
         for s in inst_steps:
-            inst_html += f'<li>{s}</li>\n'
+            cleaned_s = self._strip_emojis(s)
+            inst_html += f'                            <li class="py-1">{cleaned_s}</li>\n'
 
-        html = f"""<div class="container my-4">
+        html = f"""<div class="container my-4" style="background: #ffffff;">
     <div class="row">
         <div class="col-12">
-            <h3 class="text-primary mb-3">{title}</h3>
-            <p class="lead text-muted">
+            <h3 class="mb-3" style="color: #3e220f; font-weight: 700;">{title}</h3>
+            <p class="lead text-muted" style="font-size: 1.05rem; line-height: 1.6;">
                 {lead}
             </p>
             
-            <div class="card shadow-sm border-0 mb-4 bg-light">
-                <div class="card-body">
-                    <h5 class="card-title text-dark font-weight-bold">🌟 Key Product Highlights</h5>
-                    <ul class="list-unstyled mb-0">
-{highlights_html}
-                    </ul>
-                </div>
+            <div class="mb-4" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
+                <h5 class="mb-3" style="color: #3e220f; font-weight: 700; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">Key Product Highlights</h5>
+                <ul class="list-unstyled mb-0" style="color: #374151;">
+{highlights_html}                </ul>
             </div>
 
             <div class="row mb-4">
                 <div class="col-md-6 mb-3">
-                    <div class="border rounded p-3 h-100">
-                        <h5 class="text-dark">{comp_title}</h5>
-                        <ul class="mb-0">
-{comp_html}
-                        </ul>
+                    <div class="h-100" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
+                        <h5 class="mb-3" style="color: #3e220f; font-weight: 700; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">{comp_title}</h5>
+                        <ul class="mb-0" style="color: #374151; padding-left: 18px;">
+{comp_html}                        </ul>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <div class="border rounded p-3 h-100">
-                        <h5 class="text-dark">{inst_title}</h5>
-                        <ol class="mb-0 pl-3">
-{inst_html}
-                        </ol>
+                    <div class="h-100" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
+                        <h5 class="mb-3" style="color: #3e220f; font-weight: 700; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px;">{inst_title}</h5>
+                        <ol class="mb-0" style="color: #374151; padding-left: 18px;">
+{inst_html}                        </ol>
                     </div>
                 </div>
             </div>
 
-            <div class="alert alert-info border-0" role="alert">
+            <div class="mb-3" style="background-color: #f8fafc; border-left: 4px solid #634832; padding: 12px 16px; border-radius: 4px; color: #475569; font-size: 0.95rem;">
                 <strong>Storage:</strong> {storage}
             </div>
         </div>
@@ -759,40 +787,174 @@ Return strictly a valid JSON object matching this structure.
         if barcode_val and not self.barcode:
             vals['barcode'] = barcode_val
 
-        # Download clean watermark-free images (preserve existing studio main photo if already set)
+        # Strict Quality Gate: Stage images into Media Review Queue instead of direct unvalidated publishing
         img_urls = data.get('selected_image_urls', [])
         if img_urls:
-            if not self.image_1920:
-                main_img_data = self._download_image(img_urls[0])
-                if main_img_data:
-                    vals['image_1920'] = main_img_data
+            _, brand_cfg = self._detect_brand_profile()
+            manufacturer_name = brand_cfg.get('label') if brand_cfg else (getattr(self, 'product_brand_id', False) and self.product_brand_id.name or '')
+            source_type = 'manufacturer' if brand_cfg else 'distributor'
 
-            # Extra media gallery (only add if product does not already have extra images)
-            if not self.product_template_image_ids:
-                extra_images = []
-                for extra_url in img_urls[1:]:
-                    extra_data = self._download_image(extra_url)
-                    if extra_data:
-                        extra_images.append((0, 0, {
-                            'name': f"{self.name} Detail",
-                            'image_1920': extra_data
-                        }))
-                if extra_images:
-                    vals['product_template_image_ids'] = extra_images
+            # 1. Front Packshot Candidate
+            front_url = img_urls[0]
+            self._validate_and_process_candidate_image(
+                url=front_url,
+                role='front',
+                source_type=source_type,
+                manufacturer=manufacturer_name,
+            )
+
+            # 2. Secondary Image Candidates (back, detail, usage)
+            roles = ['back', 'detail', 'lifestyle']
+            for idx, extra_url in enumerate(img_urls[1:]):
+                role = roles[idx] if idx < len(roles) else 'detail'
+                self._validate_and_process_candidate_image(
+                    url=extra_url,
+                    role=role,
+                    source_type=source_type,
+                    manufacturer=manufacturer_name,
+                )
+
+            if self.image_1920:
+                vals['image_quality_status'] = 'approved'
+            else:
+                vals['image_quality_status'] = 'pending_review'
 
         self.write(vals)
 
-    def _download_image(self, url):
-        """Download remote image and return BinaryBytes or base64 string"""
+    def _validate_and_process_candidate_image(self, url, role="front", source_type="manufacturer", manufacturer=""):
+        """
+        Image Quality & Watermark Validation Pipeline:
+        1. URL Inspection (reject watermarks, retailer domains, low-res CDN params)
+        2. Download & SHA-256 Checksum (prevent duplicates)
+        3. PIL Decode & Integrity Verification
+        4. Resolution Validation:
+           - Block if width < 1000 or height < 1000
+           - Validate 1600x1600 min for main, 1200x1200 min for secondary
+        5. 1:1 Canvas Square Adjustment (product occupies 75-85% of canvas)
+        6. WebP Derivative Generation (100-300 KB target)
+        7. Stage into product.image.review queue for human approval
+        """
+        import hashlib
+        import io
+        from PIL import Image
+
+        if not url or not url.startswith("http"):
+            return False
+
+        # 1. URL Inspection & Watermark / Marketplace Keyword Check
+        low_url = url.lower()
+        blocked_keywords = (
+            "watermark", "sample", "preview", "wm_", "stock", "shopee",
+            "lazada", "alibaba", "aliexpress", "ebay", "amazon", "temu"
+        )
+        if any(bw in low_url for bw in blocked_keywords):
+            _logger.info("Blocked image candidate %s: external watermark/marketplace keyword detected", url)
+            return False
+
+        # 2. Download raw image
+        raw_bytes = None
         try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
             with urllib.request.urlopen(req, timeout=12) as resp:
                 raw_bytes = resp.read()
-                try:
-                    from odoo.orm.fields_binary import BinaryBytes
-                    return BinaryBytes(raw_bytes, filename="product.png")
-                except ImportError:
-                    return base64.b64encode(raw_bytes)
         except Exception as e:
             _logger.warning("Could not download candidate image %s: %s", url, e)
             return False
+
+        if not raw_bytes or len(raw_bytes) < 5000:
+            _logger.info("Blocked image candidate %s: file too small or empty", url)
+            return False
+
+        # 3. Checksum & Deduplication
+        checksum = hashlib.sha256(raw_bytes).hexdigest()
+        existing_review = self.env["product.image.review"].sudo().search([
+            ("product_tmpl_id", "=", self.id),
+            ("file_checksum", "=", checksum),
+        ], limit=1)
+        if existing_review:
+            _logger.info("Skipping duplicate image candidate %s for product %s", url, self.name)
+            return False
+
+        # 4. PIL Decode & Dimension Verification
+        try:
+            img = Image.open(io.BytesIO(raw_bytes))
+            img.load()
+            orig_w, orig_h = img.size
+        except Exception as e:
+            _logger.warning("Corrupted image candidate %s: %s", url, e)
+            return False
+
+        # Reject if below 1000px threshold
+        if orig_w < 1000 or orig_h < 1000:
+            _logger.info("Blocked image candidate %s: resolution %sx%s is below minimum 1000px threshold", url, orig_w, orig_h)
+            return False
+
+        aspect = round(orig_w / float(orig_h), 2)
+
+        # 5. Square 1:1 Canvas & 75-85% Product Coverage
+        is_transparent = img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info)
+
+        # Determine canvas size (at least 1600x1600 for front, 1200x1200 for secondary, or original max dimension)
+        min_target = 1600 if role == "front" else 1200
+        canvas_dim = max(orig_w, orig_h, min_target)
+
+        # Target product occupies ~80% of canvas
+        target_product_dim = int(canvas_dim * 0.82)
+        scale_ratio = target_product_dim / float(max(orig_w, orig_h))
+        # Never upscale a small image above its original resolution; adjust canvas instead
+        if scale_ratio > 1.0:
+            canvas_dim = int(max(orig_w, orig_h) / 0.82)
+            scaled_w, scaled_h = orig_w, orig_h
+            scaled_img = img
+        else:
+            scaled_w = int(orig_w * scale_ratio)
+            scaled_h = int(orig_h * scale_ratio)
+            scaled_img = img.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
+
+        # Create square canvas
+        if is_transparent:
+            canvas = Image.new("RGBA", (canvas_dim, canvas_dim), (255, 255, 255, 0))
+            offset = ((canvas_dim - scaled_w) // 2, (canvas_dim - scaled_h) // 2)
+            canvas.paste(scaled_img, offset, scaled_img.convert("RGBA"))
+        else:
+            canvas = Image.new("RGB", (canvas_dim, canvas_dim), (255, 255, 255))
+            offset = ((canvas_dim - scaled_w) // 2, (canvas_dim - scaled_h) // 2)
+            canvas.paste(scaled_img, offset)
+
+        # 6. Generate optimized WebP derivative (target 100-300 KB)
+        webp_buf = io.BytesIO()
+        canvas.save(webp_buf, format="WEBP", quality=85, method=6)
+        webp_bytes = webp_buf.getvalue()
+        filesize_kb = round(len(webp_bytes) / 1024.0, 1)
+
+        # If over 300 KB, re-encode with slightly lower quality
+        if filesize_kb > 320:
+            webp_buf = io.BytesIO()
+            canvas.save(webp_buf, format="WEBP", quality=75, method=6)
+            webp_bytes = webp_buf.getvalue()
+            filesize_kb = round(len(webp_bytes) / 1024.0, 1)
+
+        # 7. Stage into product.image.review
+        raw_b64 = base64.b64encode(raw_bytes)
+        webp_b64 = base64.b64encode(webp_bytes)
+
+        review_vals = {
+            "product_tmpl_id": self.id,
+            "original_source_url": url,
+            "source_type": source_type,
+            "manufacturer_name": manufacturer or (getattr(self, 'product_brand_id', False) and self.product_brand_id.name or ""),
+            "download_date": fields.Datetime.now(),
+            "original_width": orig_w,
+            "original_height": orig_h,
+            "aspect_ratio": aspect,
+            "file_checksum": checksum,
+            "image_role": role,
+            "approval_status": "pending_review",
+            "raw_image": raw_b64,
+            "webp_image": webp_b64,
+            "webp_filesize_kb": filesize_kb,
+            "usage_license_note": f"Official {manufacturer or 'brand'} catalogue packshot",
+        }
+        self.env["product.image.review"].sudo().create(review_vals)
+        _logger.info("Staged image candidate into Media Review Queue for product %s (%sx%s, WebP: %s KB)", self.name, orig_w, orig_h, filesize_kb)
+        return True

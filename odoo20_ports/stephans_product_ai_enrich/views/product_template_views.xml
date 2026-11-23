@@ -18,6 +18,17 @@
                         class="btn-secondary"/>
             </xpath>
 
+            <!-- Add Media Review Smart Button in Button Box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_image_review_queue"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-picture-o"
+                        invisible="image_review_count == 0">
+                    <field name="image_review_count" widget="statinfo" string="Media Review"/>
+                </button>
+            </xpath>
+
             <!-- Add AI Catalog Seeds Tab to Notebook -->
             <xpath expr="//notebook" position="inside">
                 <page string="AI Catalog Seeds &amp; Keywords" name="ai_catalog_seeds">
@@ -31,11 +42,28 @@
                                    placeholder="Add custom keywords, features, or highlights to emphasize..."/>
                             <field name="x_packaging_form" readonly="1"/>
                             <field name="x_key_ingredients" readonly="1"/>
+                            <field name="image_quality_status" widget="badge"
+                                   decoration-warning="image_quality_status == 'pending_review'"
+                                   decoration-success="image_quality_status == 'approved'"
+                                   decoration-danger="image_quality_status == 'rejected'"/>
                             <field name="x_ai_enriched"/>
                             <field name="x_ai_last_enriched" readonly="1"/>
                             <field name="x_ai_last_error" readonly="1" invisible="not x_ai_last_error"/>
                         </group>
                     </group>
+                    <field name="image_review_ids" readonly="1">
+                        <list string="Media Review Queue">
+                            <field name="name"/>
+                            <field name="image_role" widget="badge"/>
+                            <field name="original_width"/>
+                            <field name="original_height"/>
+                            <field name="webp_filesize_kb"/>
+                            <field name="approval_status" widget="badge"
+                                   decoration-warning="approval_status == 'pending_review'"
+                                   decoration-success="approval_status == 'approved'"
+                                   decoration-danger="approval_status == 'rejected'"/>
+                        </list>
+                    </field>
                 </page>
             </xpath>
         </field>
