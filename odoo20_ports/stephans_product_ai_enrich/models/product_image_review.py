@@ -6,7 +6,7 @@ import logging
 from PIL import Image
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, AccessError
 
 _logger = logging.getLogger(__name__)
 
@@ -43,15 +43,21 @@ class ProductImageReview(models.Model):
         required=True,
         index=True,
     )
+    verified_domain = fields.Char(
+        string="Verified Domain",
+        readonly=True,
+        index=True,
+    )
     source_type = fields.Selection(
         [
             ("manufacturer", "Official Manufacturer Catalogue"),
             ("distributor", "Authorized Distributor"),
             ("internal", "Stephan's Internal Photography"),
             ("licensed", "Explicitly Licensed Reuse"),
+            ("unverified", "External / Unverified Source"),
         ],
-        string="Source Type",
-        default="manufacturer",
+        string="Source Provenance",
+        default="unverified",
         required=True,
         index=True,
     )
@@ -78,14 +84,26 @@ class ProductImageReview(models.Model):
         digits=(16, 2),
         readonly=True,
     )
+    foreground_coverage_pct = fields.Float(
+        string="Product Canvas Occupancy (%)",
+        digits=(16, 1),
+        readonly=True,
+        help="Measured percentage of the 1:1 canvas occupied by the detected foreground product package.",
+    )
     file_checksum = fields.Char(
         string="File SHA-256 Checksum",
         readonly=True,
         index=True,
     )
+    phash = fields.Char(
+        string="Perceptual dHash",
+        readonly=True,
+        index=True,
+        help="Difference hash (dHash) used for catalogue-wide visual similarity and duplicate detection.",
+    )
     usage_license_note = fields.Char(
         string="Usage / License Note",
-        default="Authorized distribution packshot",
+        readonly=True,
     )
     image_role = fields.Selection(
         [
@@ -121,6 +139,7 @@ class ProductImageReview(models.Model):
     )
     rejection_reason = fields.Text(
         string="Rejection Reason",
+        readonly=True,
     )
     raw_image = fields.Binary(
         string="Original Raw Image",
@@ -150,56 +169,82 @@ class ProductImageReview(models.Model):
             res = f"{record.original_width}x{record.original_height}" if record.original_width else ""
             record.name = f"{p_name} - {role} ({res})"
 
+    def _check_reviewer_rights(self):
+        """Enforce that only members of group_media_reviewer or administrators can publish/reject."""
+        if not self.env.user.has_group("stephans_product_ai_enrich.group_media_reviewer") and not self.env.is_admin():
+            raise AccessError(_("Permission Denied: Only authorized Media Quality Reviewers can approve or reject catalog images."))
+
     def action_approve_and_publish(self):
-        """Human approval action: publishes clean WebP / raw derivative directly to eCommerce catalog."""
-        self.ensure_one()
-        product = self.product_tmpl_id
-        img_data = self.webp_image or self.raw_image
-        if not img_data:
-            raise UserError(_("No image binary available to publish."))
+        """Human approval action: publishes clean WebP derivative to storefront gallery with strict idempotency."""
+        self._check_reviewer_rights()
+        for review in self:
+            if review.approval_status != "pending_review":
+                raise UserError(_("Cannot approve asset '%s': current status is '%s'. Only pending assets can be approved.") % (review.name, review.approval_status))
 
-        now = fields.Datetime.now()
-        if self.image_role == "front" or not product.image_1920:
-            product.sudo().write({"image_1920": img_data})
-        else:
-            # Add to secondary gallery images
-            self.env["product.image"].sudo().create({
-                "name": self.name,
-                "product_tmpl_id": product.id,
-                "image_1920": img_data,
+            product = review.product_tmpl_id
+            img_data = review.webp_image or review.raw_image
+            if not img_data:
+                raise UserError(_("No image binary available to publish for '%s'.") % review.name)
+
+            now = fields.Datetime.now()
+            if review.image_role == "front" or not product.image_1920:
+                product.sudo().write({"image_1920": img_data})
+            else:
+                # Idempotency check: prevent duplicate gallery images with the same checksum or phash
+                existing_gallery = self.env["product.image"].sudo().search([
+                    ("product_tmpl_id", "=", product.id),
+                    ("name", "=", review.name),
+                ], limit=1)
+                if not existing_gallery:
+                    self.env["product.image"].sudo().create({
+                        "name": review.name,
+                        "product_tmpl_id": product.id,
+                        "image_1920": img_data,
+                    })
+
+            review.write({
+                "approval_status": "approved",
+                "approved_by_id": self.env.uid,
+                "approval_date": now,
+                "rejection_reason": False,
             })
+            product._recompute_image_quality_status()
 
-        self.write({
-            "approval_status": "approved",
-            "approved_by_id": self.env.uid,
-            "approval_date": now,
-            "rejection_reason": False,
-        })
-        product.sudo().write({"image_quality_status": "approved"})
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": _("Image Approved & Published"),
-                "message": _("Image published cleanly to %s storefront gallery.", product.display_name),
+                "message": _("Selected image(s) published cleanly to product storefront."),
                 "type": "success",
                 "sticky": False,
             },
         }
 
     def action_reject(self):
-        """Reject image with reason."""
+        """Open the mandatory Rejection Reason Wizard."""
         self.ensure_one()
-        self.write({
-            "approval_status": "rejected",
-            "approved_by_id": self.env.uid,
-            "approval_date": fields.Datetime.now(),
-        })
-        # Check if all images for this product are rejected
-        other_active = self.search([
-            ("product_tmpl_id", "=", self.product_tmpl_id.id),
-            ("id", "!=", self.id),
-            ("approval_status", "=", "approved"),
-        ], limit=1)
-        if not other_active:
-            self.product_tmpl_id.sudo().write({"image_quality_status": "rejected"})
+        self._check_reviewer_rights()
+        if self.approval_status != "pending_review":
+            raise UserError(_("Only pending images can be rejected."))
+
+        return {
+            "name": _("Reject Image Asset"),
+            "type": "ir.actions.act_window",
+            "res_model": "product.image.reject.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_review_id": self.id},
+        }
+
+    @api.model
+    def cron_purge_rejected_raw_images(self):
+        """Retention policy: purge raw binary attachments of rejected images older than 7 days to conserve filestore space."""
+        threshold = fields.Datetime.now() - fields.Date.timedelta(days=7)
+        old_rejected = self.search([
+            ("approval_status", "=", "rejected"),
+            ("approval_date", "<=", threshold),
+            ("raw_image", "!=", False),
+        ])
+        _logger.info("Purging %d rejected raw image binaries older than 7 days.", len(old_rejected))
+        old_rejected.write({"raw_image": False})

@@ -814,34 +814,105 @@ Return strictly a valid JSON object matching this structure.
                     manufacturer=manufacturer_name,
                 )
 
-            if self.image_1920:
-                vals['image_quality_status'] = 'approved'
-            else:
-                vals['image_quality_status'] = 'pending_review'
+            # Quality status is derived directly from the review queue records
+            vals['image_quality_status'] = 'pending_review'
 
         self.write(vals)
 
+    def _recompute_image_quality_status(self):
+        """Derive quality status strictly from review records."""
+        for product in self:
+            reviews = product.image_review_ids
+            if not reviews:
+                product.image_quality_status = "approved" if product.image_1920 else "uninspected"
+            elif any(r.approval_status == "pending_review" for r in reviews):
+                product.image_quality_status = "pending_review"
+            elif any(r.approval_status == "approved" for r in reviews):
+                product.image_quality_status = "approved"
+            else:
+                product.image_quality_status = "rejected"
+
+    @staticmethod
+    def _compute_dhash(img, hash_size=8):
+        """Computes a 64-bit difference hash (dHash) for visual perceptual similarity."""
+        from PIL import Image
+        gray = img.convert("L").resize((hash_size + 1, hash_size), Image.Resampling.LANCZOS)
+        pixels = list(gray.getdata())
+        diff = []
+        for row in range(hash_size):
+            for col in range(hash_size):
+                left = pixels[row * (hash_size + 1) + col]
+                right = pixels[row * (hash_size + 1) + col + 1]
+                diff.append(left > right)
+        decimal_val = 0
+        for index, val in enumerate(diff):
+            if val:
+                decimal_val |= 1 << index
+        return f"{decimal_val:016x}"
+
+    @staticmethod
+    def _hamming_distance(hash1, hash2):
+        if not hash1 or not hash2 or len(hash1) != len(hash2):
+            return 99
+        val1 = int(hash1, 16)
+        val2 = int(hash2, 16)
+        return bin(val1 ^ val2).count("1")
+
     def _validate_and_process_candidate_image(self, url, role="front", source_type="manufacturer", manufacturer=""):
         """
-        Image Quality & Watermark Validation Pipeline:
-        1. URL Inspection (reject watermarks, retailer domains, low-res CDN params)
-        2. Download & SHA-256 Checksum (prevent duplicates)
-        3. PIL Decode & Integrity Verification
-        4. Resolution Validation:
-           - Block if width < 1000 or height < 1000
-           - Validate 1600x1600 min for main, 1200x1200 min for secondary
-        5. 1:1 Canvas Square Adjustment (product occupies 75-85% of canvas)
-        6. WebP Derivative Generation (100-300 KB target)
-        7. Stage into product.image.review queue for human approval
+        Hardened Image Quality & Watermark Prevention Pipeline:
+        1. SSRF Guard: hostname verification, private IP & loopback blocking
+        2. Verified Manufacturer Domain Whitelisting: provenance derived strictly from domain
+        3. Streaming Resource-Capped Download: 12MB limit & image/* Content-Type validation
+        4. PIL Decompression Bomb Guard & Dimension Verification (>=1000px floor)
+        5. Catalogue-Wide Perceptual Deduplication via 64-bit dHash (Hamming distance <= 4)
+        6. Real Foreground Bounding Box Detection: package occupies 75-85% of 1:1 canvas
+        7. Controlled WebP Derivative Generation: iterative compression (target 100-300 KB)
+        8. Media Review Staging: 100% human approval required before storefront publication
         """
         import hashlib
         import io
-        from PIL import Image
+        import ipaddress
+        import socket
+        import urllib.parse
+        from PIL import Image, ImageChops
 
         if not url or not url.startswith("http"):
             return False
 
-        # 1. URL Inspection & Watermark / Marketplace Keyword Check
+        # 1. SSRF Guard & Hostname Validation
+        parsed = urllib.parse.urlparse(url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            _logger.info("Blocked candidate image: invalid scheme or missing hostname in %s", url)
+            return False
+
+        hostname = parsed.hostname.lower()
+        try:
+            target_ip = socket.gethostbyname(hostname)
+            ip_obj = ipaddress.ip_address(target_ip)
+            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_reserved or ip_obj.is_link_local:
+                _logger.warning("SSRF Block: URL %s resolved to private/loopback IP %s", url, target_ip)
+                return False
+        except Exception as e:
+            _logger.warning("DNS resolution failed for hostname %s: %s", hostname, e)
+            return False
+
+        # 2. Strict Domain Provenance Derivation
+        OFFICIAL_DOMAINS = (
+            "biolinepet.com", "vetforest.com",
+            "summit10.com", "cotecnica.es",
+            "tropicat.eu", "tropidog.eu", "tropical.pl", "tropifit.eu",
+            "ownat.com", "stephanspetstore.co.tz",
+        )
+        is_official = any(hostname == d or hostname.endswith("." + d) for d in OFFICIAL_DOMAINS)
+        if is_official:
+            derived_source_type = "manufacturer"
+            license_note = f"Verified official manufacturer asset from {hostname}"
+        else:
+            derived_source_type = "unverified"
+            license_note = f"External candidate asset from {hostname} - unverified provenance"
+
+        # Watermark & Marketplace Keyword URL Inspection
         low_url = url.lower()
         blocked_keywords = (
             "watermark", "sample", "preview", "wm_", "stock", "shopee",
@@ -851,12 +922,32 @@ Return strictly a valid JSON object matching this structure.
             _logger.info("Blocked image candidate %s: external watermark/marketplace keyword detected", url)
             return False
 
-        # 2. Download raw image
+        # 3. Streaming Download with 12MB limit & Content-Type check
         raw_bytes = None
         try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+            req = urllib.request.Request(
+                url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) StephanPetStore/2.0"},
+            )
             with urllib.request.urlopen(req, timeout=12) as resp:
-                raw_bytes = resp.read()
+                content_type = resp.headers.get("Content-Type", "").lower()
+                if not any(t in content_type for t in ("image/jpeg", "image/png", "image/webp", "image/jpg")):
+                    _logger.info("Blocked image %s: Content-Type '%s' is not a supported image format", url, content_type)
+                    return False
+
+                chunks = []
+                total_size = 0
+                MAX_BYTES = 12 * 1024 * 1024  # 12 MB
+                while True:
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    total_size += len(chunk)
+                    if total_size > MAX_BYTES:
+                        _logger.warning("Blocked image %s: exceeds 12MB limit", url)
+                        return False
+                raw_bytes = b"".join(chunks)
         except Exception as e:
             _logger.warning("Could not download candidate image %s: %s", url, e)
             return False
@@ -865,18 +956,18 @@ Return strictly a valid JSON object matching this structure.
             _logger.info("Blocked image candidate %s: file too small or empty", url)
             return False
 
-        # 3. Checksum & Deduplication
+        # Checksum & Exact File Deduplication
         checksum = hashlib.sha256(raw_bytes).hexdigest()
         existing_review = self.env["product.image.review"].sudo().search([
-            ("product_tmpl_id", "=", self.id),
             ("file_checksum", "=", checksum),
         ], limit=1)
         if existing_review:
-            _logger.info("Skipping duplicate image candidate %s for product %s", url, self.name)
+            _logger.info("Skipping exact duplicate image %s (already in queue for product %s)", url, existing_review.product_tmpl_id.name)
             return False
 
-        # 4. PIL Decode & Dimension Verification
+        # 4. PIL Decompression Bomb Guard & Dimension Verification
         try:
+            Image.MAX_IMAGE_PIXELS = 50_000_000
             img = Image.open(io.BytesIO(raw_bytes))
             img.load()
             orig_w, orig_h = img.size
@@ -884,77 +975,104 @@ Return strictly a valid JSON object matching this structure.
             _logger.warning("Corrupted image candidate %s: %s", url, e)
             return False
 
-        # Reject if below 1000px threshold
+        # Hard block if width or height is below 1000px
         if orig_w < 1000 or orig_h < 1000:
             _logger.info("Blocked image candidate %s: resolution %sx%s is below minimum 1000px threshold", url, orig_w, orig_h)
             return False
 
         aspect = round(orig_w / float(orig_h), 2)
 
-        # 5. Square 1:1 Canvas & 75-85% Product Coverage
+        # 5. Catalogue-Wide Perceptual Hashing (dHash) Deduplication
+        dhash_val = self._compute_dhash(img)
+        existing_hashes = self.env["product.image.review"].sudo().search_read(
+            [("phash", "!=", False)], ["id", "phash", "product_tmpl_id"]
+        )
+        for rec in existing_hashes:
+            if self._hamming_distance(dhash_val, rec["phash"]) <= 4:
+                _logger.info("Blocked image %s: perceptual duplicate (dHash match with review record #%s)", url, rec["id"])
+                return False
+
+        # 6. Real Foreground Bounding Box Detection & 75-85% Canvas Occupancy
         is_transparent = img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info)
-
-        # Determine canvas size (at least 1600x1600 for front, 1200x1200 for secondary, or original max dimension)
-        min_target = 1600 if role == "front" else 1200
-        canvas_dim = max(orig_w, orig_h, min_target)
-
-        # Target product occupies ~80% of canvas
-        target_product_dim = int(canvas_dim * 0.82)
-        scale_ratio = target_product_dim / float(max(orig_w, orig_h))
-        # Never upscale a small image above its original resolution; adjust canvas instead
-        if scale_ratio > 1.0:
-            canvas_dim = int(max(orig_w, orig_h) / 0.82)
-            scaled_w, scaled_h = orig_w, orig_h
-            scaled_img = img
-        else:
-            scaled_w = int(orig_w * scale_ratio)
-            scaled_h = int(orig_h * scale_ratio)
-            scaled_img = img.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
-
-        # Create square canvas
         if is_transparent:
-            canvas = Image.new("RGBA", (canvas_dim, canvas_dim), (255, 255, 255, 0))
-            offset = ((canvas_dim - scaled_w) // 2, (canvas_dim - scaled_h) // 2)
-            canvas.paste(scaled_img, offset, scaled_img.convert("RGBA"))
+            rgba_img = img.convert("RGBA")
+            bbox = rgba_img.getbbox()
         else:
-            canvas = Image.new("RGB", (canvas_dim, canvas_dim), (255, 255, 255))
-            offset = ((canvas_dim - scaled_w) // 2, (canvas_dim - scaled_h) // 2)
-            canvas.paste(scaled_img, offset)
+            rgb_img = img.convert("RGB")
+            bg = Image.new("RGB", rgb_img.size, (255, 255, 255))
+            diff = ImageChops.difference(rgb_img, bg)
+            mask = diff.convert("L").point(lambda p: 255 if p > 18 else 0)
+            bbox = mask.getbbox()
 
-        # 6. Generate optimized WebP derivative (target 100-300 KB)
-        webp_buf = io.BytesIO()
-        canvas.save(webp_buf, format="WEBP", quality=85, method=6)
-        webp_bytes = webp_buf.getvalue()
+        if not bbox or (bbox[2] - bbox[0] < 100) or (bbox[3] - bbox[1] < 100):
+            bbox = (0, 0, orig_w, orig_h)
+
+        product_crop = img.crop(bbox)
+        fg_w = bbox[2] - bbox[0]
+        fg_h = bbox[3] - bbox[1]
+
+        # Standard: 1600x1600 target for main, 1200x1200 target for secondary
+        min_canvas = 1600 if role == "front" else 1200
+        ideal_canvas = int(max(fg_w, fg_h) / 0.80)
+        canvas_dim = max(ideal_canvas, min_canvas)
+
+        target_fg_max = int(canvas_dim * 0.80)
+        scale = target_fg_max / float(max(fg_w, fg_h))
+        if scale > 1.05:
+            canvas_dim = int(max(fg_w, fg_h) / 0.80)
+            scale = 1.0
+
+        new_w = max(1, int(fg_w * scale))
+        new_h = max(1, int(fg_h * scale))
+        scaled_crop = product_crop.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        measured_occupancy = round((max(new_w, new_h) / float(canvas_dim)) * 100.0, 1)
+
+        # Composite onto 1:1 pure white canvas
+        canvas = Image.new("RGB", (canvas_dim, canvas_dim), (255, 255, 255))
+        offset = ((canvas_dim - new_w) // 2, (canvas_dim - new_h) // 2)
+        if scaled_crop.mode in ("RGBA", "LA"):
+            canvas.paste(scaled_crop, offset, scaled_crop.convert("RGBA"))
+        else:
+            canvas.paste(scaled_crop, offset)
+
+        # 7. Controlled WebP Derivative Generation (target 100-300 KB)
+        webp_bytes = None
+        for q in (85, 80, 75, 70, 65, 55):
+            buf = io.BytesIO()
+            canvas.save(buf, format="WEBP", quality=q, method=6)
+            b = buf.getvalue()
+            size_kb = len(b) / 1024.0
+            if size_kb <= 300 or q == 55:
+                webp_bytes = b
+                break
+
         filesize_kb = round(len(webp_bytes) / 1024.0, 1)
 
-        # If over 300 KB, re-encode with slightly lower quality
-        if filesize_kb > 320:
-            webp_buf = io.BytesIO()
-            canvas.save(webp_buf, format="WEBP", quality=75, method=6)
-            webp_bytes = webp_buf.getvalue()
-            filesize_kb = round(len(webp_bytes) / 1024.0, 1)
-
-        # 7. Stage into product.image.review
+        # 8. Stage into product.image.review queue
         raw_b64 = base64.b64encode(raw_bytes)
         webp_b64 = base64.b64encode(webp_bytes)
 
         review_vals = {
             "product_tmpl_id": self.id,
             "original_source_url": url,
-            "source_type": source_type,
+            "verified_domain": hostname,
+            "source_type": derived_source_type,
             "manufacturer_name": manufacturer or (getattr(self, 'product_brand_id', False) and self.product_brand_id.name or ""),
             "download_date": fields.Datetime.now(),
             "original_width": orig_w,
             "original_height": orig_h,
             "aspect_ratio": aspect,
+            "foreground_coverage_pct": measured_occupancy,
             "file_checksum": checksum,
+            "phash": dhash_val,
             "image_role": role,
             "approval_status": "pending_review",
             "raw_image": raw_b64,
             "webp_image": webp_b64,
             "webp_filesize_kb": filesize_kb,
-            "usage_license_note": f"Official {manufacturer or 'brand'} catalogue packshot",
+            "usage_license_note": license_note,
         }
         self.env["product.image.review"].sudo().create(review_vals)
-        _logger.info("Staged image candidate into Media Review Queue for product %s (%sx%s, WebP: %s KB)", self.name, orig_w, orig_h, filesize_kb)
+        self._recompute_image_quality_status()
+        _logger.info("Staged image asset for %s: %sx%s, occupancy=%s%%, WebP=%s KB (dHash: %s)", self.name, orig_w, orig_h, measured_occupancy, filesize_kb, dhash_val)
         return True

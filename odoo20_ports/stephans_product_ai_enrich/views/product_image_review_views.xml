@@ -83,6 +83,7 @@
                         </group>
                         <group string="Source &amp; Licensing Provenance">
                             <field name="source_type" widget="badge"/>
+                            <field name="verified_domain"/>
                             <field name="manufacturer_name"/>
                             <field name="original_source_url" widget="url"/>
                             <field name="usage_license_note"/>
@@ -94,8 +95,10 @@
                             <field name="original_width"/>
                             <field name="original_height"/>
                             <field name="aspect_ratio"/>
+                            <field name="foreground_coverage_pct"/>
                             <field name="webp_filesize_kb"/>
                             <field name="file_checksum"/>
+                            <field name="phash"/>
                         </group>
                         <group string="Audit &amp; Approval">
                             <field name="approved_by_id"/>
