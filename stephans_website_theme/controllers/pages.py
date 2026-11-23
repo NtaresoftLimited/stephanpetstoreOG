@@ -369,38 +369,106 @@ class StephansWebsitePages(http.Controller):
         has_search_idx = 'x_search_index' in available_fields
 
         # 1. Multi-term Tokenization & Search Normalization
-        # Handles queries like 'Summit10', 'summit-10', 'SUMMIT 10', 'Summit 10 Cat 3kg'
+        # Handles queries like 'Summit10', 'summit-10', 'SUMMIT 10', '[ITEM-436] SUMMIT 10...', ':E ADULT MINI CHICKEN 800g'
+        sku_bracket_match = re.search(r"\[([A-Za-z0-9\-_]+)\]", clean_norm)
+        extracted_sku = sku_bracket_match.group(1).strip() if sku_bracket_match else ""
+
         raw_words = [w.strip() for w in clean_norm.split() if w.strip()]
         expanded_tokens = []
         for w in raw_words:
-            sub_words = re.sub(r"['\"\-_.,;:/]", " ", w).split()
+            # Strip surrounding brackets/punctuation
+            w_clean = w.strip("[](){}<>:'\",.;!?")
+            if not w_clean:
+                continue
+            # Keep explicit SKU codes intact (e.g. ITEM-436, S-ITEM0841)
+            if re.match(r"^(?:s-)?item[\-_]?\d+$", w_clean, flags=re.IGNORECASE):
+                expanded_tokens.append(w_clean)
+                continue
+
+            sub_words = re.sub(r"['\"\-_.,;:/\[\]()]", " ", w_clean).split()
             for sw in sub_words:
-                parts = re.findall(r'[a-zA-Z]+|\d+', sw)
-                if len(parts) > 1 and len(sw) >= 3:
+                parts = re.findall(r"[a-zA-Z]+|\d+", sw)
+                # Keep pack sizes together (e.g. 800g, 2kg, 3kg, 10kg, 200ml, 200mls, 6l, 40pcs)
+                if len(parts) == 2 and parts[0].isdigit() and parts[1].lower() in ("g", "kg", "ml", "mls", "l", "pcs", "pc", "cm", "mm"):
+                    expanded_tokens.append(f"{parts[0]}{parts[1].lower()}")
+                elif len(parts) > 1 and len(sw) >= 3:
                     expanded_tokens.extend(parts)
                 else:
                     expanded_tokens.append(sw)
 
-        # Deduplicate search tokens while preserving order
+        # Deduplicate search tokens while preserving order (skip 1-letter fragments like ':E' unless digit)
         search_tokens = []
         seen_toks = set()
         for t in expanded_tokens:
             tl = t.lower()
-            if tl not in seen_toks and len(tl) >= 1:
+            if tl in ("mls",):
+                tl = "ml"
+                t = "ml"
+            if len(tl) < 2 and not tl.isdigit():
+                continue
+            if tl not in seen_toks:
                 seen_toks.add(tl)
                 search_tokens.append(t)
 
         if not search_tokens:
             search_tokens = [clean_q]
 
-        # 2. Fast Indexed Query via x_search_index (GIN trigram index) with fallback
-        full_domain = [('active', '=', True), ('is_published', '=', True)]
-        if has_search_idx:
+        # Extract core tokens without bracketed SKU prefix for progressive fallback
+        non_sku_tokens = [
+            t for t in search_tokens
+            if not re.match(r"^(?:s-)?item[\-_]?\d+$", t, flags=re.IGNORECASE)
+        ]
+
+        # 2. Fast Indexed Query via x_search_index (GIN trigram index) with progressive relaxation
+        products = []
+        seen_pids = set()
+
+        def _add_products(prod_list):
+            for pr in prod_list:
+                if pr.id not in seen_pids:
+                    seen_pids.add(pr.id)
+                    products.append(pr)
+
+        # 2a. Exact SKU match first if query contains an SKU like [ITEM-436] or S-ITEM0841
+        if extracted_sku:
+            sku_prods = pt_model.search([
+                ('active', '=', True),
+                ('is_published', '=', True),
+                '|',
+                ('default_code', '=ilike', extracted_sku),
+                ('name', 'ilike', extracted_sku),
+            ], limit=5)
+            _add_products(sku_prods)
+
+        # 2b. Full AND match across all search tokens
+        if has_search_idx and len(products) < limit_count * 2:
+            full_domain = [('active', '=', True), ('is_published', '=', True)]
             for tok in search_tokens:
                 full_domain.append(('x_search_index', 'ilike', tok))
-            products = list(pt_model.search(full_domain, order='list_price desc', limit=limit_count * 2))
-        else:
-            products = []
+            _add_products(pt_model.search(full_domain, order='list_price desc', limit=limit_count * 2))
+
+        # 2c. If bracketed SKU or partial pasted prefix prevented full AND match, match all non-SKU tokens (or drop 1st fragment token)
+        if has_search_idx and not products and len(non_sku_tokens) >= 1 and len(non_sku_tokens) < len(search_tokens):
+            ns_domain = [('active', '=', True), ('is_published', '=', True)]
+            for tok in non_sku_tokens:
+                ns_domain.append(('x_search_index', 'ilike', tok))
+            _add_products(pt_model.search(ns_domain, order='list_price desc', limit=limit_count * 2))
+
+        if has_search_idx and not products and len(search_tokens) >= 3:
+            # Drop first token in case user pasted a truncated leading word fragment (e.g. "E ADULT MINI CHICKEN 800g")
+            tail_domain = [('active', '=', True), ('is_published', '=', True)]
+            for tok in search_tokens[1:]:
+                tail_domain.append(('x_search_index', 'ilike', tok))
+            _add_products(pt_model.search(tail_domain, order='list_price desc', limit=limit_count * 2))
+
+        # 2d. Quorum / Partial-Token Match: if 3+ tokens and strict AND still returned 0, match products containing ANY >=2 meaningful tokens
+        if has_search_idx and not products and len(search_tokens) >= 2:
+            meaningful_toks = [t for t in search_tokens if len(t) >= 3 or any(c.isdigit() for c in t)]
+            if meaningful_toks:
+                or_domain = [('active', '=', True), ('is_published', '=', True)]
+                or_clauses = [('x_search_index', 'ilike', tok) for tok in meaningful_toks]
+                or_domain.extend(['|'] * (len(or_clauses) - 1) + or_clauses)
+                _add_products(pt_model.search(or_domain, order='list_price desc', limit=limit_count * 3))
 
         # Fallback if x_search_index is not yet computed on all rows
         if not products:
@@ -468,8 +536,8 @@ class StephansWebsitePages(http.Controller):
                 })
                 brand_matched_name = b['name']
 
-        # If strict search returned nothing or few items and query matched a brand (e.g. Summit10 / Summit 10)
-        if len(products) < limit_count and brand_matched_name:
+        # If strict search returned nothing or very few items AND query is primarily a brand query (<= 2 tokens)
+        if (not products or (len(products) < limit_count and len(search_tokens) <= 2)) and brand_matched_name:
             brand_filter_term = brand_matched_name.split()[0] # e.g. 'Summit'
             brand_domain = [
                 ('active', '=', True),
@@ -504,17 +572,36 @@ class StephansWebsitePages(http.Controller):
             n = strip_accents(prod.name or '').lower()
             n_compact = normalize_compact(prod.name or '')
             code = (prod.default_code or '').lower()
+            code_compact = normalize_compact(code)
+            idx_text = (getattr(prod, 'x_search_index', '') or '').lower()
+
+            # Exact SKU match boost
+            if extracted_sku and (extracted_sku.lower() == code or normalize_compact(extracted_sku) == code_compact):
+                score += 250
+            if q_compact and code_compact and (q_compact == code_compact or code_compact in q_compact):
+                score += 180
 
             # Exact brand or compact phrase match boost
             if q_compact and q_compact in n_compact:
-                score += 100
+                score += 120
 
+            matched_title_tokens = 0
             for tok in search_tokens:
                 tl = strip_accents(tok).lower()
                 if tl in n:
-                    score += 15
-                if tl in code:
-                    score += 10
+                    score += 22
+                    matched_title_tokens += 1
+                    # Extra boost for matching exact pack size token (e.g. 800g, 2kg, 3kg, 200ml)
+                    if any(c.isdigit() for c in tl):
+                        score += 25
+                elif tl in code:
+                    score += 30
+                    matched_title_tokens += 1
+                elif tl in idx_text:
+                    score += 6
+
+            if len( non_sku_tokens ) >= 2 and matched_title_tokens >= len(non_sku_tokens):
+                score += 60
             return score
 
         products = sorted(products, key=relevance_score, reverse=True)[:limit_count]

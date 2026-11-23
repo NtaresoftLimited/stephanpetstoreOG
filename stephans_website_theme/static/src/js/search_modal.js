@@ -45,7 +45,12 @@
         var openTrigger = e.target.closest('.stephans-searchbar__input, .stephans-searchbar__box, [data-open-search="true"], a[aria-label="Search"]');
         if (openTrigger) {
           e.preventDefault();
-          self.open();
+          var headerInp = openTrigger.querySelector ? openTrigger.querySelector('.stephans-searchbar__input') : null;
+          if (!headerInp && openTrigger.classList && openTrigger.classList.contains('stephans-searchbar__input')) {
+            headerInp = openTrigger;
+          }
+          var initialVal = headerInp && headerInp.value ? headerInp.value.trim() : '';
+          self.open(initialVal);
           return;
         }
 
@@ -127,14 +132,34 @@
         }
       });
 
-      // Live search input handling & Arrow key navigation
-      var searchInput = document.getElementById('stephans-search-modal-input');
-      if (searchInput) {
-        searchInput.addEventListener('input', function (e) {
+      // Live search input handling & Arrow key navigation (event delegation so it never fails if DOM loads after script)
+      document.addEventListener('input', function (e) {
+        if (e.target && e.target.id === 'stephans-search-modal-input') {
           self.handleInputChange(e.target.value);
-        });
+        }
+      });
 
-        searchInput.addEventListener('keydown', function (e) {
+      document.addEventListener('paste', function (e) {
+        if (e.target && e.target.id === 'stephans-search-modal-input') {
+          setTimeout(function () {
+            var inp = document.getElementById('stephans-search-modal-input');
+            if (inp) {
+              inp.setSelectionRange(0, 0);
+              inp.scrollLeft = 0;
+              self.handleInputChange(inp.value);
+            }
+          }, 15);
+        }
+      });
+
+      document.addEventListener('change', function (e) {
+        if (e.target && e.target.id === 'stephans-search-modal-input') {
+          self.handleInputChange(e.target.value);
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.target && e.target.id === 'stephans-search-modal-input') {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
             self.moveSelection(1);
@@ -145,11 +170,12 @@
             e.preventDefault();
             self.handleEnter();
           }
-        });
-      }
+        }
+      });
     },
 
-    open: function () {
+    open: function (prefillValue) {
+      var self = this;
       this.isOpen = true;
       this.lastFocusedElement = document.activeElement;
       var modal = document.getElementById('stephans-search-modal');
@@ -166,9 +192,15 @@
       }
       if (input) {
         input.setAttribute('aria-expanded', 'true');
+        if (typeof prefillValue === 'string' && prefillValue.trim()) {
+          input.value = prefillValue.trim();
+        }
         setTimeout(function () {
           input.focus();
-        }, 80);
+          if (input.value) {
+            self.handleInputChange(input.value);
+          }
+        }, 60);
       }
       document.body.style.overflow = 'hidden';
     },
