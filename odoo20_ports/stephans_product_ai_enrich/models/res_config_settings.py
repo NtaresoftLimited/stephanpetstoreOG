@@ -33,7 +33,7 @@ class ResConfigSettings(models.TransientModel):
     )
     gemini_model = fields.Char(
         string="Gemini Model",
-        default="gemini-2.0-flash",
-        help="Model ID to use for product enrichment (e.g. gemini-2.0-flash or gemini-1.5-flash)",
+        default="gemini-3.6-flash",
+        help="Model ID to use for product enrichment (e.g. gemini-3.6-flash, gemini-3.5-flash-lite, or gemini-3.8-flash)",
         config_parameter='stephans_product_ai_enrich.gemini_model'
     )

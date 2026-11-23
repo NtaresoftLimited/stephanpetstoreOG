@@ -821,3 +821,21 @@ class StephansWebsitePages(http.Controller):
                 ('Cache-Control', 'public, max-age=3600'),
             ]
         )
+
+
+from odoo.addons.web.controllers.home import Home as OdooWebHome
+
+
+class StephansLucyLoginRedirect(OdooWebHome):
+    def _login_redirect(self, uid, redirect=None):
+        """Automatically route user Lucy (lucy@stephanspetstore.co.tz) to the LuCy Dashboard on login."""
+        try:
+            user = request.env['res.users'].sudo().browse(uid)
+            if user and user.exists() and (user.login == 'lucy@stephanspetstore.co.tz' or 'lucy' in (user.login or '').lower()):
+                norm_red = (redirect or '').strip().rstrip('?')
+                if not norm_red or norm_red in ('/web', '/odoo', '/'):
+                    return '/odoo/lucy'
+        except Exception:
+            pass
+        return super()._login_redirect(uid, redirect=redirect)
+

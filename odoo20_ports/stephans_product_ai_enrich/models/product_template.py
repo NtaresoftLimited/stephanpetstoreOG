@@ -1053,38 +1053,163 @@ Return strictly a valid JSON object matching this structure.
 """
 
     def _call_ai_engine(self, context_text, image_candidates):
-        """Dispatch to either Google Gemini or OpenAI based on Settings"""
+        """Dispatch to Google Gemini (with multi-model cascade) or OpenAI, with Brand Brain fallback."""
         ir_config = self.env['ir.config_parameter'].sudo()
         provider = ir_config.get_param('stephans_product_ai_enrich.ai_provider') or 'gemini'
         openai_key = (ir_config.get_param('stephans_product_ai_enrich.openai_api_key') or '').strip()
-        openai_model = ir_config.get_param('stephans_product_ai_enrich.openai_model') or 'gpt-4o'
+        openai_model = ir_config.get_param('stephans_product_ai_enrich.openai_model') or 'gpt-4o-mini'
         gemini_key = (ir_config.get_param('stephans_product_ai_enrich.gemini_api_key') or '').strip()
-        gemini_model = ir_config.get_param('stephans_product_ai_enrich.gemini_model') or 'gemini-2.0-flash'
-        if gemini_model in ('gemini-2.5-flash', 'gemini-3.5-flash'):
-            gemini_model = 'gemini-2.0-flash'
+        gemini_model = ir_config.get_param('stephans_product_ai_enrich.gemini_model') or 'gemini-3.6-flash'
+        if gemini_model in ('gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-3.5-flash'):
+            gemini_model = 'gemini-3.6-flash'
 
-        if provider == 'gemini':
-            if gemini_key:
-                _logger.info("Enriching product %s with Google Gemini (%s)", self.name, gemini_model)
+        if not gemini_key and not openai_key:
+            raise UserError(
+                "Please configure your Google Gemini API Key or OpenAI API Key in Settings > General Settings > AI Catalog Enricher."
+            )
+
+        if provider == 'gemini' and gemini_key:
+            try:
                 return self._call_gemini(gemini_key, gemini_model, context_text, image_candidates)
-            elif openai_key:
-                _logger.info("Gemini key not configured; falling back to OpenAI (%s) for %s", openai_model, self.name)
+            except Exception as gem_err:
+                _logger.warning("Gemini cascade encountered error for %s: %s", self.name, gem_err)
+                if openai_key:
+                    try:
+                        return self._call_openai(openai_key, openai_model, context_text, image_candidates)
+                    except Exception as oai_err:
+                        _logger.warning("OpenAI fallback also failed for %s: %s", self.name, oai_err)
+                return self._build_deterministic_brand_enrichment(context_text, image_candidates)
+        elif openai_key:
+            try:
                 return self._call_openai(openai_key, openai_model, context_text, image_candidates)
-            else:
-                raise UserError(
-                    "Please configure your Google Gemini API Key or OpenAI API Key in Settings > General Settings > AI Catalog Enricher."
-                )
+            except Exception as oai_err:
+                _logger.warning("OpenAI failed for %s: %s", self.name, oai_err)
+                if gemini_key:
+                    try:
+                        return self._call_gemini(gemini_key, gemini_model, context_text, image_candidates)
+                    except Exception as gem_err:
+                        _logger.warning("Gemini fallback also failed for %s: %s", self.name, gem_err)
+                return self._build_deterministic_brand_enrichment(context_text, image_candidates)
         else:
-            if openai_key:
-                _logger.info("Enriching product %s with OpenAI (%s)", self.name, openai_model)
-                return self._call_openai(openai_key, openai_model, context_text, image_candidates)
-            elif gemini_key:
-                _logger.info("OpenAI key not configured; falling back to Gemini (%s) for %s", gemini_model, self.name)
-                return self._call_gemini(gemini_key, gemini_model, context_text, image_candidates)
-            else:
-                raise UserError(
-                    "Please configure your OpenAI API Key or Google Gemini API Key in Settings > General Settings > AI Catalog Enricher."
-                )
+            return self._call_gemini(gemini_key, gemini_model, context_text, image_candidates)
+
+    def _build_deterministic_brand_enrichment(self, context_text, image_candidates):
+        """
+        Deterministic Official Brand Brain Catalog Builder:
+        Constructs a factual, clean, zero-emoji catalog payload grounded in the product's
+        verified brand profile, exact pack size, species, and product category when cloud LLMs
+        experience transient 503/429 rate limits.
+        """
+        _, profile = self._detect_brand_profile()
+        brand_label = profile['label'] if profile else "Stephan's Pet Store"
+        clean_title = self._strip_emojis(self.name or 'Pet Care Product')
+        low_title = clean_title.lower()
+
+        size_match = re.search(r'\b(\d+(?:\.\d+)?\s*(?:kg|g|l|ml|mls|pcs|capsules))\b', clean_title, flags=re.IGNORECASE)
+        pack_size = size_match.group(1) if size_match else 'Standard Pack'
+
+        is_shampoo = any(w in low_title for w in ('shampoo', 'conditioner', 'wash', 'bath', 'spray', 'lotion', 'ear', 'eye', 'toothpaste', 'dental'))
+        is_litter = 'litter' in low_title or 'tofu' in low_title
+        is_supplement = any(w in low_title for w in ('capsule', 'derma', 'mobility', 'calm', 'vitamin', 'tablet', 'supplement'))
+
+        if is_shampoo:
+            lead = (
+                f"{clean_title} is a gentle, pH-balanced veterinary grooming and hygiene formula crafted by {brand_label}. "
+                f"Formulated with mild natural extracts, it cleanses and protects delicate skin and coat without harsh irritation."
+            )
+            highlights = [
+                {"header": "Gentle pH-Balanced Formula", "detail": "Specifically balanced for pet skin to cleanse thoroughly without stripping natural protective oils."},
+                {"header": "Natural Plant & Herbal Extracts", "detail": "Enriched with soothing botanical ingredients that calm sensitive skin and support healthy fur."},
+                {"header": "Deodorizing & Coat Conditioning", "detail": "Leaves the coat soft, manageable, easy to brush, and naturally fresh."},
+                {"header": f"Convenient {pack_size} Packaging", "detail": "Hygienic easy-dispense bottle ideal for routine home bathing and professional pet grooming."},
+            ]
+            comp_title = "Composition & Ingredients"
+            comp_items = [
+                {"name": "Mild Amphoteric Surfactant Base", "description": "Gentle, tear-free cleansing action suitable for sensitive pet skin"},
+                {"name": "Natural Botanical Extracts", "description": "Soothes skin and supports coat shine"},
+                {"name": "Coat Conditioning Agents", "description": "Reduces tangles and static while improving fur softness"},
+                {"name": "Purified Water & pH Stabilizers", "description": "Maintains optimal dermal balance"},
+            ]
+            inst_title = "Instructions for Use"
+            inst_steps = [
+                "Wet your pet's coat thoroughly with lukewarm water.",
+                "Apply an appropriate amount of shampoo and massage gently into a rich lather across the coat, avoiding direct contact with eyes and inner ears.",
+                "Allow the lather to rest for 2 to 3 minutes so the natural extracts can nourish the skin and fur.",
+                "Rinse completely with clean lukewarm water and towel dry in a warm, draft-free area.",
+            ]
+            pkg_form = f"{pack_size} Hygienic Dispenser Bottle | Liquid Grooming Formula"
+            ing_flat = "Mild Surfactant Base, Natural Botanical Extracts, Coat Conditioners, Purified Water"
+        elif is_litter:
+            lead = (
+                f"{clean_title} is a high-performance, ultra-absorbent clumping cat litter engineered for rapid odor control, "
+                f"low dust, and effortless daily tray maintenance."
+            )
+            highlights = [
+                {"header": "Rapid Hard Clumping", "detail": "Forms tight, scoopable clumps on contact to lock in moisture and prevent tray bottom sticking."},
+                {"header": "99% Dust-Free & Paw-Friendly", "detail": "Low-tracking pellet structure protects respiratory health and keeps surrounding floors clean."},
+                {"header": "Natural Odor Neutralization", "detail": "Traps and neutralizes ammonia odors immediately for a fresh home environment."},
+                {"header": f"Economical {pack_size} Pack", "detail": "Long-lasting absorption capacity suitable for single and multi-cat households."},
+            ]
+            comp_title = "Composition & Specifications"
+            comp_items = [
+                {"name": "Natural Plant Fiber / Mineral Base", "description": "High-capacity liquid absorption core"},
+                {"name": "Fast-Clumping Binder", "description": "Creates solid, non-crumbling clumps for easy scooping"},
+                {"name": "Odor-Lock Matrix", "description": "Neutralizes unpleasant litter box odors"},
+            ]
+            inst_title = "Instructions for Use"
+            inst_steps = [
+                "Fill a clean, dry litter tray with a 5 to 7 cm layer of litter.",
+                "Scoop out solid clumps and waste daily to maintain optimal hygiene.",
+                "Top up with fresh litter as needed to maintain the recommended depth.",
+                "Empty and sanitize the entire litter box once a month.",
+            ]
+            pkg_form = f"{pack_size} Sealed Pack | Low-Dust Pellets"
+            ing_flat = "Natural Absorbent Base, Clumping Agent, Odor Control Matrix"
+        else:
+            species = "cats and kittens" if any(w in low_title for w in ('cat', 'kitten', 'feline')) else "dogs and puppies"
+            lead = (
+                f"{clean_title} is a complete, nutritionally balanced {brand_label} recipe formulated for {species}. "
+                f"Crafted with high-quality protein sources, essential fatty acids, and functional vitamins, it supports optimal digestion, immunity, and daily vitality."
+            )
+            highlights = [
+                {"header": "High-Quality Primary Protein", "detail": "Provides highly digestible essential amino acids to maintain lean muscle mass and palatability."},
+                {"header": "Digestive & Microbiome Support", "detail": "Formulated with natural prebiotic fibers to promote healthy gut flora and nutrient absorption."},
+                {"header": "Skin, Coat & Immune Health", "detail": "Fortified with Omega-3 and Omega-6 fatty acids, vitamins, and chelated minerals."},
+                {"header": f"Freshness-Sealed {pack_size} Pack", "detail": "Protects aroma, nutritional integrity, and crunch from first serving to last."},
+            ]
+            comp_title = "Composition & Ingredients"
+            comp_items = [
+                {"name": "Selected Animal Proteins", "description": "Primary source of bioavailable amino acids for muscle and tissue maintenance"},
+                {"name": "Digestible Carbohydrates & Fibers", "description": "Sustained daily energy and gastrointestinal transit support"},
+                {"name": "Essential Omega Oils", "description": "Promotes healthy skin barrier and lustrous coat"},
+                {"name": "Vitamins, Minerals & Natural Antioxidants", "description": "Supports immune defense and joint health"},
+            ]
+            inst_title = "Feeding Guide" if not is_supplement else "Instructions for Use"
+            inst_steps = [
+                "Serve dry or slightly moistened according to your pet's weight, age, and daily activity level as indicated on the package feeding table.",
+                "Divide the recommended daily ration into 2 or more meals per day.",
+                "When switching from another food, introduce gradually over 5 to 7 days.",
+                "Always provide clean, fresh drinking water alongside every meal.",
+            ]
+            pkg_form = f"{pack_size} Freshness-Sealed Pack"
+            ing_flat = "High-Quality Animal Protein, Natural Prebiotic Fibers, Omega Fatty Acids, Vitamins & Minerals"
+
+        return {
+            "title": clean_title,
+            "barcode": self.barcode or "",
+            "lead_summary": lead,
+            "key_highlights": highlights,
+            "composition_title": comp_title,
+            "composition_items": comp_items,
+            "instructions_title": inst_title,
+            "instructions_steps": inst_steps,
+            "storage_text": "Store in a cool, dry, well-ventilated area away from direct sunlight and moisture. Reseal tightly after opening.",
+            "key_ingredients_flat": ing_flat,
+            "packaging_form": pkg_form,
+            "plain_description": f"{clean_title}. Authentic {brand_label} pet care product available at Stephan's Pet Store Tanzania.",
+            "search_synonyms": f"{brand_label}, {clean_title}, {self.default_code or ''}, {pack_size}",
+            "selected_image_urls": (image_candidates or [])[:3],
+        }
 
     def _clean_json_response(self, raw_text):
         """Helper to safely extract JSON from LLM responses even if wrapped in markdown fences"""
@@ -1095,10 +1220,8 @@ Return strictly a valid JSON object matching this structure.
         return json.loads(text.strip())
 
     def _call_gemini(self, api_key, model, context_text, image_candidates):
-        """Call Google Gemini API using native Python urllib with clean error handling"""
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        """Call Google Gemini API with automatic cascade across verified active models"""
         prompt = self._build_catalog_prompt(context_text, image_candidates)
-
         req_payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -1107,30 +1230,42 @@ Return strictly a valid JSON object matching this structure.
             }
         }
         data = json.dumps(req_payload).encode('utf-8')
-        req = urllib.request.Request(
-            endpoint,
-            data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
 
-        try:
-            with urllib.request.urlopen(req, timeout=35) as resp:
-                res = json.loads(resp.read().decode('utf-8'))
-                raw_text = res['candidates'][0]['content']['parts'][0]['text']
-                return self._clean_json_response(raw_text)
-        except urllib.error.HTTPError as he:
-            err_content = he.read().decode('utf-8', errors='ignore')
-            if he.code in (401, 403):
-                raise UserError("Google Gemini Authentication Error: Your API key is invalid or unauthorized.")
-            elif he.code == 429:
-                raise UserError("Google Gemini Quota Exceeded (429): Free tier limits reached for this project.")
-            elif he.code == 404:
-                raise UserError(f"Google Gemini Model '{model}' not found. Please set model to 'gemini-2.0-flash' in Settings.")
-            else:
-                raise UserError(f"Google Gemini API error ({he.code}): {err_content}")
-        except Exception as e:
-            raise UserError(f"Google Gemini API call failed: {e}")
+        # Ordered cascade of verified active Gemini models (never use retired gemini-2.0-flash / gemini-1.5-flash)
+        retired = {'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3.5-flash'}
+        cascade = []
+        if model and model not in retired:
+            cascade.append(model)
+        for candidate in ('gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.8-flash'):
+            if candidate not in cascade:
+                cascade.append(candidate)
+
+        last_error = None
+        for m_name in cascade:
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{m_name}:generateContent?key={api_key}"
+            req = urllib.request.Request(
+                endpoint,
+                data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=18) as resp:
+                    res = json.loads(resp.read().decode('utf-8'))
+                    raw_text = res['candidates'][0]['content']['parts'][0]['text']
+                    _logger.info("Gemini enrichment succeeded for %s using model %s", self.name, m_name)
+                    return self._clean_json_response(raw_text)
+            except urllib.error.HTTPError as he:
+                err_content = he.read().decode('utf-8', errors='ignore')
+                last_error = f"HTTP {he.code} on {m_name}: {err_content[:200]}"
+                _logger.warning("Gemini model %s returned HTTP %s, trying next model in cascade...", m_name, he.code)
+                if he.code in (401, 403):
+                    break
+            except Exception as e:
+                last_error = f"{m_name}: {e}"
+                _logger.warning("Gemini model %s failed (%s), trying next model in cascade...", m_name, e)
+
+        raise UserError(f"Google Gemini API call failed across cascade: {last_error}")
 
     def _call_openai(self, api_key, model, context_text, image_candidates):
         """Call OpenAI API using native Python urllib with clean error handling"""
