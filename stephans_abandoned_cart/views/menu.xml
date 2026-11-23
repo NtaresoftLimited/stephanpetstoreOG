@@ -14,12 +14,12 @@
               name="Abandoned Carts"
               parent="website_sale.menu_orders"
               sequence="30"
-              action="action_abandoned_cart_logs"/>
+              action="action_abandoned_cart_log"/>
 
     <!-- Quick action in Sales Orders menu as well -->
     <menuitem id="menu_sale_abandoned_cart_logs"
               name="Abandoned Carts"
-              parent="sale.menu_sale_order"
+              parent="sale.sale_order_menu"
               sequence="35"
-              action="action_abandoned_cart_logs"/>
+              action="action_abandoned_cart_log"/>
 </odoo>

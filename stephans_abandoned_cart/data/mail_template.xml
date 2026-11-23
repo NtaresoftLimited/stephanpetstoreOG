@@ -1,60 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <!-- Abandoned Cart Reminder Email Template -->
+        <!-- Branded Abandoned Cart Recovery Email Template -->
         <record id="email_template_abandoned_cart" model="mail.template">
-            <field name="name">Abandoned Cart: Quick Reminder</field>
+            <field name="name">Stephan's Pet Store: Cart Recovery</field>
             <field name="model_id" ref="sale.model_sale_order"/>
-            <field name="subject">You left something behind! 🐾 Complete your order at {{ object.company_id.name }}</field>
+            <field name="subject">Your pet's favorites are waiting at Stephan's! 🐾 Complete your order</field>
             <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
             <field name="partner_to">{{ object.partner_id.id }}</field>
             <field name="body_html" type="html">
-<div style="margin: 0; padding: 24px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
-            <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Don't leave your pet waiting! 🐶🐱</h1>
-            <p style="margin: 8px 0 0; font-size: 15px; opacity: 0.9;">We saved the items in your shopping cart for you.</p>
+<div style="margin: 0; padding: 32px 16px; background-color: #FAF8F5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2B2622;">
+    <div style="max-width: 580px; margin: 0 auto; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #EAE3D9; box-shadow: 0 4px 20px rgba(62, 34, 15, 0.06);">
+        <!-- Luxury Brand Header -->
+        <div style="background-color: #3E220F; padding: 28px 24px; text-align: center; color: #FFFFFF;">
+            <div style="font-size: 20px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #FFFFFF; margin-bottom: 6px;">
+                STEPHAN'S PET STORE
+            </div>
+            <div style="font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #C77E35; font-weight: 700;">
+                Masaki • Mikocheni • Dar es Salaam
+            </div>
         </div>
 
-        <!-- Body Content -->
-        <div style="padding: 32px 24px;">
-            <p style="font-size: 16px; line-height: 24px; margin-top: 0;">
-                Hello <strong>{{ object.partner_id.name or 'Valued Customer' }}</strong>,
+        <!-- Hero Notice -->
+        <div style="padding: 28px 24px 16px; text-align: center;">
+            <h1 style="margin: 0 0 10px; font-size: 22px; font-weight: 800; color: #3E220F; letter-spacing: -0.3px;">
+                Your Cart is Saved &amp; Reserved 🐶🐱
+            </h1>
+            <p style="margin: 0; font-size: 15px; line-height: 22px; color: #666666;">
+                Hello <strong>{{ object.partner_id.name or 'Valued Customer' }}</strong>, we safely saved your pet essentials so you can pick up right where you left off.
             </p>
-            <p style="font-size: 15px; line-height: 24px; color: #475569;">
-                We noticed you visited our online store and added items to your cart, but didn't finish checking out. Good news: your cart is saved and ready for you whenever you are!
-            </p>
+        </div>
 
-            <!-- Cart Table -->
-            <div style="margin: 28px 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        <!-- Saved Line Items -->
+        <div style="padding: 0 24px 24px;">
+            <div style="border: 1px solid #EAE3D9; border-radius: 12px; overflow: hidden; margin-top: 16px;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
                     <thead>
-                        <tr style="background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                            <th style="padding: 12px 16px; font-weight: 600; color: #475569;">Item</th>
-                            <th style="padding: 12px 16px; font-weight: 600; color: #475569; text-align: center;">Qty</th>
-                            <th style="padding: 12px 16px; font-weight: 600; color: #475569; text-align: right;">Price</th>
+                        <tr style="background-color: #FAF8F5; border-bottom: 1px solid #EAE3D9;">
+                            <th style="padding: 12px 16px; font-weight: 700; color: #3E220F; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Item</th>
+                            <th style="padding: 12px 16px; font-weight: 700; color: #3E220F; font-size: 12px; text-align: center; text-transform: uppercase; letter-spacing: 0.05em;">Qty</th>
+                            <th style="padding: 12px 16px; font-weight: 700; color: #3E220F; font-size: 12px; text-align: right; text-transform: uppercase; letter-spacing: 0.05em;">Price</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for line in object.order_line %}
-                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <tr style="border-bottom: 1px solid #F4EFEB;">
                             <td style="padding: 14px 16px;">
-                                <div style="font-weight: 600; color: #1e293b;">{{ line.product_id.display_name }}</div>
+                                <div style="font-weight: 700; color: #2B2622;">{{ line.product_id.display_name }}</div>
                             </td>
-                            <td style="padding: 14px 16px; text-align: center; color: #64748b;">
-                                {{ line.product_uom_qty }}
+                            <td style="padding: 14px 16px; text-align: center; color: #777777; font-weight: 600;">
+                                {{ int(line.product_uom_qty) if line.product_uom_qty.is_integer() else line.product_uom_qty }}
                             </td>
-                            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: #1e293b;">
+                            <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: #2B2622;">
                                 {{ format_amount(line.price_subtotal, object.currency_id) }}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                     <tfoot>
-                        <tr style="background-color: #f8fafc; font-size: 16px;">
-                            <td colspan="2" style="padding: 14px 16px; font-weight: 700; text-align: right; color: #334155;">Cart Total:</td>
-                            <td style="padding: 14px 16px; font-weight: 800; text-align: right; color: #0284c7;">
+                        <tr style="background-color: #FAF8F5; font-size: 15px;">
+                            <td colspan="2" style="padding: 14px 16px; font-weight: 800; text-align: right; color: #3E220F;">
+                                Cart Total:
+                            </td>
+                            <td style="padding: 14px 16px; font-weight: 800; text-align: right; color: #C77E35;">
                                 {{ format_amount(object.amount_total, object.currency_id) }}
                             </td>
                         </tr>
@@ -62,43 +70,47 @@
                 </table>
             </div>
 
-            <!-- Call To Action Button -->
-            <div style="text-align: center; margin: 36px 0 24px;">
-                <a href="{{ object.cart_recovery_url }}"
-                   style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; padding: 15px 36px; border-radius: 8px; font-weight: 700; font-size: 16px; letter-spacing: 0.3px; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.4);">
-                    Complete Your Purchase Now →
+            {% if object.amount_total >= 100000 %}
+            <div style="margin-top: 12px; padding: 10px 14px; background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 13px; color: #166534; text-align: center; font-weight: 600;">
+                🎉 Great news! Your cart qualifies for <strong>Free Delivery</strong> in Dar es Salaam!
+            </div>
+            {% endif %}
+
+            <!-- Call to Action -->
+            <div style="text-align: center; margin: 32px 0 20px;">
+                <a href="{{ ctx.get('recovery_url') or object.cart_recovery_url }}"
+                   style="display: inline-block; background-color: #3E220F; color: #FFFFFF; text-decoration: none; padding: 16px 38px; border-radius: 999px; font-weight: 800; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(62, 34, 15, 0.25); border: 1px solid #3E220F;">
+                    Complete Your Order Now →
                 </a>
-                <p style="margin-top: 10px; font-size: 13px; color: #94a3b8;">
-                    No need to re-add your items. Simply click above to resume right where you left off.
+                <p style="margin-top: 12px; font-size: 12px; color: #888888;">
+                    No sign-in required to restore your cart. Tap above to resume seamlessly.
                 </p>
             </div>
 
-            <!-- Perks / Trust Badges -->
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 28px;">
-                <table style="width: 100%; font-size: 12px; color: #64748b; text-align: center;">
-                    <tr>
-                        <td style="padding: 8px;">🚀 Fast Reliable Delivery</td>
-                        <td style="padding: 8px;">🔒 100% Secure Checkout</td>
-                        <td style="padding: 8px;">❤️ 5-Star Customer Support</td>
-                    </tr>
-                </table>
+            <!-- Accepted Payments -->
+            <div style="border-top: 1px solid #EAE3D9; padding-top: 18px; margin-top: 24px; text-align: center;">
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; margin-bottom: 8px; font-weight: 700;">
+                    Accepted Payment Methods
+                </div>
+                <div style="font-size: 12px; color: #555555; font-weight: 600;">
+                    M-Pesa • Airtel Money • Tigo Pesa • Visa • Mastercard • Cash on Delivery
+                </div>
             </div>
         </div>
 
         <!-- Footer -->
-        <div style="background-color: #f8fafc; padding: 20px 24px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8;">
-            <p style="margin: 0;">
-                Questions? Reply directly to this email or visit our website at
-                <a href="{{ object.company_id.website or '#' }}" style="color: #0284c7; text-decoration: none;">{{ object.company_id.name }}</a>.
+        <div style="background-color: #FAF8F5; padding: 20px 24px; text-align: center; border-top: 1px solid #EAE3D9; font-size: 12px; color: #888888;">
+            <p style="margin: 0; line-height: 18px;">
+                Have a question about your pet's diet or need help ordering?<br/>
+                Reply directly to this email or reach us on WhatsApp at <strong>+255 787 568 288</strong>.
             </p>
-            <p style="margin: 8px 0 0;">
-                {{ object.company_id.name }} • {{ object.company_id.city or 'Dar es Salaam' }}, {{ object.company_id.country_id.name or 'Tanzania' }}
+            <p style="margin: 10px 0 0; font-size: 11px; color: #AAAAAA;">
+                Stephan's Pet Store • Masaki &amp; Mikocheni Stores • Dar es Salaam, Tanzania
             </p>
         </div>
     </div>
 </div>
             </field>
-            <field name="auto_delete" eval="True"/>
         </record>
     </data>
 </odoo>

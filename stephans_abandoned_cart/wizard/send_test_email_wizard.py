@@ -50,13 +50,13 @@ class AbandonedCartTestWizard(models.TransientModel):
         if not order:
             raise UserError(_("No sample orders found with cart items. Please create at least one quotation with products first."))
 
-        order._ensure_abandoned_cart_token()
+        raw_token, recovery_url = order._generate_recovery_token()
 
         # Send test mail overriding email_to
         email_values = {
             "email_to": self.email_to,
         }
-        self.template_id.sudo().send_mail(
+        self.template_id.sudo().with_context(recovery_url=recovery_url).send_mail(
             order.id,
             force_send=True,
             raise_exception=True,

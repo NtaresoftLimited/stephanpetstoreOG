@@ -5,17 +5,21 @@
         <field name="name">abandoned.cart.log.tree</field>
         <field name="model">abandoned.cart.log</field>
         <field name="arch" type="xml">
-            <list string="Abandoned Carts" decoration-success="state == 'recovered'" decoration-warning="state == 'abandoned'" decoration-info="state == 'email_sent'" decoration-muted="state == 'cancelled'">
+            <list string="Abandoned Carts" decoration-success="state == 'recovered'" decoration-warning="state == 'abandoned'" decoration-info="state in ('email_sent', 'whatsapp_sent', 'multi_sent')" decoration-muted="state == 'cancelled'">
                 <field name="order_id"/>
                 <field name="partner_id"/>
                 <field name="email"/>
+                <field name="phone"/>
                 <field name="cart_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="currency_id" column_invisible="True"/>
+                <field name="channel" widget="badge"/>
+                <field name="actor" widget="badge"/>
                 <field name="abandon_datetime"/>
-                <field name="last_email_sent"/>
-                <field name="emails_sent_count"/>
-                <field name="state" widget="badge" decoration-success="state == 'recovered'" decoration-warning="state == 'abandoned'" decoration-info="state == 'email_sent'" decoration-muted="state == 'cancelled'"/>
-                <button name="action_send_reminder" string="Send Reminder" type="object" icon="fa-envelope" class="btn-sm btn-outline-primary" invisible="state == 'recovered'"/>
+                <field name="emails_sent_count" string="Emails"/>
+                <field name="whatsapp_sent_count" string="WhatsApp"/>
+                <field name="state" widget="badge" decoration-success="state == 'recovered'" decoration-warning="state == 'abandoned'" decoration-info="state in ('email_sent', 'whatsapp_sent', 'multi_sent')" decoration-muted="state == 'cancelled'"/>
+                <button name="action_send_reminder" string="Email" type="object" icon="fa-envelope" class="btn-sm btn-outline-primary" invisible="state == 'recovered'"/>
+                <button name="action_send_whatsapp" string="WhatsApp" type="object" icon="fa-whatsapp" class="btn-sm btn-outline-success" invisible="state == 'recovered' or not phone"/>
             </list>
         </field>
     </record>
@@ -27,7 +31,8 @@
         <field name="arch" type="xml">
             <form string="Abandoned Cart Details">
                 <header>
-                    <button name="action_send_reminder" string="Send Reminder Email Now" type="object" class="btn-primary" invisible="state == 'recovered'"/>
+                    <button name="action_send_reminder" string="Send Recovery Email" type="object" class="btn-primary" invisible="state == 'recovered' or not email"/>
+                    <button name="action_send_whatsapp" string="Send WhatsApp Reminder" type="object" class="btn-success" invisible="state == 'recovered' or not phone"/>
                     <button name="action_mark_recovered" string="Mark as Recovered" type="object" class="btn-secondary" invisible="state == 'recovered'"/>
                     <field name="state" widget="statusbar" statusbar_visible="abandoned,email_sent,recovered"/>
                 </header>
@@ -49,20 +54,27 @@
                         <group string="Customer Details">
                             <field name="partner_id"/>
                             <field name="email" widget="email"/>
+                            <field name="phone" widget="phone"/>
                             <field name="cart_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                         <group string="Recovery Tracking">
+                            <field name="channel" widget="badge"/>
+                            <field name="actor" widget="badge"/>
+                            <field name="user_id" invisible="actor != 'manual'"/>
+                            <field name="delivery_status" widget="badge"/>
                             <field name="abandon_datetime"/>
-                            <field name="last_email_sent"/>
+                            <field name="last_email_sent" invisible="emails_sent_count == 0"/>
                             <field name="emails_sent_count"/>
+                            <field name="last_whatsapp_sent" invisible="whatsapp_sent_count == 0"/>
+                            <field name="whatsapp_sent_count"/>
                             <field name="recovery_datetime" invisible="state != 'recovered'"/>
                             <field name="template_id"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Log &amp; Notes">
-                            <field name="notes" placeholder="Internal notes or automated history..."/>
+                        <page string="Audit Trail &amp; History">
+                            <field name="notes" placeholder="Complete timeline of reminders, automated triggers, and cart restoration events..."/>
                         </page>
                     </notebook>
                 </sheet>
@@ -79,14 +91,17 @@
                 <field name="order_id"/>
                 <field name="partner_id"/>
                 <field name="email"/>
+                <field name="phone"/>
                 <filter name="filter_abandoned" string="Abandoned" domain="[('state', '=', 'abandoned')]"/>
-                <filter name="filter_email_sent" string="Reminder Sent" domain="[('state', '=', 'email_sent')]"/>
+                <filter name="filter_email_sent" string="Email Sent" domain="[('state', '=', 'email_sent')]"/>
+                <filter name="filter_whatsapp_sent" string="WhatsApp Sent" domain="[('state', '=', 'whatsapp_sent')]"/>
                 <filter name="filter_recovered" string="Recovered" domain="[('state', '=', 'recovered')]"/>
                 <separator/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_channel" string="Channel" context="{'group_by': 'channel'}"/>
                     <filter name="group_by_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
-                    <filter name="group_by_abandon_date" string="Abandoned Month" context="{'group_by': 'abandon_datetime:month'}"/>
+                    <filter name="group_by_abandon_date" string="Abandoned Date" context="{'group_by': 'abandon_datetime'}"/>
                 </group>
             </search>
         </field>
@@ -98,9 +113,8 @@
         <field name="model">abandoned.cart.log</field>
         <field name="arch" type="xml">
             <graph string="Abandoned Cart Analytics" type="bar" sample="1">
-                <field name="abandon_datetime" interval="day"/>
+                <field name="abandon_datetime" interval="month"/>
                 <field name="cart_total" type="measure"/>
-                <field name="state" type="row"/>
             </graph>
         </field>
     </record>
@@ -110,28 +124,26 @@
         <field name="name">abandoned.cart.log.pivot</field>
         <field name="model">abandoned.cart.log</field>
         <field name="arch" type="xml">
-            <pivot string="Abandoned Cart Pivot" sample="1">
-                <field name="abandon_datetime" interval="month" type="row"/>
+            <pivot string="Abandoned Cart Matrix" sample="1">
                 <field name="state" type="col"/>
+                <field name="abandon_datetime" interval="month" type="row"/>
                 <field name="cart_total" type="measure"/>
             </pivot>
         </field>
     </record>
 
     <!-- Action for Abandoned Cart Logs -->
-    <record id="action_abandoned_cart_logs" model="ir.actions.act_window">
+    <record id="action_abandoned_cart_log" model="ir.actions.act_window">
         <field name="name">Abandoned Carts</field>
         <field name="res_model">abandoned.cart.log</field>
         <field name="view_mode">list,form,graph,pivot</field>
         <field name="search_view_id" ref="view_abandoned_cart_log_search"/>
-        <field name="context">{'search_default_filter_abandoned': 1, 'search_default_filter_email_sent': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No abandoned carts detected yet!
             </p>
             <p>
-                When online shoppers leave products in their cart without checking out, they will automatically appear here.
-                The automated scheduler will send reminder emails according to your configuration.
+                When online shoppers add products to their basket and leave without checking out, they will automatically appear here with automated and manual recovery workflows.
             </p>
         </field>
     </record>

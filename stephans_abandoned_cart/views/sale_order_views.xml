@@ -23,18 +23,28 @@
                         <group string="Recovery Status">
                             <field name="abandoned_cart_state" widget="badge"
                                    decoration-success="abandoned_cart_state == 'recovered'"
-                                   decoration-warning="abandoned_cart_state == 'abandoned'"/>
-                            <field name="abandoned_cart_token" readonly="1" groups="base.group_no_one"/>
+                                   decoration-warning="abandoned_cart_state in ('abandoned', 'reminder_sent')"
+                                   decoration-muted="abandoned_cart_state == 'cancelled'"/>
+                            <field name="abandoned_cart_token_hash" readonly="1" groups="base.group_no_one"/>
+                            <field name="abandoned_cart_token_expiry" readonly="1"/>
                         </group>
-                        <group string="Recovery Link">
-                            <field name="cart_recovery_url" widget="CopyClipboardChar" readonly="1"/>
+                        <group string="Single-Use Recovery Actions">
+                            <button name="action_generate_recovery_link"
+                                    type="object"
+                                    string="Generate Fresh Recovery Link"
+                                    icon="fa-link"
+                                    class="btn btn-outline-primary"
+                                    invisible="state not in ('draft', 'sent') or abandoned_cart_state == 'recovered'"/>
                         </group>
                     </group>
                     <field name="abandoned_cart_log_ids" readonly="1">
                         <list string="Logs">
                             <field name="abandon_datetime"/>
-                            <field name="last_email_sent"/>
+                            <field name="channel" widget="badge"/>
+                            <field name="actor" widget="badge"/>
                             <field name="emails_sent_count"/>
+                            <field name="whatsapp_sent_count"/>
+                            <field name="delivery_status" widget="badge"/>
                             <field name="state" widget="badge"/>
                         </list>
                     </field>

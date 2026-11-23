@@ -28,7 +28,7 @@ Features:
         "base_setup",
     ],
     "data": [
-        "security/ir.model.access.csv",
+        "security/ir.access.csv",
         "data/mail_template.xml",
         "data/ir_cron.xml",
         "wizard/send_test_email_wizard_views.xml",

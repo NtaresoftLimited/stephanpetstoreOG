@@ -9,8 +9,8 @@
                 .stephans-homebar__logo img,.stephans-logo img{height:38px;width:auto;object-fit:contain;display:block;}
                 .stephans-topbar-icon{width:14px;height:14px;object-fit:contain;display:inline-block;vertical-align:middle;}
                 .stephans-searchbar__icon-img{width:16px;height:16px;object-fit:contain;}
-                .stephans-action-item__icon-wrap{background:#f7f1e8 !important;}
-                .stephans-action-item__icon-wrap img,.stephans-action-icon{width:18px;height:18px;object-fit:contain;display:block;}
+                .stephans-action-item__icon-wrap{background:transparent !important;border:none !important;box-shadow:none !important;width:28px;height:28px;border-radius:0;display:flex;align-items:center;justify-content:center;}
+                .stephans-action-item__icon-wrap img,.stephans-action-icon{width:26px;height:26px;object-fit:contain;display:block;}
                 .stephans-nav-icon{width:18px;height:18px;object-fit:contain;display:inline-block;vertical-align:middle;}
                 .stephans-mega{display:none;}
                 .stephans-mega__group-icon{width:28px;height:28px;object-fit:contain;display:inline-block;vertical-align:middle;}
