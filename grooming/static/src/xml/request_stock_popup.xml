@@ -8,7 +8,7 @@
                 <div class="row g-2 mb-3">
                     <div class="col-12 col-md-6 text-start">
                         <label class="form-label text-start w-100 fw-bold">Request From (Source Warehouse) <span class="text-danger">*</span></label>
-                        <select class="form-select fw-semibold" t-on-change="(ev) =&gt; { this.state.sourceWarehouseId = Number(ev.target.value) || ev.target.value; this.onSourceWarehouseChange(ev); }">
+                        <select class="form-select fw-semibold" t-on-change="this.onSourceWarehouseChange">
                             <option value="" disabled="1">Select Source Warehouse...</option>
                             <t t-foreach="this.state.warehouses" t-as="wh" t-key="wh.id">
                                 <option t-att-value="wh.id" t-att-selected="wh.id === this.state.sourceWarehouseId">

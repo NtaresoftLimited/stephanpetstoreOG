@@ -11,7 +11,7 @@
                 <!-- Product Search -->
                 <div class="mb-3 text-start position-relative">
                     <label class="form-label text-start w-100 fw-bold">Add Product to Replenishment</label>
-                    <input type="text" class="form-control" placeholder="Search product by name or barcode..." t-model="this.state.searchQuery" t-on-input="this.onSearchInput" />
+                    <input type="text" class="form-control" placeholder="Search product by name or barcode..." t-att-value="this.state.searchQuery" t-on-input="this.onSearchInput" />
                     
                     <t t-if="this.state.searchResults.length > 0">
                         <div class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1050; max-height: 240px; overflow-y: auto;">
