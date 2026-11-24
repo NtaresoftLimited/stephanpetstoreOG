@@ -52,9 +52,11 @@ MANUFACTURER_DOMAINS = (
     "tropidog.eu",
     "tropidog.pl",
     "tropical.pl",
+    "w.tropical.pl",
     "tropifit.eu",
     "tropifit.pl",
     "josera.com",
+    "shop.josera.com",
     "bravecto.com",
     "nexgard.com",
     "elanco.com",
@@ -75,6 +77,13 @@ TRUSTED_RETAILER_DOMAINS = (
     "zooplus.com",
     "trixie.de",
     "ferplast.com",
+    "vetpetsmz.com",
+    "amazon.ae",
+    "amazon.com",
+    "amazon.co.uk",
+    "petlebi.com",
+    "roslinyakwariowe.pl",
+    "sklep.roslinyakwariowe.pl",
 )
 
 FLAGSHIP_BRAND_KEYS = ('bioline', 'summit', 'tropicat', 'tropidog', 'tropifit', 'tropical')
@@ -599,16 +608,24 @@ class ProductTemplate(models.Model):
         }
 
     def _detect_brand_profile(self):
-        """Match this product against the Official Brand Catalog Brain."""
+        """Match this product against the Official Brand Catalog Brain (preventing false accessory collisions)."""
         self.ensure_one()
-        haystack = (self.name or '').lower()
+        raw_name = (self.name or '').lower()
+        haystack = raw_name
         if hasattr(self, 'product_brand_id') and self.product_brand_id and self.product_brand_id.name:
             haystack += ' ' + self.product_brand_id.name.lower()
         if hasattr(self, 'brand_id') and self.brand_id and self.brand_id.name:
             haystack += ' ' + self.brand_id.name.lower()
 
+        # Guard against false brand assignment when an accessory title merely mentions a food brand (e.g. "Ceramic Pet Bowl With Whiskas")
+        accessory_nouns = ('bowl', 'ceramic', 'feeder', 'fountain', 'collar', 'leash', 'harness', 'bed', 'cushion', 'cage', 'carrier')
+        food_or_vet_only_brands = {'whiskas', 'summit', 'josera', 'ownat', 'tropidog', 'tropicat', 'tropifit', 'bravecto', 'nexgard', 'milbemax', 'f10'}
+        has_accessory_noun = any(re.search(rf'\b{noun}\b', raw_name) for noun in accessory_nouns)
+
         for key, profile in OFFICIAL_BRAND_CATALOG_BRAIN.items():
             if key in haystack:
+                if has_accessory_noun and key in food_or_vet_only_brands:
+                    continue
                 return key, profile
         return None, None
 
@@ -886,6 +903,22 @@ class ProductTemplate(models.Model):
             role_order = {'front': 0, 'back': 1, 'detail': 2, 'lifestyle': 3}
             sorted_reviews = pending_reviews.sorted(key=lambda r: role_order.get(r.image_role, 9))
             for rev in sorted_reviews:
+                orig_url = rev.original_source_url or ''
+                is_external_download = '/official-media/' not in orig_url
+                # Mandatory Manual Approval Lock for Veterinary Medicines on external scraped images
+                if rec.x_is_vet_medicine and is_external_download:
+                    _logger.info(
+                        "Vet Medicine Manual Lock: Holding external image review #%s on %s in pending_review for human verification.",
+                        rev.id, rec.name,
+                    )
+                    continue
+                # Mandatory 3-Identifier Product Match Gate for external scraped images (never auto-approve on brand/domain alone)
+                if is_external_download and not rec._verify_three_identifier_product_match(orig_url):
+                    _logger.info(
+                        "3-Identifier Gate Blocked Auto-Approval: External image #%s (%s) on %s matched <3 product identifiers; keeping in pending_review.",
+                        rev.id, orig_url, rec.name,
+                    )
+                    continue
                 try:
                     rev.sudo().action_approve_and_publish()
                 except Exception as img_err:
@@ -1009,14 +1042,26 @@ class ProductTemplate(models.Model):
 
     def _is_candidate_image_filename_compatible(self, url):
         """
-        Reject candidate image URLs whose filename explicitly names a conflicting flavor/protein,
-        species, or pack size from a "Related Products" carousel on the manufacturer website.
+        Reject candidate image URLs whose filename/path is a promotional banner, blog image,
+        popup, newsletter, magazine advert, homepage graphic, or names a conflicting flavor/protein
+        or species from a "Related Products" carousel.
         """
         if not url:
             return False
         parsed = urllib.parse.urlparse(url)
-        fname = urllib.parse.unquote(parsed.path.rsplit('/', 1)[-1]).lower()
+        unquoted_path = urllib.parse.unquote(parsed.path).lower()
+        fname = unquoted_path.rsplit('/', 1)[-1]
         prod_lower = (self.name or '').lower()
+
+        # 0. Strict Blocklist against Banners, Blogs, Popups, Adverts, and Generic UI assets
+        non_product_patterns = (
+            'baner', 'banner', 'fotos-blog', 'fotos_blog', '/blog/', 'popup',
+            'newsletter', 'advert', 'vet-times', 'mobile_homepage', 'homepage',
+            'about.jpg', 'dogs_selector', 'q@3x', 'q%403x', 'q%25403x', 'mask2014',
+            'adult-nutrition.png',
+        )
+        if any(pat in unquoted_path or pat in url.lower() for pat in non_product_patterns):
+            return False
 
         # 1. Prevent conflicting protein / flavor packshots
         flavors = ('chicken', 'lamb', 'salmon', 'fish', 'turkey', 'beef', 'duck', 'rabbit', 'venison', 'pork', 'tuna')
@@ -1040,6 +1085,66 @@ class ProductTemplate(models.Model):
                     return False
 
         return True
+
+    def _verify_three_identifier_product_match(self, url):
+        """
+        Verify at least 3 product identifiers before allowing automatic approval of an external image:
+        1. Brand Identifier (verified brand profile matches domain and is not an accessory collision)
+        2. Exact Product Title / Formulation Identifier (filename/path matches core formulation tokens or official catalog item code, and passes banner/blog/popup check)
+        3. Weight / Volume / Pack Count OR Manufacturer SKU / EAN Identifier
+        """
+        self.ensure_one()
+        if not url or not self._is_candidate_image_filename_compatible(url):
+            return False
+
+        parsed = urllib.parse.urlparse(url)
+        hostname = (parsed.hostname or '').lower()
+        source_tier, _ = self._classify_domain_provenance(hostname)
+        if source_tier != 'manufacturer':
+            return False
+
+        # Identifier 1: Brand Match
+        brand_key, profile = self._detect_brand_profile()
+        if not brand_key or not profile:
+            return False
+
+        unquoted_url = urllib.parse.unquote(url).lower()
+        prod_lower = (self.name or '').lower()
+
+        # Identifier 2: Formulation / Title Token or Verified Catalog Item Code
+        stop_words = {
+            'with', 'for', 'and', 'the', 'dog', 'dogs', 'cat', 'cats', 'pet', 'pets',
+            'food', 'adult', 'small', 'medium', 'large', 'breeds', 'breed', 'bag',
+            'rich', 'whole', 'choice', 'premium', 'super', 'item', brand_key,
+        }
+        core_tokens = [w for w in re.findall(r'[a-z]{3,}', prod_lower) if w not in stop_words]
+        matched_tokens = [w for w in core_tokens if w in unquoted_url]
+        has_catalog_code = bool(re.search(r'/(?:2\d{3}[\-_]\d|16[56]\d{10,})', unquoted_url))
+        if not matched_tokens and not has_catalog_code:
+            return False
+
+        # Identifier 3: Weight / Volume / Pack Count OR Barcode/EAN OR Verified Catalog Code
+        size_matches = list(re.finditer(r'\b(\d+(?:\.\d+)?)\s*(kg|g|ml|mls|l|pcs|pc|tablets|capsules)\b', prod_lower))
+        url_compact = re.sub(r'[\-_%\s]+', '', unquoted_url)
+        if self.barcode and self.barcode.lower() in url_compact:
+            return True
+        if has_catalog_code:
+            return True
+        if size_matches:
+            expected_sizes = [f"{m.group(1)}{m.group(2).lower().rstrip('s')}" for m in size_matches]
+            if any(sz in url_compact or sz.replace('.', '') in url_compact for sz in expected_sizes):
+                return True
+            # If the URL explicitly names a DIFFERENT pack size (e.g. 25kg or 15kg when product is 3kg), reject auto-approval
+            other_sizes = [
+                f"{m.group(1)}{m.group(2).lower().rstrip('s')}"
+                for m in re.finditer(r'(\d+(?:\.\d+)?)\s*(kg|g|ml|l)\b', unquoted_url)
+            ]
+            if other_sizes and not any(osz in expected_sizes for osz in other_sizes):
+                return False
+            # Require at least 2 matched core formulation tokens if pack size is not encoded in the filename
+            return len(matched_tokens) >= 2
+
+        return len(matched_tokens) >= 2
 
     def _extract_images_from_soup(self, soup, parsed):
         """Extract clean full-resolution product image URLs from a BeautifulSoup document."""
