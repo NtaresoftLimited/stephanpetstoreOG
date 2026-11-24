@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Media Review Queue List View (Odoo 20) -->
+    <record id="view_product_image_review_list" model="ir.ui.view">
+        <field name="name">product.image.review.list</field>
+        <field name="model">product.image.review</field>
+        <field name="arch" type="xml">
+            <list string="Media Review Queue" decoration-warning="approval_status == 'pending_review'" decoration-success="approval_status == 'approved'" decoration-muted="approval_status == 'rejected'">
+                <field name="webp_image" widget="image" options="{'size': [48, 48]}" string="Preview"/>
+                <field name="name"/>
+                <field name="product_tmpl_id"/>
+                <field name="product_sku"/>
+                <field name="image_role" widget="badge"/>
+                <field name="source_type" widget="badge"/>
+                <field name="original_width"/>
+                <field name="original_height"/>
+                <field name="webp_filesize_kb" string="WebP KB"/>
+                <field name="approval_status" widget="badge" decoration-warning="approval_status == 'pending_review'" decoration-success="approval_status == 'approved'" decoration-danger="approval_status == 'rejected'"/>
+                <button name="action_approve_and_publish" string="Approve &amp; Publish" type="object" icon="fa-check" class="btn btn-sm btn-success" invisible="approval_status == 'approved'"/>
+                <button name="action_reject" string="Reject" type="object" icon="fa-times" class="btn btn-sm btn-outline-danger" invisible="approval_status == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Media Review Queue Kanban View -->
+    <record id="view_product_image_review_kanban" model="ir.ui.view">
+        <field name="name">product.image.review.kanban</field>
+        <field name="model">product.image.review</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="approval_status" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="product_tmpl_id"/>
+                <field name="image_role"/>
+                <field name="original_width"/>
+                <field name="original_height"/>
+                <field name="webp_filesize_kb"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex flex-column align-items-center p-2">
+                            <field name="webp_image" widget="image" class="oe_avatar" style="max-height: 120px; object-fit: contain;"/>
+                            <div class="fw-bold mt-2 text-center text-truncate" style="max-width: 180px;">
+                                <field name="name"/>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                <field name="original_width"/>x<field name="original_height"/> px • <field name="webp_filesize_kb"/> KB
+                            </div>
+                            <div class="mt-2 d-flex gap-2">
+                                <button name="action_approve_and_publish" string="Approve" type="object" class="btn btn-sm btn-success" invisible="approval_status == 'approved'">Approve</button>
+                                <button name="action_reject" string="Reject" type="object" class="btn btn-sm btn-outline-danger" invisible="approval_status == 'rejected'">Reject</button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Media Review Queue Form View -->
+    <record id="view_product_image_review_form" model="ir.ui.view">
+        <field name="name">product.image.review.form</field>
+        <field name="model">product.image.review</field>
+        <field name="arch" type="xml">
+            <form string="Media Review &amp; Quality Inspection">
+                <header>
+                    <button name="action_approve_and_publish" string="Approve &amp; Publish to Store" type="object" class="btn-success" invisible="approval_status == 'approved'"/>
+                    <button name="action_reject" string="Reject Image" type="object" class="btn-outline-danger" invisible="approval_status == 'rejected'"/>
+                    <field name="approval_status" widget="statusbar" statusbar_visible="pending_review,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Image Asset"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Target Product">
+                            <field name="product_tmpl_id"/>
+                            <field name="product_sku"/>
+                            <field name="barcode"/>
+                            <field name="image_role" widget="badge"/>
+                        </group>
+                        <group string="Source &amp; Licensing Provenance">
+                            <field name="source_type" widget="badge"/>
+                            <field name="verified_domain"/>
+                            <field name="manufacturer_name"/>
+                            <field name="original_source_url" widget="url"/>
+                            <field name="usage_license_note"/>
+                            <field name="download_date"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Quality Specifications">
+                            <field name="original_width"/>
+                            <field name="original_height"/>
+                            <field name="aspect_ratio"/>
+                            <field name="foreground_coverage_pct"/>
+                            <field name="webp_filesize_kb"/>
+                            <field name="file_checksum"/>
+                            <field name="phash"/>
+                        </group>
+                        <group string="Audit &amp; Approval">
+                            <field name="approved_by_id"/>
+                            <field name="approval_date"/>
+                            <field name="rejection_reason" invisible="approval_status != 'rejected'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Optimized WebP Derivative (Published)">
+                            <div class="p-3 text-center bg-light rounded">
+                                <field name="webp_image" widget="image" options="{'size': [400, 400]}"/>
+                                <p class="small text-muted mt-2">1:1 square canvas, WebP format, target 100–300 KB, ready for responsive delivery.</p>
+                            </div>
+                        </page>
+                        <page string="Original Raw Binary (Private Archive)">
+                            <div class="p-3 text-center bg-light rounded">
+                                <field name="raw_image" widget="image" options="{'size': [300, 300]}"/>
+                                <p class="small text-muted mt-2">Unmodified high-resolution packshot as retrieved from official source.</p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Media Review Queue Search View -->
+    <record id="view_product_image_review_search" model="ir.ui.view">
+        <field name="name">product.image.review.search</field>
+        <field name="model">product.image.review</field>
+        <field name="arch" type="xml">
+            <search string="Search Media Review Queue">
+                <field name="name"/>
+                <field name="product_tmpl_id"/>
+                <field name="product_sku"/>
+                <field name="manufacturer_name"/>
+                <filter name="filter_pending" string="Pending Review" domain="[('approval_status', '=', 'pending_review')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('approval_status', '=', 'approved')]"/>
+                <filter name="filter_rejected" string="Rejected" domain="[('approval_status', '=', 'rejected')]"/>
+                <separator/>
+                <filter name="filter_front" string="Front Packshots" domain="[('image_role', '=', 'front')]"/>
+                <filter name="filter_secondary" string="Secondary Images" domain="[('image_role', '!=', 'front')]"/>
+                <group>
+                    <filter name="group_by_status" string="Approval Status" context="{'group_by': 'approval_status'}"/>
+                    <filter name="group_by_role" string="Image Role" context="{'group_by': 'image_role'}"/>
+                    <filter name="group_by_product" string="Product" context="{'group_by': 'product_tmpl_id'}"/>
+                    <filter name="group_by_source" string="Source Type" context="{'group_by': 'source_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Media Review Queue -->
+    <record id="action_product_image_review" model="ir.actions.act_window">
+        <field name="name">Media Review Queue</field>
+        <field name="res_model">product.image.review</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_product_image_review_search"/>
+        <field name="context">{'search_default_filter_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No images pending quality review!
+            </p>
+            <p>
+                When official brand catalog enrichment collects candidate packshots, they undergo automated resolution and aspect-ratio validation and appear here for human sign-off before storefront publication.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu item for Media Review Queue under eCommerce Catalog -->
+    <menuitem id="menu_product_image_review"
+              name="Media Review Queue"
+              parent="website_sale.menu_catalog"
+              sequence="25"
+              action="action_product_image_review"/>
+</odoo>

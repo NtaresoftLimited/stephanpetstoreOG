@@ -1,4 +1,5 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 import io
 import base64
@@ -192,7 +193,7 @@ class StockPicking(models.Model):
             c.drawString(left + 4 * mm, row_top - 7 * mm, product_name[:65])
             
             qty = move.quantity if move.state == 'done' else move.product_uom_qty
-            uom = move.product_uom.name or ""
+            uom = move.uom_id.name or ""
             c.drawCentredString(left + col_1 + col_2 / 2, row_top - 7 * mm, f"{qty} {uom}")
             
             if move.product_id.barcode:
@@ -278,10 +279,9 @@ class StockPicking(models.Model):
         for line in payload.get('lines', []):
             product = self.env['product.product'].browse(line['product_id'])
             move_ids.append((0, 0, {
-                'name': product.name,
                 'product_id': product.id,
                 'product_uom_qty': line['qty'],
-                'product_uom': product.uom_id.id,
+                'uom_id': product.uom_id.id,
                 'location_id': src_location.id,
                 'location_dest_id': dest_location.id,
             }))
@@ -354,22 +354,25 @@ class StockPicking(models.Model):
         Destination is strictly Masaki Back Storage (Central Hub).
         """
         # Replenishment is strictly locked to Masaki Back Storage for both POS systems
-        dest_wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
-        if not dest_wh:
-            dest_wh = self.env['stock.warehouse'].sudo().search([('name', 'ilike', 'Masaki Back Storage')], limit=1)
-        if not dest_wh:
-            dest_wh = self.env['stock.warehouse'].sudo().browse(2)
-            
-        if not dest_wh:
-            raise ValueError("Masaki Back Storage warehouse not found.")
-            
+        dest_wh = self.env['grooming.stock.request']._get_backstore_warehouse()
+
         lines = []
-        for line in payload.get('lines', []):
+        for line in (payload or {}).get('lines', []):
+            try:
+                product_id = int(line['product_id'])
+                qty = float(line['qty'])
+            except (KeyError, TypeError, ValueError):
+                raise UserError(_("Invalid replenishment line received from the POS."))
+            if qty <= 0:
+                continue
             lines.append((0, 0, {
-                'product_id': line['product_id'],
-                'quantity': line['qty']
+                'product_id': product_id,
+                'quantity': qty
             }))
-            
+        if not lines:
+            raise UserError(_("Add at least one product with a quantity above zero."))
+
+
         request = self.env['grooming.stock.request'].sudo().create({
             'destination_warehouse_id': dest_wh.id,
             'product_line_ids': lines,
@@ -399,6 +402,10 @@ class StockPicking(models.Model):
             base_url = self.env['ir.config_parameter'].sudo().get_str('web.base.url')
             doc_url = f"{base_url}/web/content/{attachment.id}/{file_name}?access_token={attachment.access_token}"
             
+            api_key = self.env['ir.config_parameter'].sudo().get_str('stephans_whatsapp.api_key')
+            if not api_key:
+                raise UserError(_("System parameter 'stephans_whatsapp.api_key' is not set."))
+
             payload = {
                 "to": '+255792079463',
                 "text": f"Hi Boss! A new Replenishment Request {request.name} has been submitted from the POS.\n📦 *Destination:* {dest_wh.name} (Central Hub)\nPlease review the attached PDF for your Approval.",
@@ -407,10 +414,11 @@ class StockPicking(models.Model):
             }
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer 99fdd082b088ec50a4461bd03796de7e9a892770feddb7d8f0ed6e800e126856",
+                "Authorization": f"Bearer {api_key}",
                 "User-Agent": "Odoo/18.0"
             }
-            requests.post("https://wasenderapi.com/api/send-message", json=payload, headers=headers, timeout=30)
+            # Short timeout: the cashier's POS popup waits on this call.
+            requests.post("https://wasenderapi.com/api/send-message", json=payload, headers=headers, timeout=10).raise_for_status()
             
         except Exception as e:
             import logging

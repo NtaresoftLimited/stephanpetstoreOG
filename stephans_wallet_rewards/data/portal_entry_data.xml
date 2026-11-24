@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Shown permanently on /my for all customers so they can view Paw Points & Sky Wallet -->
+        <record id="portal_entry_sky_wallet" model="portal.entry">
+            <field name="name">Paw Points &amp; Sky Wallet</field>
+            <field name="description">Loyalty points, voucher rewards, and store wallet</field>
+            <field name="url">/my/wallet</field>
+            <field name="image" type="bytes" file="stephans_wallet_rewards/static/src/img/paw-points.webp"/>
+            <field name="placeholder_count">sky_wallet_count</field>
+            <field name="category">client_category</field>
+            <field name="sequence" eval="15"/>
+        </record>
+    </data>
+</odoo>

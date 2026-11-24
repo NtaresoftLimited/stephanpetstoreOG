@@ -30,7 +30,7 @@
             </xpath>
 
             <!-- Add Available Quantity from Source Warehouse (Masaki Back Storage) right after Demand / before Quantity -->
-            <xpath expr="//field[@name='move_ids_without_package']//list//field[@name='quantity']" position="before">
+            <xpath expr="//field[@name='move_ids']//list//field[@name='quantity']" position="before">
                 <field name="source_available_qty" string="Available" readonly="1" force_save="1" decoration-danger="source_available_qty &lt; product_uom_qty and parent.state not in ('done', 'cancel')" decoration-success="source_available_qty &gt;= product_uom_qty and parent.state not in ('done', 'cancel')"/>
             </xpath>
         </field>

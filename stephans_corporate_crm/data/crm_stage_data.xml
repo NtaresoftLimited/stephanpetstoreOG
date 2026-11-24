@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Default Pipeline Stages -->
+    <record id="stage_corporate_prospecting" model="corporate.crm.stage">
+        <field name="name">1. Prospecting &amp; Discovery</field>
+        <field name="sequence">10</field>
+        <field name="requirements">Initial lead qualification, corporate registration verification, and primary contact establishment.</field>
+    </record>
+
+    <record id="stage_corporate_audit" model="corporate.crm.stage">
+        <field name="name">2. Pet Fleet &amp; Needs Audit</field>
+        <field name="sequence">20</field>
+        <field name="requirements">Audit number of pets, specific food formulas, and required grooming frequency.</field>
+    </record>
+
+    <record id="stage_corporate_proposal" model="corporate.crm.stage">
+        <field name="name">3. Proposal &amp; SLA Quote</field>
+        <field name="sequence">30</field>
+        <field name="requirements">Generate formal quotation with tier pricing (Platinum, Gold, Silver) and delivery/grooming schedule.</field>
+    </record>
+
+    <record id="stage_corporate_negotiation" model="corporate.crm.stage">
+        <field name="name">4. Terms &amp; Credit Approval</field>
+        <field name="sequence">40</field>
+        <field name="requirements">Finalize payment terms, credit limits, delivery branch (Masaki/Mikocheni/Delivery), and renewal date.</field>
+    </record>
+
+    <record id="stage_corporate_won" model="corporate.crm.stage">
+        <field name="name">5. Won &amp; Contract Active</field>
+        <field name="sequence">50</field>
+        <field name="is_won">True</field>
+        <field name="requirements">Contract active! Client is automatically promoted to Q1 Active with regular replenishment and grooming schedule.</field>
+    </record>
+
+    <record id="stage_corporate_retention" model="corporate.crm.stage">
+        <field name="name">6. Q2/Q3 Retention Outreach</field>
+        <field name="sequence">60</field>
+        <field name="requirements">Targeted re-engagement for accounts that slipped into Q2 or Q3 (inactive 30-90 days).</field>
+    </record>
+
+    <record id="stage_corporate_lost" model="corporate.crm.stage">
+        <field name="name">7. Lost / Churned</field>
+        <field name="sequence">70</field>
+        <field name="is_lost">True</field>
+        <field name="fold">True</field>
+        <field name="requirements">Closed deals that did not convert or accounts that churned.</field>
+    </record>
+
+    <!-- Default Lost Reasons -->
+    <record id="lost_reason_price" model="corporate.crm.lost.reason">
+        <field name="name">Price / Budget Constraint</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="lost_reason_competitor" model="corporate.crm.lost.reason">
+        <field name="name">Competitor Offered Cheaper Supplies</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="lost_reason_relocated" model="corporate.crm.lost.reason">
+        <field name="name">Relocated / Moved Outside Dar es Salaam</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="lost_reason_closed" model="corporate.crm.lost.reason">
+        <field name="name">Customer Closed Business / Facility</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="lost_reason_quality" model="corporate.crm.lost.reason">
+        <field name="name">Service / Grooming Quality Dissatisfaction</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="lost_reason_other" model="corporate.crm.lost.reason">
+        <field name="name">Other / Unspecified</field>
+        <field name="sequence">90</field>
+    </record>
+</odoo>

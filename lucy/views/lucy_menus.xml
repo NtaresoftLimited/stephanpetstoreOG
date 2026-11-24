@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_lucy_root" name="LuCy" web_icon="stephans_website_theme,static/src/images/branding/favicon.png" sequence="11" groups="base.group_system"/>
+    <menuitem id="menu_lucy_overview" name="Overview" parent="menu_lucy_root" action="action_lucy_dashboard" sequence="1" groups="base.group_system"/>
+
+    <menuitem id="menu_lucy_commerce" name="Commerce" parent="menu_lucy_root" sequence="10" groups="base.group_system"/>
+    <menuitem id="menu_lucy_website_orders" name="Website Orders" parent="menu_lucy_commerce" action="action_lucy_website_orders" sequence="1" groups="base.group_system"/>
+    <menuitem id="menu_lucy_sales_orders" name="Sales Orders" parent="menu_lucy_commerce" action="action_lucy_all_orders" sequence="2" groups="base.group_system"/>
+    <menuitem id="menu_lucy_pos_orders" name="POS Orders" parent="menu_lucy_commerce" action="action_lucy_pos_orders" sequence="3" groups="base.group_system"/>
+    <menuitem id="menu_lucy_customers" name="Customers" parent="menu_lucy_commerce" action="action_lucy_customers" sequence="4" groups="base.group_system"/>
+    <menuitem id="menu_lucy_products" name="Products" parent="menu_lucy_commerce" action="action_lucy_products" sequence="5" groups="base.group_system"/>
+
+    <menuitem id="menu_lucy_grooming" name="Grooming" parent="menu_lucy_root" sequence="20" groups="base.group_system"/>
+    <menuitem id="menu_lucy_website_grooming" name="Website Bookings" parent="menu_lucy_grooming" action="action_lucy_website_grooming" sequence="1" groups="base.group_system"/>
+    <menuitem id="menu_lucy_all_grooming" name="All Appointments" parent="menu_lucy_grooming" action="action_lucy_all_grooming" sequence="2" groups="base.group_system"/>
+
+    <menuitem id="menu_lucy_website" name="Website" parent="menu_lucy_root" sequence="30" groups="base.group_system"/>
+    <menuitem id="menu_lucy_nextjs_navigation" name="Next.js Menus &amp; Categories" parent="menu_lucy_website" action="action_lucy_nextjs_navigation" sequence="1" groups="base.group_system"/>
+    <menuitem id="menu_lucy_website_pages" name="Odoo Pages" parent="menu_lucy_website" action="action_lucy_website_pages" sequence="2" groups="base.group_system"/>
+    <menuitem id="menu_lucy_website_menus" name="Odoo Menus" parent="menu_lucy_website" action="action_lucy_website_menus" sequence="3" groups="base.group_system"/>
+    <menuitem id="menu_lucy_website_products" name="Products" parent="menu_lucy_website" action="action_lucy_products" sequence="3" groups="base.group_system"/>
+    <menuitem id="menu_lucy_catalog_categories" name="Next.js Catalog Categories" parent="menu_lucy_website" action="action_lucy_catalog_categories" sequence="4" groups="base.group_system"/>
+    <menuitem id="menu_lucy_public_categories" name="Odoo eCommerce Categories" parent="menu_lucy_website" action="action_lucy_public_categories" sequence="5" groups="base.group_system"/>
+    <menuitem id="menu_lucy_websites" name="Websites" parent="menu_lucy_website" action="action_lucy_websites" sequence="6" groups="base.group_system"/>
+    <menuitem id="menu_lucy_website_settings" name="Configuration" parent="menu_lucy_website" action="action_lucy_website_settings" sequence="7" groups="base.group_system"/>
+
+    <menuitem id="menu_lucy_inventory" name="Inventory" parent="menu_lucy_root" sequence="40" groups="base.group_system"/>
+    <menuitem id="menu_lucy_daily_stock" name="Daily Stock" parent="menu_lucy_inventory" action="sky_dashboard.action_sky_daily_stock" sequence="1" groups="base.group_system"/>
+    <menuitem id="menu_lucy_replenishments" name="Replenishments" parent="menu_lucy_inventory" action="grooming.action_grooming_stock_request" sequence="2" groups="base.group_system"/>
+    <menuitem id="menu_lucy_pricing" name="Pricing &amp; Valuation" parent="menu_lucy_inventory" action="sky_dashboard.action_sky_pricing_dashboard" sequence="3" groups="base.group_system"/>
+</odoo>

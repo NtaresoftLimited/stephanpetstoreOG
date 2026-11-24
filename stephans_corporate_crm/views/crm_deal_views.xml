@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================================= -->
+    <!-- PIPELINE KANBAN VIEW (DRAG & DROP DEAL STAGES)            -->
+    <!-- ========================================================= -->
+    <record id="view_corporate_crm_deal_kanban" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.kanban</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column"
+                    quick_create_view="stephans_corporate_crm.view_corporate_crm_deal_quick_create"
+                    sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="stage_id"/>
+                <field name="deal_type"/>
+                <field name="expected_revenue"/>
+                <field name="recurring_revenue_monthly"/>
+                <field name="probability"/>
+                <field name="date_deadline"/>
+                <field name="key_account_manager_id"/>
+                <field name="current_box"/>
+                <field name="days_inactive"/>
+                <field name="priority"/>
+                <field name="is_won"/>
+                <field name="is_lost"/>
+                <field name="currency_id"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click oe_kanban_card d-flex flex-column justify-content-between p-3 border rounded shadow-sm #{record.is_won.raw_value ? 'border-success bg-success-subtle' : ''} #{record.is_lost.raw_value ? 'border-danger bg-danger-subtle opacity-75' : ''}">
+                            <div>
+                                <!-- Header: Title & Priority -->
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <strong class="fs-6 text-dark text-truncate" t-att-title="record.name.value">
+                                        <field name="name"/>
+                                    </strong>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+
+                                <!-- Customer & Inactivity Box -->
+                                <div class="mb-2">
+                                    <div class="fw-semibold text-primary text-truncate">
+                                        <field name="partner_id"/>
+                                    </div>
+                                    <div class="d-flex gap-1 mt-1">
+                                        <span t-if="record.current_box.raw_value == 'q1'" class="badge bg-success-subtle text-success border border-success small">🟢 Q1 Active</span>
+                                        <span t-if="record.current_box.raw_value == 'q2'" class="badge bg-warning-subtle text-warning-emphasis border border-warning small">🟡 Q2 (1 Mo Inactive)</span>
+                                        <span t-if="record.current_box.raw_value == 'q3'" class="badge bg-danger-subtle text-danger border border-danger small">🟠 Q3 (Dormant)</span>
+                                        <span t-if="record.current_box.raw_value == 'q4'" class="badge bg-dark-subtle text-dark border small">🔴 Q4 (Churned)</span>
+
+                                        <span t-if="record.deal_type.raw_value == 'grooming_fleet'" class="badge bg-info-subtle text-info small">✂️ Fleet</span>
+                                        <span t-if="record.deal_type.raw_value == 'replenishment_sla'" class="badge bg-primary-subtle text-primary small">📦 Supplies</span>
+                                        <span t-if="record.deal_type.raw_value in ('q2_recovery', 'q3_recovery')" class="badge bg-danger text-white small">🎯 Win-Back</span>
+                                    </div>
+                                </div>
+
+                                <!-- Financial Value -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fs-6 fw-bold text-success">
+                                        <field name="expected_revenue" widget="monetary"/>
+                                    </span>
+                                    <span class="text-muted small" t-if="record.probability.raw_value">
+                                        <field name="probability"/>%
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Footer: Close date, WhatsApp action & KAM Avatar -->
+                            <div class="o_kanban_record_bottom border-top pt-2 mt-auto d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small" t-if="record.date_deadline.raw_value">
+                                        <i class="fa fa-calendar me-1"/> <field name="date_deadline"/>
+                                    </span>
+                                    <button name="action_open_whatsapp" type="object"
+                                            class="btn btn-sm btn-outline-success py-0 px-1"
+                                            title="WhatsApp Client">
+                                        <i class="fa fa-whatsapp"/>
+                                    </button>
+                                </div>
+                                <div>
+                                    <field name="key_account_manager_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- QUICK CREATE FORM FOR KANBAN -->
+    <record id="view_corporate_crm_deal_quick_create" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.quick.create</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name" placeholder="e.g. Masaki K9 Unit Monthly Replenishment"/>
+                    <field name="partner_id" options="{'no_create': False}"/>
+                    <field name="deal_type"/>
+                    <field name="expected_revenue"/>
+                    <field name="key_account_manager_id" widget="many2one_avatar_user"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- PIPELINE LIST / TREE VIEW                                 -->
+    <!-- ========================================================= -->
+    <record id="view_corporate_crm_deal_tree" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.list</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <list string="Corporate Pipeline Opportunities"
+                  decoration-success="is_won"
+                  decoration-muted="is_lost"
+                  decoration-danger="current_box in ('q3', 'q4') and not is_won"
+                  sample="1">
+                <field name="priority" widget="priority" optional="show"/>
+                <field name="name" string="Opportunity"/>
+                <field name="partner_id"/>
+                <field name="deal_type" widget="badge"/>
+                <field name="stage_id" widget="badge"/>
+                <field name="expected_revenue" widget="monetary" sum="Total Value"/>
+                <field name="recurring_revenue_monthly" widget="monetary" sum="Total MRR" optional="show"/>
+                <field name="probability" widget="progressbar" string="Win Prob."/>
+                <field name="current_box" widget="badge"
+                       decoration-success="current_box == 'q1'"
+                       decoration-warning="current_box == 'q2'"
+                       decoration-danger="current_box == 'q3'"
+                       decoration-muted="current_box == 'q4'"/>
+                <field name="days_inactive" string="Days Inactive" optional="show"/>
+                <field name="date_deadline"/>
+                <field name="key_account_manager_id" widget="many2one_avatar_user"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="is_won" column_invisible="True"/>
+                <field name="is_lost" column_invisible="True"/>
+                <button name="action_open_whatsapp" string="WhatsApp" type="object" icon="fa-whatsapp" class="btn-outline-success btn-sm"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- PIPELINE FORM VIEW                                        -->
+    <!-- ========================================================= -->
+    <record id="view_corporate_crm_deal_form" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.form</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <form string="Corporate Opportunity">
+                <header>
+                    <button name="action_set_won" string="Won (Sign Contract)" type="object" class="btn-success"
+                            invisible="is_won or is_lost"/>
+                    <button name="action_open_lost_wizard" string="Mark as Lost" type="object" class="btn-outline-danger"
+                            invisible="is_won or is_lost"/>
+                    <button name="action_create_quotation" string="New Quotation" type="object" class="btn-primary" icon="fa-shopping-cart"/>
+                    <button name="action_schedule_grooming" string="Schedule Grooming" type="object" class="btn-secondary" icon="fa-scissors"/>
+                    <button name="action_open_whatsapp" string="WhatsApp Contact" type="object" class="btn-outline-success" icon="fa-whatsapp"/>
+
+                    <field name="stage_id" widget="statusbar"
+                           options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Contract Won" bg_color="text-bg-success" invisible="not is_won"/>
+                    <widget name="web_ribbon" title="Lost" bg_color="text-bg-danger" invisible="not is_lost"/>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_quotations" type="object" class="oe_stat_button" icon="fa-shopping-cart">
+                            <field name="sale_order_count" widget="statinfo" string="Quotations / Orders"/>
+                        </button>
+                        <button name="action_view_groomings" type="object" class="oe_stat_button" icon="fa-scissors">
+                            <field name="grooming_count" widget="statinfo" string="Groomings"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name" string="Opportunity / Contract Title"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Vet Clinic Premium Supply Agreement or K9 Fleet Care"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Corporate Client">
+                            <field name="partner_id"/>
+                            <field name="corporate_tier"/>
+                            <field name="corporate_segment"/>
+                            <field name="current_box" widget="badge"/>
+                            <field name="days_inactive"/>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+                        <group string="Financials &amp; Timeline">
+                            <field name="expected_revenue" widget="monetary"/>
+                            <field name="recurring_revenue_monthly" widget="monetary"/>
+                            <field name="probability" widget="progressbar"/>
+                            <field name="date_deadline"/>
+                            <field name="key_account_manager_id" widget="many2one_avatar_user"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="is_won" invisible="1"/>
+                            <field name="is_lost" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Contract &amp; Business Terms" name="page_contract_terms">
+                            <group>
+                                <group string="Service &amp; Fleet Specifications">
+                                    <field name="deal_type"/>
+                                    <field name="pet_count"/>
+                                    <field name="grooming_frequency"/>
+                                    <field name="replenishment_frequency"/>
+                                    <field name="preferred_branch"/>
+                                </group>
+                                <group string="Contract Validity &amp; Renewal">
+                                    <field name="contract_start_date"/>
+                                    <field name="contract_end_date"/>
+                                </group>
+                            </group>
+                            <group string="Detailed Terms &amp; Volume SLA">
+                                <field name="contract_terms" placeholder="Specify volume commitments, delivery schedule, special packaging or grooming requirements..." nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Lost Details" name="page_lost_details" invisible="not is_lost">
+                            <group>
+                                <field name="lost_reason_id"/>
+                                <field name="lost_feedback"/>
+                            </group>
+                        </page>
+
+                        <page string="Linked Quotations &amp; Orders" name="page_linked_sales">
+                            <field name="sale_order_ids" readonly="1">
+                                <list default_order="date_order desc">
+                                    <field name="name"/>
+                                    <field name="date_order"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="amount_total" widget="monetary"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Linked Groomings" name="page_linked_groomings">
+                            <field name="grooming_appointment_ids" readonly="1">
+                                <list default_order="appointment_date desc">
+                                    <field name="name"/>
+                                    <field name="pet_name"/>
+                                    <field name="appointment_date"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="total_price" widget="monetary"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <!-- Chatter & Activities -->
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- PIPELINE PIVOT & GRAPH ANALYTICS                          -->
+    <!-- ========================================================= -->
+    <record id="view_corporate_crm_deal_pivot" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.pivot</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <pivot string="Corporate Pipeline Analysis">
+                <field name="stage_id" type="col"/>
+                <field name="deal_type" type="row"/>
+                <field name="expected_revenue" type="measure"/>
+                <field name="recurring_revenue_monthly" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_corporate_crm_deal_graph" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.graph</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <graph string="Pipeline Revenue by Stage" type="bar" sample="1">
+                <field name="stage_id"/>
+                <field name="expected_revenue" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- PIPELINE CALENDAR VIEW                                    -->
+    <!-- ========================================================= -->
+    <record id="view_corporate_crm_deal_calendar" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.calendar</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <calendar string="Expected Deal Closures &amp; Renewals" date_start="date_deadline" color="key_account_manager_id" mode="month">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="expected_revenue" widget="monetary"/>
+                <field name="stage_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- PIPELINE SEARCH & FILTER VIEW                             -->
+    <!-- ========================================================= -->
+    <record id="view_corporate_crm_deal_search" model="ir.ui.view">
+        <field name="name">corporate.crm.deal.search</field>
+        <field name="model">corporate.crm.deal</field>
+        <field name="arch" type="xml">
+            <search string="Search Pipeline Deals">
+                <field name="name" string="Opportunity / Client"
+                       filter_domain="['|', ('name', 'ilike', self), ('partner_id', 'ilike', self)]"/>
+                <field name="partner_id"/>
+                <field name="key_account_manager_id"/>
+                <field name="deal_type"/>
+
+                <separator/>
+                <filter string="Open Opportunities" name="filter_open" domain="[('is_won', '=', False), ('is_lost', '=', False)]"/>
+                <filter string="Won Contracts 🎉" name="filter_won" domain="[('is_won', '=', True)]"/>
+                <filter string="Lost Deals ❌" name="filter_lost" domain="[('is_lost', '=', True)]"/>
+                <separator/>
+                <filter string="Q2/Q3 Retention Deals" name="filter_retention" domain="[('deal_type', 'in', ('q2_recovery', 'q3_recovery'))]"/>
+                <filter string="Grooming Fleet Contracts" name="filter_fleet" domain="[('deal_type', '=', 'grooming_fleet')]"/>
+                <filter string="Replenishment SLAs" name="filter_replenish" domain="[('deal_type', '=', 'replenishment_sla')]"/>
+                <separator/>
+                <filter string="High Priority" name="filter_high_priority" domain="[('priority', 'in', ('2', '3'))]"/>
+                <filter string="My Opportunities" name="filter_my_deals" domain="[('key_account_manager_id', '=', uid)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Stage" name="group_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Deal Type" name="group_deal_type" context="{'group_by': 'deal_type'}"/>
+                    <filter string="Customer Box" name="group_box" context="{'group_by': 'current_box'}"/>
+                    <filter string="Key Account Manager" name="group_kam" context="{'group_by': 'key_account_manager_id'}"/>
+                    <filter string="Expected Close Month" name="group_deadline" context="{'group_by': 'date_deadline'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- PIPELINE ACTION WINDOW                                    -->
+    <!-- ========================================================= -->
+    <record id="action_corporate_crm_deals" model="ir.actions.act_window">
+        <field name="name">Key Account Pipeline</field>
+        <field name="res_model">corporate.crm.deal</field>
+        <field name="view_mode">kanban,list,form,pivot,graph,calendar</field>
+        <field name="search_view_id" ref="view_corporate_crm_deal_search"/>
+        <field name="context">{
+            'search_default_filter_open': 1,
+            'default_deal_type': 'new_b2b',
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage B2B Contracts, Grooming Fleet SLAs, and Retention Deals!
+            </p>
+            <p>
+                Drag and drop opportunities between stages to track contract negotiations, scheduled deliveries, and win-back outreach.
+            </p>
+        </field>
+    </record>
+</odoo>

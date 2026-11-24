@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_abandoned_cart_test_wizard_form" model="ir.ui.view">
+        <field name="name">abandoned.cart.test.wizard.form</field>
+        <field name="model">abandoned.cart.test.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send Test Abandoned Cart Email">
+                <sheet>
+                    <p class="text-muted">
+                        Test your abandoned cart email template before sending reminders to real customers.
+                        Select a sample order (or leave empty to use the latest cart) and your target email.
+                    </p>
+                    <group>
+                        <group>
+                            <field name="email_to" placeholder="e.g. info@stephanspetstore.co.tz"/>
+                            <field name="template_id"/>
+                        </group>
+                        <group>
+                            <field name="order_id" placeholder="Select a quotation (optional)"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_send_test" string="Send Test Email" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_abandoned_cart_test_wizard" model="ir.actions.act_window">
+        <field name="name">Send Test Abandoned Cart Email</field>
+        <field name="res_model">abandoned.cart.test.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

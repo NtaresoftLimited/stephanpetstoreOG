@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_ai_enrich" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.ai.enrich</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority">100</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="AI Catalog Enricher" string="AI Catalog Enricher" name="stephans_product_ai_enrich">
+                    <block title="AI Engine Selection" name="ai_catalog_engine_settings">
+                        <setting id="ai_provider_setting" help="Choose which AI engine to use for product descriptions and catalog regeneration.">
+                            <field name="ai_provider" widget="radio"/>
+                        </setting>
+                    </block>
+                    
+                    <block title="Google Gemini Settings" name="ai_catalog_gemini_settings" invisible="ai_provider != 'gemini'">
+                        <setting id="gemini_api_key_setting" help="Configure Google Gemini API key (starts with AIzaSy...).">
+                            <field name="gemini_api_key" password="True"/>
+                        </setting>
+                        <setting id="gemini_model_setting" help="Gemini Model ID (default: gemini-2.5-flash or gemini-1.5-flash).">
+                            <field name="gemini_model"/>
+                        </setting>
+                    </block>
+
+                    <block title="OpenAI (ChatGPT) Settings" name="ai_catalog_openai_settings" invisible="ai_provider != 'openai'">
+                        <setting id="openai_api_key_setting" help="Configure OpenAI API key (starts with sk-...).">
+                            <field name="openai_api_key" password="True"/>
+                        </setting>
+                        <setting id="openai_model_setting" help="OpenAI Model ID (default: gpt-4o or gpt-4o-mini).">
+                            <field name="openai_model"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

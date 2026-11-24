@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SUB-MENU UNDER WHATSAPP CONNECTOR -->
+    <menuitem id="menu_audit_whatsapp_root"
+              name="Audit &amp; Security"
+              parent="whatsapp_connector.menu_whatsapp_root"
+              sequence="25"/>
+
+    <menuitem id="menu_audit_whatsapp_logs"
+              name="Audit Logs"
+              parent="menu_audit_whatsapp_root"
+              action="action_audit_whatsapp_log"
+              sequence="10"/>
+
+    <menuitem id="menu_audit_whatsapp_rules"
+              name="Notification Rules"
+              parent="menu_audit_whatsapp_root"
+              action="action_audit_whatsapp_rule"
+              sequence="20"/>
+</odoo>

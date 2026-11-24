@@ -66,6 +66,42 @@ class GroomingService(models.Model):
         return rule[0].price if rule else 0.0
 
 
+class GroomingStation(models.Model):
+    """Grooming Station / Table Resource"""
+    _name = 'grooming.station'
+    _description = 'Grooming Station / Table'
+    _order = 'branch, sequence, name'
+
+    name = fields.Char(string='Station Name', required=True)
+    code = fields.Char(string='Code', required=True)
+    branch = fields.Selection([
+        ('masaki', 'Masaki (Slipway)'),
+        ('mikocheni', 'Mikocheni'),
+    ], string='Branch Location', default='masaki', required=True)
+    station_type = fields.Selection([
+        ('table', 'Grooming Table'),
+        ('tub', 'Bath & Wash Tub'),
+    ], string='Station Type', default='table', required=True)
+    sequence = fields.Integer(default=10)
+    active = fields.Boolean(default=True)
+    color = fields.Integer(string='Color Index', default=1)
+    capacity = fields.Integer(string='Capacity', default=1)
+    notes = fields.Text(string='Notes')
+
+    def is_available(self, start_dt, end_dt, exclude_appointment_id=None):
+        """Check if station has any active overlapping appointment"""
+        self.ensure_one()
+        domain = [
+            ('station_id', '=', self.id),
+            ('state', 'not in', ('cancelled', 'completed')),
+            ('appointment_date', '<', end_dt),
+            ('appointment_end_date', '>', start_dt),
+        ]
+        if exclude_appointment_id:
+            domain.append(('id', '!=', exclude_appointment_id))
+        return self.env['grooming.appointment'].sudo().search_count(domain) == 0
+
+
 class GroomingPrice(models.Model):
     """Pricing Matrix for Grooming Packages"""
     _name = 'grooming.price'
@@ -167,9 +203,39 @@ class GroomingAppointment(models.Model):
     has_handling = fields.Boolean(string='Handling Fee Applied')
     late_pickup_hours = fields.Integer(string='Late Pickup Hours', default=0)
     
-    # Scheduling
+    # Scheduling & Station Allocation
+    branch = fields.Selection([
+        ('masaki', 'Masaki (Slipway)'),
+        ('mikocheni', 'Mikocheni'),
+    ], string='Branch Location', default='masaki', required=True, tracking=True)
+    station_id = fields.Many2one(
+        'grooming.station',
+        string='Station / Table',
+        domain="[('branch', '=', branch), ('active', '=', True)]",
+        tracking=True
+    )
     appointment_date = fields.Datetime(string='Appointment Date & Time', required=True, tracking=True)
+    duration_hours = fields.Float(
+        string='Estimated Duration (Hours)',
+        compute='_compute_duration',
+        store=True,
+        readonly=False
+    )
+    appointment_end_date = fields.Datetime(
+        string='Scheduled End Time',
+        compute='_compute_end_date',
+        store=True
+    )
     preferred_time = fields.Char(string='Preferred Time Slot')
+    is_walkin_reserved = fields.Boolean(
+        string='Reserved Walk-in Slot',
+        default=False,
+        help='Reserved offline for urgent walk-in arrivals.'
+    )
+    is_walkin = fields.Boolean(
+        string='Is Walk-in Customer',
+        default=False
+    )
     
     # Pricing
     total_price = fields.Float(string='Total Price', compute='_compute_total', store=True)
@@ -256,9 +322,9 @@ class GroomingAppointment(models.Model):
     def _compute_policy_description(self):
         """Generate policy text based on current settings"""
         config = self.env['ir.config_parameter'].sudo()
-        detangling = config.get_float('grooming.detangling_fee', default=30000.0)
-        handling = config.get_float('grooming.handling_fee', default=10000.0)
-        late_pickup = config.get_float('grooming.late_pickup_fee', default=10000.0)
+        detangling = config.get_float('grooming.detangling_fee', default=100000.0)
+        handling = config.get_float('grooming.handling_fee', default=20000.0)
+        late_pickup = config.get_float('grooming.late_pickup_fee', default=20000.0)
         
         for rec in self:
             rec.policy_description = f"""
@@ -300,9 +366,9 @@ class GroomingAppointment(models.Model):
 
             # 3. Extras
             config = self.env['ir.config_parameter'].sudo()
-            detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
-            handling_fee = config.get_float('grooming.handling_fee', default=10000.0)
-            late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=10000.0)
+            detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
+            handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
+            late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
 
             if rec.has_detangling:
                 lines.append(f"<li>Detangling Fee: {detangling_fee:,.0f} TZS</li>")
@@ -340,9 +406,9 @@ class GroomingAppointment(models.Model):
                 
             # 3. Extra Charges config
             config = self.env['ir.config_parameter'].sudo()
-            detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
-            handling_fee = config.get_float('grooming.handling_fee', default=10000.0)
-            late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=10000.0)
+            detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
+            handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
+            late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
 
             if rec.has_detangling:
                 total += detangling_fee
@@ -355,6 +421,109 @@ class GroomingAppointment(models.Model):
             
             rec.total_price = total
     
+    @api.depends('pet_type', 'pet_category', 'service_id', 'has_detangling', 'has_handling')
+    def _compute_duration(self):
+        for rec in self:
+            duration = 1.0  # Default 1 hr
+            if rec.pet_type == 'dog':
+                is_standard = rec.service_id and 'standard' in (rec.service_id.name or '').lower()
+                if rec.pet_category in ('mini', 'small'):
+                    duration = 1.0 if is_standard else 1.5
+                elif rec.pet_category == 'medium':
+                    duration = 1.5 if is_standard else 2.0
+                elif rec.pet_category == 'large':
+                    duration = 2.0 if is_standard else 2.5
+                else:
+                    duration = 1.5
+            elif rec.pet_type == 'cat':
+                duration = 1.0
+            elif rec.pet_type == 'small_animal':
+                duration = 1.0
+
+            if rec.has_detangling:
+                duration += 0.5  # +30 min for detangling
+            if rec.has_handling:
+                duration += 0.5  # +30 min for behavioral handling
+
+            rec.duration_hours = duration
+
+    @api.depends('appointment_date', 'duration_hours')
+    def _compute_end_date(self):
+        for rec in self:
+            if rec.appointment_date and rec.duration_hours:
+                rec.appointment_end_date = rec.appointment_date + timedelta(hours=rec.duration_hours)
+            elif rec.appointment_date:
+                rec.appointment_end_date = rec.appointment_date + timedelta(hours=1.0)
+            else:
+                rec.appointment_end_date = False
+
+    @api.constrains('station_id', 'appointment_date', 'appointment_end_date', 'state')
+    def _check_station_overlap(self):
+        for rec in self:
+            if not rec.station_id or not rec.appointment_date or not rec.appointment_end_date:
+                continue
+            if rec.state in ('cancelled', 'completed'):
+                continue
+            domain = [
+                ('id', '!=', rec.id),
+                ('station_id', '=', rec.station_id.id),
+                ('state', 'not in', ('cancelled', 'completed')),
+                ('appointment_date', '<', rec.appointment_end_date),
+                ('appointment_end_date', '>', rec.appointment_date),
+            ]
+            overlap = self.search(domain, limit=1)
+            if overlap:
+                raise ValidationError(
+                    f"Table Conflict: Station '{rec.station_id.name}' is already booked from "
+                    f"{overlap.appointment_date.strftime('%H:%M')} to "
+                    f"{overlap.appointment_end_date.strftime('%H:%M')} for "
+                    f"'{overlap.pet_name}' ({overlap.name}). Please assign another station or time slot."
+                )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('station_id') and vals.get('appointment_date'):
+                branch = vals.get('branch', 'masaki')
+                stations = self.env['grooming.station'].search([
+                    ('branch', '=', branch),
+                    ('active', '=', True)
+                ], order='sequence, id')
+                
+                appt_start = fields.Datetime.to_datetime(vals['appointment_date'])
+                duration = vals.get('duration_hours') or 1.5
+                appt_end = appt_start + timedelta(hours=duration)
+                
+                for st in stations:
+                    domain = [
+                        ('station_id', '=', st.id),
+                        ('state', 'not in', ('cancelled', 'completed')),
+                        ('appointment_date', '<', appt_end),
+                        ('appointment_end_date', '>', appt_start),
+                    ]
+                    if not self.search_count(domain):
+                        vals['station_id'] = st.id
+                        break
+        return super(GroomingAppointment, self).create(vals_list)
+
+    @api.model
+    def _cron_release_walkin_buffers(self):
+        """Auto-release unclaimed walk-in buffer slots at 6:00 PM for the next day."""
+        now = datetime.now()
+        tomorrow_start = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        tomorrow_end = tomorrow_start + timedelta(days=1)
+        
+        unclaimed = self.search([
+            ('is_walkin_reserved', '=', True),
+            ('partner_id', '=', False),
+            ('state', 'in', ('pending',)),
+            ('appointment_date', '>=', tomorrow_start),
+            ('appointment_date', '<', tomorrow_end),
+        ])
+        if unclaimed:
+            unclaimed.write({'is_walkin_reserved': False})
+            _logger.info(f"Released {len(unclaimed)} walk-in slots for tomorrow.")
+
     @api.constrains('appointment_date')
     def _check_appointment_date(self):
         """Validate appointment date (no Sundays)"""
@@ -399,6 +568,32 @@ class GroomingAppointment(models.Model):
 
     def action_complete(self):
         self.write({'state': 'completed'})
+
+    def action_send_review_prompt(self):
+        """One-click WhatsApp Google Review prompt to customer upon service completion"""
+        self.ensure_one()
+        phone = self.customer_phone or self.partner_id.phone or self.partner_id.mobile
+        if not phone:
+            raise ValidationError("No customer phone number found to send review prompt.")
+        import re
+        from urllib.parse import quote
+        clean_phone = re.sub(r'[^0-9]', '', str(phone))
+        if clean_phone.startswith('0'):
+            clean_phone = '255' + clean_phone[1:]
+        elif not clean_phone.startswith('255') and len(clean_phone) == 9:
+            clean_phone = '255' + clean_phone
+
+        pet = self.pet_name or "your pet"
+        review_url = "https://g.page/r/stephans-pet-store/review"
+        msg = f"Hi {self.partner_id.name or 'there'}! Thank you for bringing {pet} to Stephan's Pet Store today for grooming. We hope {pet} looks and feels amazing! If you enjoyed our service, please leave us a 5-star review: {review_url}"
+        whatsapp_url = f"https://wa.me/{clean_phone}?text={quote(msg)}"
+
+        self.message_post(body=f"Sent Google Review prompt to {clean_phone} via WhatsApp.")
+        return {
+            'type': 'ir.actions.act_url',
+            'url': whatsapp_url,
+            'target': 'new',
+        }
 
     @api.model
     def _cron_check_reminders(self):
@@ -546,9 +741,9 @@ class GroomingAppointment(models.Model):
         if handling_product: self._ensure_pos_product(handling_product)
 
         config = self.env['ir.config_parameter'].sudo()
-        detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
-        handling_fee = config.get_float('grooming.handling_fee', default=10000.0)
-        late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=10000.0)
+        detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
+        handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
+        late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
 
         if self.has_detangling:
             SaleOrderLine.create({
@@ -674,9 +869,9 @@ class GroomingAppointment(models.Model):
         misc_product = self.env.ref('grooming.product_grooming_misc', raise_if_not_found=False)
         
         config = self.env['ir.config_parameter'].sudo()
-        detangling_fee = config.get_float('grooming.detangling_fee', default=30000.0)
-        handling_fee = config.get_float('grooming.handling_fee', default=10000.0)
-        late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=10000.0)
+        detangling_fee = config.get_float('grooming.detangling_fee', default=100000.0)
+        handling_fee = config.get_float('grooming.handling_fee', default=20000.0)
+        late_pickup_fee = config.get_float('grooming.late_pickup_fee', default=20000.0)
         
         if self.has_detangling and misc_product:
             PosOrderLine.create({

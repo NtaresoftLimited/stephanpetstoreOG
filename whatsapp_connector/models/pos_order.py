@@ -28,7 +28,9 @@ class PosOrder(models.Model):
     def _send_whatsapp_confirmation(self, order, force=False):
         """Send WhatsApp receipt. If force=True, send even if no phone (will fail but log)."""
         try:
-            phone = (order.partner_id.phone or order.partner_id.mobile) if order.partner_id else False
+            phone = (
+                order.partner_id.phone or getattr(order.partner_id, 'mobile', False)
+            ) if order.partner_id else False
             if not order.partner_id or not phone:
                 if force:
                     self._safe_post_message(order, "Failed to send WhatsApp: Customer has no phone number.")

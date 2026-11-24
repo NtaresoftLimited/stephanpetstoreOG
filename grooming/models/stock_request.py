@@ -57,15 +57,28 @@ class GroomingStockRequest(models.Model):
     picking_id = fields.Many2one('stock.picking', string='Generated Receipt', readonly=True)
     bill_id = fields.Many2one('account.move', string='Vendor Bill', readonly=True)
 
+    @api.model
+    def _get_backstore_warehouse(self):
+        """Replenishment only ever restocks Masaki Back Storage (warehouse code MBS)."""
+        mbs_wh = self.env['stock.warehouse'].sudo().search([('code', '=', 'MBS')], limit=1)
+        if not mbs_wh:
+            raise UserError(_("Masaki Back Storage warehouse (code: MBS) was not found."))
+        return mbs_wh
+
     @api.model_create_multi
     def create(self, vals_list):
-        mbs_wh = self.env['stock.warehouse'].search([('code', '=', 'MBS')], limit=1)
+        mbs_wh = self._get_backstore_warehouse()
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('grooming.stock.request') or _('New')
-            if not vals.get('destination_warehouse_id') and mbs_wh:
-                vals['destination_warehouse_id'] = mbs_wh.id
+            # Always Masaki Back Storage, whatever the caller sent (POS, import, script).
+            vals['destination_warehouse_id'] = mbs_wh.id
         return super().create(vals_list)
+
+    def write(self, vals):
+        if 'destination_warehouse_id' in vals:
+            vals = dict(vals, destination_warehouse_id=self._get_backstore_warehouse().id)
+        return super().write(vals)
 
     def action_view_vendor_bill(self):
         self.ensure_one()
@@ -260,26 +273,47 @@ class GroomingStockRequest(models.Model):
                 raise UserError(_("Please add at least one product line before submitting."))
             request.state = 'submitted'
 
+    APPROVER_GROUPS = (
+        'base.group_system',
+        'stock.group_stock_manager',
+        'point_of_sale.group_pos_manager',
+    )
+
+    def _check_approver(self):
+        """The view hides the button, but RPC callers must be checked here too."""
+        if self.env.su:
+            return
+        if not any(self.env.user.has_group(group) for group in self.APPROVER_GROUPS):
+            raise UserError(_("Only an Administrator, Inventory Manager or POS Manager can approve replenishment requests."))
+
     def action_approve_request(self):
-        for request in self:
+        self._check_approver()
+        approver = self.env.user
+        # Approvers are checked above; the receipt and bill are created as superuser so a
+        # POS/Inventory manager without accounting rights cannot fail half-way through.
+        for request in self.sudo():
             if request.state != 'submitted':
                 raise UserError(_("Only submitted requests can be approved."))
-            
-            # Destination must strictly be Masaki Back Storage
-            mbs_wh = self.env['stock.warehouse'].search([('code', '=', 'MBS')], limit=1)
-            dest_warehouse = request.destination_warehouse_id or mbs_wh
-            if not dest_warehouse:
-                raise UserError(_("Masaki Back Storage warehouse (code: MBS) was not found."))
+            if not request.product_line_ids:
+                raise UserError(_("Request %s has no product lines.") % request.name)
+
+            # Destination is always Masaki Back Storage, never the value stored on the request.
+            dest_warehouse = self._get_backstore_warehouse()
+            if request.destination_warehouse_id != dest_warehouse:
+                request.destination_warehouse_id = dest_warehouse
 
             dest_location = dest_warehouse.lot_stock_id
-            supplier_location = self.env['stock.location'].search([('usage', '=', 'supplier')], limit=1)
+            supplier_location = self.env['stock.location'].sudo().search([('usage', '=', 'supplier')], limit=1)
+            if not dest_location or not supplier_location:
+                raise UserError(_("Masaki Back Storage stock location or the Vendors location is missing."))
 
             # 1. Get or create Default Replenishment Vendor (hidden from POS cashiers)
-            vendor = self.env['res.partner'].search([('is_replenishment_vendor', '=', True)], limit=1)
+            Partner = self.env['res.partner'].sudo()
+            vendor = Partner.search([('is_replenishment_vendor', '=', True)], limit=1)
             if not vendor:
-                vendor = self.env['res.partner'].search([('name', '=', 'Central Replenishment Supplier')], limit=1)
+                vendor = Partner.search([('name', '=', 'Central Replenishment Supplier')], limit=1)
             if not vendor:
-                vendor = self.env['res.partner'].create({
+                vendor = Partner.create({
                     'name': 'Central Replenishment Supplier',
                     'is_company': True,
                     'supplier_rank': 1,
@@ -291,44 +325,54 @@ class GroomingStockRequest(models.Model):
                     vendor.write({'is_replenishment_vendor': True, 'customer_rank': 0, 'supplier_rank': 1})
 
             # 2. Create Incoming Shipment / Receipt directly into Masaki Back Storage
-            picking_type = dest_warehouse.in_type_id or self.env['stock.picking.type'].search([
+            picking_type = dest_warehouse.in_type_id or self.env['stock.picking.type'].sudo().search([
                 ('code', '=', 'incoming'),
                 ('warehouse_id', '=', dest_warehouse.id)
             ], limit=1)
+            if not picking_type:
+                raise UserError(_("Masaki Back Storage has no Receipts operation type."))
 
             picking_vals = {
-                'picking_type_id': picking_type.id if picking_type else False,
+                'picking_type_id': picking_type.id,
                 'partner_id': vendor.id,
-                'location_id': supplier_location.id if supplier_location else False,
-                'location_dest_id': dest_location.id if dest_location else False,
+                'location_id': supplier_location.id,
+                'location_dest_id': dest_location.id,
                 'origin': request.name,
                 'custom_source_warehouse_id': False,
                 'custom_destination_warehouse_id': dest_warehouse.id,
                 'move_ids': [(0, 0, {
-                    'name': line.product_id.name,
                     'product_id': line.product_id.id,
                     'product_uom_qty': line.quantity,
-                    'product_uom': line.product_id.uom_id.id,
+                    'uom_id': line.product_id.uom_id.id,
                     'location_id': supplier_location.id if supplier_location else False,
                     'location_dest_id': dest_location.id if dest_location else False,
                 }) for line in request.product_line_ids]
             }
 
-            picking = self.env['stock.picking'].create(picking_vals)
+            picking = self.env['stock.picking'].sudo().create(picking_vals)
             picking.action_confirm()
 
             # Set move quantities and validate immediately so stock lands in backstore!
             for move in picking.move_ids:
                 move.quantity = move.product_uom_qty
-            try:
-                picking.button_validate()
-            except Exception as e:
-                pass
+            picking.button_validate()
+            if picking.state != 'done':
+                # e.g. a lot/serial-tracked product: validation returned a wizard instead of
+                # receiving. Abort so no bill is posted for stock that never arrived.
+                raise UserError(_(
+                    "The receipt for %s could not be validated automatically, so nothing was received or billed. "
+                    "Check the products for lot/serial tracking, then try again."
+                ) % request.name)
 
             request.picking_id = picking.id
 
             # 3. Create & Automatically Post Vendor Bill
-            journal = self.env['account.journal'].search([('type', '=', 'purchase')], limit=1)
+            journal = self.env['account.journal'].sudo().search([
+                ('type', '=', 'purchase'),
+                ('company_id', '=', picking.company_id.id),
+            ], limit=1)
+            if not journal:
+                raise UserError(_("No purchase journal found to create the vendor bill."))
             bill_lines = []
             for line in request.product_line_ids:
                 bill_lines.append((0, 0, {
@@ -342,23 +386,35 @@ class GroomingStockRequest(models.Model):
                 'move_type': 'in_invoice',
                 'partner_id': vendor.id,
                 'invoice_date': fields.Date.context_today(self),
-                'journal_id': journal.id if journal else False,
+                'journal_id': journal.id,
                 'ref': f"Replenishment: {request.name}",
                 'invoice_origin': request.name,
                 'invoice_line_ids': bill_lines,
             }
 
-            bill = self.env['account.move'].create(bill_vals)
+            bill = self.env['account.move'].sudo().create(bill_vals)
             try:
-                bill.action_post()
+                # Savepoint: a failed posting must not leave the transaction half-written.
+                with self.env.cr.savepoint():
+                    bill.action_post()
             except Exception as e:
-                request.message_post(body=_("Vendor Bill %s created, but automatic posting encountered: %s") % (bill.name or '', str(e)))
+                request.message_post(body=_("Vendor Bill was created as a draft, but automatic posting failed: %s") % str(e))
 
             request.bill_id = bill.id
             request.state = 'received'
 
+            no_cost = request.product_line_ids.mapped('product_id').filtered(lambda p: not p.standard_price)
+            body = _("Approved and received by %s.") % approver.name
+            if no_cost:
+                body += " " + _("These products have no cost, so they were billed at 0: %s") % ", ".join(no_cost.mapped('display_name'))
+            request.message_post(body=body)
+
     def action_cancel(self):
         for request in self:
+            if request.state in ('received', 'transferred'):
+                raise UserError(_(
+                    "Request %s is already received. Return the receipt and reverse the vendor bill instead of cancelling."
+                ) % request.name)
             if request.picking_id and request.picking_id.state not in ('done', 'cancel'):
                 request.picking_id.action_cancel()
             if request.bill_id and request.bill_id.state == 'draft':

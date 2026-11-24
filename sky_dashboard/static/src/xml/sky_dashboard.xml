@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="sky_dashboard.SkyDashboard">
         <main class="o_sky_dashboard h-100 overflow-auto">
-            <div t-if="state.loading" class="o_sky_loading">
+            <div t-if="this.state.loading" class="o_sky_loading">
                 <i class="fa fa-circle-o-notch fa-spin"/><span>Loading overview…</span>
             </div>
             <div t-else="" class="container-fluid p-3 p-lg-4">
@@ -13,89 +13,90 @@
                         <p>Administrator overview of sales, stock and operating expenses.</p>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <button class="btn o_sky_refresh" t-on-click="loadDashboard">
+                        <button class="btn o_sky_refresh" t-on-click="(ev) =&gt; this.loadDashboard(ev)">
                             <i class="fa fa-refresh me-2"/>Refresh
                         </button>
-                        <button t-if="state.canAccessDailyStock" class="btn o_sky_stock_button" t-on-click="openDailyStock">
+                        <button t-if="this.state.canAccessDailyStock" class="btn o_sky_stock_button" t-on-click="(ev) =&gt; this.openDailyStock(ev)">
                             <i class="fa fa-picture-o me-2"/>Daily stock
                         </button>
-                        <button t-if="state.isAdmin" class="btn o_sky_replenish_button" t-on-click="openReplenishments">
+                        <button t-if="this.state.isAdmin" class="btn o_sky_replenish_button" t-on-click="(ev) =&gt; this.openReplenishments(ev)">
                             <i class="fa fa-truck me-2"/>Replenishments
-                            <span t-if="state.data.pending_replenishments" class="badge rounded-pill bg-danger ms-2" t-esc="state.data.pending_replenishments"/>
+                            <span t-if="this.state.data?.pending_replenishments" class="badge rounded-pill bg-danger ms-2" t-out="this.state.data.pending_replenishments"/>
                         </button>
                     </div>
                 </header>
 
                 <nav class="o_sky_tabs mb-4" aria-label="SKY dashboard sections">
-                    <button t-att-class="state.activeTab === 'business' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('business')"><i class="fa fa-line-chart me-2"/>Business overview</button>
-                    <button t-att-class="state.activeTab === 'grooming' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('grooming')"><i class="fa fa-paw me-2"/>Grooming</button>
+                    <button t-att-class="this.state.activeTab === 'business' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('business')"><i class="fa fa-line-chart me-2"/>Business overview</button>
+                    <button t-att-class="this.state.activeTab === 'grooming' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('grooming')"><i class="fa fa-paw me-2"/>Grooming</button>
+                    <button t-att-class="this.state.activeTab === 'pricing' ? 'is-active' : ''" t-on-click="() => this.setActiveTab('pricing')">Pricing &amp; Valuation</button>
                 </nav>
 
-                <div t-if="state.activeTab === 'business' and state.isAdmin and state.data.pending_replenishments" class="alert alert-warning d-flex align-items-center justify-content-between mb-3 p-3 shadow-sm rounded-3">
+                <div t-if="this.state.activeTab === 'business' and this.state.isAdmin and this.state.data?.pending_replenishments" class="alert alert-warning d-flex align-items-center justify-content-between mb-3 p-3 shadow-sm rounded-3">
                     <div class="d-flex align-items-center">
                         <i class="fa fa-exclamation-triangle fa-lg me-3 text-warning"/>
                         <div>
-                            <strong>Pending Replenishments:</strong> You have <span class="badge bg-danger ms-1" t-esc="state.data.pending_replenishments"/> request(s) awaiting approval for Masaki Back Storage.
+                            <strong>Pending Replenishments:</strong> You have <span class="badge bg-danger ms-1" t-out="this.state.data.pending_replenishments"/> request(s) awaiting approval for Masaki Back Storage.
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-dark ms-3" t-on-click="openReplenishments">Review &amp; Approve</button>
+                    <button class="btn btn-sm btn-dark ms-3" t-on-click="(ev) =&gt; this.openReplenishments(ev)">Review &amp; Approve</button>
                 </div>
 
-                <section t-if="state.activeTab === 'business'" class="row g-3 mb-3">
+                <section t-if="this.state.activeTab === 'business'" class="row g-3 mb-3">
                     <div class="col-12 col-sm-6 col-xl-3">
                         <button class="o_sky_metric" t-on-click="() => this.openOrders([['state', 'in', ['sale', 'done']]])">
                             <span class="o_sky_icon o_sky_icon--amber"><i class="fa fa-line-chart"/></span>
-                            <span><small>Revenue this month</small><strong t-esc="formatMoney(state.data.monthly_revenue)"/></span>
+                            <span><small>Revenue this month</small><strong t-out="this.formatMoney(this.state.data.monthly_revenue)"/></span>
                         </button>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3">
                         <button class="o_sky_metric" t-on-click="() => this.openOrders()">
                             <span class="o_sky_icon o_sky_icon--brown"><i class="fa fa-shopping-bag"/></span>
-                            <span><small>Confirmed orders</small><strong t-esc="state.data.monthly_orders"/></span>
+                            <span><small>Confirmed orders</small><strong t-out="this.state.data.monthly_orders"/></span>
                         </button>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3">
-                        <button class="o_sky_metric" t-on-click="openCustomers">
+                        <button class="o_sky_metric" t-on-click="(ev) =&gt; this.openCustomers(ev)">
                             <span class="o_sky_icon o_sky_icon--sand"><i class="fa fa-users"/></span>
-                            <span><small>Customers</small><strong t-esc="state.data.customers"/></span>
+                            <span><small>Customers</small><strong t-out="this.state.data.customers"/></span>
                         </button>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3">
-                        <button class="o_sky_metric" t-on-click="openProducts">
+                        <button class="o_sky_metric" t-on-click="(ev) =&gt; this.openProducts(ev)">
                             <span class="o_sky_icon o_sky_icon--rose"><i class="fa fa-cube"/></span>
-                            <span><small>Low stock items</small><strong t-esc="state.data.low_stock"/></span>
+                            <span><small>Low stock items</small><strong t-out="this.state.data.low_stock"/></span>
                         </button>
                     </div>
                 </section>
 
-                <section t-if="state.activeTab === 'business'" class="o_sky_weekly mt-4 mb-4">
+                <section t-if="this.state.activeTab === 'business'" class="o_sky_weekly mt-4 mb-4">
                     <div class="o_sky_panel">
                         <div class="o_sky_weekly_header">
                             <div><span class="o_sky_eyebrow">POINT OF SALE</span><h2>Weekly sales &amp; expenses</h2></div>
                             <div class="o_sky_filters">
-                                <label>From<input type="date" class="form-control" t-att-value="state.dateStart" t-on-change="onDateStart"/></label>
-                                <label>To<input type="date" class="form-control" t-att-value="state.dateEnd" t-on-change="onDateEnd"/></label>
+                                <label>From<input type="date" class="form-control" t-att-value="this.state.dateStart" t-on-change="(ev) =&gt; this.onDateStart(ev)"/></label>
+                                <label>To<input type="date" class="form-control" t-att-value="this.state.dateEnd" t-on-change="(ev) =&gt; this.onDateEnd(ev)"/></label>
                                 <label>Point of Sale
-                                    <select class="form-select" t-on-change="onConfigChange">
-                                        <option value="0" t-att-selected="state.configId === 0">All locations</option>
-                                        <option t-foreach="state.data.pos_configs" t-as="config" t-key="config.id" t-att-value="config.id" t-att-selected="state.configId === config.id" t-esc="config.name"/>
+                                    <select class="form-select" t-on-change="(ev) =&gt; this.onConfigChange(ev)">
+                                        <option value="0" t-att-selected="this.state.configId === 0">All locations</option>
+                                        <option t-foreach="this.state.data.pos_configs" t-as="config" t-key="config.id" t-att-value="config.id" t-att-selected="this.state.configId === config.id" t-out="config.name"/>
                                     </select>
                                 </label>
-                                <button class="btn o_sky_stock_button align-self-end" t-on-click="loadDashboard"><i class="fa fa-filter me-2"/>Apply</button>
+                                <button class="btn o_sky_stock_button align-self-end" t-on-click="(ev) =&gt; this.loadDashboard(ev)"><i class="fa fa-filter me-2"/>Apply</button>
                             </div>
                         </div>
 
                         <div class="row g-3 p-3">
-                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Gross sales</small><strong t-esc="formatMoney(state.data.weekly.gross_sales)"/></div></div>
-                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Returns</small><strong t-esc="formatMoney(state.data.weekly.returns)"/></div></div>
-                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Net sales</small><strong t-esc="formatMoney(state.data.weekly.net_sales)"/></div></div>
-                            <div class="col-6 col-lg"><button class="o_sky_week_metric is-expense" t-on-click="openExpenses"><small>Expenses</small><strong t-esc="formatMoney(state.data.weekly.expenses)"/></button></div>
-                            <div class="col-12 col-lg"><div class="o_sky_week_metric is-net"><small>Net after expenses</small><strong t-esc="formatMoney(state.data.weekly.net_after_expenses)"/></div></div>
+                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Gross sales</small><strong t-out="this.formatMoney(this.state.data.weekly.gross_sales)"/></div></div>
+                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Returns</small><strong t-out="this.formatMoney(this.state.data.weekly.returns)"/></div></div>
+                            <div class="col-6 col-lg"><div class="o_sky_week_metric"><small>Net sales</small><strong t-out="this.formatMoney(this.state.data.weekly.net_sales)"/></div></div>
+                            <div class="col-6 col-lg"><button class="o_sky_week_metric is-expense" t-on-click="(ev) =&gt; this.openExpenses(ev)"><small>Expenses</small><strong t-out="this.formatMoney(this.state.data.weekly.expenses)"/></button></div>
+                            <div class="col-12 col-lg"><div class="o_sky_week_metric is-net"><small>Net after expenses</small><strong t-out="this.formatMoney(this.state.data.weekly.net_after_expenses)"/></div></div>
                         </div>
                         <div class="o_sky_week_facts px-3 pb-3">
-                            <span><b t-esc="state.data.weekly.orders"/> orders</span>
-                            <span><b t-esc="state.data.weekly.items"/> items</span>
-                            <span>Average order <b t-esc="formatMoney(state.data.weekly.average_order)"/></span>
+                            <span><b t-out="this.state.data.weekly.orders"/> orders</span>
+                            <span><b t-out="this.state.data.weekly.items"/> items</span>
+                            <span>Average order <b t-out="this.formatMoney(this.state.data.weekly.average_order)"/></span>
                         </div>
 
                         <div class="row g-3 px-3 pb-3">
@@ -104,12 +105,12 @@
                                     <table class="table o_sky_table mb-0">
                                         <thead><tr><th>Location</th><th class="text-end">Orders</th><th class="text-end">Sales</th><th class="text-end">Returns</th><th class="text-end">Expenses</th><th class="text-end">After expenses</th></tr></thead>
                                         <tbody>
-                                            <tr t-foreach="state.data.weekly.branches" t-as="branch" t-key="branch.id" t-on-click="() => this.openPosOrders(branch.id)">
-                                                <td class="fw-semibold" t-esc="branch.name"/><td class="text-end" t-esc="branch.orders"/>
-                                                <td class="text-end" t-esc="formatMoney(branch.sales)"/><td class="text-end" t-esc="formatMoney(branch.returns)"/>
-                                                <td class="text-end" t-esc="formatMoney(branch.expenses)"/><td class="text-end fw-semibold" t-esc="formatMoney(branch.net_after_expenses)"/>
+                                            <tr t-foreach="this.state.data.weekly.branches" t-as="branch" t-key="branch.id" t-on-click="() => this.openPosOrders(branch.id)">
+                                                <td class="fw-semibold" t-out="branch.name"/><td class="text-end" t-out="branch.orders"/>
+                                                <td class="text-end" t-out="this.formatMoney(branch.sales)"/><td class="text-end" t-out="this.formatMoney(branch.returns)"/>
+                                                <td class="text-end" t-out="this.formatMoney(branch.expenses)"/><td class="text-end fw-semibold" t-out="this.formatMoney(branch.net_after_expenses)"/>
                                             </tr>
-                                            <tr t-if="!state.data.weekly.branches.length"><td colspan="6" class="text-center text-muted py-4">No sales or approved expenses in this period.</td></tr>
+                                            <tr t-if="!this.state.data.weekly.branches.length"><td colspan="6" class="text-center text-muted py-4">No sales or approved expenses in this period.</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -117,8 +118,8 @@
                             <div class="col-12 col-xl-4">
                                 <div class="o_sky_daily_list">
                                     <div class="o_sky_panel_title mb-2">Daily movement</div>
-                                    <div t-foreach="state.data.weekly.days" t-as="day" t-key="day.date">
-                                        <span t-esc="day.label"/><small><b t-esc="formatMoney(day.sales)"/> sales · <b t-esc="formatMoney(day.expenses)"/> expenses</small>
+                                    <div t-foreach="this.state.data.weekly.days" t-as="day" t-key="day.date">
+                                        <span t-out="day.label"/><small><b t-out="this.formatMoney(day.sales)"/> sales · <b t-out="this.formatMoney(day.expenses)"/> expenses</small>
                                     </div>
                                 </div>
                             </div>
@@ -127,14 +128,14 @@
                         <div class="row g-3 px-3 pb-3">
                             <div class="col-12 col-md-6">
                                 <div class="o_sky_mini_donut_panel">
-                                    <div class="o_sky_mini_donut" t-att-style="weeklyFinanceDonutStyle"><div><strong t-esc="formatMoney(state.data.weekly.net_after_expenses)"/><span>after expenses</span></div></div>
-                                    <div class="o_sky_mini_legend"><h3>Sales &amp; expenses</h3><div><i class="is-sales"/>Net sales <b t-esc="formatMoney(state.data.weekly.net_sales)"/></div><div><i class="is-expenses"/>Expenses <b t-esc="formatMoney(state.data.weekly.expenses)"/></div></div>
+                                    <div class="o_sky_mini_donut" t-att-style="this.weeklyFinanceDonutStyle"><div><strong t-out="this.formatMoney(this.state.data.weekly.net_after_expenses)"/><span>after expenses</span></div></div>
+                                    <div class="o_sky_mini_legend"><h3>Sales &amp; expenses</h3><div><i class="is-sales"/>Net sales <b t-out="this.formatMoney(this.state.data.weekly.net_sales)"/></div><div><i class="is-expenses"/>Expenses <b t-out="this.formatMoney(this.state.data.weekly.expenses)"/></div></div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <div class="o_sky_mini_donut_panel">
-                                    <div class="o_sky_mini_donut" t-att-style="paymentDonutStyle"><div><strong t-esc="state.data.weekly.payments.length"/><span>payment methods</span></div></div>
-                                    <div class="o_sky_mini_legend"><h3>Payment mix</h3><div t-foreach="state.data.weekly.payments.slice(0, 4)" t-as="payment" t-key="payment.name"><i class="is-payment"/> <span t-esc="payment.name"/><b t-esc="formatMoney(payment.amount)"/></div><div t-if="!state.data.weekly.payments.length" class="text-muted">No payments in this period.</div></div>
+                                    <div class="o_sky_mini_donut" t-att-style="this.paymentDonutStyle"><div><strong t-out="this.state.data.weekly.payments.length"/><span>payment methods</span></div></div>
+                                    <div class="o_sky_mini_legend"><h3>Payment mix</h3><div t-foreach="this.state.data.weekly.payments.slice(0, 4)" t-as="payment" t-key="payment.name"><i class="is-payment"/> <span t-out="payment.name"/><b t-out="this.formatMoney(payment.amount)"/></div><div t-if="!this.state.data.weekly.payments.length" class="text-muted">No payments in this period.</div></div>
                                 </div>
                             </div>
                         </div>
@@ -142,20 +143,20 @@
                         <div class="row g-3 px-3 pb-3">
                             <div class="col-12 col-lg-5">
                                 <div class="o_sky_panel_title mb-2">Payments received</div>
-                                <div class="o_sky_payment_rows"><div t-foreach="state.data.weekly.payments" t-as="payment" t-key="payment.name"><span t-esc="payment.name"/><b t-esc="formatMoney(payment.amount)"/></div><p t-if="!state.data.weekly.payments.length" class="text-muted">No payments.</p></div>
+                                <div class="o_sky_payment_rows"><div t-foreach="this.state.data.weekly.payments" t-as="payment" t-key="payment.name"><span t-out="payment.name"/><b t-out="this.formatMoney(payment.amount)"/></div><p t-if="!this.state.data.weekly.payments.length" class="text-muted">No payments.</p></div>
                             </div>
                             <div class="col-12 col-lg-7">
                                 <div class="o_sky_panel_title mb-2">Approved and paid expenses</div>
                                 <div class="table-responsive o_sky_inner_table"><table class="table o_sky_table mb-0"><thead><tr><th>Date</th><th>Branch</th><th>Category</th><th class="text-end">Amount</th></tr></thead><tbody>
-                                    <tr t-foreach="state.data.weekly.expense_rows" t-as="expense" t-key="expense.id" t-on-click="openExpenses"><td t-esc="expense.date"/><td t-esc="expense.branch"/><td t-esc="expense.category"/><td class="text-end" t-esc="formatMoney(expense.amount)"/></tr>
-                                    <tr t-if="!state.data.weekly.expense_rows.length"><td colspan="4" class="text-center text-muted py-4">No approved expenses.</td></tr>
+                                    <tr t-foreach="this.state.data.weekly.expense_rows" t-as="expense" t-key="expense.id" t-on-click="(ev) =&gt; this.openExpenses(ev)"><td t-out="expense.date"/><td t-out="expense.branch"/><td t-out="expense.category"/><td class="text-end" t-out="this.formatMoney(expense.amount)"/></tr>
+                                    <tr t-if="!this.state.data.weekly.expense_rows.length"><td colspan="4" class="text-center text-muted py-4">No approved expenses.</td></tr>
                                 </tbody></table></div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section t-if="state.activeTab === 'business'" class="row g-3">
+                <section t-if="this.state.activeTab === 'business'" class="row g-3">
                     <div class="col-12 col-xl-8">
                         <div class="o_sky_panel h-100">
                             <div class="o_sky_panel_header"><div><span>Recent activity</span><small>Latest sales orders</small></div><button t-on-click="() => this.openOrders()">View all</button></div>
@@ -163,12 +164,12 @@
                                 <table class="table o_sky_table mb-0">
                                     <thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th class="text-end">Total</th></tr></thead>
                                     <tbody>
-                                        <tr t-foreach="state.data.recent_orders" t-as="order" t-key="order.id" t-on-click="() => this.openOrder(order.id)">
-                                            <td class="fw-semibold" t-esc="order.name"/><td t-esc="order.customer"/><td t-esc="order.date"/>
-                                            <td><span t-attf-class="o_sky_badge o_sky_badge--{{ order.state }}" t-esc="order.state"/></td>
-                                            <td class="text-end fw-semibold" t-esc="formatMoney(order.amount)"/>
+                                        <tr t-foreach="this.state.data.recent_orders" t-as="order" t-key="order.id" t-on-click="() => this.openOrder(order.id)">
+                                            <td class="fw-semibold" t-out="order.name"/><td t-out="order.customer"/><td t-out="order.date"/>
+                                            <td><span t-attf-class="o_sky_badge o_sky_badge--{{ order.state }}" t-out="order.state"/></td>
+                                            <td class="text-end fw-semibold" t-out="this.formatMoney(order.amount)"/>
                                         </tr>
-                                        <tr t-if="!state.data.recent_orders.length"><td colspan="5" class="text-center text-muted py-5">No sales orders yet.</td></tr>
+                                        <tr t-if="!this.state.data.recent_orders.length"><td colspan="5" class="text-center text-muted py-5">No sales orders yet.</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -178,50 +179,50 @@
                         <div class="o_sky_panel h-100 p-4">
                             <div class="o_sky_panel_title">Order overview</div>
                             <div class="o_sky_donut_wrap">
-                                <div class="o_sky_donut" t-att-style="donutStyle"><div><strong t-esc="state.data.monthly_activity"/><span>This month</span></div></div>
+                                <div class="o_sky_donut" t-att-style="this.donutStyle"><div><strong t-out="this.state.data.monthly_activity"/><span>This month</span></div></div>
                             </div>
                             <div class="o_sky_legend">
-                                <div><i class="is-quotation"/><span>Quotations</span><strong t-esc="state.data.states.quotation"/></div>
-                                <div><i class="is-confirmed"/><span>Confirmed</span><strong t-esc="state.data.states.confirmed"/></div>
-                                <div><i class="is-done"/><span>Completed</span><strong t-esc="state.data.states.done"/></div>
-                                <div><i class="is-cancelled"/><span>Cancelled</span><strong t-esc="state.data.states.cancelled"/></div>
+                                <div><i class="is-quotation"/><span>Quotations</span><strong t-out="this.state.data.states.quotation"/></div>
+                                <div><i class="is-confirmed"/><span>Confirmed</span><strong t-out="this.state.data.states.confirmed"/></div>
+                                <div><i class="is-done"/><span>Completed</span><strong t-out="this.state.data.states.done"/></div>
+                                <div><i class="is-cancelled"/><span>Cancelled</span><strong t-out="this.state.data.states.cancelled"/></div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section t-if="state.activeTab === 'grooming'" class="o_sky_grooming">
+                <section t-if="this.state.activeTab === 'grooming'" class="o_sky_grooming">
                     <div class="o_sky_panel mb-3">
                         <div class="o_sky_weekly_header">
-                            <div><span class="o_sky_eyebrow">GROOMING STUDIO</span><h2>Appointments &amp; performance</h2><p class="text-muted mb-0">The same selected period used by SKY: <b t-esc="state.dateStart"/> to <b t-esc="state.dateEnd"/></p></div>
+                            <div><span class="o_sky_eyebrow">GROOMING STUDIO</span><h2>Appointments &amp; performance</h2><p class="text-muted mb-0">The same selected period used by SKY: <b t-out="this.state.dateStart"/> to <b t-out="this.state.dateEnd"/></p></div>
                             <div class="o_sky_filters">
-                                <label>From<input type="date" class="form-control" t-att-value="state.dateStart" t-on-change="onDateStart"/></label>
-                                <label>To<input type="date" class="form-control" t-att-value="state.dateEnd" t-on-change="onDateEnd"/></label>
-                                <button class="btn o_sky_stock_button align-self-end" t-on-click="loadDashboard"><i class="fa fa-filter me-2"/>Apply</button>
+                                <label>From<input type="date" class="form-control" t-att-value="this.state.dateStart" t-on-change="(ev) =&gt; this.onDateStart(ev)"/></label>
+                                <label>To<input type="date" class="form-control" t-att-value="this.state.dateEnd" t-on-change="(ev) =&gt; this.onDateEnd(ev)"/></label>
+                                <button class="btn o_sky_stock_button align-self-end" t-on-click="(ev) =&gt; this.loadDashboard(ev)"><i class="fa fa-filter me-2"/>Apply</button>
                             </div>
                         </div>
                         <div class="o_sky_quick_actions p-3">
-                            <button t-on-click="newGroomingBooking"><i class="fa fa-plus-circle"/><span>New booking</span></button>
-                            <button t-on-click="() => this.openGroomingAppointments([['state', '=', 'pending']])"><i class="fa fa-clock-o"/><span>Pending requests</span><b t-esc="state.data.grooming.pending"/></button>
-                            <button t-on-click="openGroomingExpenses"><i class="fa fa-file-text-o"/><span>Record expense</span></button>
+                            <button t-on-click="(ev) =&gt; this.newGroomingBooking(ev)"><i class="fa fa-plus-circle"/><span>New booking</span></button>
+                            <button t-on-click="() => this.openGroomingAppointments([['state', '=', 'pending']])"><i class="fa fa-clock-o"/><span>Pending requests</span><b t-out="this.state.data.grooming.pending"/></button>
+                            <button t-on-click="(ev) =&gt; this.openGroomingExpenses(ev)"><i class="fa fa-file-text-o"/><span>Record expense</span></button>
                             <button t-on-click="() => this.openGroomingAppointments()"><i class="fa fa-calendar"/><span>All appointments</span></button>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments()"><small>Total</small><strong t-esc="state.data.grooming.total"/></button></div>
-                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'pending']])"><small>Pending</small><strong t-esc="state.data.grooming.pending"/></button></div>
-                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'confirmed']])"><small>Confirmed</small><strong t-esc="state.data.grooming.confirmed"/></button></div>
-                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', 'in', ['checked_in', 'in_progress', 'halfway']]])"><small>In progress</small><strong t-esc="state.data.grooming.in_progress"/></button></div>
-                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'completed']])"><small>Completed</small><strong t-esc="state.data.grooming.completed"/></button></div>
-                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric is-cancelled" t-on-click="() => this.openGroomingAppointments([['state', '=', 'cancelled']])"><small>Cancelled</small><strong t-esc="state.data.grooming.cancelled"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments()"><small>Total</small><strong t-out="this.state.data.grooming.total"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'pending']])"><small>Pending</small><strong t-out="this.state.data.grooming.pending"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'confirmed']])"><small>Confirmed</small><strong t-out="this.state.data.grooming.confirmed"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', 'in', ['checked_in', 'in_progress', 'halfway']]])"><small>In progress</small><strong t-out="this.state.data.grooming.in_progress"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric" t-on-click="() => this.openGroomingAppointments([['state', '=', 'completed']])"><small>Completed</small><strong t-out="this.state.data.grooming.completed"/></button></div>
+                        <div class="col-6 col-lg-2"><button class="o_sky_groom_metric is-cancelled" t-on-click="() => this.openGroomingAppointments([['state', '=', 'cancelled']])"><small>Cancelled</small><strong t-out="this.state.data.grooming.cancelled"/></button></div>
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric"><small>Expected value</small><strong t-esc="formatMoney(state.data.grooming.expected_value)"/></div></div>
-                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric"><small>Completed paid revenue</small><strong t-esc="formatMoney(state.data.grooming.revenue)"/></div></div>
-                        <div class="col-6 col-xl-3"><button class="o_sky_week_metric is-expense" t-on-click="openGroomingExpenses"><small>Posted expenses</small><strong t-esc="formatMoney(state.data.grooming.expenses)"/></button></div>
-                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric is-net"><small>Net grooming income</small><strong t-esc="formatMoney(state.data.grooming.net_income)"/></div></div>
+                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric"><small>Expected value</small><strong t-out="this.formatMoney(this.state.data.grooming.expected_value)"/></div></div>
+                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric"><small>Completed paid revenue</small><strong t-out="this.formatMoney(this.state.data.grooming.revenue)"/></div></div>
+                        <div class="col-6 col-xl-3"><button class="o_sky_week_metric is-expense" t-on-click="(ev) =&gt; this.openGroomingExpenses(ev)"><small>Posted expenses</small><strong t-out="this.formatMoney(this.state.data.grooming.expenses)"/></button></div>
+                        <div class="col-6 col-xl-3"><div class="o_sky_week_metric is-net"><small>Net grooming income</small><strong t-out="this.formatMoney(this.state.data.grooming.net_income)"/></div></div>
                     </div>
 
                     <div class="row g-3 mb-3">
@@ -229,24 +230,305 @@
                             <div class="o_sky_panel h-100">
                                 <div class="o_sky_panel_header"><div><span>Recent appointments</span><small>Latest appointments in the selected period</small></div><button t-on-click="() => this.openGroomingAppointments()">View all</button></div>
                                 <div class="table-responsive"><table class="table o_sky_table mb-0"><thead><tr><th>Date</th><th>Pet</th><th>Customer</th><th>Service</th><th>Status</th><th>Payment</th><th class="text-end">Total</th></tr></thead><tbody>
-                                    <tr t-foreach="state.data.grooming.recent" t-as="appointment" t-key="appointment.id" t-on-click="() => this.openGroomingAppointment(appointment.id)"><td t-esc="appointment.date"/><td class="fw-semibold" t-esc="appointment.pet"/><td t-esc="appointment.customer"/><td t-esc="appointment.service"/><td><span t-attf-class="o_sky_badge o_sky_badge--{{ appointment.state }}" t-esc="appointment.state_label"/></td><td><span t-attf-class="o_sky_badge o_sky_badge--{{ appointment.payment_status }}" t-esc="appointment.payment_status"/></td><td class="text-end fw-semibold" t-esc="formatMoney(appointment.amount)"/></tr>
-                                    <tr t-if="!state.data.grooming.recent.length"><td colspan="7" class="text-center text-muted py-5">No appointments in this period.</td></tr>
+                                    <tr t-foreach="this.state.data.grooming.recent" t-as="appointment" t-key="appointment.id" t-on-click="() => this.openGroomingAppointment(appointment.id)"><td t-out="appointment.date"/><td class="fw-semibold" t-out="appointment.pet"/><td t-out="appointment.customer"/><td t-out="appointment.service"/><td><span t-attf-class="o_sky_badge o_sky_badge--{{ appointment.state }}" t-out="appointment.state_label"/></td><td><span t-attf-class="o_sky_badge o_sky_badge--{{ appointment.payment_status }}" t-out="appointment.payment_status"/></td><td class="text-end fw-semibold" t-out="this.formatMoney(appointment.amount)"/></tr>
+                                    <tr t-if="!this.state.data.grooming.recent.length"><td colspan="7" class="text-center text-muted py-5">No appointments in this period.</td></tr>
                                 </tbody></table></div>
                             </div>
                         </div>
                         <div class="col-12 col-xl-4">
                             <div class="o_sky_panel h-100 p-4">
                                 <div class="o_sky_panel_title">Appointment status</div>
-                                <div class="o_sky_donut_wrap"><div class="o_sky_donut" t-att-style="groomingStatusDonutStyle"><div><strong t-esc="state.data.grooming.total"/><span>Total</span></div></div></div>
-                                <div class="o_sky_legend o_sky_groom_legend"><div><i class="is-pending"/><span>Pending</span><strong t-esc="state.data.grooming.pending"/></div><div><i class="is-groom-confirmed"/><span>Confirmed</span><strong t-esc="state.data.grooming.confirmed"/></div><div><i class="is-groom-progress"/><span>In progress</span><strong t-esc="state.data.grooming.in_progress"/></div><div><i class="is-groom-completed"/><span>Completed</span><strong t-esc="state.data.grooming.completed"/></div><div><i class="is-groom-cancelled"/><span>Cancelled</span><strong t-esc="state.data.grooming.cancelled"/></div></div>
+                                <div class="o_sky_donut_wrap"><div class="o_sky_donut" t-att-style="this.groomingStatusDonutStyle"><div><strong t-out="this.state.data.grooming.total"/><span>Total</span></div></div></div>
+                                <div class="o_sky_legend o_sky_groom_legend"><div><i class="is-pending"/><span>Pending</span><strong t-out="this.state.data.grooming.pending"/></div><div><i class="is-groom-confirmed"/><span>Confirmed</span><strong t-out="this.state.data.grooming.confirmed"/></div><div><i class="is-groom-progress"/><span>In progress</span><strong t-out="this.state.data.grooming.in_progress"/></div><div><i class="is-groom-completed"/><span>Completed</span><strong t-out="this.state.data.grooming.completed"/></div><div><i class="is-groom-cancelled"/><span>Cancelled</span><strong t-out="this.state.data.grooming.cancelled"/></div></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title">Payment status</div><div class="o_sky_donut_wrap"><div class="o_sky_donut" t-att-style="groomingPaymentDonutStyle"><div><strong t-esc="state.data.grooming.paid"/><span>Paid</span></div></div></div><div class="o_sky_legend"><div><i class="is-groom-completed"/><span>Paid</span><strong t-esc="state.data.grooming.paid"/></div><div><i class="is-cancelled"/><span>Unpaid</span><strong t-esc="state.data.grooming.unpaid"/></div></div></div></div>
-                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title mb-3">Daily appointments</div><div class="o_sky_daily_list border-0 p-0"><div t-foreach="state.data.grooming.days" t-as="day" t-key="day.date"><span t-esc="day.label"/><b t-esc="day.appointments"/></div></div></div></div>
-                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title mb-3">Branch attribution</div><div class="o_sky_payment_rows"><div t-foreach="state.data.grooming.branches" t-as="branch" t-key="branch.name"><span><b t-esc="branch.name"/><small class="d-block text-muted"><t t-esc="branch.appointments"/> appointments</small></span><b t-esc="formatMoney(branch.revenue)"/></div><p t-if="!state.data.grooming.branches.length" class="text-muted">No branch data in this period.</p></div></div></div>
+                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title">Payment status</div><div class="o_sky_donut_wrap"><div class="o_sky_donut" t-att-style="this.groomingPaymentDonutStyle"><div><strong t-out="this.state.data.grooming.paid"/><span>Paid</span></div></div></div><div class="o_sky_legend"><div><i class="is-groom-completed"/><span>Paid</span><strong t-out="this.state.data.grooming.paid"/></div><div><i class="is-cancelled"/><span>Unpaid</span><strong t-out="this.state.data.grooming.unpaid"/></div></div></div></div>
+                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title mb-3">Daily appointments</div><div class="o_sky_daily_list border-0 p-0"><div t-foreach="this.state.data.grooming.days" t-as="day" t-key="day.date"><span t-out="day.label"/><b t-out="day.appointments"/></div></div></div></div>
+                        <div class="col-12 col-lg-4"><div class="o_sky_panel h-100 p-4"><div class="o_sky_panel_title mb-3">Branch attribution</div><div class="o_sky_payment_rows"><div t-foreach="this.state.data.grooming.branches" t-as="branch" t-key="branch.name"><span><b t-out="branch.name"/><small class="d-block text-muted"><t t-out="branch.appointments"/> appointments</small></span><b t-out="this.formatMoney(branch.revenue)"/></div><p t-if="!this.state.data.grooming.branches.length" class="text-muted">No branch data in this period.</p></div></div></div>
+                    </div>
+                </section>
+
+                <!-- Pricing & Valuation Section (No eyebrow, no icons, plain clean design) -->
+                <section t-if="this.state.activeTab === 'pricing'">
+                    <div t-if="this.state.pricingLoading" class="p-5 text-center text-muted">
+                        Loading pricing &amp; stock valuation metrics…
+                    </div>
+                    <div t-elif="this.state.pricingData">
+                        <header class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+                            <div>
+                                <h1 class="h3 fw-bold mb-0 text-dark">Pricing, Margin &amp; Stock Valuation Dashboard</h1>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <select class="form-select form-select-sm" style="width: auto; min-width: 170px;" t-att-value="this.state.pricingLocationId" t-on-change="(ev) =&gt; this.onPricingLocationChange(ev)">
+                                    <t t-foreach="this.state.pricingData.locations" t-as="loc" t-key="loc.id">
+                                        <option t-att-value="loc.id" t-out="loc.name"/>
+                                    </t>
+                                </select>
+                                <button class="btn btn-outline-secondary btn-sm" t-on-click="(ev) =&gt; this.openAllProducts(ev)">
+                                    View All Products
+                                </button>
+                                <button class="btn btn-primary btn-sm" style="background-color: #6366F1; border-color: #6366F1;" t-on-click="(ev) =&gt; this.loadPricingDashboard(ev)">
+                                    Refresh Live Metrics
+                                </button>
+                            </div>
+                        </header>
+
+                        <!-- Top 4 KPI Scorecards -->
+                        <div class="row g-3 mb-4">
+                            <!-- 1. Total Stock Valuation (Blue) -->
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="card h-100 border-0 shadow-sm o_sky_kpi_card o_sky_kpi_blue">
+                                    <div class="card-body">
+                                        <div class="text-uppercase text-muted fw-semibold small mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                            TOTAL STOCK VALUATION
+                                        </div>
+                                        <div class="h4 fw-bold text-dark mb-1">
+                                            <t t-out="this.formatPricingMoney(this.state.pricingData.metrics.total_valuation)"/>
+                                        </div>
+                                        <div class="text-muted small">
+                                            Across <t t-out="this.state.pricingData.metrics.total_units"/> units on hand
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Avg Retail Margin (Green) -->
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="card h-100 border-0 shadow-sm o_sky_kpi_card o_sky_kpi_green">
+                                    <div class="card-body">
+                                        <div class="text-uppercase text-muted fw-semibold small mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                            AVG RETAIL MARGIN
+                                        </div>
+                                        <div class="h4 fw-bold text-success mb-1">
+                                            <t t-out="this.state.pricingData.metrics.avg_margin"/>%
+                                        </div>
+                                        <div class="text-muted small">
+                                            Median Margin: <t t-out="this.state.pricingData.metrics.median_margin"/>% across priced items
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Negative Margin Alerts (Red) -->
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="card h-100 border-0 shadow-sm o_sky_kpi_card o_sky_kpi_red">
+                                    <div class="card-body">
+                                        <div class="text-uppercase text-danger fw-semibold small mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                            NEGATIVE MARGIN ALERTS
+                                        </div>
+                                        <div class="h4 fw-bold mb-1" t-att-class="this.state.pricingData.metrics.negative_margin_count > 0 ? 'text-danger' : 'text-dark'">
+                                            <t t-out="this.state.pricingData.metrics.negative_margin_count"/> SKU(s) Selling at Loss
+                                        </div>
+                                        <div class="text-danger small" t-if="this.state.pricingData.metrics.negative_margin_count > 0">
+                                            Click to inspect &amp; fix prices
+                                        </div>
+                                        <div class="text-muted small" t-else="">
+                                            <t t-out="this.state.pricingData.metrics.cost_pending_count"/> SKUs with cost pending in Odoo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Catalog Price Coverage (Purple) -->
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="card h-100 border-0 shadow-sm o_sky_kpi_card o_sky_kpi_purple">
+                                    <div class="card-body">
+                                        <div class="text-uppercase text-muted fw-semibold small mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                            CATALOG PRICE COVERAGE
+                                        </div>
+                                        <div class="h4 fw-bold text-dark mb-1">
+                                            <t t-out="this.state.pricingData.metrics.catalog_price_coverage"/>%
+                                        </div>
+                                        <div class="text-muted small">
+                                            <t t-out="this.state.pricingData.metrics.priced_count"/> priced / <t t-out="this.state.pricingData.metrics.unpriced_count"/> pending price
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row: Category Valuation Share (Donut & Table) -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-lg-5">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold text-dark mb-4 text-center">Store Stock Valuation Share by Category</h6>
+                                        <div class="d-flex align-items-center justify-content-center gap-4 flex-wrap">
+                                            <div class="o_sky_pie_circle" t-att-style="this.state.pricingData.pie_conic_style"/>
+                                            <div class="d-flex flex-column gap-2">
+                                                <t t-foreach="this.state.pricingData.categories" t-as="cat" t-key="cat.category">
+                                                    <div class="d-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                                                        <span class="d-inline-block rounded-circle" t-att-style="'width: 10px; height: 10px; background-color: ' + cat.color"/>
+                                                        <span class="text-secondary" t-out="cat.category"/>
+                                                        <span class="fw-semibold text-dark">(<t t-out="cat.share"/>%)</span>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-7">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body p-0">
+                                        <div class="p-3 border-bottom">
+                                            <h6 class="fw-bold text-dark mb-0">Category Valuation</h6>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table align-middle mb-0 o_sky_plain_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>CATEGORY</th>
+                                                        <th class="text-end">PRODUCTS</th>
+                                                        <th class="text-end">UNITS ON HAND</th>
+                                                        <th class="text-end">STOCK VALUATION</th>
+                                                        <th class="text-end">SHARE</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="this.state.pricingData.categories" t-as="cat" t-key="cat.category">
+                                                        <tr>
+                                                            <td class="fw-semibold text-dark" t-out="cat.category"/>
+                                                            <td class="text-end text-muted" t-out="cat.products"/>
+                                                            <td class="text-end text-muted"><t t-out="cat.units"/> pcs</td>
+                                                            <td class="text-end fw-semibold text-dark"><t t-out="this.formatPricingMoney(cat.valuation)"/></td>
+                                                            <td class="text-end text-muted"><t t-out="cat.share"/>%</td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row: Negative Margin Outliers -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-0">
+                                <div class="p-3 border-bottom d-flex align-items-center gap-2">
+                                    <span class="text-danger fw-bold">Negative Margin Outliers</span>
+                                    <span class="badge bg-danger rounded-pill"><t t-out="this.state.pricingData.metrics.negative_margin_count"/> Alert(s)</span>
+                                </div>
+                                <div t-if="this.state.pricingData.negative_margin_outliers.length" class="table-responsive">
+                                    <table class="table align-middle mb-0 o_sky_plain_table">
+                                        <thead>
+                                            <tr>
+                                                <th>SKU</th>
+                                                <th>PRODUCT NAME</th>
+                                                <th>CATEGORY</th>
+                                                <th class="text-end">COST PRICE</th>
+                                                <th class="text-end">SELLING PRICE</th>
+                                                <th class="text-end">LOSS PER UNIT</th>
+                                                <th class="text-end">LOSS MARGIN %</th>
+                                                <th class="text-center">ACTION</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="this.state.pricingData.negative_margin_outliers" t-as="outlier" t-key="outlier.id">
+                                                <tr>
+                                                    <td class="text-primary small" t-out="outlier.sku"/>
+                                                    <td class="fw-semibold text-dark" t-out="outlier.name"/>
+                                                    <td class="text-muted small" t-out="outlier.category"/>
+                                                    <td class="text-end text-muted"><t t-out="this.formatPricingMoney(outlier.cost_price)"/></td>
+                                                    <td class="text-end fw-bold text-dark"><t t-out="this.formatPricingMoney(outlier.selling_price)"/></td>
+                                                    <td class="text-end text-danger fw-semibold">-<t t-out="this.formatPricingMoney(outlier.loss_per_unit)"/></td>
+                                                    <td class="text-end"><span class="badge bg-danger-subtle text-danger">-<t t-out="outlier.loss_margin_pct"/>%</span></td>
+                                                    <td class="text-center">
+                                                        <button class="btn btn-outline-danger btn-sm py-0 px-2" t-on-click="() => this.openProduct(outlier.id)">Fix Price</button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div t-else="" class="p-4 text-center text-muted small">
+                                    No negative margin outliers detected. All priced products are currently selling at or above recorded cost.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row: Top Items (Priced & Stock Value) -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-0">
+                                <div class="p-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <t t-if="this.state.pricingTopMode === 'price'">Top Highest Priced Items</t>
+                                        <t t-else="">Top Highest Stock Value Items</t>
+                                    </h6>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-sm" t-att-class="this.state.pricingTopMode === 'price' ? 'btn-secondary' : 'btn-outline-secondary'" t-on-click="() => this.setPricingTopMode('price')">By Unit Price</button>
+                                        <button class="btn btn-sm" t-att-class="this.state.pricingTopMode === 'value' ? 'btn-secondary' : 'btn-outline-secondary'" t-on-click="() => this.setPricingTopMode('value')">By Total Stock Value</button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0 o_sky_plain_table">
+                                        <thead>
+                                            <tr>
+                                                <th>RANK</th>
+                                                <th>SKU</th>
+                                                <th>PRODUCT DESCRIPTION</th>
+                                                <th>CATEGORY</th>
+                                                <th class="text-end">STOCK ON HAND</th>
+                                                <th class="text-end">UNIT SELLING PRICE</th>
+                                                <th class="text-end">TOTAL STOCK VALUE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="this.state.pricingTopMode === 'price' ? this.state.pricingData.top_highest_priced : this.state.pricingData.top_stock_value" t-as="item" t-key="item.id">
+                                                <tr style="cursor: pointer;" t-on-click="() => this.openProduct(item.id)">
+                                                    <td><span class="badge border text-secondary"><t t-out="item.rank"/></span></td>
+                                                    <td class="text-primary small" t-out="item.sku"/>
+                                                    <td class="fw-semibold text-dark" t-out="item.name"/>
+                                                    <td class="text-muted small" t-out="item.category"/>
+                                                    <td class="text-end fw-semibold text-dark"><t t-out="item.stock_on_hand"/> pcs</td>
+                                                    <td class="text-end fw-bold text-success"><t t-out="this.formatPricingMoney(item.selling_price)"/></td>
+                                                    <td class="text-end fw-bold text-dark"><t t-out="this.formatPricingMoney(item.total_stock_value)"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row: Strategic Insights -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold text-dark mb-2">Category Concentration</h6>
+                                        <p class="text-muted small mb-0">
+                                            <t t-out="this.state.pricingData.insights.category_concentration"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold text-dark mb-2">Retail Margin Benchmark</h6>
+                                        <p class="text-muted small mb-0">
+                                            <t t-out="this.state.pricingData.insights.retail_margin_benchmark"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold text-dark mb-2">Catalog Readiness</h6>
+                                        <p class="text-muted small mb-0">
+                                            <t t-out="this.state.pricingData.insights.catalog_readiness"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>

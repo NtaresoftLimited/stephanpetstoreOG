@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- City becomes a searchable list for Tanzania (back office, POS customer form, portal/checkout). -->
+    <record id="base.tz" model="res.country">
+        <field name="enforce_cities" eval="True"/>
+    </record>
+
+    <!-- New contacts default to Tanzania / Dar es Salaam (POS "Create Partner", back office, signups). -->
+    <function model="ir.default" name="set" eval="('res.partner', 'country_id', ref('base.tz'))"/>
+    <function model="ir.default" name="set" eval="('res.partner', 'state_id', ref('stephans_tz_address.state_tz_02'))"/>
+</odoo>

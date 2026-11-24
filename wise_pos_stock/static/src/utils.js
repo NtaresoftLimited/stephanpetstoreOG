@@ -1,8 +1,9 @@
 /** @odoo-module */
 export function getProductQty(stockType, product) {
+  if (!product) return 0;
   const qty =
     stockType == 'on_hand' ? product.qty_available : product.virtual_available;
-  return qty;
+  return Number(qty || 0);
 }
 
 export function computeMarginInfo(product) {

@@ -1,14 +1,15 @@
 {
     "name": "SKY Dashboard",
-    "version": "18.0.1.1.0",
+    "version": "20.0.1.3.0",
     "category": "Productivity/Dashboard",
     "summary": "Minimal business overview for Stephans Pet Store",
     "author": "Stephans Pet Store",
     "website": "https://stephans-pet-store.com",
     "license": "LGPL-3",
-    "depends": ["sale_management", "stock", "point_of_sale", "grooming"],
+    "depends": ["sale_management", "stock", "point_of_sale", "grooming", "loyalty", "pos_wallet_management"],
     "data": [
         "security/sky_stock_security.xml",
+        "security/ir.access.csv",
         "data/sky_stock_cron.xml",
         "reports/sky_stock_report.xml",
         "wizard/sky_stock_generate_wizard_views.xml",

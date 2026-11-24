@@ -4,8 +4,8 @@ from datetime import timedelta
 
 
 class CustomerStatement(models.TransientModel):
-    _name = 'techovers.customer.statement'
-    _description = 'TechOvers Customer Statement'
+    _name = 'stephans.customer.statement'
+    _description = "Stephan's Pet Store Customer Statement"
 
     partner_id = fields.Many2one('res.partner', string='Customer Company/SACCO', required=True)
     date_start = fields.Date(string='Billing Period Start', required=True, default=lambda self: fields.Date.context_today(self).replace(day=1))

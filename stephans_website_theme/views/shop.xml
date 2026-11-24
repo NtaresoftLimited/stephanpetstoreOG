@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Product tiles are at most one quarter of the desktop catalogue width.
+        A 512 px source is therefore sufficient even on high-density displays,
+        while avoiding the heavier 1024 px default for every visible card.
+    -->
+    <template id="stephans_shop_product_images" inherit_id="website_sale.product_image_and_ribbon">
+        <xpath expr="//span[hasclass('oe_product_image_img_wrapper_primary')]" position="attributes">
+            <attribute name="t-options">{'widget': 'image', 'preview_image': 'image_512', 'class': 'oe_product_image_img h-100 w-100'}</attribute>
+        </xpath>
+        <xpath expr="//span[hasclass('oe_product_image_img_wrapper_secondary')]" position="attributes">
+            <attribute name="t-options">{'widget': 'image', 'preview_image': 'image_512', 'class': 'oe_product_image_img_secondary h-100 w-100'}</attribute>
+        </xpath>
+    </template>
+</odoo>

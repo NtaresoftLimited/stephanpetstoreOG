@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+
+<!-- Odoo 20 port: the payment method list is filtered in displayedPaymentMethods; this only adds
+     the "Use Sky Wallet" switch shown when the till uses the checkbox display. -->
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_wallet_management.PaymentScreenMethods" t-inherit="point_of_sale.PaymentScreenMethods" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('paymentmethods')]" position="after">
+            <div t-if="this.showWalletSwitch" class="wallet_text">
+                <div class="use_wallet d-flex justify-content-between align-items-center border p-2 mt-2">
+                    <label class="switch">
+                        <input id="use_wallet_payment" type="checkbox"
+                            t-att-checked="this.walletLine ? 'checked' : undefined"
+                            t-on-change="(ev) => this.toggleWalletPayment(ev)"/>
+                        <span class="check_box round"></span>
+                    </label>
+                    <div class="d-flex flex-column" style="width: 70%;">
+                        <span>Use Sky Wallet</span>
+                        <div class="wallet_balance">
+                            Balance: <span style="color: #247b45; font-weight: bold;" t-out="this.pos.formatCurrency(this.walletRemaining)"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

@@ -1,10 +1,17 @@
+import base64
 from collections import defaultdict
 from datetime import datetime, time, timedelta
+import io
+import struct
 
+from PIL import Image, WebPImagePlugin  # noqa: F401
 import pytz
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
+
+
+_PDF_IMAGE_CACHE = {}
 
 
 class SkyDailyStockReport(models.Model):
@@ -16,7 +23,7 @@ class SkyDailyStockReport(models.Model):
     report_date = fields.Date(required=True, readonly=True, index=True)
     date_end = fields.Date(string="End Date", readonly=True, index=True)
     pos_config_id = fields.Many2one(
-        "pos.config", required=True, readonly=True, index=True, ondelete="restrict"
+        "pos.config", required=False, readonly=True, index=True, ondelete="restrict"
     )
     warehouse_id = fields.Many2one(
         "stock.warehouse", required=True, readonly=True, index=True, ondelete="restrict"
@@ -100,12 +107,12 @@ class SkyDailyStockReport(models.Model):
         return move.product_uom_qty
 
     @api.model
-    def _prepare_lines(self, config, report_date, end_date=None):
+    def _prepare_lines(self, config, report_date, end_date=None, warehouse=None):
         if not end_date:
             end_date = report_date
-        warehouse = config.warehouse_id
+        warehouse = warehouse or (config.warehouse_id if config else False)
         if not warehouse:
-            raise ValidationError(_("%s has no warehouse assigned.") % config.display_name)
+            raise ValidationError(_("No warehouse assigned."))
         stock_location = warehouse.lot_stock_id
         inside_location_ids = set(
             self.env["stock.location"].sudo().search([("id", "child_of", stock_location.id)]).ids
@@ -116,14 +123,20 @@ class SkyDailyStockReport(models.Model):
         metrics = defaultdict(
             lambda: {"sold": 0.0, "returned": 0.0, "transfer": 0.0, "adjustment": 0.0}
         )
-        order_lines = self.env["pos.order.line"].sudo().search(
-            [
-                ("order_id.config_id", "=", config.id),
-                ("order_id.date_order", ">=", start_utc),
-                ("order_id.date_order", "<", end_utc),
-                ("order_id.state", "in", ["paid", "done", "invoiced"]),
-                ("product_id.type", "!=", "service"),
-            ]
+        order_lines = (
+            self.env["pos.order.line"]
+            .sudo()
+            .search(
+                [
+                    ("order_id.config_id", "=", config.id),
+                    ("order_id.date_order", ">=", start_utc),
+                    ("order_id.date_order", "<", end_utc),
+                    ("order_id.state", "in", ["paid", "done", "invoiced"]),
+                    ("product_id.type", "!=", "service"),
+                ]
+            )
+            if config
+            else self.env["pos.order.line"].browse()
         )
         for line in order_lines:
             line_uom = (
@@ -241,15 +254,54 @@ class SkyDailyStockReport(models.Model):
         return commands
 
     @api.model
-    def generate_for_range(self, start_date, end_date=None, config_ids=None, replace=False):
+    def generate_for_range(self, start_date, end_date=None, config_ids=None, replace=False, warehouse_ids=None):
         start_date = fields.Date.to_date(start_date or fields.Date.context_today(self))
         end_date = fields.Date.to_date(end_date or start_date)
+        reports = self.browse()
+        if warehouse_ids:
+            warehouses = self.env["stock.warehouse"].sudo().browse(warehouse_ids).exists()
+            all_configs = self.env["pos.config"].sudo().search([("active", "=", True)])
+            for warehouse in warehouses:
+                config = all_configs.filtered(lambda c: c.warehouse_id.id == warehouse.id)[:1]
+                domain = [
+                    ("report_date", "=", start_date),
+                    ("warehouse_id", "=", warehouse.id),
+                ]
+                if start_date != end_date:
+                    domain.append(("date_end", "=", end_date))
+                existing = self.sudo().search(domain, limit=1)
+                if existing and not replace:
+                    reports |= existing
+                    continue
+                if existing:
+                    existing.sudo().unlink()
+                users = self._cashier_users(config, start_date) if config else self.env["res.users"].browse()
+                warehouse_name = warehouse.name
+                date_label = (
+                    start_date.strftime("%d %b %Y")
+                    if start_date == end_date
+                    else f"{start_date.strftime('%d %b %Y')} - {end_date.strftime('%d %b %Y')}"
+                )
+                report = self.sudo().create(
+                    {
+                        "name": f"Stock Report — {warehouse_name} — {date_label}",
+                        "report_date": start_date,
+                        "date_end": end_date,
+                        "pos_config_id": config.id if config else False,
+                        "warehouse_id": warehouse.id,
+                        "cashier_user_ids": [fields.Command.set(users.ids)],
+                        "line_ids": self._prepare_lines(config, start_date, end_date, warehouse=warehouse),
+                        "state": "locked",
+                    }
+                )
+                reports |= report
+            return reports
+
         configs = (
             self.env["pos.config"].sudo().browse(config_ids).exists()
             if config_ids
             else self.env["pos.config"].sudo().search([("active", "=", True)])
         )
-        reports = self.browse()
         for config in configs.filtered("warehouse_id"):
             domain = [
                 ("report_date", "=", start_date),
@@ -353,3 +405,95 @@ class SkyDailyStockReportLine(models.Model):
     transfer_qty = fields.Float(readonly=True, digits="Product Unit of Measure")
     adjustment_qty = fields.Float(readonly=True, digits="Product Unit of Measure")
     closing_qty = fields.Float(readonly=True, digits="Product Unit of Measure")
+
+    def get_pdf_image_uri(self):
+        """Return a wkhtmltopdf-safe PNG or JPEG data URI for the product photo (fast cached)."""
+        self.ensure_one()
+        product = self.product_id
+        if not product:
+            return False
+
+        cache_key = (product.id, str(product.write_date or ""))
+        if cache_key in _PDF_IMAGE_CACHE:
+            return _PDF_IMAGE_CACHE[cache_key]
+
+        product_sudo = product.with_context(bin_size=False).sudo()
+        tmpl = product_sudo.product_tmpl_id.with_context(bin_size=False)
+        raw = None
+        for candidate in (
+            product_sudo.image_128,
+            tmpl.image_128,
+            product_sudo.image_256,
+            tmpl.image_256,
+        ):
+            if not candidate:
+                continue
+            c_bytes = getattr(candidate, "content", None)
+            if c_bytes is None:
+                try:
+                    c_bytes = base64.b64decode(candidate)
+                except Exception:
+                    c_bytes = None
+            if c_bytes:
+                raw = c_bytes
+                break
+
+        if not raw:
+            _PDF_IMAGE_CACHE[cache_key] = False
+            return False
+
+        # Fast path 1: Already PNG (wkhtmltopdf native support)
+        if raw.startswith(b"\x89PNG"):
+            uri = "data:image/png;base64," + base64.b64encode(raw).decode("ascii")
+            _PDF_IMAGE_CACHE[cache_key] = uri
+            return uri
+
+        # Fast path 2: Already JPEG (wkhtmltopdf native support)
+        if raw.startswith(b"\xff\xd8\xff"):
+            uri = "data:image/jpeg;base64," + base64.b64encode(raw).decode("ascii")
+            _PDF_IMAGE_CACHE[cache_key] = uri
+            return uri
+
+        # WebP or other format -> convert to crisp 128x128 PNG via PIL
+        try:
+            im = None
+            try:
+                im = Image.open(io.BytesIO(raw))
+            except Exception:
+                if raw[:4] == b"RIFF" and raw[8:12] == b"WEBP":
+                    for tag in (b"VP8 ", b"VP8L"):
+                        idx = raw.find(tag, 12)
+                        if idx != -1 and idx + 8 <= len(raw):
+                            simple = (
+                                b"RIFF"
+                                + struct.pack("<I", 4 + len(raw) - idx)
+                                + b"WEBP"
+                                + raw[idx:]
+                            )
+                            im = Image.open(io.BytesIO(simple))
+                            break
+            if im is None:
+                _PDF_IMAGE_CACHE[cache_key] = False
+                return False
+
+            with im:
+                im.thumbnail((128, 128))
+                if im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info):
+                    rgba = im.convert("RGBA")
+                    bg = Image.new("RGB", rgba.size, (255, 255, 255))
+                    bg.paste(rgba, mask=rgba.split()[3])
+                    im = bg
+                elif im.mode != "RGB":
+                    im = im.convert("RGB")
+                out = io.BytesIO()
+                im.save(out, format="PNG", optimize=True)
+                uri = "data:image/png;base64," + base64.b64encode(out.getvalue()).decode("ascii")
+
+                if len(_PDF_IMAGE_CACHE) > 3000:
+                    _PDF_IMAGE_CACHE.clear()
+
+                _PDF_IMAGE_CACHE[cache_key] = uri
+                return uri
+        except Exception:
+            _PDF_IMAGE_CACHE[cache_key] = False
+            return False

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_corporate_crm_lost_wizard_form" model="ir.ui.view">
+        <field name="name">corporate.crm.lost.wizard.form</field>
+        <field name="model">corporate.crm.lost.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Mark Opportunity as Lost">
+                <sheet>
+                    <div class="alert alert-warning py-2" role="alert">
+                        Please indicate why this corporate opportunity was lost to help analyze retention patterns and improve offerings.
+                    </div>
+                    <group>
+                        <field name="deal_id" readonly="1"/>
+                        <field name="lost_reason_id" widget="many2one" options="{'no_create': False}"/>
+                        <field name="lost_feedback" placeholder="Additional context (competitor pricing, client moved, closed facility, etc.)..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm_lost" string="Confirm Lost" type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

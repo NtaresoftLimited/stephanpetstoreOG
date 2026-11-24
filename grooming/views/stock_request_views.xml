@@ -7,7 +7,7 @@
             <form string="Replenishment Request">
                 <header>
                     <button name="action_submit_request" string="Submit Request" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_approve_request" string="Approve &amp; Receive" type="object" class="oe_highlight" invisible="state != 'submitted'" groups="base.group_system"/>
+                    <button name="action_approve_request" string="Approve &amp; Receive" type="object" class="oe_highlight" invisible="state != 'submitted'" groups="base.group_system,stock.group_stock_manager,point_of_sale.group_pos_manager"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state in ('received', 'transferred', 'cancel')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,submitted,received"/>
                 </header>
@@ -87,7 +87,7 @@
         <field name="name">Replenishment Approvals</field>
         <field name="res_model">grooming.stock.request</field>
         <field name="view_mode">list,form</field>
-        <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+        <field name="group_ids" eval="[(6, 0, [ref('base.group_system'), ref('stock.group_stock_manager'), ref('point_of_sale.group_pos_manager')])]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Manage your replenishment approvals here!
@@ -95,11 +95,11 @@
         </field>
     </record>
 
-    <!-- Adding to Inventory -> Operations menu (Restricted to Administrator Only) -->
+    <!-- Adding to Inventory -> Operations menu (Admin, Inventory Manager, POS Manager) -->
     <menuitem id="menu_grooming_stock_request" 
               name="Replenishment Approvals" 
               parent="stock.menu_stock_warehouse_mgmt"
               action="action_grooming_stock_request"
-              groups="base.group_system"
+              groups="base.group_system,stock.group_stock_manager,point_of_sale.group_pos_manager"
               sequence="15"/>
 </odoo>

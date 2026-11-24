@@ -92,9 +92,9 @@
 
                             <br/>
 
-                            <strong><t t-esc="o.env.company.name"/></strong><br/>
+                            <strong><t t-out="o.env.company.name"/></strong><br/>
 
-                            <span class="font-bold"><t t-esc="o.report_type_label"/> Sales Report</span><br/>
+                            <span class="font-bold"><t t-out="o.report_type_label"/> Sales Report</span><br/>
 
                             
 
@@ -127,9 +127,9 @@
 
                         <div style="font-size: 10px;">
 
-                            <strong>Printed By:</strong> <span t-esc="user.name"/><br/>
+                            <strong>Printed By:</strong> <span t-out="user.name"/><br/>
 
-                            <strong>Generated:</strong> <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                            <strong>Generated:</strong> <span t-out="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
 
                             <br/>
 
@@ -174,18 +174,18 @@
                                 <tr t-foreach="report_data['products']" t-as="prod">
 
                                     <td>
-                                        <span t-esc="prod['name']"/>
+                                        <span t-out="prod['name']"/>
                                         <t t-if="prod.get('brand')">
                                             <br/>
                                             <span style="font-size: 9px; font-style: italic; color: #555;">
-                                                <t t-esc="prod['brand']"/>
+                                                <t t-out="prod['brand']"/>
                                             </span>
                                         </t>
                                     </td>
 
-                                    <td class="text-center"><span t-esc="prod['qty']"/></td>
+                                    <td class="text-center"><span t-out="prod['qty']"/></td>
 
-                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(prod['total'])"/></td>
+                                    <td class="text-end"><span t-out="'{:,.2f}'.format(prod['total'])"/></td>
 
                                 </tr>
 
@@ -197,7 +197,7 @@
 
                                     <td colspan="2" class="text-end font-bold">Total Sales:</td>
 
-                                    <td class="text-end font-bold"><span t-esc="'{:,.2f}'.format(report_data['total_sales'])"/></td>
+                                    <td class="text-end font-bold"><span t-out="'{:,.2f}'.format(report_data['total_sales'])"/></td>
 
                                 </tr>
 
@@ -220,22 +220,22 @@
                                 <tbody>
                                     <tr t-foreach="report_data['grooming_products']" t-as="prod">
                                         <td>
-                                            <span t-esc="prod['name']"/>
+                                            <span t-out="prod['name']"/>
                                             <t t-if="prod.get('brand')">
                                                 <br/>
                                                 <span style="font-size: 9px; font-style: italic; color: #555;">
-                                                    <t t-esc="prod['brand']"/>
+                                                    <t t-out="prod['brand']"/>
                                                 </span>
                                             </t>
                                         </td>
-                                        <td class="text-center"><span t-esc="prod['qty']"/></td>
-                                        <td class="text-end"><span t-esc="'{:,.2f}'.format(prod['total'])"/></td>
+                                        <td class="text-center"><span t-out="prod['qty']"/></td>
+                                        <td class="text-end"><span t-out="'{:,.2f}'.format(prod['total'])"/></td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <td colspan="2" class="text-end font-bold">Total Grooming:</td>
-                                        <td class="text-end font-bold"><span t-esc="'{:,.2f}'.format(report_data['total_grooming'])"/></td>
+                                        <td class="text-end font-bold"><span t-out="'{:,.2f}'.format(report_data['total_grooming'])"/></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -270,9 +270,9 @@
 
                                 <tr t-foreach="report_data['payments']" t-as="pay">
 
-                                    <td><span t-esc="pay['method']"/></td>
+                                    <td><span t-out="pay['method']"/></td>
 
-                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(pay['amount'])"/></td>
+                                    <td class="text-end"><span t-out="'{:,.2f}'.format(pay['amount'])"/></td>
 
                                 </tr>
 
@@ -312,9 +312,9 @@
 
                                 <tr t-foreach="report_data['cash_in']" t-as="cin">
 
-                                    <td><span t-esc="cin['reason']"/></td>
+                                    <td><span t-out="cin['reason']"/></td>
 
-                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(cin['amount'])"/></td>
+                                    <td class="text-end"><span t-out="'{:,.2f}'.format(cin['amount'])"/></td>
 
                                 </tr>
 
@@ -326,7 +326,7 @@
 
                                     <td class="text-end font-bold">Total Cash In:</td>
 
-                                    <td class="text-end font-bold"><span t-esc="'{:,.2f}'.format(report_data['total_cash_in'])"/></td>
+                                    <td class="text-end font-bold"><span t-out="'{:,.2f}'.format(report_data['total_cash_in'])"/></td>
 
                                 </tr>
 
@@ -366,9 +366,9 @@
 
                                 <tr t-foreach="report_data['expenses']" t-as="exp">
 
-                                    <td><span t-esc="exp['reason']"/></td>
+                                    <td><span t-out="exp['reason']"/></td>
 
-                                    <td class="text-end negative"><span t-esc="'{:,.2f}'.format(exp['amount'])"/></td>
+                                    <td class="text-end negative"><span t-out="'{:,.2f}'.format(exp['amount'])"/></td>
 
                                 </tr>
 
@@ -380,7 +380,7 @@
 
                                     <td class="text-end font-bold">Total Expenses:</td>
 
-                                    <td class="text-end font-bold negative"><span t-esc="'{:,.2f}'.format(report_data['total_cash_out'])"/></td>
+                                    <td class="text-end font-bold negative"><span t-out="'{:,.2f}'.format(report_data['total_cash_out'])"/></td>
 
                                 </tr>
 
@@ -396,7 +396,7 @@
 
                             <span class="font-bold align-right" style="font-size: 13px;">Net Cash (TSh): </span>
 
-                            <span class="font-bold" t-esc="'{:,.2f}'.format(report_data['net_cash'])" style="font-size: 15px;"/>
+                            <span class="font-bold" t-out="'{:,.2f}'.format(report_data['net_cash'])" style="font-size: 15px;"/>
 
                         </div>
 

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================================= -->
+    <!-- TOP-LEVEL ROOT APPLICATION MENU                           -->
+    <!-- ========================================================= -->
+    <menuitem id="menu_corporate_crm_root"
+              name="Key Account CRM"
+              sequence="25"
+              groups="stephans_corporate_crm.group_corporate_crm_user"
+              web_icon="stephans_corporate_crm,static/description/icon.png"/>
+
+    <!-- 1. Deals Pipeline (Primary Kanban View) -->
+    <menuitem id="menu_corporate_crm_deals_pipeline"
+              name="Deals Pipeline"
+              parent="menu_corporate_crm_root"
+              sequence="5"
+              action="action_corporate_crm_deals"/>
+
+    <!-- 2. Customer Boxes (Q1 - Q4 Matrix) -->
+    <menuitem id="menu_corporate_crm_boxes_kanban"
+              name="Customer Boxes (Q1 - Q4)"
+              parent="menu_corporate_crm_root"
+              sequence="10"
+              action="action_corporate_crm_boxes"/>
+
+    <!-- 2. Accounts Directory -->
+    <menuitem id="menu_corporate_crm_directory"
+              name="Accounts"
+              parent="menu_corporate_crm_root"
+              sequence="20"/>
+
+    <menuitem id="menu_corporate_crm_accounts_list"
+              name="Corporate Key Accounts"
+              parent="menu_corporate_crm_directory"
+              sequence="1"
+              action="action_corporate_crm_accounts_list"/>
+
+    <!-- 3. Dynamic Shifts & Logs -->
+    <menuitem id="menu_corporate_crm_shifts"
+              name="Box Shifts &amp; Retention"
+              parent="menu_corporate_crm_root"
+              sequence="30"/>
+
+    <menuitem id="menu_corporate_crm_shift_logs_item"
+              name="Box Shift Audit Trail"
+              parent="menu_corporate_crm_shifts"
+              sequence="1"
+              action="action_corporate_crm_shift_logs"/>
+
+    <!-- 4. Configuration -->
+    <menuitem id="menu_corporate_crm_config"
+              name="Configuration"
+              parent="menu_corporate_crm_root"
+              sequence="90"
+              groups="stephans_corporate_crm.group_corporate_crm_manager"/>
+
+    <menuitem id="menu_corporate_crm_settings_item"
+              name="Settings"
+              parent="menu_corporate_crm_config"
+              sequence="1"
+              action="action_corporate_crm_config_settings"/>
+
+    <menuitem id="menu_corporate_crm_stages_item"
+              name="Pipeline Stages"
+              parent="menu_corporate_crm_config"
+              sequence="10"
+              action="action_corporate_crm_stages"/>
+
+    <menuitem id="menu_corporate_crm_lost_reasons_item"
+              name="Lost Reasons"
+              parent="menu_corporate_crm_config"
+              sequence="20"
+              action="action_corporate_crm_lost_reasons"/>
+
+    <!-- ========================================================= -->
+    <!-- INTEGRATION INTO LUCY MANAGEMENT CONSOLE                   -->
+    <!-- ========================================================= -->
+    <menuitem id="menu_lucy_corporate_crm"
+              name="Key Account CRM"
+              parent="lucy.menu_lucy_root"
+              sequence="15"
+              groups="base.group_user"/>
+
+    <menuitem id="menu_lucy_crm_deals"
+              name="Deals Pipeline"
+              parent="menu_lucy_corporate_crm"
+              sequence="1"
+              action="action_corporate_crm_deals"/>
+
+    <menuitem id="menu_lucy_crm_boxes"
+              name="Customer Boxes (Q1 - Q4)"
+              parent="menu_lucy_corporate_crm"
+              sequence="2"
+              action="action_corporate_crm_boxes"/>
+
+    <menuitem id="menu_lucy_crm_accounts"
+              name="Corporate Accounts"
+              parent="menu_lucy_corporate_crm"
+              sequence="3"
+              action="action_corporate_crm_accounts_list"/>
+
+    <menuitem id="menu_lucy_crm_shifts"
+              name="Box Shift Logs"
+              parent="menu_lucy_corporate_crm"
+              sequence="4"
+              action="action_corporate_crm_shift_logs"/>
+
+    <!-- ========================================================= -->
+    <!-- INTEGRATION INTO SALES APP                                -->
+    <!-- ========================================================= -->
+    <menuitem id="menu_sale_corporate_crm_deals"
+              name="Key Account Pipeline"
+              parent="sale.sale_order_menu"
+              sequence="3"
+              action="action_corporate_crm_deals"/>
+
+    <menuitem id="menu_sale_corporate_crm_boxes"
+              name="Key Account Boxes (Q1 - Q4)"
+              parent="sale.sale_order_menu"
+              sequence="4"
+              action="action_corporate_crm_boxes"/>
+</odoo>

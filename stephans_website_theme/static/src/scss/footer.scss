@@ -12,7 +12,8 @@
 .stephans-footer__grid > div:last-child { padding-right: 0; border-right: 0; }
 .stephans-footer__brand > img { width: 150px; height: 62px; object-fit: contain; mix-blend-mode: multiply; }
 .stephans-footer__brand p { max-width: 220px; line-height: 1.7; font-size: 14px; color: #4e2a15; margin: 0; }
-.stephans-footer h4 { margin: 0 0 4px; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #4e2a15; }
+.stephans-footer h4 { margin: 0 0 4px; padding-bottom: 8px; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #4e2a15; position: relative; }
+.stephans-footer h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 24px; height: 1px; background: #c97b3a; }
 .stephans-footer a { color: #4e2a15; font-size: 14px; text-decoration: none; transition: color .2s; }
 .stephans-footer a:hover { color: $stephans-gold; }
 .stephans-footer p { margin: 0; font-size: 14px; }

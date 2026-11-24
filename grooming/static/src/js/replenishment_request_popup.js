@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, proxy, useState, onWillStart, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -9,6 +9,8 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 export class ReplenishmentRequestPopup extends Component {
     static template = "grooming.ReplenishmentRequestPopup";
     static components = { Dialog };
+    // Odoo 20 / OWL 3: components only get this.props through useProps().
+    props = useProps();
     
     setup() {
         super.setup();
@@ -16,7 +18,8 @@ export class ReplenishmentRequestPopup extends Component {
         this.notification = useService("notification");
         this.dialog = useService("dialog");
         
-        this.state = useState({
+        const createState = useState || proxy;
+        this.state = createState({
             cartLines: [],
             searchQuery: "",
             searchResults: [],
@@ -25,12 +28,13 @@ export class ReplenishmentRequestPopup extends Component {
 
         onWillStart(async () => {
             // Get products from current order
-            const currentOrder = this.props.pos.get_order();
-            if (currentOrder && currentOrder.get_orderlines().length > 0) {
-                this.state.cartLines = currentOrder.get_orderlines().map(line => ({
-                    product_id: line.get_product().id,
-                    product_name: line.get_product().display_name,
-                    qty: line.get_quantity()
+            // Odoo 20: camelCase order API; orderline.product_id is a record, qty a field.
+            const currentOrder = this.props.pos.getOrder();
+            if (currentOrder && currentOrder.getOrderlines().length > 0) {
+                this.state.cartLines = currentOrder.getOrderlines().map(line => ({
+                    product_id: line.product_id.id,
+                    product_name: line.product_id.display_name,
+                    qty: line.qty
                 }));
                 const pids = this.state.cartLines.map(l => l.product_id);
                 await this.fetchStockAvailability(pids);
@@ -101,18 +105,8 @@ export class ReplenishmentRequestPopup extends Component {
         this.state.searchResults = [];
     }
 
-    setMaxQty(line) {
-        const avail = this.state.stockAvailability[line.product_id] || 0;
-        if (avail > 0) {
-            line.qty = avail;
-        }
-    }
-
-    isQtyExceeded(line) {
-        const avail = this.state.stockAvailability[line.product_id];
-        if (avail === undefined || avail === null) return false;
-        return parseFloat(line.qty) > avail;
-    }
+    // No stock limit here: replenishment always buys into Masaki Back Storage, so requesting more
+    // than back storage holds is the normal case. (The limit belongs to RequestStockPopup only.)
 
     updateQty(line, newQty) {
         let val = parseFloat(newQty);
@@ -142,10 +136,10 @@ export class ReplenishmentRequestPopup extends Component {
             this.notification.add("Replenishment Request Submitted Successfully!", { type: "success" });
             
             // Clear the cart since the request was successful
-            const currentOrder = this.props.pos.get_order();
+            const currentOrder = this.props.pos.getOrder();
             if (currentOrder) {
                 this.props.pos.removeOrder(currentOrder);
-                this.props.pos.add_new_order();
+                this.props.pos.addNewOrder();
             }
             
             this.props.close();

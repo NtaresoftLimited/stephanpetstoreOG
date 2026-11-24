@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- LOG FORM VIEW -->
+    <record id="view_audit_whatsapp_log_form" model="ir.ui.view">
+        <field name="name">audit.whatsapp.log.form</field>
+        <field name="model">audit.whatsapp.log</field>
+        <field name="arch" type="xml">
+            <form string="Audit Event Log" create="false" edit="false">
+                <header>
+                    <button name="action_resend_whatsapp" string="Resend WhatsApp Alert" type="object" class="btn-primary" invisible="whatsapp_status == 'sent'"/>
+                    <field name="whatsapp_status" widget="statusbar" statusbar_visible="pending,sent,failed,skipped"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Audit Summary"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="meta_info" string="Event Metadata">
+                            <field name="timestamp" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="rule_id" readonly="1"/>
+                            <field name="severity" widget="badge" decoration-danger="severity == 'high'" decoration-warning="severity == 'medium'" decoration-info="severity == 'low'"/>
+                        </group>
+                        <group name="record_info" string="Target Record">
+                            <field name="model_name" readonly="1"/>
+                            <field name="res_id" readonly="1"/>
+                            <field name="record_name" readonly="1"/>
+                            <field name="action" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Event Details" name="details">
+                            <field name="details" nolabel="1" readonly="1" widget="text"/>
+                        </page>
+                        <page string="WhatsApp Delivery Status" name="whatsapp">
+                            <group>
+                                <field name="whatsapp_recipient" readonly="1"/>
+                                <field name="whatsapp_response" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LOG LIST VIEW -->
+    <record id="view_audit_whatsapp_log_tree" model="ir.ui.view">
+        <field name="name">audit.whatsapp.log.list</field>
+        <field name="model">audit.whatsapp.log</field>
+        <field name="arch" type="xml">
+            <list string="Audit Logs" create="false" edit="false" decoration-danger="severity == 'high'" decoration-warning="severity == 'medium'">
+                <field name="timestamp"/>
+                <field name="severity" widget="badge" decoration-danger="severity == 'high'" decoration-warning="severity == 'medium'" decoration-info="severity == 'low'"/>
+                <field name="name"/>
+                <field name="model_name"/>
+                <field name="record_name"/>
+                <field name="action"/>
+                <field name="user_id"/>
+                <field name="whatsapp_status" widget="badge" decoration-success="whatsapp_status == 'sent'" decoration-danger="whatsapp_status == 'failed'" decoration-muted="whatsapp_status == 'skipped'"/>
+                <field name="whatsapp_recipient"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- LOG SEARCH VIEW -->
+    <record id="view_audit_whatsapp_log_search" model="ir.ui.view">
+        <field name="name">audit.whatsapp.log.search</field>
+        <field name="model">audit.whatsapp.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Audit Logs">
+                <field name="name"/>
+                <field name="model_name"/>
+                <field name="record_name"/>
+                <field name="user_id"/>
+                <filter string="Critical / High Severity" name="filter_high" domain="[('severity', '=', 'high')]"/>
+                <filter string="WhatsApp Sent" name="filter_sent" domain="[('whatsapp_status', '=', 'sent')]"/>
+                <filter string="WhatsApp Failed" name="filter_failed" domain="[('whatsapp_status', '=', 'failed')]"/>
+                <separator/>
+                <filter string="Group by Severity" name="group_severity" context="{'group_by': 'severity'}"/>
+                <filter string="Group by Model" name="group_model" context="{'group_by': 'model_name'}"/>
+                <filter string="Group by Action" name="group_action" context="{'group_by': 'action'}"/>
+                <filter string="Group by User" name="group_user" context="{'group_by': 'user_id'}"/>
+                <filter string="Group by WhatsApp Status" name="group_status" context="{'group_by': 'whatsapp_status'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_audit_whatsapp_log" model="ir.actions.act_window">
+        <field name="name">Audit Logs</field>
+        <field name="res_model">audit.whatsapp.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_audit_whatsapp_log_search"/>
+        <field name="context">{'search_default_filter_high': 0}</field>
+    </record>
+</odoo>

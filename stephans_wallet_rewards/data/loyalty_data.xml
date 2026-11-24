@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Paw Points: native Odoo loyalty program shared by POS and website.
+         Earn 1 point per 1,000 TSh spent (tax incl.), redeem 100 points for 5,000 TSh off.
+         Sky Wallet top-ups (product wk_wallet) earn nothing: points are earned when the money is spent.
+         noupdate="1" so the team can tune the rule in Point of Sale > Products > Discount & Loyalty. -->
+    <data noupdate="1">
+        <record id="loyalty_program_paw_points" model="loyalty.program">
+            <field name="name">Paw Points</field>
+            <field name="program_type">loyalty</field>
+            <field name="applies_on">future</field>
+            <field name="trigger">auto</field>
+            <field name="portal_visible">True</field>
+            <field name="portal_point_name">Paw Points</field>
+            <field name="pos_ok">True</field>
+            <field name="ecommerce_ok">True</field>
+            <field name="sale_ok">True</field>
+            <field name="rule_ids" eval="[(5, 0, 0), (0, 0, {
+                'reward_point_mode': 'money',
+                'reward_point_amount': 0.001,
+                'minimum_amount': 0,
+                'minimum_qty': 0,
+                'minimum_amount_tax_mode': 'incl',
+                'product_domain': '[(&quot;default_code&quot;, &quot;!=&quot;, &quot;wk_wallet&quot;)]',
+            })]"/>
+            <field name="reward_ids" eval="[(5, 0, 0), (0, 0, {
+                'reward_type': 'discount',
+                'discount_mode': 'per_order',
+                'discount': 5000,
+                'discount_applicability': 'order',
+                'required_points': 100,
+                'description': '5,000 TSh off (100 Paw Points)',
+            })]"/>
+        </record>
+    </data>
+    <!-- Runs on every install/upgrade: keep the reward's discount product approved. -->
+    <function model="loyalty.program" name="_stephans_approve_reward_products"/>
+</odoo>

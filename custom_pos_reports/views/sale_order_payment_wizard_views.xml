@@ -38,8 +38,8 @@
         <field name="target">new</field>
     </record>
 
-    <record id="view_sale_order_form_register_payment_techovers" model="ir.ui.view">
-        <field name="name">sale.order.form.register.payment.techovers</field>
+    <record id="view_sale_order_form_register_payment_stephans" model="ir.ui.view">
+        <field name="name">sale.order.form.register.payment.stephans</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">

@@ -11,5 +11,16 @@
             <field name="interval_type">hours</field>
             <field name="active">True</field>
         </record>
+
+        <!-- CRON for Auto-Releasing Unclaimed Walk-in Buffer Slots at 6:00 PM for Next Day -->
+        <record id="ir_cron_release_walkin_slots" model="ir.cron">
+            <field name="name">Grooming: Auto-Release Unclaimed Walk-in Buffer Slots (Daily 6PM)</field>
+            <field name="model_id" ref="model_grooming_appointment"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_release_walkin_buffers()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active">True</field>
+        </record>
     </data>
 </odoo>

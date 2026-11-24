@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_image_reject_wizard_form" model="ir.ui.view">
+        <field name="name">product.image.reject.wizard.form</field>
+        <field name="model">product.image.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Image Asset">
+                <sheet>
+                    <p class="text-muted">
+                        Please document the reason for rejecting this image. The rejection reason is permanently recorded in the audit trail, and the unapproved raw image binary is safely purged to protect disk space.
+                    </p>
+                    <group>
+                        <field name="review_id" readonly="1"/>
+                        <field name="reason_code"/>
+                        <field name="rejection_notes" placeholder="Explain the watermark, resolution issue, or package mismatch..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm_rejection" string="Confirm Rejection" type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_product_image_reject_wizard" model="ir.actions.act_window">
+        <field name="name">Reject Image Asset</field>
+        <field name="res_model">product.image.reject.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shift Log List View -->
+    <record id="view_corporate_crm_shift_log_tree" model="ir.ui.view">
+        <field name="name">corporate.crm.shift.log.list</field>
+        <field name="model">corporate.crm.shift.log</field>
+        <field name="arch" type="xml">
+            <list string="Box Shift Logs" default_order="shift_date desc" create="false" edit="false">
+                <field name="shift_date"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="from_box" widget="badge"/>
+                <field name="to_box" widget="badge"
+                       decoration-success="to_box == 'q1'"
+                       decoration-warning="to_box == 'q2'"
+                       decoration-danger="to_box in ('q3', 'q4')"/>
+                <field name="movement_type" widget="badge"
+                       decoration-success="movement_type == 'promoted'"
+                       decoration-danger="movement_type == 'demoted'"/>
+                <field name="trigger_source" widget="badge"/>
+                <field name="days_inactive"/>
+                <field name="total_spend_at_shift" widget="monetary"/>
+                <field name="notes"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Shift Log Form View -->
+    <record id="view_corporate_crm_shift_log_form" model="ir.ui.view">
+        <field name="name">corporate.crm.shift.log.form</field>
+        <field name="model">corporate.crm.shift.log</field>
+        <field name="arch" type="xml">
+            <form string="Box Shift Log Entry" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Account &amp; Transition">
+                            <field name="partner_id"/>
+                            <field name="shift_date"/>
+                            <field name="from_box"/>
+                            <field name="to_box"/>
+                            <field name="movement_type"/>
+                        </group>
+                        <group string="Trigger Context">
+                            <field name="trigger_source"/>
+                            <field name="days_inactive"/>
+                            <field name="total_spend_at_shift"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    <group string="Notes &amp; Details">
+                        <field name="notes" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Shift Log Pivot & Graph Analytics -->
+    <record id="view_corporate_crm_shift_log_pivot" model="ir.ui.view">
+        <field name="name">corporate.crm.shift.log.pivot</field>
+        <field name="model">corporate.crm.shift.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Box Shifts Analytics">
+                <field name="shift_date" interval="month" type="row"/>
+                <field name="to_box" type="col"/>
+                <field name="days_inactive" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_corporate_crm_shift_log_graph" model="ir.ui.view">
+        <field name="name">corporate.crm.shift.log.graph</field>
+        <field name="model">corporate.crm.shift.log</field>
+        <field name="arch" type="xml">
+            <graph string="Customer Transitions by Box" type="bar" sample="1">
+                <field name="to_box"/>
+                <field name="movement_type"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Shift Log Search View -->
+    <record id="view_corporate_crm_shift_log_search" model="ir.ui.view">
+        <field name="name">corporate.crm.shift.log.search</field>
+        <field name="model">corporate.crm.shift.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Box Shifts">
+                <field name="partner_id"/>
+                <field name="name"/>
+                <filter string="Promoted 🔺" name="filter_promoted" domain="[('movement_type', '=', 'promoted')]"/>
+                <filter string="Demoted 🔻" name="filter_demoted" domain="[('movement_type', '=', 'demoted')]"/>
+                <separator/>
+                <filter string="Shifted to Q1 Active" name="filter_to_q1" domain="[('to_box', '=', 'q1')]"/>
+                <filter string="Shifted to Q2 Slipping" name="filter_to_q2" domain="[('to_box', '=', 'q2')]"/>
+                <filter string="Shifted to Q3 Dormant" name="filter_to_q3" domain="[('to_box', '=', 'q3')]"/>
+                <filter string="Shifted to Q4 Churned" name="filter_to_q4" domain="[('to_box', '=', 'q4')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Customer Account" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Target Box" name="group_to_box" context="{'group_by': 'to_box'}"/>
+                    <filter string="Movement Type" name="group_movement" context="{'group_by': 'movement_type'}"/>
+                    <filter string="Trigger Source" name="group_trigger" context="{'group_by': 'trigger_source'}"/>
+                    <filter string="Shift Date" name="group_date" context="{'group_by': 'shift_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Shift Logs -->
+    <record id="action_corporate_crm_shift_logs" model="ir.actions.act_window">
+        <field name="name">Box Shift Logs &amp; Audit Trail</field>
+        <field name="res_model">corporate.crm.shift.log</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_corporate_crm_shift_log_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Comprehensive Audit Trail of Customer Box Transitions!
+            </p>
+            <p>
+                Every dynamic promotion to Q1 or demotion to Q2, Q3, and Q4 is logged here with trigger reasons and spend statistics.
+            </p>
+        </field>
+    </record>
+</odoo>

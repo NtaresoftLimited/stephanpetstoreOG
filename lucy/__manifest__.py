@@ -1,0 +1,36 @@
+{
+    "name": "LuCy Management Console",
+    "version": "20.0.1.0.0",
+    "category": "Productivity/Dashboard",
+    "summary": "Administrator console for commerce, grooming, website and inventory",
+    "author": "Stephan's Pet Store",
+    "website": "https://stephanspetstore.co.tz",
+    "license": "LGPL-3",
+    "depends": [
+        "web",
+        "website",
+        "website_sale",
+        "sale_management",
+        "stock",
+        "point_of_sale",
+        "grooming",
+        "sky_dashboard",
+        "stephans_website_theme",
+    ],
+    "data": [
+        "security/ir.model.access.csv",
+        "views/lucy_actions.xml",
+        "views/website_navigation_views.xml",
+        "views/lucy_menus.xml",
+    ],
+    "assets": {
+        "web.assets_backend": [
+            "lucy/static/src/js/lucy_dashboard.js",
+            "lucy/static/src/xml/lucy_dashboard.xml",
+            "lucy/static/src/scss/lucy_dashboard.scss",
+        ],
+    },
+    "application": True,
+    "installable": True,
+    "auto_install": False,
+}

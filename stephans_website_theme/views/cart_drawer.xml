@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="stephans_cart_drawer" name="Stephan's Slide-Over Cart Drawer">
+        <!-- Backdrop Overlay -->
+        <div id="stephans-cart-backdrop" class="stephans-cart-backdrop" aria-hidden="true"></div>
+
+        <!-- Slide-over Drawer Panel -->
+        <aside id="stephans-cart-drawer" class="stephans-cart-drawer" aria-label="Shopping Cart Drawer" aria-hidden="true">
+            <!-- Header -->
+            <div class="stephans-cart-header">
+                <div class="stephans-cart-header__title">
+                    <img src="/stephans_website_theme/static/src/images/branding/favicon.png" alt="" class="stephans-cart-header__icon"/>
+                    <h2>Your Cart</h2>
+                    <span id="stephans-cart-badge-drawer" class="stephans-cart-header__badge">0</span>
+                </div>
+                <button type="button" id="stephans-cart-close" class="stephans-cart-close" aria-label="Close cart">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body: Items List or Empty State -->
+            <div class="stephans-cart-body">
+                <!-- Empty State -->
+                <div id="stephans-cart-empty" class="stephans-cart-empty" style="display: none;">
+                    <div class="stephans-cart-empty__art">
+                        <svg viewBox="0 0 64 64" width="80" height="80" fill="none" stroke="#c77e35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="32" cy="32" r="30" stroke="#f0ece6" stroke-width="4"/>
+                            <path d="M20 22h24l-3 18H23L20 22z"/>
+                            <path d="M26 22V17a6 6 0 0 1 12 0v5"/>
+                            <circle cx="26" cy="46" r="2.5" fill="#c77e35"/>
+                            <circle cx="38" cy="46" r="2.5" fill="#c77e35"/>
+                        </svg>
+                    </div>
+                    <h3>Your cart is feeling lonely!</h3>
+                    <p>Looks like you haven't added anything to your cart yet. Discover our latest pet essentials.</p>
+                    <a href="/shop" class="stephans-cart-btn stephans-cart-btn--primary">
+                        Shop Now
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Items Container -->
+                <div id="stephans-cart-items-container" class="stephans-cart-items">
+                    <!-- Dynamic Cart Items Rendered via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Footer: Summary & Actions -->
+            <div id="stephans-cart-footer" class="stephans-cart-footer">
+                <div class="stephans-cart-summary">
+                    <!-- Native Paw Points Rewards Hint -->
+                    <div class="stephans-cart-paw-banner" data-open-paw-points="true" style="display: flex; align-items: center; gap: 8px; padding: 9px 12px; margin-bottom: 12px; border-radius: 12px; background: rgba(199, 126, 53, 0.08); border: 1px solid rgba(199, 126, 53, 0.2); cursor: pointer;">
+                        <span style="font-size: 14px;">🐾</span>
+                        <div style="font-size: 11px; line-height: 1.35; color: #5c5047;">
+                            <strong style="color: #c77e35;">Paw Points:</strong> Earn 1 point per 1,000 TSh. <span style="text-decoration: underline; font-weight: 600; color: #3e220f;">Sign in to earn</span>
+                        </div>
+                    </div>
+
+                    <div class="stephans-cart-summary__row">
+                        <span>Subtotal</span>
+                        <strong id="stephans-cart-subtotal">TZS 0</strong>
+                    </div>
+                </div>
+
+                <div class="stephans-cart-actions">
+                    <a href="/shop/checkout" class="stephans-cart-btn stephans-cart-btn--primary stephans-cart-btn--checkout">
+                        Proceed to Checkout
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </a>
+                    <a href="/shop/cart" class="stephans-cart-view-link">
+                        View Shopping Bag
+                    </a>
+                </div>
+            </div>
+        </aside>
+    </template>
+</odoo>

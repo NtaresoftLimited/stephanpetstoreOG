@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="stephans_global_layout" inherit_id="website.layout" name="Stephan's Global Website Chrome">
+        <xpath expr="//head" position="inside">
+            <!-- Modern Geist and Playfair Display Fonts -->
+            <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin"/>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
+
+            <!-- Stephan's Theme Stylesheets -->
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/theme.css?v=20.0.2.20.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/mega_menu.css?v=20.0.2.20.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/home_header.css?v=20.0.2.18.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/shop.css?v=20.0.2.18.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/cart_drawer.css?v=20.0.2.18.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/search_modal.css?v=20.0.2.23.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/lucy_widget.css?v=20.0.2.18.0"/>
+            <link rel="stylesheet" type="text/css" href="/stephans_website_theme/static/src/css/paw_points.css?v=20.0.2.19.0"/>
+
+            <!-- Stephan's Interactive Scripts -->
+            <script type="text/javascript" defer="defer" src="/stephans_website_theme/static/src/js/header.js?v=20.0.2.19.0"/>
+            <script type="text/javascript" defer="defer" src="/stephans_website_theme/static/src/js/cart_drawer.js?v=20.0.2.19.0"/>
+            <script type="text/javascript" defer="defer" src="/stephans_website_theme/static/src/js/search_modal.js?v=20.0.2.23.0"/>
+            <script type="text/javascript" defer="defer" src="/stephans_website_theme/static/src/js/lucy_widget.js?v=20.0.2.19.0"/>
+            <script type="text/javascript" defer="defer" src="/stephans_website_theme/static/src/js/paw_points.js?v=20.0.2.19.0"/>
+        </xpath>
+
+        <!-- Replace Standard Header with Stephan's Custom Header -->
+        <xpath expr="//header[@id='top']" position="replace">
+            <t t-if="not no_header" t-call="stephans_website_theme.stephans_preview_header"/>
+        </xpath>
+
+        <!-- Replace Standard Footer with Stephan's Custom Footer and Inject Modals/Drawers -->
+        <xpath expr="//footer[@id='bottom']" position="replace">
+            <t t-if="not no_footer" t-call="stephans_website_theme.stephans_preview_footer"/>
+            <t t-call="stephans_website_theme.stephans_cart_drawer"/>
+            <t t-call="stephans_website_theme.stephans_search_modal"/>
+            <t t-call="stephans_website_theme.stephans_lucy_widget"/>
+            <t t-call="stephans_website_theme.stephans_paw_points_modal"/>
+        </xpath>
+    </template>
+</odoo>
