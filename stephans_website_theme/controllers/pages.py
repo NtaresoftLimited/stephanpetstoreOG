@@ -581,8 +581,10 @@ class StephansWebsitePages(http.Controller):
             if q_compact and code_compact and (q_compact == code_compact or code_compact in q_compact):
                 score += 180
 
-            # Exact brand or compact phrase match boost
-            if q_compact and q_compact in n_compact:
+            # Exact full product name match boost
+            if q_compact and n_compact and q_compact == n_compact:
+                score += 300
+            elif q_compact and q_compact in n_compact:
                 score += 120
 
             matched_title_tokens = 0
@@ -600,11 +602,13 @@ class StephansWebsitePages(http.Controller):
                 elif tl in idx_text:
                     score += 6
 
-            if len( non_sku_tokens ) >= 2 and matched_title_tokens >= len(non_sku_tokens):
+            if len(non_sku_tokens) >= 2 and matched_title_tokens >= len(non_sku_tokens):
                 score += 60
             return score
 
-        products = sorted(products, key=relevance_score, reverse=True)[:limit_count]
+        ranked_products = sorted(products, key=relevance_score, reverse=True)
+        total_matched_count = len(ranked_products)
+        products = ranked_products[:limit_count]
 
         currency = request.env.company.currency_id
         results = []
@@ -646,14 +650,15 @@ class StephansWebsitePages(http.Controller):
         seen_cats = set()
         for p in products:
             c = p.categ_id
-            if c:
+            if c and c.name:
+                raw_cat = c.name.strip()
                 prefix = 'Cats' if ('cat' in (p.name or '').lower()) else 'Dogs'
-                c_name = f"{prefix} > {c.name}"
+                c_name = raw_cat if raw_cat.lower() in ('cats', 'dogs') else f"{prefix} > {raw_cat}"
                 if c_name not in seen_cats:
                     seen_cats.add(c_name)
                     matched_categories.append({
                         'name': c_name,
-                        'url': f"/shop?search={c.name}",
+                        'url': f"/shop?search={urllib.parse.quote_plus(raw_cat)}",
                         'type': 'Category'
                     })
             if len(matched_categories) >= 2:
@@ -671,7 +676,7 @@ class StephansWebsitePages(http.Controller):
             'products': results,
             'categories': matched_categories[:2],
             'brands': matched_brands[:2],
-            'count': len(results)
+            'count': total_matched_count
         }
         set_cached(
             "search_api",

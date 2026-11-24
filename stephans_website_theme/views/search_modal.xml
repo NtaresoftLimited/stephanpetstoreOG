@@ -14,19 +14,12 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
 
-                    <!-- Input with clear-icon positioned inside -->
+                    <!-- Search Input -->
                     <div class="stephans-search-input-wrapper">
                         <input type="text" id="stephans-search-modal-input" class="stephans-search-modal__input" 
                                placeholder="Search products, brands, categories..." autocomplete="off"
                                role="combobox" aria-autocomplete="list" aria-expanded="false"
                                aria-controls="stephans-search-results-area" aria-label="Search products, brands and categories"/>
-                        <button type="button" id="stephans-search-input-clear" class="stephans-search-input-clear" 
-                                aria-label="Clear search input" title="Clear search" style="display: none;">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"/>
-                                <line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
-                        </button>
                     </div>
                     
                     <!-- Actions: Singular clean close button -->
@@ -122,12 +115,8 @@
                     </div>
                 </div>
 
-                <!-- Footer with Context-Aware Shortcuts -->
-                <div class="stephans-search-modal__footer">
-                    <div id="stephans-search-shortcuts" class="stephans-search-shortcuts" aria-hidden="true">
-                        <span id="stephans-shortcut-empty" class="stephans-shortcut-msg"><kbd>Esc</kbd> to close</span>
-                        <span id="stephans-shortcut-results" class="stephans-shortcut-msg" style="display: none;"><kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close</span>
-                    </div>
+                <!-- Footer Action Bar (Shown only when view-all link is active) -->
+                <div id="stephans-search-footer" class="stephans-search-modal__footer" style="display: none;">
                     <a href="/shop" id="stephans-search-see-all" class="stephans-search-see-all" style="display: none;">View all <span id="stephans-results-count">0</span> results →</a>
                 </div>
             </div>

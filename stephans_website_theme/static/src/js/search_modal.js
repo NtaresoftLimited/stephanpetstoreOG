@@ -23,6 +23,9 @@
       .replace(/'/g, '&#039;');
   }
 
+  var CACHE_TTL_MS = 5 * 60 * 1000;
+  var clientSearchCache = Object.create(null);
+
   var SearchModal = {
     isOpen: false,
     debounceTimer: null,
@@ -265,11 +268,11 @@
       }
     },
 
-    updateKeyboardShortcuts: function (hasResults) {
-      var emptyMsg = document.getElementById('stephans-shortcut-empty');
-      var resultsMsg = document.getElementById('stephans-shortcut-results');
-      if (emptyMsg) emptyMsg.style.display = hasResults ? 'none' : 'inline-flex';
-      if (resultsMsg) resultsMsg.style.display = hasResults ? 'inline-flex' : 'none';
+    updateFooterVisibility: function (showFooter) {
+      var footerEl = document.getElementById('stephans-search-footer');
+      if (footerEl) {
+        footerEl.style.display = showFooter ? 'flex' : 'none';
+      }
     },
 
     handleInputChange: function (value) {
@@ -277,7 +280,6 @@
       var q = value.trim();
       self.currentQuery = q;
 
-      var clearBtn = document.getElementById('stephans-search-input-clear');
       var initialSec = document.getElementById('stephans-search-initial');
       var resultsSec = document.getElementById('stephans-search-results-area');
       var loadingEl = document.getElementById('stephans-search-loading');
@@ -286,10 +288,6 @@
       var noResultsEl = document.getElementById('stephans-search-no-results');
       var errorEl = document.getElementById('stephans-search-error-state');
       var seeAllEl = document.getElementById('stephans-search-see-all');
-
-      if (clearBtn) {
-        clearBtn.style.display = q.length > 0 ? 'flex' : 'none';
-      }
 
       if (q.length < 2) {
         if (self.abortController) {
@@ -306,7 +304,18 @@
 
         self.selectedIndex = -1;
         self.currentResults = [];
-        self.updateKeyboardShortcuts(false);
+        self.updateFooterVisibility(false);
+        return;
+      }
+
+      var cacheKey = q.toLowerCase();
+      var cachedEntry = clientSearchCache[cacheKey];
+      if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+        clearTimeout(this.debounceTimer);
+        if (initialSec) initialSec.style.display = 'none';
+        if (resultsSec) resultsSec.style.display = 'block';
+        if (loadingEl) loadingEl.style.display = 'none';
+        self.renderSearchResponse(q, cachedEntry.data);
         return;
       }
 
@@ -320,15 +329,15 @@
       if (errorEl) errorEl.style.display = 'none';
       if (seeAllEl) seeAllEl.style.display = 'none';
 
-      self.updateKeyboardShortcuts(false);
+      self.updateFooterVisibility(false);
 
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(function () {
         self.performSearch(q);
-      }, 200);
+      }, 160);
     },
 
-    performSearch: function (query) {
+    renderSearchResponse: function (query, data) {
       var self = this;
       var loadingEl = document.getElementById('stephans-search-loading');
       var prodsGroup = document.getElementById('stephans-search-products-group');
@@ -338,8 +347,132 @@
       var noResultsEl = document.getElementById('stephans-search-no-results');
       var failedQueryEl = document.getElementById('stephans-search-failed-query');
       var errorEl = document.getElementById('stephans-search-error-state');
-      var countEl = document.getElementById('stephans-results-count');
       var seeAllEl = document.getElementById('stephans-search-see-all');
+
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+
+      var products = data.products || data.results || [];
+      var categories = data.categories || [];
+      var brands = data.brands || [];
+      var totalCount = data.count !== undefined ? data.count : products.length;
+
+      self.currentResults = [];
+      self.selectedIndex = -1;
+
+      var hasProducts = products.length > 0;
+      var hasTax = categories.length > 0 || brands.length > 0;
+
+      // 1. Result Count / Footer Link Rules
+      if (hasProducts) {
+        if (seeAllEl) {
+          var noun = Number(totalCount) === 1 ? 'result' : 'results';
+          seeAllEl.style.display = 'inline-block';
+          seeAllEl.href = '/shop?search=' + encodeURIComponent(query);
+          seeAllEl.innerHTML = 'View all <span id="stephans-results-count">' + escapeHtml(totalCount) + '</span> ' + noun + ' &rarr;';
+        }
+        self.updateFooterVisibility(true);
+      } else if (brands.length > 0) {
+        var matchedBrand = brands[0];
+        if (seeAllEl) {
+          seeAllEl.style.display = 'inline-block';
+          seeAllEl.href = matchedBrand.url || ('/shop?search=' + encodeURIComponent(matchedBrand.name));
+          seeAllEl.innerHTML = 'View ' + escapeHtml(matchedBrand.name) + ' products &rarr;';
+        }
+        self.updateFooterVisibility(true);
+      } else {
+        if (seeAllEl) seeAllEl.style.display = 'none';
+        self.updateFooterVisibility(false);
+      }
+
+      // 2. Empty State Handling
+      if (!hasProducts && !hasTax) {
+        if (noResultsEl) {
+          noResultsEl.style.display = 'block';
+          if (failedQueryEl) failedQueryEl.textContent = query;
+        }
+        if (prodsGroup) prodsGroup.style.display = 'none';
+        if (taxGroup) taxGroup.style.display = 'none';
+        return;
+      }
+
+      if (noResultsEl) noResultsEl.style.display = 'none';
+
+      // 3. Render Products Securely
+      if (hasProducts && prodsGroup && prodsList) {
+        prodsGroup.style.display = 'block';
+        var prodsHtml = products.map(function (item) {
+          var targetUrl = item.url || ('/shop/product/' + item.id);
+          self.currentResults.push({ type: 'product', url: targetUrl });
+          var itemIdx = self.currentResults.length - 1;
+          var brandCat = (item.brand ? item.brand + ' · ' : '') + (item.category || 'Pet Food');
+
+          return (
+            '<a href="' + escapeAttr(targetUrl) + '" class="stephans-search-product-item" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
+              '<div class="stephans-search-product-thumb">' +
+                '<img src="' + escapeAttr(item.image_url) + '" alt="' + escapeAttr(item.name) + '" loading="lazy"/>' +
+              '</div>' +
+              '<div class="stephans-search-product-meta">' +
+                '<h4 class="stephans-search-product-title">' + escapeHtml(item.name) + '</h4>' +
+                '<div class="stephans-search-product-sub">' + escapeHtml(brandCat) + '</div>' +
+              '</div>' +
+              '<div class="stephans-search-product-price">' + escapeHtml(item.price_formatted) + '</div>' +
+            '</a>'
+          );
+        }).join('');
+        prodsList.innerHTML = prodsHtml;
+      } else if (prodsGroup) {
+        prodsGroup.style.display = 'none';
+      }
+
+      // 4. Render Categories & Brands Securely
+      if (hasTax && taxGroup && taxList) {
+        taxGroup.style.display = 'block';
+        var taxHtml = '';
+
+        categories.forEach(function (cat) {
+          self.currentResults.push({ type: 'category', url: cat.url });
+          var itemIdx = self.currentResults.length - 1;
+          taxHtml += (
+            '<a href="' + escapeAttr(cat.url) + '" class="stephans-search-tax-item" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
+              '<span class="stephans-search-tax-name">' + escapeHtml(cat.name) + '</span>' +
+              '<span class="stephans-search-tax-badge">Category</span>' +
+            '</a>'
+          );
+        });
+
+        brands.forEach(function (brand) {
+          self.currentResults.push({ type: 'brand', url: brand.url });
+          var itemIdx = self.currentResults.length - 1;
+          taxHtml += (
+            '<a href="' + escapeAttr(brand.url) + '" class="stephans-search-tax-item stephans-search-tax-item--brand" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
+              '<span class="stephans-search-tax-name stephans-search-tax-name--brand">' + escapeHtml(brand.name) + '</span>' +
+              '<span class="stephans-search-tax-badge">Brand</span>' +
+            '</a>'
+          );
+        });
+
+        taxList.innerHTML = taxHtml;
+      } else if (taxGroup) {
+        taxGroup.style.display = 'none';
+      }
+    },
+
+    performSearch: function (query) {
+      var self = this;
+      var loadingEl = document.getElementById('stephans-search-loading');
+      var prodsGroup = document.getElementById('stephans-search-products-group');
+      var taxGroup = document.getElementById('stephans-search-tax-group');
+      var noResultsEl = document.getElementById('stephans-search-no-results');
+      var errorEl = document.getElementById('stephans-search-error-state');
+      var seeAllEl = document.getElementById('stephans-search-see-all');
+
+      var cacheKey = query.toLowerCase();
+      var cachedEntry = clientSearchCache[cacheKey];
+      if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+        self.renderSearchResponse(query, cachedEntry.data);
+        return;
+      }
 
       // Abort any existing in-flight request
       if (this.abortController) {
@@ -359,117 +492,11 @@
         .then(function (data) {
           // Stale response guard
           if (thisSeq !== self.querySeq) return;
-
-          if (loadingEl) loadingEl.style.display = 'none';
-          if (errorEl) errorEl.style.display = 'none';
-
-          var products = data.products || data.results || [];
-          var categories = data.categories || [];
-          var brands = data.brands || [];
-          var totalCount = data.count !== undefined ? data.count : products.length;
-
-          self.currentResults = [];
-          // Index starts at -1 so first item is NOT auto-skipped on first arrow press
-          self.selectedIndex = -1;
-
-          var hasProducts = products.length > 0;
-          var hasTax = categories.length > 0 || brands.length > 0;
-
-          // 1. Result Count / Footer Link Rules
-          if (hasProducts) {
-            if (countEl) countEl.textContent = totalCount;
-            if (seeAllEl) {
-              seeAllEl.style.display = 'inline-flex';
-              seeAllEl.href = '/shop?search=' + encodeURIComponent(query);
-              seeAllEl.innerHTML = 'View all <span id="stephans-results-count">' + escapeHtml(totalCount) + '</span> results &rarr;';
-            }
-            self.updateKeyboardShortcuts(true);
-          } else if (brands.length > 0) {
-            // No product results but brand matches
-            var matchedBrand = brands[0];
-            if (seeAllEl) {
-              seeAllEl.style.display = 'inline-flex';
-              seeAllEl.href = matchedBrand.url || ('/shop?search=' + encodeURIComponent(matchedBrand.name));
-              seeAllEl.innerHTML = 'View ' + escapeHtml(matchedBrand.name) + ' products &rarr;';
-            }
-            self.updateKeyboardShortcuts(true);
-          } else {
-            // Nothing matches: Hide result-count link completely
-            if (seeAllEl) seeAllEl.style.display = 'none';
-            self.updateKeyboardShortcuts(false);
-          }
-
-          // 2. Empty State Handling
-          if (!hasProducts && !hasTax) {
-            if (noResultsEl) {
-              noResultsEl.style.display = 'block';
-              if (failedQueryEl) failedQueryEl.textContent = query;
-            }
-            if (prodsGroup) prodsGroup.style.display = 'none';
-            if (taxGroup) taxGroup.style.display = 'none';
-            return;
-          }
-
-          if (noResultsEl) noResultsEl.style.display = 'none';
-
-          // 3. Render Products Securely
-          if (hasProducts && prodsGroup && prodsList) {
-            prodsGroup.style.display = 'block';
-            var prodsHtml = products.map(function (item) {
-              var targetUrl = item.url || ('/shop/product/' + item.id);
-              self.currentResults.push({ type: 'product', url: targetUrl });
-              var itemIdx = self.currentResults.length - 1;
-              var brandCat = (item.brand ? item.brand + ' · ' : '') + (item.category || 'Pet Food');
-
-              return (
-                '<a href="' + escapeAttr(targetUrl) + '" class="stephans-search-product-item" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
-                  '<div class="stephans-search-product-thumb">' +
-                    '<img src="' + escapeAttr(item.image_url) + '" alt="' + escapeAttr(item.name) + '" loading="lazy"/>' +
-                  '</div>' +
-                  '<div class="stephans-search-product-meta">' +
-                    '<h4 class="stephans-search-product-title">' + escapeHtml(item.name) + '</h4>' +
-                    '<div class="stephans-search-product-sub">' + escapeHtml(brandCat) + '</div>' +
-                  '</div>' +
-                  '<div class="stephans-search-product-price">' + escapeHtml(item.price_formatted) + '</div>' +
-                '</a>'
-              );
-            }).join('');
-            prodsList.innerHTML = prodsHtml;
-          } else if (prodsGroup) {
-            prodsGroup.style.display = 'none';
-          }
-
-          // 4. Render Categories & Brands Securely
-          if (hasTax && taxGroup && taxList) {
-            taxGroup.style.display = 'block';
-            var taxHtml = '';
-
-            categories.forEach(function (cat) {
-              self.currentResults.push({ type: 'category', url: cat.url });
-              var itemIdx = self.currentResults.length - 1;
-              taxHtml += (
-                '<a href="' + escapeAttr(cat.url) + '" class="stephans-search-tax-item" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
-                  '<span class="stephans-search-tax-name">' + escapeHtml(cat.name) + '</span>' +
-                  '<span class="stephans-search-tax-badge">Category</span>' +
-                '</a>'
-              );
-            });
-
-            brands.forEach(function (brand) {
-              self.currentResults.push({ type: 'brand', url: brand.url });
-              var itemIdx = self.currentResults.length - 1;
-              taxHtml += (
-                '<a href="' + escapeAttr(brand.url) + '" class="stephans-search-tax-item stephans-search-tax-item--brand" id="stephans-search-item-' + itemIdx + '" data-idx="' + itemIdx + '" role="option" aria-selected="false">' +
-                  '<span class="stephans-search-tax-name stephans-search-tax-name--brand">' + escapeHtml(brand.name) + '</span>' +
-                  '<span class="stephans-search-tax-badge">Brand</span>' +
-                '</a>'
-              );
-            });
-
-            taxList.innerHTML = taxHtml;
-          } else if (taxGroup) {
-            taxGroup.style.display = 'none';
-          }
+          clientSearchCache[cacheKey] = {
+            expiresAt: Date.now() + CACHE_TTL_MS,
+            data: data
+          };
+          self.renderSearchResponse(query, data);
         })
         .catch(function (err) {
           if (err.name === 'AbortError') return; // Expected cancellation
@@ -482,7 +509,7 @@
           if (seeAllEl) seeAllEl.style.display = 'none';
 
           if (errorEl) errorEl.style.display = 'block';
-          self.updateKeyboardShortcuts(false);
+          self.updateFooterVisibility(false);
           console.error('Stephan\'s search error:', err);
         });
     },
