@@ -897,6 +897,131 @@ class ProductTemplate(models.Model):
             }
         }
 
+    def _archive_raw_text_before_update(self):
+        """
+        Automated Rollback Backup:
+        Every product's original raw text, name, and descriptions are archived in scripts/backups/
+        before any AI or catalogue update runs.
+        """
+        import os
+        import json
+        from datetime import datetime
+
+        # Candidate backup locations (supporting local workspace, server addons, and system backup path)
+        possible_dirs = [
+            "/opt/odoo/backups/products",
+            "/opt/odoo/odoo20-addons/scripts/backups",
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts", "backups")),
+            os.path.abspath(os.path.join(os.getcwd(), "scripts", "backups")),
+        ]
+
+        target_dir = None
+        for p in possible_dirs:
+            try:
+                os.makedirs(p, exist_ok=True)
+                if os.access(p, os.W_OK):
+                    target_dir = p
+                    break
+            except Exception:
+                continue
+
+        if not target_dir:
+            target_dir = "/tmp/odoo20_product_backups"
+            os.makedirs(target_dir, exist_ok=True)
+
+        for rec in self:
+            sku = (rec.default_code or f"ID_{rec.id}").strip()
+            safe_sku = "".join(c for c in sku if c.isalnum() or c in ("-", "_"))
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:19]
+
+            def _extract_val(val):
+                if isinstance(val, dict):
+                    return val
+                return str(val) if val is not None else ""
+
+            backup_data = {
+                "product_id": rec.id,
+                "sku": rec.default_code or "",
+                "name": _extract_val(rec.name),
+                "timestamp": timestamp,
+                "backup_date_iso": datetime.now().isoformat(),
+                "description_sale": _extract_val(rec.description_sale),
+                "website_description": _extract_val(rec.website_description),
+                "x_enrichment_status": rec.x_enrichment_status or "",
+                "list_price": rec.list_price,
+                "standard_price": rec.standard_price,
+            }
+
+            filename = f"backup_{rec.id}_{safe_sku}_{timestamp}.json"
+            backup_path = os.path.join(target_dir, filename)
+
+            try:
+                with open(backup_path, "w", encoding="utf-8") as f:
+                    json.dump(backup_data, f, indent=2, ensure_ascii=False)
+                _logger.info("Automated Rollback Backup saved for Product [%s] %s to %s", rec.id, rec.name, backup_path)
+            except Exception as e:
+                _logger.warning("Could not write rollback backup for product %s: %s", rec.id, e)
+
+    def action_rollback_to_backup(self, backup_file=None):
+        """
+        One-click Rollback:
+        Restores this product's description, name, and attributes from the latest (or specified) backup file.
+        """
+        self.ensure_one()
+        import os
+        import json
+        import glob
+
+        search_dirs = [
+            "/opt/odoo/backups/products",
+            "/opt/odoo/odoo20-addons/scripts/backups",
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts", "backups")),
+            os.path.abspath(os.path.join(os.getcwd(), "scripts", "backups")),
+            "/tmp/odoo20_product_backups"
+        ]
+
+        if not backup_file:
+            pattern = f"backup_{self.id}_*.json"
+            candidates = []
+            for sdir in search_dirs:
+                if os.path.exists(sdir):
+                    candidates.extend(glob.glob(os.path.join(sdir, pattern)))
+
+            if not candidates:
+                raise UserError(_("No backup files found for Product [%s] in backup directories.") % self.id)
+
+            candidates.sort(key=os.path.getmtime, reverse=True)
+            backup_file = candidates[0]
+
+        if not os.path.exists(backup_file):
+            raise UserError(_("Specified backup file does not exist: %s") % backup_file)
+
+        with open(backup_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        restore_vals = {}
+        if "website_description" in data:
+            restore_vals["website_description"] = data["website_description"]
+        if "description_sale" in data:
+            restore_vals["description_sale"] = data["description_sale"]
+        if "name" in data and isinstance(data["name"], str):
+            restore_vals["name"] = data["name"]
+
+        self._assert_store_data_protected(restore_vals)
+        self.sudo().write(restore_vals)
+        _logger.info("Product [%s] rolled back successfully from %s", self.id, backup_file)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Product Rolled Back Successfully'),
+                'message': _('Restored descriptions from backup archive: %s') % os.path.basename(backup_file),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
     def _auto_publish_staged_enrichment_and_media(self):
         """
         Hands-Free Auto-Approval & Publishing:
@@ -905,6 +1030,9 @@ class ProductTemplate(models.Model):
            pending_review images ('front' -> image_1920 + WebP derivatives; 'back' & 'detail' -> product.image gallery)
            without duplicates, while keeping all store data (price, cost, stock, POS, warehouse) 100% untouched.
         """
+        # Automated Rollback Backup: Archive raw text before any update runs
+        self._archive_raw_text_before_update()
+
         for rec in self:
             pub_vals = {
                 'x_enrichment_status': 'approved',
