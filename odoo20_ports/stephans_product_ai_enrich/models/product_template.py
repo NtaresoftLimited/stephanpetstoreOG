@@ -1483,6 +1483,12 @@ Return strictly a valid JSON object matching this structure.
         is_shampoo = any(w in low_title for w in ('shampoo', 'conditioner', 'wash', 'bath', 'spray', 'lotion', 'ear', 'eye', 'toothpaste', 'dental'))
         is_litter = 'litter' in low_title or 'tofu' in low_title
         is_supplement = any(w in low_title for w in ('capsule', 'derma', 'mobility', 'calm', 'vitamin', 'tablet', 'supplement'))
+        is_accessory = any(w in low_title for w in (
+            'cage', 'leash', 'collar', 'harness', 'bowl', 'feeder', 'fountain', 'bed', 'cushion',
+            'toy', 'carrier', 'crate', 'scratch', 'scratching', 'tree', 'brush', 'comb', 'clipper',
+            'tank', 'aquarium', 'filter', 'heater', 'pump', 'led', 'gravel', 'ornament', 'bag',
+            'lead', 'mat', 'scoop', 'tray', 'door', 'flap', 'muzzle', 'tag', 'bell', 'ball', 'rope'
+        ))
 
         if is_shampoo:
             lead = (
@@ -1537,6 +1543,30 @@ Return strictly a valid JSON object matching this structure.
             ]
             pkg_form = f"{pack_size} Sealed Pack | Low-Dust Pellets"
             ing_flat = "Natural Absorbent Base, Clumping Agent, Odor Control Matrix"
+        elif is_accessory:
+            lead = f"{clean_title}: Premium Durable Pet Accessory Designed for Safety, Comfort & Daily Enrichment"
+            highlights = [
+                {"header": "DURABLE & PET-SAFE CONSTRUCTION", "detail": "Engineered with sturdy, non-toxic pet-safe materials built to withstand active daily indoor and outdoor use."},
+                {"header": "OPTIMAL COMFORT & ERGONOMIC DESIGN", "detail": "Tailored to provide superior pet comfort, ergonomic handling, and effortless everyday operation."},
+                {"header": "HYGIENIC & EASY TO CLEAN", "detail": "Smooth, non-porous surfaces allow quick wiping, washing, and sanitizing for a clean home environment."},
+                {"header": "SECURE & RELIABLE FIT", "detail": "Precision hardware and reinforced construction ensure dependable pet security and accident-free use."},
+                {"header": f"PRACTICAL {pack_size.upper()} SPECIFICATION", "detail": "Engineered for optimal size-to-weight balance suitable for home, travel, and training routines."}
+            ]
+            comp_title = "Materials & Specifications"
+            comp_items = [
+                {"name": "Structural Framework", "description": "High-durability pet-grade reinforced material"},
+                {"name": "Hardware & Fasteners", "description": "Corrosion-resistant secure connection fittings"},
+                {"name": "Surface Finish", "description": "Smooth, pet-safe non-toxic protective coating"}
+            ]
+            inst_title = "Instructions & Care Guide"
+            inst_steps = [
+                "Inspect the accessory before first use to ensure all parts and fastenings are securely positioned.",
+                "Adjust fit or position comfortably to suit your pet's size and posture without pinching.",
+                "Clean regularly with mild soap and warm water; allow to dry completely before re-use.",
+                "Check periodically for routine wear and store in a clean, dry area when not in use."
+            ]
+            pkg_form = f"{pack_size} Packaged Unit | Pet Accessory & Care Hardware"
+            ing_flat = "Reinforced Pet-Grade Material, Secure Fasteners, Protective Surface Coating"
         else:
             species = "cats and kittens" if any(w in low_title for w in ('cat', 'kitten', 'feline')) else "dogs and puppies"
             lead = (
