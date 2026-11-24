@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import urllib.parse
 from odoo import http
 from odoo.http import request
 from markupsafe import Markup, escape
