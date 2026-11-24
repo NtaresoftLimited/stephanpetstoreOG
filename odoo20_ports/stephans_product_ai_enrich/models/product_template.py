@@ -1990,8 +1990,8 @@ Return strictly a valid JSON object matching this structure.
             if added:
                 existing_roles.append(next_role)
 
-        # Guarantee 3 distinct, non-duplicate official product views using current product image / primary official packshot
-        self._ensure_three_distinct_official_views(manufacturer=manufacturer_name)
+        # Honest cataloguing: genuine external images only. Synthetic crop generation disabled.
+        # self._ensure_three_distinct_official_views(manufacturer=manufacturer_name)
 
         if self.image_review_ids:
             vals['image_quality_status'] = 'pending_review'
@@ -2010,9 +2010,8 @@ Return strictly a valid JSON object matching this structure.
         from PIL import Image, ImageChops, ImageDraw, ImageOps
 
         self.ensure_one()
-        active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
-        if len(active_reviews) >= 3:
-            return
+        _logger.debug("Synthetic crop generation bypassed for product [%s] %s", self.id, self.name)
+        return
 
         # Determine base official product image bytes (from first verified review image or current product image_1920)
         base_b64 = None

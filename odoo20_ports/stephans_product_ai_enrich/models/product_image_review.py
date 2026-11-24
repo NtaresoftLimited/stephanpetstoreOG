@@ -204,9 +204,39 @@ class ProductImageReview(models.Model):
         if not self.env.user.has_group("stephans_product_ai_enrich.group_media_reviewer") and not self.env.is_admin():
             raise AccessError(_("Permission Denied: Only authorized Media Quality Reviewers can approve or reject catalog images."))
 
+    @staticmethod
+    def _normalize_image_binary(data):
+        if not data:
+            return b""
+        raw = bytes(data)
+        try:
+            decoded = base64.b64decode(raw, validate=True)
+            if len(decoded) > 10 and (decoded[:2] == b'\xff\xd8' or decoded[:4] == b'\x89PNG' or decoded[:4] == b'RIFF' or decoded[:3] == b'GIF'):
+                return decoded
+        except Exception:
+            pass
+        return raw
+
+    @classmethod
+    def _extract_image_fingerprint(cls, data):
+        normalized = cls._normalize_image_binary(data)
+        if not normalized:
+            return None, None
+        sha256 = hashlib.sha256(normalized).hexdigest()
+        try:
+            im = Image.open(io.BytesIO(normalized))
+            gray = im.convert('L').resize((9, 8), Image.Resampling.LANCZOS)
+            pixels = list(gray.getdata())
+            diff = [pixels[r * 9 + c] > pixels[r * 9 + c + 1] for r in range(8) for c in range(8)]
+            dhash = sum(1 << i for i, v in enumerate(diff) if v)
+            return sha256, dhash
+        except Exception:
+            return sha256, None
+
     def action_approve_and_publish(self):
-        """Human approval action: publishes clean WebP derivatives to storefront gallery with strict provenance & idempotency."""
+        """Human approval action: publishes clean WebP derivatives to storefront gallery with strict provenance, deduplication & Odoo primary protection."""
         self._check_reviewer_rights()
+        now = fields.Datetime.now()
         for review in self:
             if review.approval_status != "pending_review":
                 raise UserError(_("Cannot approve asset '%s': current status is '%s'. Only pending assets can be approved.") % (review.name, review.approval_status))
@@ -222,8 +252,11 @@ class ProductImageReview(models.Model):
             if not preview_data:
                 raise UserError(_("No image binary available to publish for '%s'.") % review.name)
 
-            now = fields.Datetime.now()
-            if review.image_role == "front" or not product.image_1920:
+            cand_sha, cand_dhash = self._extract_image_fingerprint(preview_data)
+
+            # Rule 1: Protected original Odoo main image is inviolable. Never replace it.
+            if not product.image_1920:
+                # Slot 1 is empty in Odoo. External candidate may fill Slot 1 after passing provenance & identity check.
                 img_vals = {
                     "image_1920": review.raw_image or preview_data,
                     "image_1024": preview_data,
@@ -234,24 +267,85 @@ class ProductImageReview(models.Model):
                     img_vals["image_256"] = review.webp_thumb_160
                     img_vals["image_128"] = review.webp_thumb_160
                 product.sudo().write(img_vals)
-            else:
-                existing_gallery = self.env["product.image"].sudo().search([
-                    ("product_tmpl_id", "=", product.id),
-                    ("name", "=", review.name),
-                ], limit=1)
-                if not existing_gallery:
-                    self.env["product.image"].sudo().create({
-                        "name": review.name,
-                        "product_tmpl_id": product.id,
-                        "image_1920": preview_data,
-                    })
+                review.write({
+                    "approval_status": "approved",
+                    "approved_by_id": self.env.uid,
+                    "approval_date": now,
+                    "rejection_reason": False,
+                })
+                continue
 
+            # Product already has a primary image. Compare candidate against protected primary.
+            prim_sha, prim_dhash = self._extract_image_fingerprint(product.image_1920)
+            if cand_sha and prim_sha and cand_sha == prim_sha:
+                _logger.info("Review #%s rejected: exact duplicate of protected primary on product %s", review.id, product.id)
+                review.write({
+                    "approval_status": "rejected",
+                    "rejection_reason": "Decoded binary is an exact duplicate of the protected primary Odoo image.",
+                })
+                continue
+
+            if prim_dhash is not None and cand_dhash is not None:
+                dist = bin(prim_dhash ^ cand_dhash).count('1')
+                if dist <= 8:
+                    _logger.info("Review #%s held in pending: perceptual near-duplicate (dist=%d) of primary on product %s", review.id, dist, product.id)
+                    review.write({
+                        "rejection_reason": f"Perceptual near-duplicate/crop of primary image (Hamming distance {dist} <= 8); requires manual review.",
+                    })
+                    continue
+
+            # Check candidate against all existing gallery images
+            gallery_exact_dupe = False
+            gallery_near_dupe = False
+            for sib in product.product_template_image_ids:
+                if not sib.image_1920:
+                    continue
+                sib_sha, sib_dhash = self._extract_image_fingerprint(sib.image_1920)
+                if cand_sha and sib_sha and cand_sha == sib_sha:
+                    gallery_exact_dupe = True
+                    break
+                if sib_dhash is not None and cand_dhash is not None:
+                    s_dist = bin(sib_dhash ^ cand_dhash).count('1')
+                    if s_dist <= 8:
+                        gallery_near_dupe = True
+                        break
+
+            if gallery_exact_dupe:
+                _logger.info("Review #%s rejected: exact duplicate of existing gallery image on product %s", review.id, product.id)
+                review.write({
+                    "approval_status": "rejected",
+                    "rejection_reason": "Decoded binary is an exact duplicate of an existing gallery image.",
+                })
+                continue
+
+            if gallery_near_dupe:
+                _logger.info("Review #%s held in pending: perceptual near-duplicate of existing gallery image on product %s", review.id, product.id)
+                review.write({
+                    "rejection_reason": "Perceptual near-duplicate of an existing gallery image; requires manual review.",
+                })
+                continue
+
+            # Gallery Slot Capacity Gate: Slots 2 & 3 maximum
+            if len(product.product_template_image_ids) >= 2:
+                _logger.info("Review #%s held in pending: gallery slots full (2/2) on product %s", review.id, product.id)
+                review.write({
+                    "rejection_reason": "Gallery full (2/2 slots occupied); asset preserved in review archive.",
+                })
+                continue
+
+            # Genuine, distinct external asset: publish to gallery
+            self.env["product.image"].sudo().create({
+                "name": review.name,
+                "product_tmpl_id": product.id,
+                "image_1920": preview_data,
+            })
             review.write({
                 "approval_status": "approved",
                 "approved_by_id": self.env.uid,
                 "approval_date": now,
                 "rejection_reason": False,
             })
+
             product._recompute_image_quality_status()
             if hasattr(product, "_invalidate_product_shared_cache"):
                 product._invalidate_product_shared_cache()
