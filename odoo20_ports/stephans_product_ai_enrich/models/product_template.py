@@ -872,9 +872,8 @@ class ProductTemplate(models.Model):
         # 3. Validate Error-Prevention Gates (Brand, Pack Size, Species, Life Stage)
         self._validate_enrichment_gates(ai_data)
 
-        # 4. Stage outputs into review fields and auto-publish text + 3 official images
+        # 4. Stage outputs into review fields (manual review queue only; zero automatic publishing)
         self._stage_ai_data_for_review(ai_data, image_candidates=image_candidates)
-        self._auto_publish_staged_enrichment_and_media()
 
         status_vals = {
             'x_ai_enriched': True,
@@ -888,9 +887,9 @@ class ProductTemplate(models.Model):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('AI Enrichment & 3 Official Images Published'),
+                'title': _('AI Enrichment Staged for Review'),
                 'message': _(
-                    "Product '%s' description and 3 official non-duplicate images have been validated, approved, and published automatically."
+                    "Product '%s' suggestions and candidate packshots staged into the Review Queue. Human verification required before publishing."
                 ) % self.name,
                 'type': 'success',
                 'sticky': False,
@@ -1024,11 +1023,9 @@ class ProductTemplate(models.Model):
 
     def _auto_publish_staged_enrichment_and_media(self):
         """
-        Hands-Free Auto-Approval & Publishing:
-        1. Publishes validated x_suggested_description and x_suggested_description_sale to the product.
-        2. Automatically approves and publishes all eligible Tier-1 ('manufacturer' / 'authorized_distributor')
-           pending_review images ('front' -> image_1920 + WebP derivatives; 'back' & 'detail' -> product.image gallery)
-           without duplicates, while keeping all store data (price, cost, stock, POS, warehouse) 100% untouched.
+        Publishes validated text description suggestions to the product after human approval.
+        Media review assets remain strictly in the manual review queue (pending_review)
+        for individual human inspection and approval.
         """
         # Automated Rollback Backup: Archive raw text before any update runs
         self._archive_raw_text_before_update()
@@ -1045,34 +1042,9 @@ class ProductTemplate(models.Model):
             self._assert_store_data_protected(pub_vals)
             rec.sudo().write(pub_vals)
 
-            pending_reviews = rec.image_review_ids.filtered(
-                lambda r: r.approval_status == 'pending_review'
-                and r.source_type in ('manufacturer', 'authorized_distributor', 'distributor', 'internal', 'licensed')
-            )
-            # Sort so 'front' is published first, followed by 'back' and 'detail'
-            role_order = {'front': 0, 'back': 1, 'detail': 2, 'lifestyle': 3}
-            sorted_reviews = pending_reviews.sorted(key=lambda r: role_order.get(r.image_role, 9))
-            for rev in sorted_reviews:
-                orig_url = rev.original_source_url or ''
-                is_external_download = '/official-media/' not in orig_url
-                # Mandatory Manual Approval Lock for Veterinary Medicines on external scraped images
-                if rec.x_is_vet_medicine and is_external_download:
-                    _logger.info(
-                        "Vet Medicine Manual Lock: Holding external image review #%s on %s in pending_review for human verification.",
-                        rev.id, rec.name,
-                    )
-                    continue
-                # Mandatory 3-Identifier Product Match Gate for external scraped images (never auto-approve on brand/domain alone)
-                if is_external_download and not rec._verify_three_identifier_product_match(orig_url):
-                    _logger.info(
-                        "3-Identifier Gate Blocked Auto-Approval: External image #%s (%s) on %s matched <3 product identifiers; keeping in pending_review.",
-                        rev.id, orig_url, rec.name,
-                    )
-                    continue
-                try:
-                    rev.sudo().action_approve_and_publish()
-                except Exception as img_err:
-                    _logger.warning("Auto-publish skipped image review #%s on %s: %s", rev.id, rec.name, img_err)
+            # Strict manual review boundary: Images are NEVER automatically approved or published.
+            # All candidate assets remain in product.image.review (pending_review) for human review.
+            _logger.info("Product [%s] descriptions published; image reviews held in pending_review for manual approval.", rec.id)
 
             rec._recompute_image_quality_status()
             rec._invalidate_product_shared_cache()
@@ -1962,36 +1934,21 @@ Return strictly a valid JSON object matching this structure.
             else (getattr(self, 'product_brand_id', False) and self.product_brand_id.name or "Stephan's Pet Store")
         )
 
-        # Clean up any previous unapproved pending_review image candidates so regenerating replaces stale candidates without duplicates
-        stale_pending = self.image_review_ids.filtered(lambda r: r.approval_status == 'pending_review')
-        if stale_pending:
-            stale_pending.sudo().unlink()
-
         # Combine AI-selected image URLs with remaining official discovered candidates
         ordered_urls = []
         for u in (data.get('selected_image_urls') or []) + (image_candidates or []):
             if u and isinstance(u, str) and u.startswith('http') and u not in ordered_urls:
                 ordered_urls.append(u)
 
-        target_roles = ['front', 'back', 'detail']
-        active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
-        existing_roles = [r.image_role for r in active_reviews]
-
         for candidate_url in ordered_urls:
             active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
             if len(active_reviews) >= 3:
                 break
-            next_role = next((r for r in target_roles if r not in existing_roles), 'detail')
-            added = self._validate_and_process_candidate_image(
+            # Validate candidate against mandatory acceptance gates (Gate 1, 2, 3), useful-view, and duplicate check
+            self._validate_and_process_candidate_image(
                 url=candidate_url,
-                role=next_role,
                 manufacturer=manufacturer_name,
             )
-            if added:
-                existing_roles.append(next_role)
-
-        # Honest cataloguing: genuine external images only. Synthetic crop generation disabled.
-        # self._ensure_three_distinct_official_views(manufacturer=manufacturer_name)
 
         if self.image_review_ids:
             vals['image_quality_status'] = 'pending_review'
@@ -2001,197 +1958,11 @@ Return strictly a valid JSON object matching this structure.
         self.write(vals)
 
     def _ensure_three_distinct_official_views(self, manufacturer=""):
-        """
-        Ensure the product has 3 distinct, non-duplicate official images ('front', 'back', 'detail')
-        in the Media Review Queue based on the official manufacturer packshot and current product picture.
-        """
-        import hashlib
-        import io
-        from PIL import Image, ImageChops, ImageDraw, ImageOps
-
-        self.ensure_one()
-        _logger.debug("Synthetic crop generation bypassed for product [%s] %s", self.id, self.name)
+        """Deprecated and permanently disabled: Synthetic crop generation is strictly prohibited."""
         return
 
-        # Determine base official product image bytes (from first verified review image or current product image_1920)
-        base_b64 = None
-        base_domain = "stephanspetstore.co.tz"
-        _, brand_cfg = self._detect_brand_profile()
-        if brand_cfg and brand_cfg.get("official_urls"):
-            parsed_host = urllib.parse.urlparse(brand_cfg["official_urls"][0]).hostname
-            if parsed_host:
-                base_domain = parsed_host.lower()
-
-        if active_reviews:
-            rev0 = active_reviews.with_context(bin_size=False)[0]
-            base_b64 = rev0.raw_image or rev0.webp_image
-            base_domain = rev0.verified_domain or base_domain
-        if not base_b64:
-            self_bin = self.with_context(bin_size=False)
-            if self_bin.image_1920:
-                base_b64 = self_bin.image_1920
-            elif self_bin.product_template_image_ids:
-                base_b64 = self_bin.product_template_image_ids[0].image_1920
-
-        if not base_b64:
-            return
-
-        try:
-            if isinstance(base_b64, (bytes, str)):
-                raw_source_bytes = base64.b64decode(base_b64)
-            else:
-                raw_source_bytes = bytes(base_b64)
-            src_img = Image.open(io.BytesIO(raw_source_bytes))
-            src_img.load()
-        except Exception:
-            try:
-                raw_source_bytes = bytes(base_b64)
-                src_img = Image.open(io.BytesIO(raw_source_bytes))
-                src_img.load()
-            except Exception as e:
-                _logger.warning("Could not decode base image for 3-view generation on %s: %s", self.name, e)
-                return
-
-        orig_w, orig_h = src_img.size
-        is_transparent = src_img.mode in ("RGBA", "LA") or (src_img.mode == "P" and "transparency" in src_img.info)
-        if is_transparent:
-            rgba_img = src_img.convert("RGBA")
-            bbox = rgba_img.getbbox()
-            work_img = Image.new("RGB", src_img.size, (255, 255, 255))
-            work_img.paste(rgba_img, (0, 0), rgba_img)
-        else:
-            work_img = src_img.convert("RGB")
-            bg = Image.new("RGB", work_img.size, (255, 255, 255))
-            diff = ImageChops.difference(work_img, bg)
-            mask = diff.convert("L").point(lambda p: 255 if p > 18 else 0)
-            bbox = mask.getbbox()
-
-        if not bbox or (bbox[2] - bbox[0] < 60) or (bbox[3] - bbox[1] < 60):
-            bbox = (0, 0, orig_w, orig_h)
-
-        product_crop = work_img.crop(bbox)
-        fg_w, fg_h = product_crop.size
-        canvas_dim = 1200
-
-        # Build 3 distinct studio views from the official product image:
-        # 1. 'front': Full 1:1 Studio Packshot (80% foreground occupancy on pure white canvas)
-        # 2. 'back': Official Packaging Label & Specification Studio Zoom (upper/middle specification focus)
-        # 3. 'detail': Framed Studio Presentation View (lower/center formula & feature close-up with studio frame)
-        view_specs = [
-            ("front", "official-studio-front", "Official 1:1 Full Studio Packshot"),
-            ("back", "official-label-zoom", "Official Packaging Label & Specification View"),
-            ("detail", "official-detail-closeup", "Official Formula & Packaging Detail Close-Up"),
-        ]
-
-        existing_roles = {r.image_role for r in active_reviews}
-        existing_hashes = [r.phash for r in self.image_review_ids if r.phash]
-        existing_checksums = {r.file_checksum for r in self.image_review_ids if r.file_checksum}
-
-        for role_code, slug_tag, view_label in view_specs:
-            active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
-            if len(active_reviews) >= 3:
-                break
-            if role_code in existing_roles:
-                continue
-            role_to_assign = role_code
-
-            canvas_1200 = Image.new("RGB", (canvas_dim, canvas_dim), (255, 255, 255))
-
-            if slug_tag == "official-studio-front":
-                target_fg = int(canvas_dim * 0.82)
-                scale = target_fg / float(max(fg_w, fg_h))
-                nw, nh = max(1, int(fg_w * scale)), max(1, int(fg_h * scale))
-                resized = product_crop.resize((nw, nh), Image.Resampling.LANCZOS)
-                canvas_1200.paste(resized, ((canvas_dim - nw) // 2, (canvas_dim - nh) // 2))
-                occupancy_pct = 82.0
-
-            elif slug_tag == "official-label-zoom":
-                # Focus on the central/upper packaging specification & branding zone (zoomed crop)
-                top_y = int(fg_h * 0.14)
-                bot_y = int(fg_h * 0.78)
-                left_x = int(fg_w * 0.04)
-                right_x = int(fg_w * 0.96)
-                if (bot_y - top_y) < 40 or (right_x - left_x) < 40:
-                    sub_crop = product_crop
-                else:
-                    sub_crop = product_crop.crop((left_x, top_y, right_x, bot_y))
-                sw, sh = sub_crop.size
-                target_fg = int(canvas_dim * 0.86)
-                scale = target_fg / float(max(sw, sh))
-                nw, nh = max(1, int(sw * scale)), max(1, int(sh * scale))
-                resized = sub_crop.resize((nw, nh), Image.Resampling.LANCZOS)
-                canvas_1200.paste(resized, ((canvas_dim - nw) // 2, (canvas_dim - nh) // 2))
-                occupancy_pct = 86.0
-
-            else:
-                # Focus on the lower-middle product feature / net weight badge zone with clean studio card border
-                top_y = int(fg_h * 0.34)
-                bot_y = int(fg_h * 0.96)
-                sub_crop = product_crop.crop((0, top_y, fg_w, bot_y)) if (bot_y - top_y) >= 40 else product_crop
-                sw, sh = sub_crop.size
-                target_fg = int(canvas_dim * 0.78)
-                scale = target_fg / float(max(sw, sh))
-                nw, nh = max(1, int(sw * scale)), max(1, int(sh * scale))
-                resized = ImageOps.autocontrast(sub_crop.resize((nw, nh), Image.Resampling.LANCZOS), cutoff=1)
-                canvas_1200.paste(resized, ((canvas_dim - nw) // 2, (canvas_dim - nh) // 2))
-                draw = ImageDraw.Draw(canvas_1200)
-                draw.rectangle([36, 36, canvas_dim - 36, canvas_dim - 36], outline=(228, 224, 218), width=3)
-                occupancy_pct = 78.0
-
-            dhash_val = self._compute_dhash(canvas_1200)
-            if len(existing_hashes) >= 3 and any(self._hamming_distance(dhash_val, eh) == 0 for eh in existing_hashes):
-                continue
-
-            raw_buf = io.BytesIO()
-            canvas_1200.save(raw_buf, format="JPEG", quality=92)
-            view_raw_bytes = raw_buf.getvalue()
-            checksum = hashlib.sha256(view_raw_bytes).hexdigest()
-            if checksum in existing_checksums:
-                continue
-
-            webp_1200_bytes, filesize_1200_kb = self._encode_webp_target(canvas_1200, max_kb=250)
-            canvas_480 = canvas_1200.resize((480, 480), Image.Resampling.LANCZOS)
-            webp_480_bytes, filesize_480_kb = self._encode_webp_target(canvas_480, max_kb=95)
-            canvas_160 = canvas_1200.resize((160, 160), Image.Resampling.LANCZOS)
-            webp_160_bytes, filesize_160_kb = self._encode_webp_target(canvas_160, max_kb=28)
-
-            source_tier, _ = self._classify_domain_provenance(base_domain)
-            if source_tier not in ("manufacturer", "authorized_distributor"):
-                source_tier = "manufacturer"
-
-            review_vals = {
-                "product_tmpl_id": self.id,
-                "original_source_url": f"https://{base_domain}/official-media/{self.id}/{slug_tag}.jpg",
-                "verified_domain": base_domain,
-                "source_type": source_tier,
-                "manufacturer_name": manufacturer or "Stephan's Pet Store",
-                "download_date": fields.Datetime.now(),
-                "original_width": canvas_dim,
-                "original_height": canvas_dim,
-                "aspect_ratio": 1.0,
-                "foreground_coverage_pct": occupancy_pct,
-                "file_checksum": checksum,
-                "phash": dhash_val,
-                "image_role": role_to_assign,
-                "approval_status": "pending_review",
-                "raw_image": base64.b64encode(view_raw_bytes).decode("ascii"),
-                "webp_image": base64.b64encode(webp_1200_bytes).decode("ascii"),
-                "webp_filesize_kb": filesize_1200_kb,
-                "webp_card_480": base64.b64encode(webp_480_bytes).decode("ascii"),
-                "webp_card_480_kb": filesize_480_kb,
-                "webp_thumb_160": base64.b64encode(webp_160_bytes).decode("ascii"),
-                "webp_thumb_160_kb": filesize_160_kb,
-                "usage_license_note": f"{view_label} derived from verified official product image ({manufacturer})",
-            }
-            self.env["product.image.review"].sudo().create(review_vals)
-            existing_roles.add(role_to_assign)
-            existing_hashes.append(dhash_val)
-            existing_checksums.add(checksum)
-
-        self._recompute_image_quality_status()
-
     def _recompute_image_quality_status(self):
-        """Derive quality status strictly from review records."""
+        """Derive quality status strictly from review records and gallery presence."""
         for product in self:
             reviews = product.image_review_ids
             if not reviews:
@@ -2205,7 +1976,7 @@ Return strictly a valid JSON object matching this structure.
 
     @staticmethod
     def _compute_dhash(img, hash_size=8):
-        """Computes a 64-bit difference hash (dHash) for visual perceptual similarity."""
+        """Computes a 64-bit gradient difference hash (dHash) for visual perceptual similarity."""
         from PIL import Image
         gray = img.convert("L").resize((hash_size + 1, hash_size), Image.Resampling.LANCZOS)
         pixels = list(gray.getdata())
@@ -2222,12 +1993,228 @@ Return strictly a valid JSON object matching this structure.
         return f"{decimal_val:016x}"
 
     @staticmethod
+    def _compute_dct_phash(img):
+        """Compute standard 64-bit DCT perceptual hash (pHash) without external dependencies."""
+        import math
+        from PIL import Image
+        try:
+            gray = img.convert('L').resize((32, 32), Image.Resampling.LANCZOS)
+            pixels = list(gray.getdata())
+            cos_table = [[math.cos((2 * x + 1) * u * math.pi / 64.0) for x in range(32)] for u in range(8)]
+            row_dct = []
+            for r in range(32):
+                row_pix = pixels[r * 32 : (r + 1) * 32]
+                row_coeffs = [sum(row_pix[x] * cos_table[u][x] for x in range(32)) for u in range(8)]
+                row_dct.append(row_coeffs)
+            dct = []
+            for u in range(8):
+                for v in range(8):
+                    dct.append(sum(row_dct[y][v] * cos_table[u][y] for y in range(32)))
+            low_freq = dct[1:]
+            sorted_coeffs = sorted(low_freq)
+            median = (sorted_coeffs[31] + sorted_coeffs[32]) / 2.0
+            bits = [1 if c > median else 0 for c in dct]
+            decimal_val = sum(b << i for i, b in enumerate(bits))
+            return f"{decimal_val:016x}"
+        except Exception:
+            return None
+
+    @staticmethod
     def _hamming_distance(hash1, hash2):
         if not hash1 or not hash2 or len(hash1) != len(hash2):
             return 99
         val1 = int(hash1, 16)
         val2 = int(hash2, 16)
         return bin(val1 ^ val2).count("1")
+
+    @staticmethod
+    def _detect_pixel_watermark_or_overlay(img):
+        """
+        Inspect image pixels for:
+        1. Corner watermark stamps, price stickers, retailer logo badges
+        2. Embedded bottom promotional banners or URL ribbons
+        Returns: (has_watermark_or_overlay, reason_str)
+        """
+        from PIL import ImageStat
+        rgb = img.convert('RGB')
+        w, h = rgb.size
+
+        # 1. Corner patch inspection (outer 10% x 10%)
+        cw, ch = max(10, int(w * 0.10)), max(10, int(h * 0.10))
+        corners = {
+            'top-left': (0, 0, cw, ch),
+            'top-right': (w - cw, 0, w, ch),
+            'bottom-left': (0, h - ch, cw, h),
+            'bottom-right': (w - cw, h - ch, w, h),
+        }
+
+        # Estimate background color from outer border perimeter
+        border_pixels = []
+        for x in range(0, w, max(1, w // 40)):
+            border_pixels.append(rgb.getpixel((x, 0)))
+            border_pixels.append(rgb.getpixel((x, h - 1)))
+        for y in range(0, h, max(1, h // 40)):
+            border_pixels.append(rgb.getpixel((y, 0)))
+            border_pixels.append(rgb.getpixel((w - 1, y)))
+        avg_bg_r = sum(p[0] for p in border_pixels) / len(border_pixels)
+        avg_bg_g = sum(p[1] for p in border_pixels) / len(border_pixels)
+        avg_bg_b = sum(p[2] for p in border_pixels) / len(border_pixels)
+
+        for cname, box in corners.items():
+            crop = rgb.crop(box)
+            stat = ImageStat.Stat(crop)
+            std_dev = sum(stat.stddev) / 3.0
+            mean = stat.mean
+            dist_to_bg = ((mean[0] - avg_bg_r)**2 + (mean[1] - avg_bg_g)**2 + (mean[2] - avg_bg_b)**2)**0.5
+            if std_dev > 15.0 and dist_to_bg > 25.0:
+                return True, f"Watermark/badge detected in {cname} corner (std_dev={std_dev:.1f}, dist={dist_to_bg:.1f})"
+
+        # 2. Bottom banner strip inspection (bottom 7%)
+        bh = max(10, int(h * 0.07))
+        bottom_strip = rgb.crop((0, h - bh, w, h))
+        b_stat = ImageStat.Stat(bottom_strip)
+        b_dist = ((b_stat.mean[0] - avg_bg_r)**2 + (b_stat.mean[1] - avg_bg_g)**2 + (b_stat.mean[2] - avg_bg_b)**2)**0.5
+        if b_dist > 35.0 and sum(b_stat.stddev) / 3.0 > 15.0:
+            return True, f"Promotional banner strip detected at bottom (dist={b_dist:.1f})"
+
+        return False, "Clean studio canvas with zero pixel overlays/watermarks"
+
+    def _evaluate_gate_1_identity(self, url):
+        """
+        Gate 1: Exact Product Identity Verification.
+        Cross-checks 5 core identifiers:
+        1. Brand / Manufacturer
+        2. SKU / Manufacturer Item Code
+        3. Barcode / EAN-13
+        4. Exact Pack Size / Volume
+        5. Target Species / Life Stage / Formula Variant
+
+        Returns: (status, evidence_str)
+          - status in ('pass', 'fail', 'identity_required')
+        """
+        self.ensure_one()
+        prod_name = (self.name or '').strip()
+        brand_key, profile = self._detect_brand_profile()
+        brand_name = (profile and profile.get('label')) or (self.product_brand_id and self.product_brand_id.name) or ""
+        sku = (self.default_code or '').strip()
+        barcode = (self.barcode or '').strip()
+
+        # Check if baseline product in Odoo has verified identity
+        size_matches = list(re.finditer(r'(?:^|[\W_])(\d+(?:\.\d+)?)\s*(kg|g|ml|mls|l|pcs|pc|tablets|capsules)(?:$|[\W_])', prod_name.lower()))
+        has_size = bool(size_matches)
+
+        if not brand_key and not brand_name:
+            return 'identity_required', "Product in Odoo lacks verified brand/manufacturer identity."
+        if not barcode and not sku and not has_size:
+            return 'identity_required', "Product in Odoo lacks essential verified identifiers (missing EAN-13, SKU, and unambiguous pack size)."
+
+        if not url:
+            return 'fail', "No candidate URL provided."
+
+        unquoted_url = urllib.parse.unquote(url).lower()
+        url_compact = re.sub(r'[\-_%\s/]+', '', unquoted_url)
+
+        matched_identifiers = []
+        conflicting_identifiers = []
+
+        # 1. Brand match
+        if (brand_key and brand_key in unquoted_url) or (brand_name and brand_name.lower() in unquoted_url):
+            matched_identifiers.append(f"Brand: {brand_name or brand_key}")
+        else:
+            parsed = urllib.parse.urlparse(url)
+            host = (parsed.hostname or '').lower()
+            if profile and profile.get('official_urls'):
+                if any(urllib.parse.urlparse(ou).hostname and urllib.parse.urlparse(ou).hostname.lower() in host for ou in profile['official_urls']):
+                    matched_identifiers.append(f"Brand (Domain): {host}")
+
+        # 2. Barcode / EAN-13 match
+        if barcode and barcode.lower() in url_compact:
+            matched_identifiers.append(f"EAN/Barcode: {barcode}")
+
+        # 3. Manufacturer SKU / Item number match
+        if sku and len(sku) >= 3 and (sku.lower() in unquoted_url or sku.lower() in url_compact):
+            matched_identifiers.append(f"SKU/Item#: {sku}")
+        else:
+            cat_match = re.search(r'/(?:(\d{4,6})[\-_]|item[_\-](\d+))', unquoted_url)
+            if cat_match and sku and (cat_match.group(1) == sku or cat_match.group(2) == sku):
+                matched_identifiers.append(f"Catalog Item#: {sku}")
+
+        # 4. Pack Size / Volume match and conflict check
+        if size_matches:
+            expected_sizes = [f"{m.group(1)}{m.group(2).lower().rstrip('s')}" for m in size_matches]
+            size_in_url = any(sz in url_compact or sz.replace('.', '') in url_compact for sz in expected_sizes)
+            if size_in_url:
+                matched_identifiers.append(f"Pack Size: {expected_sizes[0]}")
+            else:
+                other_sizes = [
+                    f"{m.group(1)}{m.group(2).lower().rstrip('s')}"
+                    for m in re.finditer(r'(?:^|[\W_])(\d+(?:\.\d+)?)\s*(kg|g|ml|mls|l)(?:$|[\W_])', unquoted_url)
+                ]
+                if other_sizes and not any(osz in expected_sizes for osz in other_sizes):
+                    conflicting_identifiers.append(f"Conflicting pack size in URL: {other_sizes[0]} (expected {expected_sizes[0]})")
+
+        # 5. Species / Life Stage / Formulation Variant
+        prod_lower = prod_name.lower()
+        if 'cat' in prod_lower and 'dog' not in prod_lower and 'dog' in unquoted_url:
+            conflicting_identifiers.append("Species mismatch: URL indicates 'dog' but product is for 'cat'")
+        elif 'dog' in prod_lower and 'cat' not in prod_lower and 'cat' in unquoted_url:
+            conflicting_identifiers.append("Species mismatch: URL indicates 'cat' but product is for 'dog'")
+        elif 'puppy' in prod_lower and 'adult' in unquoted_url:
+            conflicting_identifiers.append("Life-stage mismatch: URL indicates 'adult' but product is 'puppy'")
+        elif 'kitten' in prod_lower and 'adult' in unquoted_url:
+            conflicting_identifiers.append("Life-stage mismatch: URL indicates 'adult' but product is 'kitten'")
+        else:
+            stop_words = {
+                'with', 'for', 'and', 'the', 'dog', 'dogs', 'cat', 'cats', 'pet', 'pets',
+                'food', 'adult', 'small', 'medium', 'large', 'breeds', 'breed', 'bag',
+                'rich', 'whole', 'choice', 'premium', 'super', 'item', brand_key or '',
+            }
+            core_tokens = [w for w in re.findall(r'[a-z]{3,}', prod_lower) if w not in stop_words]
+            matched_tokens = [w for w in core_tokens if w in unquoted_url]
+            if len(matched_tokens) >= 2:
+                matched_identifiers.append(f"Formulation tokens: {', '.join(matched_tokens[:3])}")
+
+        if conflicting_identifiers:
+            return 'fail', f"Identity conflict detected: {'; '.join(conflicting_identifiers)}"
+
+        if len(matched_identifiers) >= 3:
+            return 'pass', f"Verified 3+ corroborated product identifiers: {'; '.join(matched_identifiers)}"
+        else:
+            return 'fail', f"Matched only {len(matched_identifiers)} identifiers ({', '.join(matched_identifiers) or 'none'}); requires >= 3 corroborated identifiers."
+
+    def _detect_and_validate_useful_view(self, url, img, existing_roles):
+        """
+        Validates that candidate adds a genuine, distinct useful view.
+        Inspects URL tokens, filename, and image characteristics.
+        Returns: (role, evidence_str, is_valid)
+        """
+        unquoted = urllib.parse.unquote(url).lower()
+
+        # 1. Back view (Back label, ingredients panel, guaranteed analysis)
+        back_tokens = ('back', 'rear', 'ingred', 'nutri', 'facts', 'label', 'guarantee', 'composition', 'table', 'panel', 'reverse')
+        if any(bt in unquoted for bt in back_tokens):
+            return 'back', 'Confirmed back label / ingredients panel via source metadata/filename.', True
+
+        # 2. Detail view (Feeding guide, instructions, dosage, kibble size, cap, dispenser)
+        detail_tokens = ('feeding', 'guide', 'dosage', 'instructions', 'how_to_use', 'detail', 'texture', 'kibble', 'cap', 'dispenser', 'spray', 'close_up', 'closeup', 'specs')
+        if any(dt in unquoted for dt in detail_tokens):
+            return 'detail', 'Confirmed product detail / feeding guide / dispenser view.', True
+
+        # 3. Lifestyle view (Pet interacting with product, in-use)
+        lifestyle_tokens = ('lifestyle', 'in_use', 'inuse', 'pet_with', 'action', 'model')
+        if any(lt in unquoted for lt in lifestyle_tokens):
+            return 'lifestyle', 'Confirmed lifestyle / in-use view.', True
+
+        # 4. Front packshot
+        front_tokens = ('front', 'main', 'packshot', 'bottle', 'pack', 'box', 'can', 'pouch', 'bag', 'primary')
+        if any(ft in unquoted for ft in front_tokens) or not any(r in existing_roles for r in ['front']):
+            if 'front' not in existing_roles:
+                return 'front', 'Primary front packshot view.', True
+            else:
+                return 'front', 'Duplicate front view: front packshot already exists; cannot masquerade as back/detail.', False
+
+        # If front already exists and this candidate has no back/detail tokens, it cannot be accepted as back/detail
+        return 'detail', 'Generic packshot lacks specific back/ingredients/detail evidence.', False
 
     @staticmethod
     def _encode_webp_target(pil_img, max_kb, qualities=(85, 80, 75, 70, 65, 55)):
@@ -2242,20 +2229,17 @@ Return strictly a valid JSON object matching this structure.
                 break
         return best_bytes, round(len(best_bytes) / 1024.0, 1)
 
-    def _validate_and_process_candidate_image(self, url, role="front", source_type=None, manufacturer=""):
+    def _validate_and_process_candidate_image(self, url, role=None, source_type=None, manufacturer=""):
         """
-        Hardened Image Quality, Provenance & Multi-Derivative Pipeline:
-        1. SSRF Guard: hostname verification, private IP & loopback blocking
-        2. 4-Tier Provenance Classification: manufacturer, authorized_distributor, trusted_retailer, external_unverified
-        3. Streaming Resource-Capped Download: 12MB limit & image/* Content-Type validation
-        4. PIL Decompression Bomb Guard & Dimension Verification (>=1000x1000px floor)
-        5. Catalogue-Wide Perceptual Deduplication via 64-bit dHash (Hamming distance <= 4)
-        6. Real Foreground Bounding Box Detection: package occupies ~80% of 1:1 canvas
-        7. Multi-Tier WebP Derivatives (keeping original raw_image unchanged for gallery zoom):
-           - Product-page preview: 1200x1200 WebP (100-250 KB)
-           - Product-card image: 480x480 WebP (40-100 KB)
-           - Search thumbnail: 160x160 WebP (10-30 KB)
-        8. Media Review Staging: 100% human approval required before storefront publication
+        Mandatory 3-Gate Acceptance Pipeline:
+        Gate 1: Exact Product Identity Verification (Brand, SKU, EAN-13, Pack Size, Species)
+        Gate 2: Source Provenance & Authenticity (Tier 1 Manufacturer / Authorized Distributor only)
+        Gate 3: Visual Technical Quality, Dimensions (>=800px floor, preferred >=1000px), & Pixel Cleanliness
+        Useful-View Validation: Verifies genuine back/ingredients/detail role
+        Catalogue-Wide Deduplication: Binary SHA-256 + 64-bit dHash + 64-bit DCT pHash vs Primary & Gallery
+
+        Passing all 3 gates allows entry into the manual review queue ONLY (pending_review).
+        Zero automatic downloading to live media, zero automatic approval, zero automatic publication.
         """
         import hashlib
         import io
@@ -2266,7 +2250,13 @@ Return strictly a valid JSON object matching this structure.
         if not url or not url.startswith("http"):
             return False
 
-        # 1. SSRF Guard & Hostname Validation
+        # --- GATE 1: Exact Product Identity Verification ---
+        gate1_status, gate1_evidence = self._evaluate_gate_1_identity(url)
+        if gate1_status != 'pass':
+            _logger.info("Candidate %s rejected at Gate 1 (%s): %s", url, gate1_status, gate1_evidence)
+            return False
+
+        # --- SSRF Guard & Hostname Validation ---
         parsed = urllib.parse.urlparse(url)
         if parsed.scheme not in ("http", "https") or not parsed.hostname:
             return False
@@ -2282,8 +2272,16 @@ Return strictly a valid JSON object matching this structure.
             _logger.warning("DNS resolution failed for hostname %s: %s", hostname, e)
             return False
 
-        # 2. Strict 4-Tier Domain Provenance Derivation
+        # --- GATE 2: Source Provenance & Authenticity ---
         derived_source_type, license_note = self._classify_domain_provenance(hostname)
+        if derived_source_type not in ("manufacturer", "authorized_distributor"):
+            gate2_status = 'fail'
+            gate2_evidence = f"Blocked provenance: Domain {hostname} classified as {derived_source_type}. Consumer marketplaces and unverified retailers prohibited."
+            _logger.info("Candidate %s rejected at Gate 2: %s", url, gate2_evidence)
+            return False
+        else:
+            gate2_status = 'pass'
+            gate2_evidence = f"Tier 1 official domain ({hostname}): {derived_source_type}. Direct manufacturer/distributor asset."
 
         # Watermark & Marketplace Keyword URL Inspection
         low_url = url.lower()
@@ -2298,7 +2296,7 @@ Return strictly a valid JSON object matching this structure.
             _logger.info("Blocked image candidate %s: conflicting flavor/species in filename for %s", url, self.name)
             return False
 
-        # 3. Streaming Download with 12MB limit & Content-Type check
+        # Streaming Download with 12MB limit & Content-Type check
         raw_bytes = None
         try:
             req = urllib.request.Request(
@@ -2329,15 +2327,18 @@ Return strictly a valid JSON object matching this structure.
         if not raw_bytes or len(raw_bytes) < 5000:
             return False
 
-        # Checksum & Exact File Deduplication (strictly no duplicate within this product or across catalog)
         checksum = hashlib.sha256(raw_bytes).hexdigest()
+
+        # Skip if already exists in reviews (preserves review history)
         existing_review = self.env["product.image.review"].sudo().search([
+            ("product_tmpl_id", "=", self.id),
             ("file_checksum", "=", checksum),
         ], limit=1)
         if existing_review:
+            _logger.info("Candidate %s checksum already exists in reviews on %s; skipping.", url, self.name)
             return False
 
-        # 4. PIL Decompression Bomb Guard & Dimension Verification (>=600x600 floor + studio aspect ratio guard)
+        # PIL Decompression Bomb Guard & Image Loading
         try:
             Image.MAX_IMAGE_PIXELS = 50_000_000
             img = Image.open(io.BytesIO(raw_bytes))
@@ -2346,26 +2347,88 @@ Return strictly a valid JSON object matching this structure.
         except Exception:
             return False
 
-        aspect = round(orig_w / float(orig_h), 2)
-        if orig_w < 600 or orig_h < 600:
-            _logger.info("Blocked image %s: resolution %sx%s is below minimum 600x600 threshold", url, orig_w, orig_h)
-            return False
-        if aspect < 0.50 or aspect > 1.85:
-            _logger.info("Blocked image %s: aspect ratio %s (%sx%s) is a wide banner/ribbon, not a product packshot", url, aspect, orig_w, orig_h)
+        # --- GATE 3: Visual Technical Quality, Dimensions, Cleanliness ---
+        # Resolution standard: Minimum useful shortest dimension floor is 800px; preferred >= 1000px
+        min_dim = min(orig_w, orig_h)
+        if min_dim < 800:
+            gate3_status = 'fail'
+            gate3_evidence = f"Resolution {orig_w}x{orig_h} (shortest dimension {min_dim}px) is below minimum 800px threshold."
+            _logger.info("Candidate %s rejected at Gate 3: %s", url, gate3_evidence)
             return False
 
-        # 5. Catalogue-Wide Perceptual Hashing (dHash) Deduplication
+        aspect = round(orig_w / float(orig_h), 2)
+        if aspect < 0.50 or aspect > 1.85:
+            gate3_status = 'fail'
+            gate3_evidence = f"Aspect ratio {aspect} ({orig_w}x{orig_h}) is a wide banner/strip, not an acceptable packshot."
+            _logger.info("Candidate %s rejected at Gate 3: %s", url, gate3_evidence)
+            return False
+
+        # Pixel-level inspection for watermarks, badges, stickers, and banners
+        has_overlay, overlay_reason = self._detect_pixel_watermark_or_overlay(img)
+        if has_overlay:
+            gate3_status = 'fail'
+            gate3_evidence = f"Pixel inspection failed: {overlay_reason}"
+            _logger.info("Candidate %s rejected at Gate 3: %s", url, gate3_evidence)
+            return False
+
+        preferred_note = " (meets preferred >=1000px standard)" if min_dim >= 1000 else " (meets >=800px minimum floor)"
+        gate3_status = 'pass'
+        gate3_evidence = f"Resolution {orig_w}x{orig_h}{preferred_note}, aspect ratio {aspect}, zero pixel watermarks/overlays."
+
+        # --- Useful-View Validation ---
+        active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
+        existing_roles = [r.image_role for r in active_reviews]
+        detected_role, view_evidence, is_valid_view = self._detect_and_validate_useful_view(url, img, existing_roles)
+        if not is_valid_view:
+            _logger.info("Candidate %s rejected on useful-view validation: %s", url, view_evidence)
+            return False
+        assigned_role = role or detected_role
+
+        # --- DUPLICATE FINGERPRINT COMPARISON AT STAGING TIME ---
         dhash_val = self._compute_dhash(img)
-        existing_hashes = self.env["product.image.review"].sudo().search_read(
-            [("phash", "!=", False)], ["id", "phash", "product_tmpl_id"]
-        )
-        for rec in existing_hashes:
-            same_prod = rec.get("product_tmpl_id") and rec["product_tmpl_id"][0] == self.id
-            max_dist = 3 if same_prod else 2
-            if self._hamming_distance(dhash_val, rec["phash"]) <= max_dist:
+        phash_val = self._compute_dct_phash(img)
+        dupe_summaries = []
+        Review = self.env["product.image.review"]
+
+        # 1. Compare against protected primary image (Odoo image_1920)
+        if self.image_1920:
+            p_sha, p_dhash_int, p_phash_int = Review._extract_image_fingerprint(self.image_1920)
+            p_dhash_hex = f"{p_dhash_int:016x}" if p_dhash_int is not None else None
+            p_phash_hex = f"{p_phash_int:016x}" if p_phash_int is not None else None
+
+            is_sha_dupe = (checksum == p_sha)
+            d_dist = self._hamming_distance(dhash_val, p_dhash_hex)
+            p_dist = self._hamming_distance(phash_val, p_phash_hex)
+            dupe_summaries.append(f"Primary image: SHA match={is_sha_dupe}, dHash dist={d_dist} (thresh <=8), pHash dist={p_dist} (thresh <=10)")
+
+            if is_sha_dupe:
+                _logger.info("Candidate %s rejected: exact SHA-256 duplicate of protected primary on %s", url, self.name)
+                return False
+            if d_dist <= 8 or p_dist <= 10:
+                _logger.info("Candidate %s rejected: perceptual near-duplicate (dDist=%d, pDist=%d) of protected primary on %s", url, d_dist, p_dist, self.name)
                 return False
 
-        # 6. Real Foreground Bounding Box Detection & 80% Canvas Occupancy
+        # 2. Compare against all existing gallery images
+        gallery_dupe_found = False
+        for sib in self.product_template_image_ids:
+            if not sib.image_1920:
+                continue
+            s_sha, s_dhash_int, s_phash_int = Review._extract_image_fingerprint(sib.image_1920)
+            s_dhash_hex = f"{s_dhash_int:016x}" if s_dhash_int is not None else None
+            s_phash_hex = f"{s_phash_int:016x}" if s_phash_int is not None else None
+            s_sha_match = (checksum == s_sha)
+            s_ddist = self._hamming_distance(dhash_val, s_dhash_hex)
+            s_pdist = self._hamming_distance(phash_val, s_phash_hex)
+            dupe_summaries.append(f"Gallery #{sib.id}: SHA match={s_sha_match}, dHash dist={s_ddist}, pHash dist={s_pdist}")
+            if s_sha_match or s_ddist <= 8 or s_pdist <= 10:
+                gallery_dupe_found = True
+                break
+
+        if gallery_dupe_found:
+            _logger.info("Candidate %s rejected: duplicate of existing gallery image on %s", url, self.name)
+            return False
+
+        # Real Foreground Bounding Box Detection & 80% Canvas Occupancy
         is_transparent = img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info)
         if is_transparent:
             rgba_img = img.convert("RGBA")
@@ -2400,19 +2463,14 @@ Return strictly a valid JSON object matching this structure.
         else:
             canvas_1200.paste(scaled_crop, offset)
 
-        # 7. Generate Separate Multi-Tier WebP Derivatives:
-        # (a) Product-page preview: 1200x1200 WebP (target <= 250 KB)
+        # Multi-Tier WebP Derivatives
         webp_1200_bytes, filesize_1200_kb = self._encode_webp_target(canvas_1200, max_kb=250)
-
-        # (b) Product-card image: 480x480 WebP (target 40-100 KB)
         canvas_480 = canvas_1200.resize((480, 480), Image.Resampling.LANCZOS)
         webp_480_bytes, filesize_480_kb = self._encode_webp_target(canvas_480, max_kb=95)
-
-        # (c) Search thumbnail: 160x160 WebP (target 10-30 KB)
         canvas_160 = canvas_1200.resize((160, 160), Image.Resampling.LANCZOS)
         webp_160_bytes, filesize_160_kb = self._encode_webp_target(canvas_160, max_kb=28)
 
-        # 8. Stage into product.image.review queue (100% human approval required)
+        # STAGE INTO MANUAL REVIEW QUEUE ONLY (pending_review)
         review_vals = {
             "product_tmpl_id": self.id,
             "original_source_url": url,
@@ -2425,9 +2483,18 @@ Return strictly a valid JSON object matching this structure.
             "aspect_ratio": aspect,
             "foreground_coverage_pct": measured_occupancy,
             "file_checksum": checksum,
-            "phash": dhash_val,
-            "image_role": role,
+            "dhash": dhash_val,
+            "phash": phash_val,
+            "image_role": assigned_role,
             "approval_status": "pending_review",
+            "gate1_status": gate1_status,
+            "gate1_evidence": gate1_evidence,
+            "gate2_status": gate2_status,
+            "gate2_evidence": gate2_evidence,
+            "gate3_status": gate3_status,
+            "gate3_evidence": gate3_evidence,
+            "duplicate_comparison_summary": "; ".join(dupe_summaries) if dupe_summaries else "Zero duplicate matches detected.",
+            "view_role_evidence": view_evidence,
             "raw_image": base64.b64encode(raw_bytes).decode("ascii"),
             "webp_image": base64.b64encode(webp_1200_bytes).decode("ascii"),
             "webp_filesize_kb": filesize_1200_kb,
@@ -2440,7 +2507,7 @@ Return strictly a valid JSON object matching this structure.
         self.env["product.image.review"].sudo().create(review_vals)
         self._recompute_image_quality_status()
         _logger.info(
-            "Staged image asset for %s [%s]: %sx%s, preview=%sKB, card480=%sKB, thumb160=%sKB",
-            self.name, derived_source_type, orig_w, orig_h, filesize_1200_kb, filesize_480_kb, filesize_160_kb
+            "Staged image asset into review queue for %s [%s]: %sx%s, role=%s, preview=%sKB",
+            self.name, derived_source_type, orig_w, orig_h, assigned_role, filesize_1200_kb
         )
         return True

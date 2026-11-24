@@ -3,6 +3,7 @@ import base64
 import hashlib
 import io
 import logging
+import math
 from PIL import Image
 
 from odoo import api, fields, models, _
@@ -107,11 +108,65 @@ class ProductImageReview(models.Model):
         readonly=True,
         index=True,
     )
-    phash = fields.Char(
-        string="Perceptual dHash",
+    dhash = fields.Char(
+        string="Gradient dHash",
         readonly=True,
         index=True,
-        help="Difference hash (dHash) used for catalogue-wide visual similarity and duplicate detection.",
+        help="64-bit gradient difference hash (dHash) in 16-hex format.",
+    )
+    phash = fields.Char(
+        string="DCT pHash",
+        readonly=True,
+        index=True,
+        help="64-bit Discrete Cosine Transform perceptual hash (pHash) in 16-hex format.",
+    )
+    gate1_status = fields.Selection(
+        [
+            ("pass", "Pass"),
+            ("fail", "Fail"),
+            ("identity_required", "Identity Required"),
+        ],
+        string="Gate 1: Exact Identity",
+        readonly=True,
+        index=True,
+    )
+    gate1_evidence = fields.Text(
+        string="Gate 1 Evidence",
+        readonly=True,
+    )
+    gate2_status = fields.Selection(
+        [
+            ("pass", "Pass"),
+            ("fail", "Fail"),
+        ],
+        string="Gate 2: Source Provenance",
+        readonly=True,
+        index=True,
+    )
+    gate2_evidence = fields.Text(
+        string="Gate 2 Evidence",
+        readonly=True,
+    )
+    gate3_status = fields.Selection(
+        [
+            ("pass", "Pass"),
+            ("fail", "Fail"),
+        ],
+        string="Gate 3: Quality & Cleanliness",
+        readonly=True,
+        index=True,
+    )
+    gate3_evidence = fields.Text(
+        string="Gate 3 Evidence",
+        readonly=True,
+    )
+    duplicate_comparison_summary = fields.Text(
+        string="Duplicate Comparison Results",
+        readonly=True,
+    )
+    view_role_evidence = fields.Char(
+        string="View Role Evidence",
+        readonly=True,
     )
     usage_license_note = fields.Char(
         string="Usage / License Note",
@@ -217,21 +272,48 @@ class ProductImageReview(models.Model):
             pass
         return raw
 
+    @staticmethod
+    def _compute_dct_phash(im):
+        """Compute standard 64-bit DCT perceptual hash (pHash) without external dependencies."""
+        try:
+            gray = im.convert('L').resize((32, 32), Image.Resampling.LANCZOS)
+            pixels = list(gray.getdata())
+            cos_table = [[math.cos((2 * x + 1) * u * math.pi / 64.0) for x in range(32)] for u in range(8)]
+            row_dct = []
+            for r in range(32):
+                row_pix = pixels[r * 32 : (r + 1) * 32]
+                row_coeffs = [sum(row_pix[x] * cos_table[u][x] for x in range(32)) for u in range(8)]
+                row_dct.append(row_coeffs)
+            dct = []
+            for u in range(8):
+                for v in range(8):
+                    dct.append(sum(row_dct[y][v] * cos_table[u][y] for y in range(32)))
+            low_freq = dct[1:]
+            sorted_coeffs = sorted(low_freq)
+            median = (sorted_coeffs[31] + sorted_coeffs[32]) / 2.0
+            bits = [1 if c > median else 0 for c in dct]
+            return sum(b << i for i, b in enumerate(bits))
+        except Exception:
+            return None
+
     @classmethod
     def _extract_image_fingerprint(cls, data):
         normalized = cls._normalize_image_binary(data)
         if not normalized:
-            return None, None
+            return None, None, None
         sha256 = hashlib.sha256(normalized).hexdigest()
         try:
             im = Image.open(io.BytesIO(normalized))
+            # dHash
             gray = im.convert('L').resize((9, 8), Image.Resampling.LANCZOS)
             pixels = list(gray.getdata())
             diff = [pixels[r * 9 + c] > pixels[r * 9 + c + 1] for r in range(8) for c in range(8)]
             dhash = sum(1 << i for i, v in enumerate(diff) if v)
-            return sha256, dhash
+            # pHash
+            phash = cls._compute_dct_phash(im)
+            return sha256, dhash, phash
         except Exception:
-            return sha256, None
+            return sha256, None, None
 
     def action_approve_and_publish(self):
         """Human approval action: publishes clean WebP derivatives to storefront gallery with strict provenance, deduplication & Odoo primary protection."""
@@ -252,45 +334,29 @@ class ProductImageReview(models.Model):
             if not preview_data:
                 raise UserError(_("No image binary available to publish for '%s'.") % review.name)
 
-            cand_sha, cand_dhash = self._extract_image_fingerprint(preview_data)
+            cand_sha, cand_dhash, cand_phash = self._extract_image_fingerprint(preview_data)
 
-            # Rule 1: Protected original Odoo main image is inviolable. Never replace it.
-            if not product.image_1920:
-                # Slot 1 is empty in Odoo. External candidate may fill Slot 1 after passing provenance & identity check.
-                img_vals = {
-                    "image_1920": review.raw_image or preview_data,
-                    "image_1024": preview_data,
-                }
-                if review.webp_card_480:
-                    img_vals["image_512"] = review.webp_card_480
-                if review.webp_thumb_160:
-                    img_vals["image_256"] = review.webp_thumb_160
-                    img_vals["image_128"] = review.webp_thumb_160
-                product.sudo().write(img_vals)
-                review.write({
-                    "approval_status": "approved",
-                    "approved_by_id": self.env.uid,
-                    "approval_date": now,
-                    "rejection_reason": False,
-                })
-                continue
+            # Rule: External media NEVER occupies product.template.image_1920 (Slot 1).
+            # Slot 1 is reserved exclusively for the original/internal Odoo product packshot.
+            # External candidates can ONLY occupy Gallery Slots 2 & 3 (product.image).
 
-            # Product already has a primary image. Compare candidate against protected primary.
-            prim_sha, prim_dhash = self._extract_image_fingerprint(product.image_1920)
-            if cand_sha and prim_sha and cand_sha == prim_sha:
-                _logger.info("Review #%s rejected: exact duplicate of protected primary on product %s", review.id, product.id)
-                review.write({
-                    "approval_status": "rejected",
-                    "rejection_reason": "Decoded binary is an exact duplicate of the protected primary Odoo image.",
-                })
-                continue
-
-            if prim_dhash is not None and cand_dhash is not None:
-                dist = bin(prim_dhash ^ cand_dhash).count('1')
-                if dist <= 8:
-                    _logger.info("Review #%s held in pending: perceptual near-duplicate (dist=%d) of primary on product %s", review.id, dist, product.id)
+            # Compare candidate against protected primary image (if present)
+            if product.image_1920:
+                prim_sha, prim_dhash, prim_phash = self._extract_image_fingerprint(product.image_1920)
+                if cand_sha and prim_sha and cand_sha == prim_sha:
+                    _logger.info("Review #%s rejected: exact duplicate of protected primary on product %s", review.id, product.id)
                     review.write({
-                        "rejection_reason": f"Perceptual near-duplicate/crop of primary image (Hamming distance {dist} <= 8); requires manual review.",
+                        "approval_status": "rejected",
+                        "rejection_reason": "Decoded binary is an exact duplicate of the protected primary Odoo image.",
+                    })
+                    continue
+
+                d_dist = bin(prim_dhash ^ cand_dhash).count('1') if (prim_dhash is not None and cand_dhash is not None) else 99
+                p_dist = bin(prim_phash ^ cand_phash).count('1') if (prim_phash is not None and cand_phash is not None) else 99
+                if d_dist <= 8 or p_dist <= 10:
+                    _logger.info("Review #%s held in pending: perceptual near-duplicate (dDist=%d, pDist=%d) of primary on product %s", review.id, d_dist, p_dist, product.id)
+                    review.write({
+                        "rejection_reason": f"Perceptual near-duplicate of primary image (dHash dist={d_dist} <= 8, pHash dist={p_dist} <= 10); requires manual review.",
                     })
                     continue
 
@@ -300,15 +366,15 @@ class ProductImageReview(models.Model):
             for sib in product.product_template_image_ids:
                 if not sib.image_1920:
                     continue
-                sib_sha, sib_dhash = self._extract_image_fingerprint(sib.image_1920)
+                sib_sha, sib_dhash, sib_phash = self._extract_image_fingerprint(sib.image_1920)
                 if cand_sha and sib_sha and cand_sha == sib_sha:
                     gallery_exact_dupe = True
                     break
-                if sib_dhash is not None and cand_dhash is not None:
-                    s_dist = bin(sib_dhash ^ cand_dhash).count('1')
-                    if s_dist <= 8:
-                        gallery_near_dupe = True
-                        break
+                s_ddist = bin(sib_dhash ^ cand_dhash).count('1') if (sib_dhash is not None and cand_dhash is not None) else 99
+                s_pdist = bin(sib_phash ^ cand_phash).count('1') if (sib_phash is not None and cand_phash is not None) else 99
+                if s_ddist <= 8 or s_pdist <= 10:
+                    gallery_near_dupe = True
+                    break
 
             if gallery_exact_dupe:
                 _logger.info("Review #%s rejected: exact duplicate of existing gallery image on product %s", review.id, product.id)
@@ -333,7 +399,7 @@ class ProductImageReview(models.Model):
                 })
                 continue
 
-            # Genuine, distinct external asset: publish to gallery
+            # Genuine, distinct external asset: publish strictly to gallery (Slot 2 or 3)
             self.env["product.image"].sudo().create({
                 "name": review.name,
                 "product_tmpl_id": product.id,

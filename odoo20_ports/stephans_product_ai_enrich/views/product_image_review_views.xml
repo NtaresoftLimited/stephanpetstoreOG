@@ -98,6 +98,7 @@
                             <field name="foreground_coverage_pct"/>
                             <field name="webp_filesize_kb"/>
                             <field name="file_checksum"/>
+                            <field name="dhash"/>
                             <field name="phash"/>
                         </group>
                         <group string="Audit &amp; Approval">
@@ -107,6 +108,28 @@
                         </group>
                     </group>
                     <notebook>
+                        <page string="Mandatory Acceptance Gates &amp; Evidence">
+                            <group>
+                                <group string="Gate 1: Exact Identity">
+                                    <field name="gate1_status" widget="badge"/>
+                                    <field name="gate1_evidence"/>
+                                </group>
+                                <group string="Gate 2: Source Provenance">
+                                    <field name="gate2_status" widget="badge"/>
+                                    <field name="gate2_evidence"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Gate 3: Quality &amp; Cleanliness">
+                                    <field name="gate3_status" widget="badge"/>
+                                    <field name="gate3_evidence"/>
+                                    <field name="view_role_evidence"/>
+                                </group>
+                                <group string="Duplicate Fingerprint Comparison">
+                                    <field name="duplicate_comparison_summary"/>
+                                </group>
+                            </group>
+                        </page>
                         <page string="Optimized WebP Derivative (Published)">
                             <div class="p-3 text-center bg-light rounded">
                                 <field name="webp_image" widget="image" options="{'size': [400, 400]}"/>
