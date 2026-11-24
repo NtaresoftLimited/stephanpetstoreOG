@@ -61,6 +61,11 @@ MANUFACTURER_DOMAINS = (
     "nexgard.com",
     "elanco.com",
     "f10products.co.uk",
+    "whiskas.com",
+    "whiskas.in",
+    "whiskas.co.uk",
+    "whiskas.co.za",
+    "mars.com",
     "whiskas.co.uk",
 )
 
@@ -84,6 +89,9 @@ TRUSTED_RETAILER_DOMAINS = (
     "petlebi.com",
     "roslinyakwariowe.pl",
     "sklep.roslinyakwariowe.pl",
+    "checkers.co.za",
+    "epetstore.co.za",
+    "aquapet.co.ke",
 )
 
 FLAGSHIP_BRAND_KEYS = ('bioline', 'summit', 'tropicat', 'tropidog', 'tropifit', 'tropical')
@@ -268,13 +276,27 @@ OFFICIAL_BRAND_CATALOG_BRAIN = {
     },
     'whiskas': {
         'label': 'Whiskas',
-        'tier': 2,
-        'official_urls': ['https://www.whiskas.co.uk/'],
-        'trusted_retailer_urls': [],
-        'search_templates': [],
-        'keywords': 'Whiskas, Mars Petcare, complete cat food, balanced nutrition',
-        'synonyms': 'Whiskas, cat pouch, feline food',
-        'guidelines': 'Official Whiskas cat food. Highlight flavor, life-stage nutrition, and feeding guide.',
+        'tier': 1,
+        'official_urls': [
+            'https://www.whiskas.in/',
+            'https://www.whiskas.com/',
+            'https://www.whiskas.co.uk/',
+            'https://www.whiskas.co.za/',
+        ],
+        'trusted_retailer_urls': [
+            'https://www.checkers.co.za/',
+            'https://www.epetstore.co.za/',
+            'https://aquapet.co.ke/',
+        ],
+        'search_templates': [
+            'https://www.whiskas.in/our-products?query={query}',
+        ],
+        'keywords': 'Whiskas, Mars Petcare, complete wet cat food, adult cat tuna in jelly, crude protein, taurine, zinc',
+        'synonyms': 'Whiskas, Whiskas cat pouch, adult wet cat food',
+        'guidelines': (
+            'Official Whiskas Cat Food. Amazon mobile-first copywriting: highlight flavor, life-stage nutrition, '
+            'guaranteed analytical constituents, and exact daily feeding guide formatted with uppercase headlines and line breaks.'
+        ),
         'is_vet_medicine': False,
     },
     'ownat': {
@@ -1381,10 +1403,13 @@ Available Manufacturer Image URLs:
 CRITICAL FORMULA REQUIREMENTS:
 All products in Stephan's Pet Store MUST follow the exact same visual hierarchy and clean professional styling:
 - STRICT NO-EMOJI RULE: Never output emojis, unicode icons, or cartoon symbols in any title, header, bullet, or description. Use clean, elegant typography.
+- AMAZON MOBILE-FIRST COPYWRITING STANDARD:
+  * Headline Formula: "[Brand] [Product Name] [Size]: [Core Customer Outcome in 6 to 10 words] ([Key Spec])". NEVER use em dashes (—). Always use a clean colon (:) after the product name. Deliver the biggest outcome in the first 8 words.
+  * Exactly 5 Feature Bullets in key_highlights: Each "header" MUST be 2 to 4 capitalized words (e.g. "STRENGTHENS LEAN MUSCLES & VITALITY", "SHINY COAT & HYDRATION SUPPORT"). "detail" MUST deliver the immediate tangible outcome, followed by the formulation mechanism.
 1. title: Clean, standardized format preserving the exact pack size: [Brand] [Product Line / Feature] [Size or Weight]
 2. barcode: Manufacturer EAN-13 or UPC barcode if verified (or empty string).
-3. lead_summary: 1-2 compelling executive summary sentences explaining the core formula, technology, and primary benefit.
-4. key_highlights: Array of 4 to 6 highlights, each with a clean bold header and detailed explanation (NO emojis/icons).
+3. lead_summary: Mobile headline formula: [Brand] [Product Name] [Size]: [Core Customer Outcome in 6 to 10 words] ([Key Spec]). No em dashes (—).
+4. key_highlights: Exactly 5 Amazon-style highlights, each with an uppercase bold header and outcome-first detail explanation.
 5. composition_title: 'Composition & Ingredients' (or 'Materials & Specifications' for accessories) - NO emojis
 6. composition_items: Array of 3 to 6 key components/analytical constituents with their functional role.
 7. instructions_title: 'Feeding Guide' (for pet foods) or 'Instructions for Use' - NO emojis
@@ -1676,15 +1701,23 @@ Return strictly a valid JSON object matching this structure.
         inst_steps = data.get('instructions_steps') or []
         storage = self._strip_emojis(data.get('storage_text') or 'Store in a cool, dry, well-ventilated area away from direct sunlight and humidity.')
 
+        # Sanitize lead summary: convert em dashes to clean colons
+        lead_clean = lead.replace('—', ':').replace(' - ', ': ')
+
         highlights_html = ""
         for hl in highlights:
             if isinstance(hl, dict):
-                h_header = self._strip_emojis(hl.get('header', ''))
-                h_detail = self._strip_emojis(hl.get('detail', ''))
-                highlights_html += f'                    <li class="py-1"><strong>{h_header}:</strong> {h_detail}</li>\n'
+                h_header = self._strip_emojis(hl.get('header', '')).replace('—', '').strip(' :')
+                h_detail = self._strip_emojis(hl.get('detail', '')).replace('—', '-').strip()
+                highlights_html += (
+                    f'                    <li class="py-2" style="margin-bottom: 10px;">\n'
+                    f'                        <strong style="color: #1f2937; text-transform: uppercase;">{h_header}:</strong><br/>\n'
+                    f'                        <span style="color: #4b5563; line-height: 1.6;">{h_detail}</span>\n'
+                    f'                    </li>\n'
+                )
             elif isinstance(hl, str):
-                cleaned_hl = self._strip_emojis(hl)
-                highlights_html += f'                    <li class="py-1">{cleaned_hl}</li>\n'
+                cleaned_hl = self._strip_emojis(hl).replace('—', ':')
+                highlights_html += f'                    <li class="py-2" style="margin-bottom: 10px;">{cleaned_hl}</li>\n'
 
         comp_html = ""
         for c in comp_items:
@@ -1709,7 +1742,7 @@ Return strictly a valid JSON object matching this structure.
         <div class="col-12">
             <h3 class="mb-3" style="color: #3e220f; font-weight: 700;">{title}</h3>
             <p class="lead text-muted" style="font-size: 1.05rem; line-height: 1.6;">
-                {lead}
+                {lead_clean}
             </p>
             
             <div class="mb-4" style="border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; padding: 20px; box-shadow: none;">
