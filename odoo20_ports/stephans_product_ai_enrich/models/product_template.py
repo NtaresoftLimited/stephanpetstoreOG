@@ -864,7 +864,7 @@ class ProductTemplate(models.Model):
             self.action_seed_official_brand_urls()
 
         # 1. Fetch & parse content from Tier-1 manufacturer & Tier-2 cross-check URLs
-        scraped_text, image_candidates = self._fetch_catalog_sources()
+        scraped_text, image_candidates, image_context = self._fetch_catalog_sources()
 
         # 2. Query AI Engine
         ai_data = self._call_ai_engine(scraped_text, image_candidates)
@@ -873,7 +873,11 @@ class ProductTemplate(models.Model):
         self._validate_enrichment_gates(ai_data)
 
         # 4. Stage outputs into review fields (manual review queue only; zero automatic publishing)
-        self._stage_ai_data_for_review(ai_data, image_candidates=image_candidates)
+        self._stage_ai_data_for_review(
+            ai_data,
+            image_candidates=image_candidates,
+            image_context=image_context,
+        )
 
         status_vals = {
             'x_ai_enriched': True,
@@ -1319,6 +1323,31 @@ class ProductTemplate(models.Model):
                     found.append(src)
         return found
 
+    def _extract_image_context_from_soup(self, soup, parsed, identity_page_url):
+        """Return accepted image URLs with their verified page and useful HTML metadata."""
+        context = {}
+        accepted = set(self._extract_images_from_soup(soup, parsed))
+        for img in soup.find_all('img'):
+            metadata = ' '.join(filter(None, [
+                img.get('alt'), img.get('title'), img.get('aria-label'),
+                ' '.join(img.get('class') or []),
+            ]))[:500]
+            for raw in (img.get('data-large_image'), img.get('data-zoom-image'),
+                        img.get('data-full-url'), img.get('data-src'), img.get('src')):
+                if not raw or not isinstance(raw, str):
+                    continue
+                src = urllib.parse.urljoin(identity_page_url, raw.strip())
+                full_res = re.sub(r'-\d+x\d+(\.[a-zA-Z]{3,4})(?:\?.*)?$', r'\1', src)
+                full_res = re.sub(r'_\d+x\d*\.', '.', full_res)
+                full_res = re.sub(r'width=\d+', 'width=1920', full_res)
+                for candidate in (full_res, src):
+                    if candidate in accepted:
+                        context[candidate] = {
+                            'identity_page_url': identity_page_url,
+                            'source_metadata': metadata,
+                        }
+        return context
+
     def _discover_product_detail_links(self, soup, base_url, parsed):
         """
         Discover official product detail links on a manufacturer search or catalog page
@@ -1395,6 +1424,7 @@ class ProductTemplate(models.Model):
         )
         image_candidates = []
         detail_page_images = []
+        image_context = {}
         visited_urls = set()
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
 
@@ -1440,7 +1470,11 @@ class ProductTemplate(models.Model):
                                     d_tag.decompose()
                                 d_text = d_soup.get_text(' ', strip=True)[:4000]
                                 combined_text += f"\n--- Official Product Detail Page ({source_tier.upper()}): {detail_url} ---\n{d_text}\n"
-                                for d_img in self._extract_images_from_soup(d_soup, d_parsed):
+                                detail_context = self._extract_image_context_from_soup(
+                                    d_soup, d_parsed, detail_url,
+                                )
+                                image_context.update(detail_context)
+                                for d_img in detail_context:
                                     if d_img not in detail_page_images:
                                         detail_page_images.append(d_img)
                         except Exception as de:
@@ -1461,7 +1495,10 @@ class ProductTemplate(models.Model):
             if candidate not in ordered_candidates:
                 ordered_candidates.append(candidate)
 
-        return combined_text, ordered_candidates[:15]
+        limited_candidates = ordered_candidates[:15]
+        return combined_text, limited_candidates, {
+            url: image_context[url] for url in limited_candidates if url in image_context
+        }
 
     def _build_catalog_prompt(self, context_text, image_candidates):
         """Construct the prompt enforcing the Stephan's Pet Store catalog formula & safety rules"""
@@ -1906,7 +1943,7 @@ Return strictly a valid JSON object matching this structure.
 </div>"""
         return html
 
-    def _stage_ai_data_for_review(self, data, image_candidates=None):
+    def _stage_ai_data_for_review(self, data, image_candidates=None, image_context=None):
         """
         Stage AI-prepared suggestions and up to 3 distinct official product images
         ('front', 'back', 'detail') into the Media Review Queue without duplicates.
@@ -1942,12 +1979,13 @@ Return strictly a valid JSON object matching this structure.
 
         for candidate_url in ordered_urls:
             active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
-            if len(active_reviews) >= 3:
+            if len(active_reviews) >= 2:
                 break
             # Validate candidate against mandatory acceptance gates (Gate 1, 2, 3), useful-view, and duplicate check
             self._validate_and_process_candidate_image(
                 url=candidate_url,
                 manufacturer=manufacturer_name,
+                **((image_context or {}).get(candidate_url, {})),
             )
 
         if self.image_review_ids:
@@ -2079,7 +2117,7 @@ Return strictly a valid JSON object matching this structure.
 
         return False, "Clean studio canvas with zero pixel overlays/watermarks"
 
-    def _evaluate_gate_1_identity(self, url):
+    def _evaluate_gate_1_identity(self, url, identity_page_url=None):
         """
         Gate 1: Exact Product Identity Verification.
         Cross-checks 5 core identifiers:
@@ -2112,6 +2150,8 @@ Return strictly a valid JSON object matching this structure.
             return 'fail', "No candidate URL provided."
 
         unquoted_url = urllib.parse.unquote(url).lower()
+        identity_page = urllib.parse.unquote(identity_page_url or '').lower()
+        identity_haystack = f"{unquoted_url} {identity_page}"
         url_compact = re.sub(r'[\-_%\s/]+', '', unquoted_url)
 
         matched_identifiers = []
@@ -2155,6 +2195,11 @@ Return strictly a valid JSON object matching this structure.
 
         # 5. Species / Life Stage / Formulation Variant
         prod_lower = prod_name.lower()
+        stop_words = {
+            'with', 'for', 'and', 'the', 'dog', 'dogs', 'cat', 'cats', 'pet', 'pets',
+            'food', 'adult', 'small', 'medium', 'large', 'breeds', 'breed', 'bag',
+            'rich', 'whole', 'choice', 'premium', 'super', 'item', brand_key or '',
+        }
         if 'cat' in prod_lower and 'dog' not in prod_lower and 'dog' in unquoted_url:
             conflicting_identifiers.append("Species mismatch: URL indicates 'dog' but product is for 'cat'")
         elif 'dog' in prod_lower and 'cat' not in prod_lower and 'cat' in unquoted_url:
@@ -2164,15 +2209,29 @@ Return strictly a valid JSON object matching this structure.
         elif 'kitten' in prod_lower and 'adult' in unquoted_url:
             conflicting_identifiers.append("Life-stage mismatch: URL indicates 'adult' but product is 'kitten'")
         else:
-            stop_words = {
-                'with', 'for', 'and', 'the', 'dog', 'dogs', 'cat', 'cats', 'pet', 'pets',
-                'food', 'adult', 'small', 'medium', 'large', 'breeds', 'breed', 'bag',
-                'rich', 'whole', 'choice', 'premium', 'super', 'item', brand_key or '',
-            }
             core_tokens = [w for w in re.findall(r'[a-z]{3,}', prod_lower) if w not in stop_words]
-            matched_tokens = [w for w in core_tokens if w in unquoted_url]
+            matched_tokens = [w for w in core_tokens if w in identity_haystack]
             if len(matched_tokens) >= 2:
                 matched_identifiers.append(f"Formulation tokens: {', '.join(matched_tokens[:3])}")
+
+        if identity_page_url:
+            page_host = (urllib.parse.urlparse(identity_page_url).hostname or '').lower()
+            image_host = (urllib.parse.urlparse(url).hostname or '').lower()
+            official_hosts = [
+                (urllib.parse.urlparse(official).hostname or '').lower()
+                for official in ((profile or {}).get('official_urls') or [])
+            ]
+            if page_host and image_host and any(
+                page_host == host or page_host.endswith('.' + host) for host in official_hosts if host
+            ) and any(
+                image_host == host or image_host.endswith('.' + host) for host in official_hosts if host
+            ):
+                page_tokens = [w for w in re.findall(r'[a-z]{3,}', prod_lower) if w not in stop_words]
+                page_matches = [w for w in page_tokens if w in identity_page]
+                if len(page_matches) >= 2:
+                    matched_identifiers.append(
+                        f"Official matched product page: {', '.join(page_matches[:3])}"
+                    )
 
         if conflicting_identifiers:
             return 'fail', f"Identity conflict detected: {'; '.join(conflicting_identifiers)}"
@@ -2182,23 +2241,40 @@ Return strictly a valid JSON object matching this structure.
         else:
             return 'fail', f"Matched only {len(matched_identifiers)} identifiers ({', '.join(matched_identifiers) or 'none'}); requires >= 3 corroborated identifiers."
 
-    def _detect_and_validate_useful_view(self, url, img, existing_roles):
+    def _detect_and_validate_useful_view(self, url, img, existing_roles, source_metadata=""):
         """
         Validates that candidate adds a genuine, distinct useful view.
         Inspects URL tokens, filename, and image characteristics.
         Returns: (role, evidence_str, is_valid)
         """
-        unquoted = urllib.parse.unquote(url).lower()
+        unquoted = f"{urllib.parse.unquote(url).lower()} {(source_metadata or '').lower()}"
 
-        # 1. Back view (Back label, ingredients panel, guaranteed analysis)
-        back_tokens = ('back', 'rear', 'ingred', 'nutri', 'facts', 'label', 'guarantee', 'composition', 'table', 'panel', 'reverse')
+        # 0. Disallowed Secondary Image Check (Negative Filters)
+        disallowed_tokens = (
+            'icon', 'ingredient_icon', 'carrot', 'fruit', 'banner', 'badge',
+            'logo', 'graphic', 'synthetic', 'text_crop', 'text_to_image',
+            'promo', 'fresh_chicken_meat', 'selected_tubers', 'wholesome_peas'
+        )
+        if any(dt in unquoted for dt in disallowed_tokens):
+            return 'rejected', 'Disallowed secondary image: ingredient icon, general brand graphic, or synthetic text image.', False
+
+        # 1. Back view (Packaging back, composition, additives, analytical constituents, nutritional information panel)
+        back_tokens = (
+            'back', 'rear', 'composition', 'additives', 'analytical', 'constituents',
+            'nutri', 'nutrition', 'ingredients', 'guarantee', 'facts', 'label',
+            'table', 'panel', 'reverse'
+        )
         if any(bt in unquoted for bt in back_tokens):
-            return 'back', 'Confirmed back label / ingredients panel via source metadata/filename.', True
+            return 'back', 'Confirmed back view: packaging back, composition, additives, analytical constituents, or nutritional-information panel.', True
 
-        # 2. Detail view (Feeding guide, instructions, dosage, kibble size, cap, dispenser)
-        detail_tokens = ('feeding', 'guide', 'dosage', 'instructions', 'how_to_use', 'detail', 'texture', 'kibble', 'cap', 'dispenser', 'spray', 'close_up', 'closeup', 'specs')
+        # 2. Detail view (Feeding guide, daily dosage, instructions for use, kibble close-up, tablet/capsule, useful close-up)
+        detail_tokens = (
+            'feeding', 'daily_dosage', 'dosage', 'instructions', 'how_to_use', 'use',
+            'kibble', 'tablet', 'capsule', 'close_up', 'closeup', 'detail',
+            'texture', 'dispenser', 'cap', 'spray', 'specs'
+        )
         if any(dt in unquoted for dt in detail_tokens):
-            return 'detail', 'Confirmed product detail / feeding guide / dispenser view.', True
+            return 'detail', 'Confirmed detail view: feeding guide, daily dosage, instructions for use, kibble close-up, tablet/capsule, or useful close-up.', True
 
         # 3. Lifestyle view (Pet interacting with product, in-use)
         lifestyle_tokens = ('lifestyle', 'in_use', 'inuse', 'pet_with', 'action', 'model')
@@ -2229,7 +2305,10 @@ Return strictly a valid JSON object matching this structure.
                 break
         return best_bytes, round(len(best_bytes) / 1024.0, 1)
 
-    def _validate_and_process_candidate_image(self, url, role=None, source_type=None, manufacturer=""):
+    def _validate_and_process_candidate_image(
+        self, url, role=None, source_type=None, manufacturer="",
+        identity_page_url=None, source_metadata="",
+    ):
         """
         Mandatory 3-Gate Acceptance Pipeline:
         Gate 1: Exact Product Identity Verification (Brand, SKU, EAN-13, Pack Size, Species)
@@ -2251,7 +2330,7 @@ Return strictly a valid JSON object matching this structure.
             return False
 
         # --- GATE 1: Exact Product Identity Verification ---
-        gate1_status, gate1_evidence = self._evaluate_gate_1_identity(url)
+        gate1_status, gate1_evidence = self._evaluate_gate_1_identity(url, identity_page_url=identity_page_url)
         if gate1_status != 'pass':
             _logger.info("Candidate %s rejected at Gate 1 (%s): %s", url, gate1_status, gate1_evidence)
             return False
@@ -2378,11 +2457,20 @@ Return strictly a valid JSON object matching this structure.
         # --- Useful-View Validation ---
         active_reviews = self.image_review_ids.filtered(lambda r: r.approval_status != 'rejected')
         existing_roles = [r.image_role for r in active_reviews]
-        detected_role, view_evidence, is_valid_view = self._detect_and_validate_useful_view(url, img, existing_roles)
+        detected_role, view_evidence, is_valid_view = self._detect_and_validate_useful_view(
+            url, img, existing_roles, source_metadata=source_metadata,
+        )
         if not is_valid_view:
             _logger.info("Candidate %s rejected on useful-view validation: %s", url, view_evidence)
             return False
         assigned_role = role or detected_role
+        brand_key, _brand_profile = self._detect_brand_profile()
+        if brand_key == "summit" and assigned_role not in ("back", "detail"):
+            _logger.info(
+                "Candidate %s rejected for %s: Summit 10 pilot accepts only back/detail secondary roles (detected=%s).",
+                url, self.name, assigned_role,
+            )
+            return False
 
         # --- DUPLICATE FINGERPRINT COMPARISON AT STAGING TIME ---
         dhash_val = self._compute_dhash(img)
@@ -2443,6 +2531,17 @@ Return strictly a valid JSON object matching this structure.
         if not bbox or (bbox[2] - bbox[0] < 100) or (bbox[3] - bbox[1] < 100):
             bbox = (0, 0, orig_w, orig_h)
 
+        # Preserve a small safety margin so the normalized image never clips
+        # packaging edges, labels, caps, or feeding-table text.
+        pad_x = max(4, int((bbox[2] - bbox[0]) * 0.04))
+        pad_y = max(4, int((bbox[3] - bbox[1]) * 0.04))
+        bbox = (
+            max(0, bbox[0] - pad_x),
+            max(0, bbox[1] - pad_y),
+            min(orig_w, bbox[2] + pad_x),
+            min(orig_h, bbox[3] + pad_y),
+        )
+
         product_crop = img.crop(bbox)
         fg_w = bbox[2] - bbox[0]
         fg_h = bbox[3] - bbox[1]
@@ -2450,7 +2549,9 @@ Return strictly a valid JSON object matching this structure.
         # Product-page preview master square canvas: 1200x1200 px
         canvas_dim = 1200
         target_fg_max = int(canvas_dim * 0.80)
-        scale = target_fg_max / float(max(fg_w, fg_h))
+        # Never enlarge a source foreground by more than 20%; excessive
+        # upscaling makes label text look sharp-sized but not genuinely clear.
+        scale = min(1.20, target_fg_max / float(max(fg_w, fg_h)))
         new_w = max(1, int(fg_w * scale))
         new_h = max(1, int(fg_h * scale))
         scaled_crop = product_crop.resize((new_w, new_h), Image.Resampling.LANCZOS)
